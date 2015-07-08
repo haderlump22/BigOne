@@ -256,7 +256,7 @@ public class Transaktionen {
             }
         });
 		
-		btnClean = new JButton(new ImageIcon(getClass().getResource("images/korb.gif")));
+		btnClean = new JButton(new ImageIcon(getClass().getResource("images/Zeichnung.png")));
 		btnClean.setBounds(550,360,110,55);
 		btnClean.addActionListener(new ActionListener(){ 
             public void actionPerformed(ActionEvent ae){ 
