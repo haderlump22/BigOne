@@ -3,7 +3,6 @@ package de.rachel.bigone;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
 import java.sql.Connection;
 import java.sql.DriverManager;
 
@@ -25,25 +24,25 @@ public class Login {
 	private JPasswordField txtPW;
 	private JButton btnLogin;
 	private String strB, strPW;
-	private String strDbDrv="org.gjt.mm.mysql.Driver";
-	private String strDbUrl="jdbc:mysql://localhost:3306/bigone";
+	private String strDbDrv="org.postgresql.Driver";
+	private String strDbUrl="jdbc:postgresql://localhost:5432/";
+	private String strDatabase = "bigone";
 	private Connection cn = null;
 		
 	public Login(JFrame dialogOwner) {
 		login = new JDialog(dialogOwner,"LOGIN",true);
-		login.setSize(290,200);
-		login.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+		login.setSize(290,150);
+		login.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 		login.setLayout(null);
 		login.getContentPane().setBackground(Color.white);
 		
-		
-		lblUeberschrift = new JLabel("Login to Budget");
+		lblUeberschrift = new JLabel("Login to BigOne");
    		lblUeberschrift.setBounds(10,10,270,25);
 
-   		lblName = new JLabel("Benutzername");
+   		lblName = new JLabel("Username");
    		lblName.setBounds(10,40,100,25);
 
-   		lblPW = new JLabel("Passwort");
+   		lblPW = new JLabel("Password");
    		lblPW.setBounds(10,70,100,25);
    		
    		txtBenutzer = new JTextField();
@@ -64,7 +63,7 @@ public class Login {
    				try {
    					// Select fitting database driver and connect:
    					Class.forName( strDbDrv );
-   					cn = DriverManager.getConnection( strDbUrl, strB, strPW );
+   					cn = DriverManager.getConnection( strDbUrl + strDatabase, strB, strPW );
    					login.dispose();
    				} 
    				catch( Exception ex ) {

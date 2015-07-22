@@ -2,21 +2,21 @@ package de.rachel.bigone;
 
 //define Imports
 import javax.swing.*;
+
 import java.awt.*;
+
 import javax.swing.text.*;
 import javax.swing.border.*;
-
 
 import java.awt.event.*;
 import java.sql.*;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 
-import static de.rachel.bigone.DatabaseConstants.*;
-
 public class Transaktionen {
 	private static final int TANKEN = 6;
 	private static final int AUFTEILUNG = 52;
+	private Connection cn = null;
 	private JFrame mainwindow;
 	private JPanel sh, bank, liqui, details;
 	private JLabel transaktion, eurol, euror, lblKto, lblBLZ, lblDatum, lblBetrag, lblBeschreibung;
@@ -27,11 +27,12 @@ public class Transaktionen {
 	private JCheckBox chkLiqui;
 	private JRadioButton rb1, rb2;
 	private ButtonGroup grpsh;
-	private JComboBox cmbBLZ, cmbKto, cmbEreigniss;
+	private JComboBox<String> cmbBLZ, cmbKto, cmbEreigniss;
 	private JButton btnSave, btnClean;
 	private String[][] datenAuft;
 		
-	Transaktionen(){
+	Transaktionen(Connection LoginCN){
+		cn = LoginCN;
 		mainwindow = new JFrame("Transaktionen");
 		mainwindow.setSize(800,500);
 		mainwindow.setLocation(200,200);
@@ -49,10 +50,12 @@ public class Transaktionen {
 		transaktion.setFont(fontTop);
 		transaktion.setBounds(260,43,280,38);
 		//transaktion.setBorder(new EtchedBorder());
-		eurol = new JLabel(new ImageIcon(getClass().getResource("images/euro.gif")), JLabel.CENTER);
+		
+		ImageIcon imgEuro = new ImageIcon(getClass().getResource("images/Euro.png"));
+		eurol = new JLabel(imgEuro, JLabel.CENTER);
 		eurol.setBounds(100,20,81,84);
 		//eurol.setBorder(new EtchedBorder());
-		euror = new JLabel(new ImageIcon(getClass().getResource("images/euro.gif")),JLabel.CENTER);
+		euror = new JLabel(imgEuro, JLabel.CENTER);
 		euror.setBounds(619,20,81,84);
 		//euror.setBorder(new EtchedBorder());
 		
@@ -82,7 +85,7 @@ public class Transaktionen {
 		lblBLZ.setBounds(10,20,30,25);
 		lblKto = new JLabel("Kto");
 		lblKto.setBounds(10,55,30,25);
-		cmbBLZ = new JComboBox();
+		cmbBLZ = new JComboBox<String>();
 		cmbBLZ.setBounds(40,20,150,25);
 		cmbBLZ.setFont(fontCmbBoxes);
 		fill_cmbBank();
@@ -99,7 +102,7 @@ public class Transaktionen {
 		      }
 		 } );
 		
-		cmbKto = new JComboBox();
+		cmbKto = new JComboBox<String>();
 		cmbKto.setBounds(40,55,150,25);
 		cmbKto.setFont(fontCmbBoxes);
 		//widgets auf das bankpanel legen
@@ -122,7 +125,6 @@ public class Transaktionen {
 		try {
 			txtLiquiDate = new JFormattedTextField(new MaskFormatter("##-##-20##"));
 		} catch (ParseException e1) {
-			// TODO Automatisch erstellter Catch-Block
 			e1.printStackTrace();
 		}
 		txtLiquiDate.setBounds(45,50,110,25);
@@ -149,7 +151,6 @@ public class Transaktionen {
 			try {
 				txtDatum = new JFormattedTextField(new MaskFormatter("##-##-20##"));
 			} catch (ParseException e1) {
-				// TODO Automatisch erstellter Catch-Block
 				e1.printStackTrace();
 			}
 			txtDatum.setBounds(110,20,110,25);
@@ -163,22 +164,17 @@ public class Transaktionen {
 			        }
 			      public void focusGained( FocusEvent fe) {
 			    	  //hier commt code hinein wenn das textfeld den focus erhalt
-
 			      }
 			 } );
 			txtDatum.addKeyListener(new KeyListener() {
 				public void keyPressed(KeyEvent arg0) {
-					// TODO Automatisch erstellter Methoden-Stub
-					
 				}
 				public void keyReleased(KeyEvent ke) {
-					// TODO Automatisch erstellter Methoden-Stub
 					if( ke.getKeyCode() == KeyEvent.VK_ENTER) {
 						txtBetrag.requestFocus();
 					}
 				}
 				public void keyTyped(KeyEvent arg0) {
-					// TODO Automatisch erstellter Methoden-Stub
 				}
 			});
 			
@@ -189,7 +185,6 @@ public class Transaktionen {
 			txtBetrag.setText("0,00");
 			txtBetrag.addFocusListener( new FocusListener() {
 				public void focusLost( FocusEvent fe ) {
-			    	 
 				}
 				public void focusGained(FocusEvent fe) {
 					txtBetrag.selectAll();
@@ -197,17 +192,13 @@ public class Transaktionen {
 			});
 			txtBetrag.addKeyListener(new KeyListener() {
 				public void keyPressed(KeyEvent ke) {
-					// TODO Automatisch erstellter Methoden-Stub
-					
 				}
 				public void keyReleased(KeyEvent ke) {
-					// TODO Automatisch erstellter Methoden-Stub
 					if( ke.getKeyCode() == KeyEvent.VK_ENTER) {
 						txtBeschreibung.requestFocus();
 					}
 				}
 				public void keyTyped(KeyEvent ke) {
-					// TODO Automatisch erstellter Methoden-Stub
 				}
 			});
 			
@@ -218,13 +209,10 @@ public class Transaktionen {
 			txtBeschreibung.setFont(fontTxtFields);
 			txtBeschreibung.addKeyListener(new KeyListener() {
 				public void keyTyped(KeyEvent ke) {
-					// TODO Automatisch erstellter Methoden-Stub
 				}
 				public void keyPressed(KeyEvent ke) {
-					// TODO Automatisch erstellter Methoden-Stub
 				}
 				public void keyReleased(KeyEvent ke) {
-					// TODO Automatisch erstellter Methoden-Stub
 					if( ke.getKeyCode() == KeyEvent.VK_TAB && txtBeschreibung.getText().length() != 0) {
 						txtBeschreibung.setText(txtBeschreibung.getText().trim());
 						cmbEreigniss.requestFocus();
@@ -232,7 +220,7 @@ public class Transaktionen {
 				}			
 			});
 			
-			cmbEreigniss = new JComboBox();
+			cmbEreigniss = new JComboBox<String>();
 			cmbEreigniss.setBounds(110,180,200,25);
 			cmbEreigniss.setFont(fontCmbBoxes);
 		fill_cmbEreigniss();
@@ -256,7 +244,7 @@ public class Transaktionen {
             }
         });
 		
-		btnClean = new JButton(new ImageIcon(getClass().getResource("images/Zeichnung.png")));
+		btnClean = new JButton(new ImageIcon(getClass().getResource("images/DevNull.png")));
 		btnClean.setBounds(550,360,110,55);
 		btnClean.addActionListener(new ActionListener(){ 
             public void actionPerformed(ActionEvent ae){ 
@@ -326,7 +314,7 @@ public class Transaktionen {
                  //tankwerte zur eintragung aufnehmen
                  //das Programm arbeitet weiter wenn
                  //dialog geschlossen wird
-                 TankDialog td = new TankDialog(mainwindow, txtBetrag.getText());
+                 TankDialog td = new TankDialog(mainwindow, txtBetrag.getText(),cn);
                  
                  lager.strKfzId = td.get_kfz_id();
                  lager.strTreibstoffId = td.get_treibstoff_id();
@@ -345,7 +333,7 @@ public class Transaktionen {
             	 //aufteilungsdaten aufnehmen
             	 //das Programm arbeitet weiter wenn
                  //dialog geschlossen wird
-            	 Aufteilung auft = new Aufteilung(mainwindow, Double.valueOf(lager.strBetrag).doubleValue());
+            	 Aufteilung auft = new Aufteilung(mainwindow, Double.valueOf(lager.strBetrag).doubleValue(),cn);
             	 
             	 datenAuft = auft.getDaten();
             	 
@@ -366,21 +354,9 @@ public class Transaktionen {
 	private void tankdaten_einfuegen(int transaktions_id, DataToSave lager) {
 		//fuegt die Tanktaden in die entsprechende Tabelle anhand der im
 		//lager hinterlegten werte ein
-		try
-		{
-			Class.forName(DRIVER);
-		}
-		catch ( ClassNotFoundException e )
-	    {
-	      System.err.println( "Keine Treiber-Klasse!" );
-	      return;
-	    }
-		Connection con = null;
-	    try
-	    {
-	      con = DriverManager.getConnection( URL, USER, PASS );
-	      Statement stmt = con.createStatement();
-	      String sql = "INSERT INTO tankdaten " +
+		DBTools pusher = new DBTools(cn);
+		
+		pusher.insert("INSERT INTO tankdaten " +
 	      			   "( transaktions_id, liter, km, kraftstoff_id, datum_bar, betrag_bar, kfz_id) " +
 	      			   "VALUES " +
 	      			   "(" + transaktions_id + ", " +
@@ -389,60 +365,23 @@ public class Transaktionen {
 	      			   lager.strTreibstoffId + ", " +
 	      			   "NULL, " +
 	      			   "NULL, " +
-	      			   lager.strKfzId + ");";
+	      			   lager.strKfzId + ");");
 	      
-	      stmt.executeUpdate(sql);
-	      stmt.close();
-	    }
-	    catch ( SQLException e )
-	    {
-	      e.printStackTrace();
-	      return;
-	    }
-	    finally
-	    {
-	      if ( con != null )
-	        try { con.close(); } catch ( SQLException e ) { e.printStackTrace(); }
-	    }
 	}
 	private int get_max_transaktions_id() {
 		//findet die aktuell groesste Transaktonsid
-		int max_transaktons_id;
-		try
-		{
-			Class.forName(DRIVER);
-		}
-		catch ( ClassNotFoundException e )
-	    {
-	      System.err.println( "Keine Treiber-Klasse!" );
-	      return -1;
-	    }
-		Connection con = null;
-	    try
-	    {
-	      con = DriverManager.getConnection( URL, USER, PASS );
-	      Statement stmt = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_READ_ONLY);
-	      String sql = "SELECT max(transaktions_id) from transaktionen;";
-	      ResultSet rs = stmt.executeQuery(sql);
-	      rs.last();
-	      if(rs.getRow() == 1)
-	    	  max_transaktons_id = rs.getInt(1);
-	      else
-	    	  max_transaktons_id = -1;
-	      rs.close();
-	      stmt.close();
-	    }
-	    catch ( SQLException e )
-	    {
-	      e.printStackTrace();
-	      return -1;
-	    }
-	    finally
-	    {
-	      if ( con != null )
-	        try { con.close(); } catch ( SQLException e ) { e.printStackTrace(); }
-	    }
-	    return max_transaktons_id;
+		Number max_transaktons_id;
+
+		DBTools getter = new DBTools(cn);
+		
+	    getter.select("SELECT max(transaktions_id) from transaktionen;",1);
+	    
+	    if(getter.getRowCount() == 1)
+	    	max_transaktons_id = (Number) getter.getValueAt(0, 0);
+	    else
+	    	max_transaktons_id = -1;
+
+	    return max_transaktons_id.intValue();
 	}
 	private void CleanAll() {
 		//hier werden alle Werte und Inhalte des Dialogs wieder 
@@ -459,109 +398,38 @@ public class Transaktionen {
 		txtDatum.requestFocus();
 	}
 	private void fill_cmbEreigniss() {
-		try
-		{
-			Class.forName(DRIVER);
-		}
-		catch ( ClassNotFoundException e )
-	    {
-	      System.err.println( "Keine Treiber-Klasse!" );
-	      return;
-	    }
-		Connection con = null;
-	    try
-	    {
-	      con = DriverManager.getConnection( URL, USER, PASS );
-	      Statement stmt = con.createStatement();
-	      ResultSet rs = stmt.executeQuery( "SELECT ereigniss_id, ereigniss_krzbez FROM kontenereignisse order by 2;" );
-	      while ( rs.next() )
-	        cmbEreigniss.addItem(rs.getString(2) + " (" + rs.getInt(1)+")");
-	      rs.close();
-	      stmt.close();
-	    }
-	    catch ( SQLException e )
-	    {
-	      e.printStackTrace();
-	      return;
-	    }
-	    finally
-	    {
-	      if ( con != null )
-	        try { con.close(); } catch ( SQLException e ) { e.printStackTrace(); }
-	    }
+		DBTools getter = new DBTools(cn);
+		
+		getter.select("SELECT ereigniss_id, ereigniss_krzbez FROM kontenereignisse order by 2;",2);
+		
+		Object[][] cmbEreinissValues = getter.getData();
+		
+	    for(Object[] cmbEreignissValue : cmbEreinissValues)
+	    	cmbEreigniss.addItem(cmbEreignissValue[1] + " (" + cmbEreignissValue[0]+")");
 	}
 	private void fill_cmbBank() {
-		try
-		{
-			Class.forName(DRIVER);
-		}
-		catch ( ClassNotFoundException e )
-	    {
-	      System.err.println( "Keine Treiber-Klasse!" );
-	      return;
-	    }
-		Connection con = null;
-	    try
-	    {
-	      con = DriverManager.getConnection( URL, USER, PASS );
-	      Statement stmt = con.createStatement();
-	      ResultSet rs = stmt.executeQuery( "SELECT blz, kreditinstitut FROM kreditinstitut where gilt_bis IS NULL order by 1;" );
-	      while ( rs.next() )
-	        cmbBLZ.addItem(rs.getString(1) + " (" + rs.getString(2) + ")");
-	      rs.close();
-	      stmt.close();
-	      
-	      //Standartauswahl auf die Postbank legen
-	      
-	    }
-	    catch ( SQLException e )
-	    {
-	      e.printStackTrace();
-	      return;
-	    }
-	    finally
-	    {
-	      if ( con != null )
-	        try { con.close(); } catch ( SQLException e ) { e.printStackTrace(); }
-	    }
+		DBTools getter = new DBTools(cn);
+		
+		getter.select("SELECT blz, kreditinstitut FROM kreditinstitut where gilt_bis IS NULL order by 1;",2);
+		
+		Object[][] cmbBankValues = getter.getData();
+		
+	    for(Object[] cmbBankValue : cmbBankValues)
+	        cmbBLZ.addItem(cmbBankValue[0] + " (" + cmbBankValue[0] + ")");
 	}
 	private void fill_cmbKto(String strAuswahl) {
-		try
-		{
-			Class.forName(DRIVER);
-		}
-		catch ( ClassNotFoundException e )
-	    {
-	      System.err.println( "Keine Treiber-Klasse!" );
-	      return;
-	    }
-		Connection con = null;
-	    try
-	    {
-	      con = DriverManager.getConnection( URL, USER, PASS );
-	      Statement stmt = con.createStatement();
-	      ResultSet rs = stmt.executeQuery( "SELECT konten.kontonummer, personen.vorname " +
+		DBTools getter = new DBTools(cn);
+		
+		getter.select("SELECT konten.kontonummer, personen.vorname " +
 	      		"FROM konten, kreditinstitut, personen " +
 	      		"where konten.kreditinstitut_id = kreditinstitut.kreditinstitut_id " +
 	      		"and kreditinstitut.blz = '"+ strAuswahl +"' " +
-	      		"and konten.personen_id = personen.personen_id;" );
-	      
-	      while ( rs.next() )
-	        cmbKto.addItem(rs.getString(1)+ " (" +rs.getString(2)+ ")");
-	      rs.close();
-	      stmt.close();
-	    }
-	    catch ( SQLException e )
-	    {
-	      e.printStackTrace();
-	      return;
-	    }
-	    finally
-	    {
-	      if ( con != null )
-	        try { con.close(); } catch ( SQLException e ) { e.printStackTrace(); }
-	    }
-	   
+	      		"and konten.personen_id = personen.personen_id;",2);
+		
+		Object[][] cmbKtoValues = getter.getData();
+		
+		for(Object[] cmbKtoValue : cmbKtoValues)
+	        cmbKto.addItem(cmbKtoValue[0] + " (" + cmbKtoValue[1] + ")");
 	}
 	private boolean fuellung_pruefen() {
 		
@@ -574,48 +442,22 @@ public class Transaktionen {
 			return "h";
 	}
 	private int konto_id_finden(String strBLZ, String strKto) {
-		int intKontoId;
+		Number intKontoId;
 		
-		try
-		{
-			Class.forName(DRIVER);
-		}
-		catch ( ClassNotFoundException e )
-	    {
-	      System.err.println( "Keine Treiber-Klasse!" );
-	      return -1;
-	    }
-		Connection con = null;
-	    try
-	    {
-	      con = DriverManager.getConnection( URL, USER, PASS );
-	      Statement stmt = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_READ_ONLY);
-	      ResultSet rs = stmt.executeQuery( "SELECT ko.konten_id FROM kreditinstitut kr, konten ko " +
+		DBTools getter = new DBTools(cn);
+		
+	    getter.select("SELECT ko.konten_id FROM kreditinstitut kr, konten ko " +
 	    		  "where kr.blz = '" + strBLZ + "' " +
 	    		  "and kr.gilt_bis is NULL " +
 	    		  "and ko.kreditinstitut_id = kr.kreditinstitut_id " +
-	    		  "and ko.kontonummer = '" + strKto + "' ;" );
-	      rs.last();
-	      if(rs.getRow() == 1)
-	    	  intKontoId = rs.getInt(1);
-	      else
-	    	  intKontoId = -1;
-	      
-	      rs.close();
-	      stmt.close();
-	            
-	    }
-	    catch ( SQLException e )
-	    {
-	      e.printStackTrace();
-	      return -1;
-	    }
-	    finally
-	    {
-	      if ( con != null )
-	        try { con.close(); } catch ( SQLException e ) { e.printStackTrace(); }
-	    }		
-	    return intKontoId;
+	    		  "and ko.kontonummer = '" + strKto + "' ;",1);
+	    
+	    if(getter.getRowCount() == 1)
+	    	intKontoId = (Number) getter.getValueAt(0, 0);
+	    else
+	    	intKontoId = -1;
+
+	    return intKontoId.intValue();
 	}
 	private String getBLZ(String strBLZroh) {
 		return strBLZroh.substring(0,strBLZroh.indexOf(' '));
@@ -624,21 +466,9 @@ public class Transaktionen {
 		return strKtoroh.substring(0,strKtoroh.indexOf(' '));
 	}
 	private void transaktionsdaten_einfuegen(DataToSave lager) {
-		try
-		{
-			Class.forName(DRIVER);
-		}
-		catch ( ClassNotFoundException e )
-	    {
-	      System.err.println( "Keine Treiber-Klasse!" );
-	      return;
-	    }
-		Connection con = null;
-	    try
-	    {
-	      con = DriverManager.getConnection( URL, USER, PASS );
-	      Statement stmt = con.createStatement();
-	      String sql = "INSERT INTO transaktionen " +
+		DBTools pusher = new DBTools(cn);
+		
+	    String sql = "INSERT INTO transaktionen " +
 	      			   "( soll_haben, konten_id, datum, betrag, buchtext, ereigniss_id, liqui_monat) " +
 	      			   "VALUES " +
 	      			   "('" + lager.sh + "', " +
@@ -656,60 +486,23 @@ public class Transaktionen {
 	      			   else
 	      				   sql = sql + "'" + lager.strLiquiDate + "');";
 	      
-	      stmt.executeUpdate(sql);
-	      stmt.close();
-	    }
-	    catch ( SQLException e )
-	    {
-	      e.printStackTrace();
-	      return;
-	    }
-	    finally
-	    {
-	      if ( con != null )
-	        try { con.close(); } catch ( SQLException e ) { e.printStackTrace(); }
-	    }
+		pusher.insert(sql);
 	}
 	private void aufteilungsdaten_einfuegen(int transaktions_id, String[][] datenAuft) {
 		//fuegt die aufteilungsdaten in die entsprechende Tabelle anhand der im
 		//array hinterlegten werte ein
-		try
-		{
-			Class.forName(DRIVER);
+		DBTools pusher = new DBTools(cn);
+
+		for(String[] arg : datenAuft) {
+			String sql = "INSERT INTO aufteilung " +
+	      			   "( transaktions_id, betrag, ereigniss_id, liqui) " +
+	      			   "VALUES " +
+	      			   "(" + transaktions_id + ", " +
+	      			   arg[1] + ", " +
+	      			   arg[0] + ", " +
+	      			   arg[2] + ");";
+	    //System.out.println(sql);
+	    pusher.insert(sql);
 		}
-		catch ( ClassNotFoundException e )
-	    {
-	      System.err.println( "Keine Treiber-Klasse!" );
-	      return;
-	    }
-		Connection con = null;
-	    try
-	    {
-	      con = DriverManager.getConnection( URL, USER, PASS );
-	      Statement stmt = con.createStatement();
-	      for(String[] arg : datenAuft) {
-		      String sql = "INSERT INTO aufteilung " +
-		      			   "( transaktions_id, betrag, ereigniss_id, liqui) " +
-		      			   "VALUES " +
-		      			   "(" + transaktions_id + ", " +
-		      			   arg[1] + ", " +
-		      			   arg[0] + ", " +
-		      			   arg[2] + ");";
-		      //System.out.println(sql);
-		      stmt.executeUpdate(sql);
-	      }
-	      stmt.close();
-	    }
-	    catch ( SQLException e )
-	    {
-	      e.printStackTrace();
-	      return;
-	    }
-	    finally
-	    {
-	      if ( con != null )
-	        try { con.close(); } catch ( SQLException e ) { e.printStackTrace(); }
-	    }
-		
 	}
 }

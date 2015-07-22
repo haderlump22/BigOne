@@ -9,6 +9,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.sql.Connection;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -31,6 +32,7 @@ import de.rachel.bigone.Models.ValuesTableModel;
 import de.rachel.bigone.Renderer.ValuesTableCellRenderer;
 
 public class Values {
+	private Connection cn = null;
 	private JFrame valuewindow;
 	private JFormattedTextField txtValue, txtLiquiDate;
 	private Font fontTxtFields;
@@ -38,7 +40,8 @@ public class Values {
 	private ValuesTableModel model; 
 	private JPopupMenu popmen;
 
-	Values(){
+	Values(Connection LoginCN){
+		cn = LoginCN;
 		valuewindow = new JFrame("Beträge finden");
 		valuewindow.setSize(785,480);
 		valuewindow.setLocation(200,200);
@@ -57,7 +60,7 @@ public class Values {
 				model = (ValuesTableModel)table.getModel();
 				transaktions_id = "" + model.getValueAt(table.getSelectedRow(), 0);
 				
-				DatabaseConstants getter = new DatabaseConstants();
+				DBTools getter = new DBTools(cn);
 				String sql = "SELECT k.kreditinstitut, ko.bemerkung, p.name, p.vorname, ko.kontonummer, k.blz FROM kreditinstitut k, personen p, konten ko, transaktionen t " +
 							"WHERE t.transaktions_id = "+ transaktions_id +" AND t.konten_id = ko.konten_id AND p.personen_id = ko.personen_id AND k.kreditinstitut_id = ko.kreditinstitut_id;";
 				getter.select(sql, 6);
@@ -69,9 +72,6 @@ public class Values {
 				infotext = infotext + getter.getValueAt(0, 3);
 				
 				JOptionPane.showMessageDialog(valuewindow, infotext, "Kontoinfo ID= " + transaktions_id, JOptionPane.INFORMATION_MESSAGE);
-				
-				//close DB Connection
-				getter.connection_close();
 	        }
 	    });
 		popmen.add(ktonfo);
@@ -139,7 +139,7 @@ public class Values {
 	}
    	private void zeichne_tabelle() {
 
-		table = new JTable(new ValuesTableModel(txtValue.getText().replace(".", "").replace(',', '.'),BigOneTools.datum_wandeln(txtLiquiDate.getText(), 0)));
+		table = new JTable(new ValuesTableModel(txtValue.getText().replace(".", "").replace(',', '.'),BigOneTools.datum_wandeln(txtLiquiDate.getText(), 0),cn));
 		ValuesTableCellRenderer ren = new ValuesTableCellRenderer();
 		table.setDefaultRenderer( Object.class, ren );
 		table.getColumnModel().getColumn(2).setCellEditor(new DateTableCellEditor());

@@ -7,6 +7,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.sql.Connection;
 
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -23,6 +24,7 @@ import de.rachel.bigone.Renderer.RACTableCellRenderer;
 
 
 public class Rac {
+	private Connection cn = null;
 	private static final int TANKEN = 6;
 	private static final int AUFTEILUNG = 52;
 	//private static final int KONTOID = 7;
@@ -36,7 +38,8 @@ public class Rac {
 	private JFileChooser open;
 	private JScrollPane sp;
 
-	Rac(){
+	Rac(Connection LoginCN){
+		cn = LoginCN;
 		RACWindow = new JFrame("Kontoauszug einlesen");
 		RACWindow.setSize(785,480);
 		RACWindow.setLocation(200,200);
@@ -97,8 +100,8 @@ public class Rac {
             	String sql="";
             	boolean insert_details_success = true;
             	boolean insert_tankdaten_success = true;
-            	DatabaseConstants pusher = new DatabaseConstants();
-            	DatabaseConstants getter = new DatabaseConstants();
+            	DBTools pusher = new DBTools(cn);
+            	DBTools getter = new DBTools(cn);
             	model = (RACTableModel)table.getModel();
             	
             	//tabellendaten von der letzten Zeile zur ersten hin importieren
@@ -130,7 +133,7 @@ public class Rac {
             			//Aufteilungen zur eintragung aufnehmen
                         //das Programm arbeitet weiter wenn
                         //dialog geschlossen wird
-                        Aufteilung aufteil = new Aufteilung(RACWindow, Double.valueOf(model.getValueAt(i, 2).toString()).doubleValue());
+                        Aufteilung aufteil = new Aufteilung(RACWindow, Double.valueOf(model.getValueAt(i, 2).toString()).doubleValue(), cn);
                         //da gerade der letzte Datensatz in die tabelle transaktionen eingetragen
                         //wurde kann man auch schon dessen ID feststellen
                         getter.select("SELECT max(transaktions_id) from transaktionen;", 1);
@@ -158,7 +161,7 @@ public class Rac {
             			//tankwerte zur eintragung aufnehmen
                         //das Programm arbeitet weiter wenn
                         //dialog geschlossen wird
-                        TankDialog td = new TankDialog(RACWindow,model.getValueAt(i, 2).toString());
+                        TankDialog td = new TankDialog(RACWindow,model.getValueAt(i, 2).toString(),cn);
                         getter.select("SELECT max(transaktions_id) from transaktionen;", 1);
                         
                         String sql_tanken = "INSERT INTO tankdaten " +
@@ -211,10 +214,10 @@ public class Rac {
 		BigOneTools tool = new BigOneTools();
 		
 		table = new JTable(new RACTableModel(strFile,tool.ermittle_anzahl_zeilen(open.getSelectedFile().toString())));
-		RACTableCellRenderer ren  = new RACTableCellRenderer();
+		RACTableCellRenderer ren  = new RACTableCellRenderer(cn);
 		table.setDefaultRenderer( Object.class, ren );
 		table.getColumnModel().getColumn(5).setCellEditor(new LiquiDateTableCellEditor());
-		table.getColumnModel().getColumn(6).setCellEditor(new ComboTableCellEditor());
+		table.getColumnModel().getColumn(6).setCellEditor(new ComboTableCellEditor(cn));
 
 		//fuer einige spalten feste breiten einrichten
 		table.getColumnModel().getColumn(0).setMinWidth(78);

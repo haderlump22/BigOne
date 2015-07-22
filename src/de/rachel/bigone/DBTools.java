@@ -1,31 +1,24 @@
 package de.rachel.bigone;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-public final class DatabaseConstants {
+public final class DBTools {
 	//public static final String DRIVER   = "org.gjt.mm.mysql.Driver";
 	public static final String DRIVER   = "org.postgresql.Driver";
 	//public static final String PROTOCOL = "jdbc:mysql://localhost:3306/";
 	public static final String PROTOCOL = "jdbc:postgresql://localhost:5432/";
 	public static final String DATABASE = "bigone";
-	//public static final String DATABASE = "testdb";
-	public static final String URL      = PROTOCOL + DATABASE;
-	public static final String USER     = "domm";
-	public static final String PASS     = "Fdosco+65";
 	private Statement  st = null;
 	private ResultSet  rs = null;
 	private Connection cn = null;
 	private Object[][] daten;
 
-	public DatabaseConstants() { 
+	public DBTools(Connection LoginCN) { 
 		try {
-			//Select fitting database driver and connect:
-			Class.forName( DRIVER );
-			cn = DriverManager.getConnection( URL, USER, PASS );
+			cn = LoginCN;
 			st = cn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_READ_ONLY);
 		}
 		catch(Exception ex) {
@@ -33,6 +26,16 @@ public final class DatabaseConstants {
 		} 
 	}
 	public boolean insert(String sql) {
+		try {
+			st.executeUpdate(sql);
+			return true;
+		}
+		catch(SQLException ex) {
+			ex.printStackTrace();
+			return false;
+		}
+	}
+	public boolean update(String sql) {
 		try {
 			st.executeUpdate(sql);
 			return true;
@@ -73,13 +76,5 @@ public final class DatabaseConstants {
 	}
 	public Object getValueAt(int row, int col) {
 		return daten[row][col];
-	}
-	public void connection_close() {
-		try {
-			cn.close();
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 	}
 }

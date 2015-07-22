@@ -1,17 +1,11 @@
 package de.rachel.bigone;
 
-import static de.rachel.bigone.DatabaseConstants.*;
-
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.text.DecimalFormat;
 
 import javax.swing.*;
@@ -24,11 +18,13 @@ public class TankDialog extends JFrame {
 	private static final long serialVersionUID = -2262653597062890751L;
 	private JLabel lblKm, lblLt, lblKfz, lblTreibstoff;
 	private JFormattedTextField txtKm, txtLt;
-	private JComboBox cmbKfz, cmbTreibstoff;
+	private JComboBox<String> cmbKfz, cmbTreibstoff;
 	private JButton btnTaSa;
 	private Font fontTxtFields, fontCmbBoxes;
+	private Connection cn = null;
 	
-	TankDialog(JFrame dialogOwner, String strBetrag){
+	TankDialog(JFrame dialogOwner, String strBetrag, Connection LoginCN){
+		cn = LoginCN;
 		final JDialog dialog = new JDialog(dialogOwner, "Tankdaten: " + strBetrag, true);
 		dialog.setSize(220,250);
 		dialog.setLayout(null);
@@ -75,7 +71,7 @@ public class TankDialog extends JFrame {
 		lblKfz = new JLabel("Kfz");
 		lblKfz.setBounds(10,70,60,25);
 		
-		cmbKfz = new JComboBox();
+		cmbKfz = new JComboBox<String>();
 		cmbKfz.setFont(fontCmbBoxes);
 		cmbKfz.setBounds(80,70,100,25);
 		fill_cmbKfz();
@@ -83,7 +79,7 @@ public class TankDialog extends JFrame {
 		lblTreibstoff = new JLabel("Treibstoff");
 		lblTreibstoff.setBounds(10,100,60,25);
 		
-		cmbTreibstoff = new JComboBox();
+		cmbTreibstoff = new JComboBox<String>();
 		cmbTreibstoff.setFont(fontCmbBoxes);
 		cmbTreibstoff.setBounds(80,100,100,25);
 		fill_cmbTreibstoff();
@@ -112,71 +108,24 @@ public class TankDialog extends JFrame {
 		dialog.setVisible(true);
 	}
 	private void fill_cmbKfz() {
-		try
-		{
-			Class.forName(DRIVER);
-		}
-		catch ( ClassNotFoundException e )
-	    {
-	      System.err.println( "Keine Treiber-Klasse!" );
-	      return;
-	    }
-		Connection con = null;
-	    try
-	    {
-	      con = DriverManager.getConnection( URL, USER, PASS );
-	      Statement stmt = con.createStatement();
-	      ResultSet rs = stmt.executeQuery( "SELECT typ, kfz_id FROM kfz order by 1;" );
-	      while ( rs.next() )
-	        cmbKfz.addItem(rs.getString(1) + " (" + rs.getString(2) + ")");
-	      rs.close();
-	      stmt.close();
-	      
-	    }
-	    catch ( SQLException e )
-	    {
-	      e.printStackTrace();
-	      return;
-	    }
-	    finally
-	    {
-	      if ( con != null )
-	        try { con.close(); } catch ( SQLException e ) { e.printStackTrace(); }
-	    }
+		DBTools getter = new DBTools(cn);
 		
+		getter.select("SELECT typ, kfz_id FROM kfz order by 1;",2);
+		
+		Object[][] cmbKfzValues = getter.getData();
+		
+		for(Object[] cmbKfzValue : cmbKfzValues)
+	        cmbKfz.addItem(cmbKfzValue[0] + " (" + cmbKfzValue[1] + ")");
 	}
 	private void fill_cmbTreibstoff() {
-		try
-		{
-			Class.forName(DRIVER);
-		}
-		catch ( ClassNotFoundException e )
-	    {
-	      System.err.println( "Keine Treiber-Klasse!" );
-	      return;
-	    }
-		Connection con = null;
-	    try
-	    {
-	      con = DriverManager.getConnection( URL, USER, PASS );
-	      Statement stmt = con.createStatement();
-	      ResultSet rs = stmt.executeQuery( "SELECT bez, kraftstoff_id FROM kraftstoffe order by 1;" );
-	      while ( rs.next() )
-	        cmbTreibstoff.addItem(rs.getString(1) + " (" + rs.getString(2) + ")");
-	      rs.close();
-	      stmt.close();
-	      
-	    }
-	    catch ( SQLException e )
-	    {
-	      e.printStackTrace();
-	      return;
-	    }
-	    finally
-	    {
-	      if ( con != null )
-	        try { con.close(); } catch ( SQLException e ) { e.printStackTrace(); }
-	    }
+		DBTools getter = new DBTools(cn);
+		
+		getter.select("SELECT bez, kraftstoff_id FROM kraftstoffe order by 1;",2);
+	   
+		Object[][] cmbTreibstoffValues = getter.getData();
+		
+		for(Object[] cmbTreibstoffValue : cmbTreibstoffValues)
+			cmbTreibstoff.addItem(cmbTreibstoffValue[0] + " (" + cmbTreibstoffValue[1] + ")");
 	}
 	public String get_km() {
 		return txtKm.getText();
