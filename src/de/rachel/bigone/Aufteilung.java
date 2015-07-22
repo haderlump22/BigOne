@@ -1,6 +1,6 @@
 package de.rachel.bigone;
 
-import static de.rachel.bigone.DatabaseConstants.*;
+//import static de.rachel.bigone.DBTools.*;
 
 import java.awt.Font;
 import java.awt.event.ActionEvent;
@@ -8,10 +8,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.text.DecimalFormat;
 
 import javax.swing.*;
@@ -24,17 +20,19 @@ public class Aufteilung extends JFrame{
 	private static final long serialVersionUID = -2262653597062890751L;
 	private JLabel lblBetrag, lblEreigniss, lblRestInfo;
 	private JCheckBox chkLiquiFaehig;
-	private JComboBox cmbEreigniss;
+	private JComboBox<String> cmbEreigniss;
 	private JButton btnIncr, btnSave;
 	private JFormattedTextField txtBetrag;
 	private Font fontTxtFields, fontCmbBoxes;
 	private double flGesBetLager;
+	private Connection cn = null;
 	//die zweite dimension des Array hat immer eine laenge von 3
 	//damit ereignissid, betrag und liqui kennzeichen aufgenommen
 	//werden kann (in dieser reihenfolge)
 	private String[][] daten = null, lager = null;
 	
-	Aufteilung(JFrame dialogOwner, double flGesBetrag){
+	Aufteilung(JFrame dialogOwner, double flGesBetrag, Connection LoginCN){
+		cn = LoginCN;
 		final JDialog dialog = new JDialog(dialogOwner, "Aufteilung", true);
 		dialog.setSize(300,250);
 		dialog.setLayout(null);
@@ -75,7 +73,7 @@ public class Aufteilung extends JFrame{
 		lblEreigniss = new JLabel("Ereigniss");
 		lblEreigniss.setBounds(10,80,53,25);
 		
-		cmbEreigniss = new JComboBox();
+		cmbEreigniss = new JComboBox<String>();
 		cmbEreigniss.setFont(fontCmbBoxes);
 		cmbEreigniss.setBounds(80,80,200,25);
 		fill_cmbEreigniss();
@@ -189,36 +187,15 @@ public class Aufteilung extends JFrame{
 		lager = null;
 	}
 	private void fill_cmbEreigniss() {
-		try
-		{
-			Class.forName(DRIVER);
+		DBTools getter = new DBTools(cn);
+
+		getter.select( "SELECT ereigniss_id, ereigniss_krzbez FROM kontenereignisse order by 2;",2 );
+		
+		Object[][] cmbValues = getter.getData();
+		
+		for(Object[] cmbValueParts : cmbValues) {
+			cmbEreigniss.addItem(cmbValueParts[1] + " (" + cmbValueParts[0]+")");
 		}
-		catch ( ClassNotFoundException e )
-	    {
-	      System.err.println( "Keine Treiber-Klasse!" );
-	      return;
-	    }
-		Connection con = null;
-	    try
-	    {
-	      con = DriverManager.getConnection( URL, USER, PASS );
-	      Statement stmt = con.createStatement();
-	      ResultSet rs = stmt.executeQuery( "SELECT ereigniss_id, ereigniss_krzbez FROM kontenereignisse order by 2;" );
-	      while ( rs.next() )
-	        cmbEreigniss.addItem(rs.getString(2) + " (" + rs.getInt(1)+")");
-	      rs.close();
-	      stmt.close();
-	    }
-	    catch ( SQLException e )
-	    {
-	      e.printStackTrace();
-	      return;
-	    }
-	    finally
-	    {
-	      if ( con != null )
-	        try { con.close(); } catch ( SQLException e ) { e.printStackTrace(); }
-	    }
 	}
 	private double roundScale2( double d )
 	  {

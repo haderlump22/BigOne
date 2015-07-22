@@ -1,20 +1,11 @@
 package de.rachel.bigone;
 
-import static de.rachel.bigone.DatabaseConstants.DRIVER;
-import static de.rachel.bigone.DatabaseConstants.PASS;
-import static de.rachel.bigone.DatabaseConstants.URL;
-import static de.rachel.bigone.DatabaseConstants.USER;
-
 import java.awt.Font;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 
@@ -29,16 +20,18 @@ import javax.swing.text.MaskFormatter;
 import javax.swing.text.NumberFormatter;
 
 public class KeyDateAccountBalance {
+	private Connection cn = null;
 	private int iKontoId;
 	private JFrame kdab;
 	private JPanel bank, date, amount, taxex;
 	private JLabel lblKto, lblBLZ;
-	private JComboBox cmbBLZ, cmbKto;
+	private JComboBox<String> cmbBLZ, cmbKto;
 	private JFormattedTextField txtDate, txtAmount, txtTaxEx;
 	private String sDate;
 	private Font fontTxtFields, fontCmbBoxes, fontAmount;
 	
-	KeyDateAccountBalance(){
+	KeyDateAccountBalance(Connection LoginCN){
+		cn = LoginCN;
 		kdab = new JFrame("Kontostand");
 		kdab.setSize(400,300);
 		kdab.setLocation(200,200);
@@ -62,7 +55,7 @@ public class KeyDateAccountBalance {
 		lblBLZ.setBounds(10,20,30,25);
 		lblKto = new JLabel("Kto");
 		lblKto.setBounds(10,55,30,25);
-		cmbBLZ = new JComboBox();
+		cmbBLZ = new JComboBox<String>();
 		cmbBLZ.setBounds(40,20,150,25);
 		cmbBLZ.setFont(fontCmbBoxes);
 		fill_cmbBank();
@@ -79,7 +72,7 @@ public class KeyDateAccountBalance {
 		        }
 		 } );
 		
-		cmbKto = new JComboBox();
+		cmbKto = new JComboBox<String>();
 		cmbKto.setBounds(40,55,150,25);
 		cmbKto.setFont(fontCmbBoxes);
 		//widgets auf das bankpanel legen
@@ -101,7 +94,6 @@ public class KeyDateAccountBalance {
 			try {
 				txtDate = new JFormattedTextField(new MaskFormatter("##-##-20##"));
 			} catch (ParseException e1) {
-				// TODO Automatisch erstellter Catch-Block
 				e1.printStackTrace();
 			}
 			txtDate.setBounds(10,18,120,25);
@@ -109,11 +101,8 @@ public class KeyDateAccountBalance {
 			txtDate.setFont(fontTxtFields);
 			txtDate.addKeyListener(new KeyListener() {
 				public void keyPressed(KeyEvent arg0) {
-					// TODO Automatisch erstellter Methoden-Stub
-					
 				}
 				public void keyReleased(KeyEvent ke) {
-					// TODO Automatisch erstellter Methoden-Stub
 					if( ke.getKeyCode() == KeyEvent.VK_ENTER) {
 						iKontoId = konto_id_finden(getBLZ(cmbBLZ.getSelectedItem().toString()),getKto(cmbKto.getSelectedItem().toString()));
 						sDate = BigOneTools.datum_wandeln(txtDate.getText(),0);
@@ -122,7 +111,6 @@ public class KeyDateAccountBalance {
 					}
 				}
 				public void keyTyped(KeyEvent arg0) {
-					// TODO Automatisch erstellter Methoden-Stub
 				}
 			});
 		
@@ -163,170 +151,76 @@ public class KeyDateAccountBalance {
 		txtDate.requestFocus();
 	}
 	private void fill_cmbBank() {
-		try
-		{
-			Class.forName(DRIVER);
-		}
-		catch ( ClassNotFoundException e )
-	    {
-	      System.err.println( "Keine Treiber-Klasse!" );
-	      return;
-	    }
-		Connection con = null;
-	    try
-	    {
-	      con = DriverManager.getConnection( URL, USER, PASS );
-	      Statement stmt = con.createStatement();
-	      ResultSet rs = stmt.executeQuery( "SELECT blz, kreditinstitut FROM kreditinstitut where gilt_bis IS NULL order by 1;" );
-	      while ( rs.next() )
-	        cmbBLZ.addItem(rs.getString(1) + " (" + rs.getString(2) + ")");
-	      rs.close();
-	      stmt.close();
+		DBTools getter = new DBTools(cn);
+	    getter.select("SELECT blz, kreditinstitut FROM kreditinstitut where gilt_bis IS NULL order by 1;",2);
+	    
+	    Object[][] cmbBankValues = getter.getData();
+	    
+	    for(Object[] cmbBankValue : cmbBankValues)
+	    	cmbBLZ.addItem(cmbBankValue[0] + " (" + cmbBankValue[1] + ")");
 	      
 	      //Standartauswahl auf die Postbank legen
 	      
-	    }
-	    catch ( SQLException e )
-	    {
-	      e.printStackTrace();
-	      return;
-	    }
-	    finally
-	    {
-	      if ( con != null )
-	        try { con.close(); } catch ( SQLException e ) { e.printStackTrace(); }
-	    }
+
 	}
 	private void fill_cmbKto(String strAuswahl) {
-		try
-		{
-			Class.forName(DRIVER);
-		}
-		catch ( ClassNotFoundException e )
-	    {
-	      System.err.println( "Keine Treiber-Klasse!" );
-	      return;
-	    }
-		Connection con = null;
-	    try
-	    {
-	      con = DriverManager.getConnection( URL, USER, PASS );
-	      Statement stmt = con.createStatement();
-	      ResultSet rs = stmt.executeQuery( "SELECT konten.kontonummer, personen.vorname " +
+		DBTools getter = new DBTools(cn);
+		
+
+	    getter.select("SELECT konten.kontonummer, personen.vorname " +
 	      		"FROM konten, kreditinstitut, personen " +
 	      		"where konten.kreditinstitut_id = kreditinstitut.kreditinstitut_id " +
 	      		"and kreditinstitut.blz = '"+ strAuswahl +"' " +
-	      		"and konten.personen_id = personen.personen_id;" );
-	      while ( rs.next() )
-	        cmbKto.addItem(rs.getString(1)+ " (" +rs.getString(2)+ ")");
-	      rs.close();
-	      stmt.close();
-	    }
-	    catch ( SQLException e )
-	    {
-	      e.printStackTrace();
-	      return;
-	    }
-	    finally
-	    {
-	      if ( con != null )
-	        try { con.close(); } catch ( SQLException e ) { e.printStackTrace(); }
-	    }
-	   
+	      		"and konten.personen_id = personen.personen_id;",2);
+	    
+	    Object[][] cmbKtoValues = getter.getData();
+	    
+	    for(Object[] cmbKtoValue : cmbKtoValues)
+	        cmbKto.addItem(cmbKtoValue[0]+ " (" +cmbKtoValue[1]+ ")");
 	}
 	private void calculate_ab(int QueryiKontoId, String QuerysDate) {
-		Float fHaben, fSoll, fErg;
+		Number fHaben, fSoll, fErg;
 		
-		try
-		{
-			Class.forName(DRIVER);
-		}
-		catch ( ClassNotFoundException e )
-	    {
-	      System.err.println( "Keine Treiber-Klasse!" );
-	      return;
-	    }
-		Connection con = null;
-	    try
-	    {
-	      con = DriverManager.getConnection( URL, USER, PASS );
-	      Statement stmt = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_READ_ONLY);
-	      ResultSet rs = stmt.executeQuery("SELECT sum(betrag) FROM transaktionen where konten_id = " + 
+		DBTools getter = new DBTools(cn);
+		
+		getter.select("SELECT sum(betrag) FROM transaktionen where konten_id = " + 
 	    		  QueryiKontoId + " and soll_haben = 'h' and datum <= '" + QuerysDate + "'"+
-	    		  " and ereigniss_id not in (94);");
-	      rs.last();
-	      fHaben = rs.getFloat(1);
+	    		  " and ereigniss_id not in (94);", 1);
+
+		fHaben = (Number) getter.getValueAt(0, 0);
 	      
-	      rs = stmt.executeQuery("SELECT sum(betrag) FROM transaktionen where konten_id = " + 
+		getter.select("SELECT sum(betrag) FROM transaktionen where konten_id = " + 
 	    		  QueryiKontoId + " and soll_haben = 's' and datum <= '" + QuerysDate + "'" +
-	    		  " and ereigniss_id not in (94);");
-	      rs.last();
-	      fSoll = rs.getFloat(1);
-	      	
-	      rs.close();
-	      stmt.close();
+	    		  " and ereigniss_id not in (94);",1);
+
+	    fSoll = (Number) getter.getValueAt(0, 0);
+
 	      
-	      //ergebniss berechnen und in das Textfeld einfuegen
-	      fErg = fHaben - fSoll;
-	      txtAmount.setText(fErg.toString().replace('.',','));
-	      //dieses focusieren und wegnehmen des Focus ist dafuer das
-	      //das oben festgelgte Format des Textfeldes wirksam wird
-	      txtAmount.requestFocus();
-	      txtDate.requestFocus();
-	    }
-	    catch ( SQLException e )
-	    {
-	      e.printStackTrace();
-	      return;
-	    }
-	    finally
-	    {
-	      if ( con != null )
-	        try { con.close(); } catch ( SQLException e ) { e.printStackTrace(); }
-	    }
+		//ergebniss berechnen und in das Textfeld einfuegen
+		fErg = fHaben.floatValue() - fSoll.floatValue();
+		txtAmount.setText(fErg.toString().replace('.',','));
+		
+		//dieses focusieren und wegnehmen des Focus ist dafuer das
+		//das oben festgelgte Format des Textfeldes wirksam wird
+		txtAmount.requestFocus();
+		txtDate.requestFocus();
 	}
 	private int konto_id_finden(String strBLZ, String strKto) {
-		int intKontoId;
+		Integer intKontoId;
 		
-		try
-		{
-			Class.forName(DRIVER);
-		}
-		catch ( ClassNotFoundException e )
-	    {
-	      System.err.println( "Keine Treiber-Klasse!" );
-	      return -1;
-	    }
-		Connection con = null;
-	    try
-	    {
-	      con = DriverManager.getConnection( URL, USER, PASS );
-	      Statement stmt = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_READ_ONLY);
-	      ResultSet rs = stmt.executeQuery( "SELECT ko.konten_id FROM kreditinstitut kr, konten ko " +
+		DBTools getter = new DBTools(cn);
+
+	    getter.select("SELECT ko.konten_id FROM kreditinstitut kr, konten ko " +
 	    		  "where kr.blz = '" + strBLZ + "' " +
 	    		  "and kr.gilt_bis is NULL " +
 	    		  "and ko.kreditinstitut_id = kr.kreditinstitut_id " +
-	    		  "and ko.kontonummer = '" + strKto + "' ;" );
-	      rs.last();
-	      if(rs.getRow() == 1)
-	    	  intKontoId = rs.getInt(1);
-	      else
-	    	  intKontoId = -1;
-	      
-	      rs.close();
-	      stmt.close();
-	            
-	    }
-	    catch ( SQLException e )
-	    {
-	      e.printStackTrace();
-	      return -1;
-	    }
-	    finally
-	    {
-	      if ( con != null )
-	        try { con.close(); } catch ( SQLException e ) { e.printStackTrace(); }
-	    }		
+	    		  "and ko.kontonummer = '" + strKto + "' ;",1);
+
+	    if(getter.getRowCount() == 1)
+	    	intKontoId = (Integer) getter.getValueAt(0, 0);
+	    else
+	    	intKontoId = -1;
+	
 	    return intKontoId;
 	}
 	private String getBLZ(String strBLZroh) {
@@ -336,48 +230,24 @@ public class KeyDateAccountBalance {
 		return strKtoroh.substring(0,strKtoroh.indexOf(' '));
 	}
 	private double get_taxex(int QueryiKontoId) {
-		double dblWert=0;
+		/*
+		 * ermittelt aktuell gueltigen Freistellungsauftrag des mittels der 
+		 * KontenID uebergebenen Kontenkennung
+		 */
+		Number dblWert=0;
 		
-		try
-		{
-			Class.forName(DRIVER);
-		}
-		catch ( ClassNotFoundException e )
-	    {
-	      System.err.println( "Keine Treiber-Klasse!" );
-	      return 0;
-	    }
-		Connection con = null;
-	    try
-	    {
-	      con = DriverManager.getConnection( URL, USER, PASS );
-	      Statement stmt = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_READ_ONLY);
-	      ResultSet rs = stmt.executeQuery( "SELECT f.betrag FROM freistellungsauftraege f " +
-	    		  							"WHERE f.gilt_bis is null " +
-	    		  							"AND f.kreditinstitut_id=(select  k.kreditinstitut_id from konten k where k.konten_id = "+QueryiKontoId+") " +
-	      									"AND f.personen_id =(select k.personen_id from konten k where k.konten_id = "+QueryiKontoId+");");
+		DBTools getter = new DBTools(cn);
+		
+		getter.select("SELECT f.betrag FROM freistellungsauftraege f " +
+					"WHERE f.gilt_bis is null " +
+					"AND f.kreditinstitut_id=(select  k.kreditinstitut_id from konten k where k.konten_id = "+QueryiKontoId+") " +
+					"AND f.personen_id =(select k.personen_id from konten k where k.konten_id = "+QueryiKontoId+");",1);
 	      
-	      while (rs.next()) {
-	      	rs.last();
-		    if(rs.getDouble(1) != 0)
-		    	dblWert = rs.getDouble(1);
-		    else
-		    	dblWert = 0;
-	      }
-	      rs.close();
-	      stmt.close();
-	    }
-	    catch ( SQLException e )
-	    {
-	      e.printStackTrace();
-	      return 0;
-	    }
-	    finally
-	    {
-	      if ( con != null )
-	        try { con.close(); } catch ( SQLException e ) { e.printStackTrace(); }
-	    }
+	    if(getter.getRowCount() == 1)
+	    	dblWert = (Number) getter.getValueAt(0, 0);
+	    else
+	    	dblWert = 0;
 	    
-	    return dblWert;
+	    return dblWert.doubleValue();
 	}
 }

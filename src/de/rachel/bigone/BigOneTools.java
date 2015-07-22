@@ -21,6 +21,7 @@ public class BigOneTools {
 			while (in.readLine() != null) {
 				iZeilen++; //zeilenzaehler erhoehen
 			}
+			in.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

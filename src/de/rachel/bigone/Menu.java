@@ -2,18 +2,28 @@ package de.rachel.bigone;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.Connection;
+
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 
 public class Menu {
-	private JFrame menuwindow;
-	private JMenuBar mbar;
-	private DatabaseConstants DBC;
+	private JFrame menuwindow = null;
+	private JMenuBar mbar = null;
+	private Login login = null;
+	private Connection cn = null;
 
 	Menu(){
-	DBC = new DatabaseConstants();
+	//show Login
+	login = new Login(menuwindow);
+	
+	//kill aplication by 3 loginerrors or however getConnection brings null
+	if(login.getLogincount() == 3 || login.getConnection() == null)
+		System.exit(0);
+	
+	cn = login.getConnection();
 	
 	menuwindow = new JFrame("BigOne");
 	menuwindow.setLocation(100,100);
@@ -26,7 +36,7 @@ public class Menu {
 	JMenuItem trans = new JMenuItem("Transaktionen");
 	trans.addActionListener(new ActionListener(){ 
         public void actionPerformed(ActionEvent ae){ 
-            new Transaktionen();
+            new Transaktionen(cn);
         }
     });
 	prog.add(trans);
@@ -35,7 +45,7 @@ public class Menu {
 	JMenuItem liqui = new JMenuItem("Liqui");
 	liqui.addActionListener(new ActionListener(){ 
         public void actionPerformed(ActionEvent ae){ 
-            new Liqui(DBC);
+            new Liqui(cn);
         }
     });
 	quer.add(liqui);
@@ -43,7 +53,7 @@ public class Menu {
 	JMenuItem values = new JMenuItem("Beträge finden");
 	values.addActionListener(new ActionListener(){ 
         public void actionPerformed(ActionEvent ae){ 
-            new Values();
+            new Values(cn);
         }
     });
 	quer.add(values);
@@ -51,7 +61,7 @@ public class Menu {
 	JMenuItem kdab = new JMenuItem("Kontostand");
 	kdab.addActionListener(new ActionListener(){ 
         public void actionPerformed(ActionEvent ae){ 
-            new KeyDateAccountBalance();
+            new KeyDateAccountBalance(cn);
         }
     });
 	quer.add(kdab);
@@ -59,7 +69,7 @@ public class Menu {
 	JMenuItem rac = new JMenuItem("Import");
 	rac.addActionListener(new ActionListener(){ 
         public void actionPerformed(ActionEvent ae){ 
-            new Rac();
+            new Rac(cn);
         }
     });
 	quer.add(rac);

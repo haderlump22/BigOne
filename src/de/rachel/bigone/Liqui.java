@@ -5,6 +5,7 @@ import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.sql.Connection;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 
@@ -24,12 +25,12 @@ public class Liqui {
 	private JTextArea txtHinweis;
 	private Font fontTxtFields;
 	private Object[][] daten = null;
-	private DatabaseConstants liquiDBC;
-	private String strHinweis, strBetrag, strEreigniss;
+	private Connection cn = null;
+	//private String strHinweis, strBetrag, strEreigniss;
 	
 	
-	Liqui(DatabaseConstants DBC){
-		liquiDBC = DBC;
+	Liqui(Connection LoginCN){
+		cn = LoginCN;
 		liquiwindow = new JFrame("Liquistatus");
 		liquiwindow.setSize(400,280);
 		liquiwindow.setLocation(200,200);
@@ -56,12 +57,9 @@ public class Liqui {
 			txtAbrMonat.addKeyListener(new KeyListener() {
 				@Override
 				public void keyTyped(KeyEvent ke) {
-					// TODO Auto-generated method stub
-					
 				}
 				@Override
 				public void keyReleased(KeyEvent ke) {
-					// TODO Auto-generated method stub
 					if( ke.getKeyCode() == KeyEvent.VK_ENTER) {
 						txtHinweis.setText(""); //clear txtHinweis Field
 						berechne();
@@ -69,8 +67,6 @@ public class Liqui {
 				}
 				@Override
 				public void keyPressed(KeyEvent ke) {
-					// TODO Auto-generated method stub
-					
 				}
 			});
 		//inhalte fuer das Panel AbrMonat auf selbiges legen
@@ -160,7 +156,7 @@ public class Liqui {
 		int iZaehler;
 		double dblSumFixKosten=0;
 		double dblErgSql;
-		DatabaseConstants getter = new DatabaseConstants();
+		DBTools getter = new DBTools(cn);
 		
 		for(iZaehler = 0; iZaehler < daten.length; iZaehler++)
 		{
@@ -206,15 +202,13 @@ public class Liqui {
 		    		dblSumFixKosten = dblSumFixKosten + 0;
 		    }
 		}
-		//close db connection
-		getter.connection_close();
-		
+
 		return dblSumFixKosten;
 		
 	}
 	private double summiere_liqui_aus_aufteilung(String sh) {
 		double dblWert;
-		DatabaseConstants getter = new DatabaseConstants();
+		DBTools getter = new DBTools(cn);
 		
 		getter.select("select sum(aufteilung.betrag) from transaktionen, " + 
     		  	"aufteilung where soll_haben = '" + sh + "' and liqui_monat = '" + 
@@ -227,66 +221,59 @@ public class Liqui {
 			dblWert = roundScale2(Double.valueOf(""+getter.getValueAt(0, 0)).doubleValue());
 	    else
 	    	dblWert = 0;
-		
-		getter.connection_close();
-		
+
 		//System.out.println("Aufteilung("+sh+"): "+ dblWert);
 		return dblWert;
 		
 	}
 	private double summiere_ausgaben() {
-		String sql = new String("select sum(betrag) from transaktionen where soll_haben " +
+		DBTools getter = new DBTools(cn);
+		
+		getter.select("select sum(betrag) from transaktionen where soll_haben " +
 	    		  "= 's' and liqui_monat = '" + BigOneTools.datum_wandeln(txtAbrMonat.getText(),0) + "' " +
 	    		  "and ereigniss_id not in (select ereigniss_id from mtlausgaben where gilt_ab <= '" + 
 	    		  BigOneTools.datum_wandeln(txtAbrMonat.getText(),0) + "' and gilt_bis >= '" + 
-	    		  BigOneTools.datum_wandeln(txtAbrMonat.getText(),0) + "') and ereigniss_id not in(47,52);");
-		//System.out.println(sql);
-		liquiDBC.select(sql, 1);
+	    		  BigOneTools.datum_wandeln(txtAbrMonat.getText(),0) + "') and ereigniss_id not in(47,52);",1);
+
 		
-		return roundScale2(Double.valueOf(liquiDBC.getValueAt(0, 0).toString()));
+		return roundScale2(Double.valueOf(getter.getValueAt(0, 0).toString()));
 	}
 	private double summiere_einnahmen() {
-		String sql;
+		DBTools getter = new DBTools(cn);
 		
-		sql = "select sum(betrag) from transaktionen " +
+		getter.select("select sum(betrag) from transaktionen " +
 	    		"where soll_haben = 'h' and liqui_monat = '" + 
-	    		BigOneTools.datum_wandeln(txtAbrMonat.getText(),0) + "' and ereigniss_id not in (52);";
-	    //System.out.println(sql);
-	    liquiDBC.select(sql, 1);
+	    		BigOneTools.datum_wandeln(txtAbrMonat.getText(),0) + "' and ereigniss_id not in (52);",1);
 	    
-	    return roundScale2(Double.valueOf(liquiDBC.getValueAt(0, 0).toString()));
+	    return roundScale2(Double.valueOf(getter.getValueAt(0, 0).toString()));
 	}
 	private void monats_fixkosten() {
-		String sql;
+		DBTools getter = new DBTools(cn);
 		
-		sql = "select betrag, ereigniss_id, hart from mtlausgaben where gilt_ab <= '" + 
+		getter.select("select betrag, ereigniss_id, hart from mtlausgaben where gilt_ab <= '" + 
 		  		BigOneTools.datum_wandeln(txtAbrMonat.getText(),0) + "' " + 
-		  		"and gilt_bis >= '" + BigOneTools.datum_wandeln(txtAbrMonat.getText(),0) + "';";
+		  		"and gilt_bis >= '" + BigOneTools.datum_wandeln(txtAbrMonat.getText(),0) + "';",3);
 	    
-	    liquiDBC.select(sql, 3);
-
 		//datenarray der liquiDBC instanz in das lokale datenarray kopieren
-	    daten = new Object[liquiDBC.getRowCount()][3];
+	    daten = new Object[getter.getRowCount()][3];
 	    
-	    for(int i = 0; i < liquiDBC.getRowCount(); i++) {
-	    	daten[i][0] = liquiDBC.getValueAt(i, 0);
+	    for(int i = 0; i < getter.getRowCount(); i++) {
+	    	daten[i][0] = getter.getValueAt(i, 0);
 	    	//System.out.print(daten[i][0]+"/");
-	    	daten[i][1] = liquiDBC.getValueAt(i, 1);
+	    	daten[i][1] = getter.getValueAt(i, 1);
 	    	//System.out.print(daten[i][1]+"/");
-	    	daten[i][2] = liquiDBC.getValueAt(i, 2);
+	    	daten[i][2] = getter.getValueAt(i, 2);
 	    	//System.out.println(daten[i][2]+"/");
 	    }
 	}
 	private double monatliche_jahreskosten() {
-		String sql;
+		DBTools getter = new DBTools(cn);
 		
-		sql = "select sum(betrag) from jahresausgaben where gilt_ab <= '" + 
+		getter.select("select sum(betrag) from jahresausgaben where gilt_ab <= '" + 
 		  		BigOneTools.datum_wandeln(txtAbrMonat.getText(),0) + "' " + 
-		  		"and gilt_bis >= '" + BigOneTools.datum_wandeln(txtAbrMonat.getText(),0) + "';";
+		  		"and gilt_bis >= '" + BigOneTools.datum_wandeln(txtAbrMonat.getText(),0) + "';",1);
 	    
-	    liquiDBC.select(sql, 1);
-	      
-	    return roundScale2(Double.valueOf(liquiDBC.getValueAt(0, 0).toString()) / 12);
+	    return roundScale2(Double.valueOf(getter.getValueAt(0, 0).toString()) / 12);
 		
 	}
 	private double roundScale2( double d )

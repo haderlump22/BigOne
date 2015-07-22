@@ -1,28 +1,24 @@
 package de.rachel.bigone.Editors;
 
-import static de.rachel.bigone.DatabaseConstants.DRIVER;
-import static de.rachel.bigone.DatabaseConstants.PASS;
-import static de.rachel.bigone.DatabaseConstants.URL;
-import static de.rachel.bigone.DatabaseConstants.USER;
-
 import java.awt.Component;
 import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-
 import javax.swing.*;
 import javax.swing.table.TableCellEditor;
+
+import de.rachel.bigone.DBTools;
 
 public class ComboTableCellEditor extends AbstractCellEditor implements TableCellEditor {
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 4917922491523056278L;
-	private JComboBox component = new JComboBox(); 
+	private JComboBox<String> component = new JComboBox<String>();
+	private Connection cn=null;
 	 
-	  public Component getTableCellEditorComponent( 
+	public ComboTableCellEditor(Connection LoginCN) {
+		cn = LoginCN;
+	}
+	public Component getTableCellEditorComponent( 
 	      JTable table, Object value, boolean isSelected, int rowIndex, int colIndex ) { 
 	    	//noch keine eintraege in combobox sind
 		  	//diese fuellen
@@ -41,35 +37,13 @@ public class ComboTableCellEditor extends AbstractCellEditor implements TableCel
 			
 	  }
 	  private void fill_component() {
-			try
-			{
-				Class.forName(DRIVER);
-			}
-			catch ( ClassNotFoundException e )
-		    {
-		      System.err.println( "Keine Treiber-Klasse!" );
-		      return;
-		    }
-			Connection con = null;
-		    try
-		    {
-		      con = DriverManager.getConnection( URL, USER, PASS );
-		      Statement stmt = con.createStatement();
-		      ResultSet rs = stmt.executeQuery( "SELECT ereigniss_id, ereigniss_krzbez FROM kontenereignisse order by 2;" );
-		      while ( rs.next() )
-		        component.addItem(rs.getString(2) + " (" + rs.getInt(1)+")");
-		      rs.close();
-		      stmt.close();
-		    }
-		    catch ( SQLException e )
-		    {
-		      e.printStackTrace();
-		      return;
-		    }
-		    finally
-		    {
-		      if ( con != null )
-		        try { con.close(); } catch ( SQLException e ) { e.printStackTrace(); }
-		    }
-		}
+		  DBTools getter = new DBTools(cn);
+		  
+		  getter.select("SELECT ereigniss_id, ereigniss_krzbez FROM kontenereignisse order by 2;",2);
+
+		  Object[][] cmbComponentValues = getter.getData();
+		  
+		  for(Object[] cmbComponentValue : cmbComponentValues)
+		  	component.addItem(cmbComponentValue[1] + " (" + cmbComponentValue[0]+")");
+	  }
 }

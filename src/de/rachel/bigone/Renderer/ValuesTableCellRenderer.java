@@ -16,7 +16,7 @@ public class ValuesTableCellRenderer implements TableCellRenderer {
       JLabel label;
       
       if(!(value instanceof JLabel)) {
-         label = new JLabel((String)value);
+         label = new JLabel(value.toString());
       } else {
          label = (JLabel) value;
       }

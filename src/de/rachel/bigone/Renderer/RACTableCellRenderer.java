@@ -1,20 +1,26 @@
 package de.rachel.bigone.Renderer;
 
 import java.awt.Component;
+
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
 
 import de.rachel.bigone.BigOneTools;
-import de.rachel.bigone.DatabaseConstants;
+import de.rachel.bigone.DBTools;
 
 import java.awt.Color;
+import java.sql.Connection;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
 public class RACTableCellRenderer implements TableCellRenderer {
-
-		public Component getTableCellRendererComponent(
+	private Connection cn = null;
+	
+	public RACTableCellRenderer(Connection LoginCN) {
+		cn = LoginCN;
+	}
+	public Component getTableCellRendererComponent(
 	      JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
 		
 	      JLabel label;
@@ -81,14 +87,12 @@ public class RACTableCellRenderer implements TableCellRenderer {
 						 "datum >= '" + iYear + "-" + (iMonth + 1) + "-1' and " +
 						 "datum <= '" + iYear + "-" + (iMonth + 1) + "-" + calendar.getActualMaximum(Calendar.DAY_OF_MONTH) + "';";
 			//System.out.println(sql);
-			DatabaseConstants marker = new DatabaseConstants();
+			DBTools marker = new DBTools(cn);
 			marker.select(sql,1);
 
 			if(Integer.valueOf(marker.getValueAt(0, 0).toString()) > 0 ) {
-				marker.connection_close();
 				return true;
 			}else {
-				marker.connection_close();
 				return false;
 			}
 			
