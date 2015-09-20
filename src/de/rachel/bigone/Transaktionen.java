@@ -415,7 +415,7 @@ public class Transaktionen {
 		Object[][] cmbBankValues = getter.getData();
 		
 	    for(Object[] cmbBankValue : cmbBankValues)
-	        cmbBLZ.addItem(cmbBankValue[0] + " (" + cmbBankValue[0] + ")");
+	        cmbBLZ.addItem(cmbBankValue[0] + " (" + cmbBankValue[1] + ")");
 	}
 	private void fill_cmbKto(String strAuswahl) {
 		DBTools getter = new DBTools(cn);
