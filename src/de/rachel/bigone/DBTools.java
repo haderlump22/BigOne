@@ -6,11 +6,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 public final class DBTools {
-	//public static final String DRIVER   = "org.gjt.mm.mysql.Driver";
-	public static final String DRIVER   = "org.postgresql.Driver";
-	//public static final String PROTOCOL = "jdbc:mysql://localhost:3306/";
-	public static final String PROTOCOL = "jdbc:postgresql://localhost:5432/";
-	public static final String DATABASE = "bigone";
 	private Statement  st = null;
 	private ResultSet  rs = null;
 	private Connection cn = null;

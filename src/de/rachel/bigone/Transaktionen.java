@@ -43,7 +43,7 @@ public class Transaktionen {
 		//schriftenfestlegungen
 		fontTop= new Font("Arial",Font.BOLD,38);
 		fontTxtFields = new Font("Arial",Font.PLAIN,16);
-		fontCmbBoxes = new  Font("Arial",Font.PLAIN,16);
+		fontCmbBoxes = new Font("Arial",Font.PLAIN,16);
 		
 		//Kopf des Fensters layouten
 		transaktion = new JLabel("Transaktionen",JLabel.CENTER);

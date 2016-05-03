@@ -47,9 +47,11 @@ public class Login {
    		
    		txtBenutzer = new JTextField();
    		txtBenutzer.setBounds(120,40,120,25);
+   		//txtBenutzer.setText("");
 
    		txtPW = new JPasswordField("");
    		txtPW.setBounds(120,70,120,25);
+   		//txtPW.setText("");
    		
    		btnLogin = new JButton("Login");
    		btnLogin.setBounds(100,100,90,25);

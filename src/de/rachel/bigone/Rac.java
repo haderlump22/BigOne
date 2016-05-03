@@ -117,23 +117,26 @@ public class Rac {
  	      			   	"'12', '" +
  	      			   	model.getValueAt(i, 0) + "'," +
  	      			   	model.getValueAt(i, 2) + ",'" +
- 	      			   	model.getValueAt(i, 3) + "'," +
+ 	      			   	model.getValueAt(i, 3).toString().replace("'", "''") + "'," +
  	      			   	BigOneTools.extractEreigId(model.getValueAt(i, 6).toString()) + ",'" +
  	      			   	model.getValueAt(i, 5) + "');";
             		
             		//neuen datensatz einfuegen und den erfolg pruefen
+            		//falls Datensatz nicht eingefuegt werden konnt
+            		//mit dem naechsten weiter machen und nicht abbrechen
             		if(pusher.insert(sql) == false) {
             			System.out.println("Fehler beim Import des Datensatzes Nr: " + i);
-            			break;
+            			continue;
             		}
             		//die Ereignissid pruefen und eventuelle Tankdaten oder
             		//aufteilungen in die DB Tabellen eintragen
             		switch(BigOneTools.extractEreigId(model.getValueAt(i, 6).toString())) {
             		case AUFTEILUNG:
-            			//Aufteilungen zur eintragung aufnehmen
+            			//Aufteilungen zur Eintragung aufnehmen
                         //das Programm arbeitet weiter wenn
                         //dialog geschlossen wird
                         Aufteilung aufteil = new Aufteilung(RACWindow, Double.valueOf(model.getValueAt(i, 2).toString()).doubleValue(), cn);
+                        
                         //da gerade der letzte Datensatz in die tabelle transaktionen eingetragen
                         //wurde kann man auch schon dessen ID feststellen
                         getter.select("SELECT max(transaktions_id) from transaktionen;", 1);
@@ -152,8 +155,7 @@ public class Rac {
 						    if(pusher.insert(sql_auft) == false) {
 						    	System.out.println("Fehler beim Einfuegen der Detaildatensaetze zu Datensatz Nr: " + i);
 						    	insert_details_success = false;
-						    	break; 	// aus der for Schleife fuer das Einfuegen der Detaildatensaetze
-						    			// ausbrechen
+						    	continue; 	// mit dem naechsten Datensatz beim einfuegen weitermachen
 						    }
 						}
             			break;
@@ -184,8 +186,8 @@ public class Rac {
             		}
             		
             		if(insert_details_success == false || insert_tankdaten_success == false) {
-            			break; 	// aus der haupt for Schleife fuer das Einfuegen der 
-            					// Buchungsdatensaetze ausbrechen
+            			continue; 	//ist ein fehler aufgetreten dann mit dem naechsten datensatz
+            			 		//beim einfuegen weitermachen
             		}
             	}
             //nach erfolgreicher importierung den Improtbutton deaktivieren

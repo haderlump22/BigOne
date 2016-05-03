@@ -27,23 +27,23 @@ public class ComboTableCellEditor extends AbstractCellEditor implements TableCel
 	    	}
 	    	return component; 
 	  } 
-	  public Object getCellEditorValue() 
-	  { 
-		  //damit bei erneuter auswahl immer der erste eintrag selectiert ist
-		  //dieser kleine umweg
-		  String strLager = new String(component.getSelectedItem().toString());
-		  component.setSelectedIndex(0);
-		  return strLager;
-			
-	  }
-	  private void fill_component() {
-		  DBTools getter = new DBTools(cn);
+    public Object getCellEditorValue() 
+    { 
+    	//damit bei erneuter auswahl immer der erste eintrag selectiert ist
+    	//dieser kleine umweg
+    	String strLager = new String(component.getSelectedItem().toString());
+    	component.setSelectedIndex(0);
+    	return strLager;
+		
+    }
+	private void fill_component() {
+		DBTools getter = new DBTools(cn);
 		  
-		  getter.select("SELECT ereigniss_id, ereigniss_krzbez FROM kontenereignisse order by 2;",2);
+		getter.select("SELECT ereigniss_id, ereigniss_krzbez FROM kontenereignisse WHERE gueltig = 'TRUE' order by 2;",2);
 
-		  Object[][] cmbComponentValues = getter.getData();
+		Object[][] cmbComponentValues = getter.getData();
 		  
-		  for(Object[] cmbComponentValue : cmbComponentValues)
-		  	component.addItem(cmbComponentValue[1] + " (" + cmbComponentValue[0]+")");
-	  }
+		for(Object[] cmbComponentValue : cmbComponentValues)
+			component.addItem(cmbComponentValue[1] + " (" + cmbComponentValue[0]+")");
+	}
 }
