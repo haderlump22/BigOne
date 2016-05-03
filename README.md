@@ -14,3 +14,12 @@ Some Infos
 - put the sourcefiles in the Repository
 - give a sql Script by, which create DB and Tables
 - create my own Pictures for the Transaktion Formular.
+
+20160503 23:00
+- add a Login Formular to get Username and Password
+- The Module to calculate the Profit get a new Part to calc the
+  proportion of each person income to the total income. That help to calc
+  faster how much money gets each person at the end of the month.
+- Use now in all Classes the new DBTools and give to all Classes the
+  Connection that is createt by the new Login Class.
+- Fix some Things that not enjoy me... ;-)
