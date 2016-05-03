@@ -36,7 +36,7 @@ public class BigOneTools {
 	static public String datum_wandeln(String text,int iArt) {
 		//Art 0
 		//diese Funktion konvertiert ein Datum im Format TT.MM.JJJJ
-		//in das fuer MySql notwendige Datumsformat JJJJ-MM-TT
+		//in das fuer die SQL DB notwendige Datumsformat JJJJ-MM-TT
 		//Art 1
 		//genau umgekehrt
 		String strTag, strMonat, strJahr, strErg = "";
