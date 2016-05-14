@@ -394,13 +394,14 @@ public class Liqui {
 						
 						//hint the total sum of all person
 						txtHinweisAufteilung.append("Gesammtsumme:\n");
-						txtHinweisAufteilung.append(TotalPersonAmount+"\n");
+						txtHinweisAufteilung.append(Double.toString(TotalPersonAmount).replace(".", ",") + "\n");
 						
 						//calc the proportion of the sums in percent, to the total Sum of all persons
-						txtHinweisAufteilung.append("Sparbetrag: "+dResidualValue+"\n");
+						txtHinweisAufteilung.append("Sparbetrag: "+Double.toString(dResidualValue).replace(".", ",")+"\n");
 						for(int PersonCounter = 0; PersonCounter < PersonAmount.length; PersonCounter++) {
 							double percent = roundScale2((PersonAmount[PersonCounter] * 100) / TotalPersonAmount);
-							txtHinweisAufteilung.append(percent + "% / " + roundScale2((percent * dResidualValue) / 100)+"\n");
+							double dValue = roundScale2((percent * dResidualValue) / 100);
+							txtHinweisAufteilung.append(Double.toString(percent).replace(".", ",") + "% / " + Double.toString(dValue).replace(".", ",")+"\n");
 						}
 					}
 				}
