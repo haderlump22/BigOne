@@ -43,7 +43,7 @@ public final class DBTools {
 	public void select(String sql, int iFields) {
 		try {
 			rs = st.executeQuery( sql );
-			
+
 			//auf Grund der uebergebenen Feldanzahl und der ermittelten
 			//datensaetze das array redimensionieren
 			rs.last();
@@ -52,10 +52,10 @@ public final class DBTools {
 			
 			//daten aus dem recordset in das stringarray lesens
 			while ( rs.next() ) {
-				for(int i=0; i<iFields ; i++)
-					daten[rs.getRow()-1][i] = rs.getObject(i+1);
+				for(int i=0; i<iFields ; i++) {
+					daten[rs.getRow()-1][i] = rs.getObject(i+1);}
 			}
-
+			
 			//recordset/statement wieder leeren
 			rs = null;
 		}
