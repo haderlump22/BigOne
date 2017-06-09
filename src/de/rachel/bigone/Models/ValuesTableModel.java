@@ -78,27 +78,27 @@ public class ValuesTableModel extends AbstractTableModel{
 		{
 		//fuer den betrag
 		case 3:
-			strSqlUpdate = "UPDATE transaktionen t SET t.betrag = " + strNewValue + 
-							" WHERE t.transaktions_id = " + strTransID + " ;";
+			strSqlUpdate = "UPDATE transaktionen SET betrag = " + strNewValue + 
+							" WHERE transaktions_id = " + strTransID + " ;";
 			break;
 		//fuer das wertstellungsdatum
 		case 2:
 			strNewValue = "'"+strNewValue+"'";
-			strSqlUpdate = "UPDATE transaktionen t SET t.datum = " + strNewValue + 
-							" WHERE t.transaktions_id = " + strTransID + " ;";
+			strSqlUpdate = "UPDATE transaktionen SET datum = " + strNewValue + 
+							" WHERE transaktions_id = " + strTransID + " ;";
 			break;
 		//fuer den Buchtext
 		case 4:
 			strNewValue = "'"+strNewValue+"'";
-			strSqlUpdate = "UPDATE transaktionen t SET t.buchtext = " + strNewValue + 
-							" WHERE t.transaktions_id = " + strTransID + " ;";
+			strSqlUpdate = "UPDATE transaktionen SET buchtext = " + strNewValue + 
+							" WHERE transaktions_id = " + strTransID + " ;";
 			break;
 		//fuer das liquidatum
 		case 5:
 			if(strNewValue != "NULL")
 				strNewValue = "'"+strNewValue+"'";
-			strSqlUpdate = "UPDATE transaktionen t SET t.liqui_monat = " + strNewValue + 
-							" WHERE t.transaktions_id = " + strTransID + " ;";
+			strSqlUpdate = "UPDATE transaktionen SET liqui_monat = " + strNewValue + 
+							" WHERE transaktions_id = " + strTransID + " ;";
 			break;
 		}
 

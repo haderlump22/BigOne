@@ -47,13 +47,15 @@ public class RACTableModel extends AbstractTableModel{
 	private String[][] lese_werte(String strDateiName, int iZeilen) {
 		/*
 		 * liest bestimmte felder einer Text datei ein ein Array
-		 * ein. Dabei wird ab zeile 11 begonnen(erste Zeile ist die nullte!!!)
+		 * ein. Dabei wird ab zeile 9 begonnen(erste Zeile ist die nullte!!!)
 		 * , weil bei der Postbank ab hier die datensaetze anfangen
 		 * - ab ende 2011 hat die postbank ihr onlinebanking umgestellt
 		 *   dabei ist jetzt ein csv format im einsatz in dem ab zeile 10 die 
 		 *   datensaetze beginnen
 		 * - ausserdem werden betraege jetzt mit euro symbol dargestellt 
 		 *   zeichensatz ist hier windows-1252
+		 * - ab JUN 2016 wurde das EUR Symbol vor den Betrag gestellt
+		 * - ab NOV 2016 wurde das EUR Symbol wieder hinter den Betrag gestellt ARSCHLOECHER!!!
 		 */
 		
    		int iAktZeile = 0;
@@ -86,13 +88,20 @@ public class RACTableModel extends AbstractTableModel{
 							break;
 						case 6://Betrag
 							if(strZeilenTeile[iFeld].replace("\"","").substring(0,1).charAt(0) == '-') {
+								//eurosymbol mit leerzeichen vor betrag
+								//strLager[iAktZeile - 10][2] = strZeilenTeile[iFeld].replace("\"","").substring(3).replace(".","").replace(',', '.'); //wert vom syntax schon fuer mysql db vorbereiten
+								
+								//eurosymbol mit leerzeichen hinter dem betrag
 								//das letzte substring ist dafuer das das eurosymbol und das leerzeichen am ende des betrages verschwinden
-								strLager[iAktZeile - 10][2] = strZeilenTeile[iFeld].replace("\"","").substring(1).replace(".","").replace(',', '.'); //wert vom syntax schon fuer mysql db vorbereiten
-								strLager[iAktZeile - 10][2] = strLager[iAktZeile - 10][2].substring(0, strLager[iAktZeile - 10][2].length() - 2); 
+								strLager[iAktZeile - 10][2] = strZeilenTeile[iFeld].replace("\"","").replace(".","").replace(',', '.').substring(1, strZeilenTeile[iFeld].length() - 4); //wert vom syntax schon fuer mysql db vorbereiten
 								strLager[iAktZeile - 10][1] = "s";
 							}
 							else {
+								//eurosymbol mit leerzeichen hinter dem betrag
 								strLager[iAktZeile - 10][2] = strZeilenTeile[iFeld].replace("\"","").replace(".","").replace(',', '.').substring(0, strZeilenTeile[iFeld].length() - 4);
+								
+								//eurosymbol mit leerzeichen vor betrag
+								//strLager[iAktZeile - 10][2] = strZeilenTeile[iFeld].replace("\"","").substring(2).replace(".","").replace(',', '.');
 								strLager[iAktZeile - 10][1] = "h";
 							}
 							break;	

@@ -670,8 +670,11 @@ public class Liqui {
 	    		  sAbrMonat + "' and gilt_bis >= '" + 
 	    		  sAbrMonat + "') and ereigniss_id not in(47,52);",1);
 
-		
-		return roundScale2(Double.valueOf(getter.getValueAt(0, 0).toString()));
+		//wenn keine Ausgaben (erkennbar an null im Objekt) dann 0.00 zurueckgeben
+		if(getter.getValueAt(0, 0) == null)
+			return 0.00;
+		else
+			return roundScale2(Double.valueOf(getter.getValueAt(0, 0).toString()));
 	}
 	private double summiere_einnahmen(String sAbrMonat) {
 		DBTools getter = new DBTools(cn);
@@ -679,8 +682,13 @@ public class Liqui {
 		getter.select("select sum(betrag) from transaktionen " +
 	    		"where soll_haben = 'h' and konten_id = " + KontenID + " and liqui_monat = '" + 
 	    		sAbrMonat + "' and ereigniss_id not in (52);",1);
-	    
-	    return roundScale2(Double.valueOf(getter.getValueAt(0, 0).toString()));
+		
+		//wenn keine Einnahmen (erkennbar an null im Objekt) dann 0.00 zurueckgeben
+		if(getter.getValueAt(0, 0) == null)
+			return 0.00;
+		else
+			return roundScale2(Double.valueOf(getter.getValueAt(0, 0).toString()));
+
 	}
 	private void monats_fixkosten(String sAbrMonat) {
 		DBTools getter = new DBTools(cn);
