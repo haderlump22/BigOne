@@ -70,19 +70,18 @@ public class Rac {
             	
         		open.showOpenDialog(RACWindow);
         		iZeilen = new BigOneTools().ermittle_anzahl_zeilen(open.getSelectedFile().toString());
-        		if(iZeilen > 11) {
+        		if(iZeilen >= 10) {
         			if(table == null) {
         				zeichne_tabelle(open.getSelectedFile().toString());
-        			}
-        			else {
+        			} else {
             			model = (RACTableModel)table.getModel();
             			model.aktualisiere(open.getSelectedFile().toString(),iZeilen);	
         			}
         			//nach dem erfolgreichen einlesen der zu importierenden daten
         			//den Button aktivieren
         			btnImp.setEnabled(true);
-        		}
-        		else {
+        		} else {
+        			System.out.println("Zu wenige Zeilen in der einzulesenden Datei!");
         			RACWindow.remove(sp);
         			RACWindow.validate();
         			RACWindow.repaint();
@@ -203,12 +202,11 @@ public class Rac {
 		open.showOpenDialog(RACWindow);
 		
 		BigOneTools tool = new BigOneTools();
-		if(tool.ermittle_anzahl_zeilen(open.getSelectedFile().toString()) > 11) {
+		if(tool.ermittle_anzahl_zeilen(open.getSelectedFile().toString()) >= 10) {
 			zeichne_tabelle(open.getSelectedFile().toString());
+		} else {
+			System.out.println("Zu wenige Zeilen in der einzulesenden Datei!");
 		}
-
-
-		
 		RACWindow.setVisible(true);
 	}
 	private void zeichne_tabelle(String strFile) {
