@@ -47,17 +47,12 @@ public class RACTableModel extends AbstractTableModel{
 	private String[][] lese_werte(String strDateiName, int iZeilen) {
 		/*
 		 * liest bestimmte felder einer Text datei ein ein Array
-		 * ein. Dabei wird ab zeile 9 begonnen(erste Zeile ist die nullte!!!)
-		 * , weil bei der Postbank ab hier die datensaetze anfangen
-		 * - ab ende 2011 hat die postbank ihr onlinebanking umgestellt
-		 *   dabei ist jetzt ein csv format im einsatz in dem ab zeile 10 die 
-		 *   datensaetze beginnen
+		 * ein, bei der Postbank fangen ab Zeile 10 die datensaetze an
 		 * - ausserdem werden betraege jetzt mit euro symbol dargestellt 
 		 *   zeichensatz ist hier windows-1252
 		 * - ab JUN 2016 wurde das EUR Symbol vor den Betrag gestellt
 		 * - ab NOV 2016 wurde das EUR Symbol wieder hinter den Betrag gestellt ARSCHLOECHER!!!
 		 */
-		
    		int iAktZeile = 0;
 		String strLager[][] = null;
 		strLager = new String[iZeilen - 9][7];
@@ -109,8 +104,8 @@ public class RACTableModel extends AbstractTableModel{
 					}
 					//am ende der verarbeitung einer Zeile wird das ereigniss fest auf
 					//HaushGeld (46) gesetzt
-					strLager[iAktZeile - 10][6] = "HaushGeld (46)";			    }
-				
+					strLager[iAktZeile - 10][6] = "HaushGeld (46)";
+				}
 			}
 			in.close();
 		} catch (IOException e) {
