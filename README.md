@@ -23,3 +23,6 @@ Some Infos
 - Use now in all Classes the new DBTools and give to all Classes the
   Connection that is createt by the new Login Class.
 - Fix some Things that not enjoy me... ;-)
+
+20171113 13:06
+- now you can Import your Data from a XML File in the CAMT Format
