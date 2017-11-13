@@ -16,6 +16,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import de.rachel.bigone.Editors.ComboTableCellEditor;
 import de.rachel.bigone.Editors.LiquiDateTableCellEditor;
@@ -51,6 +52,8 @@ public class Rac {
 		//fontTxtFields = new Font("Arial",Font.PLAIN,16);
 		
 		open = new JFileChooser();
+		//beim OpenDialog sollen nur XML Dateien angezeigt werden
+		open.setFileFilter(new FileNameExtensionFilter("XML", "xml"));
 		
 		popmen = new JPopupMenu(); 
 		JMenuItem delrow = new JMenuItem("Zeile löschen");
@@ -66,29 +69,29 @@ public class Rac {
 		btnOpen.setBounds(30,17,115,35);
 		btnOpen.addActionListener(new ActionListener(){ 
             public void actionPerformed(ActionEvent ae){
-            	int iZeilen;
             	
         		open.showOpenDialog(RACWindow);
-        		iZeilen = new BigOneTools().ermittle_anzahl_zeilen(open.getSelectedFile().toString());
-        		if(iZeilen >= 10) {
+
+        		ReadCamt Auszug = new ReadCamt(open.getSelectedFile().toString());
+        		
+        		if(Auszug.getBuchungsanzahl() > 0) {
         			if(table == null) {
-        				zeichne_tabelle(open.getSelectedFile().toString());
+        				zeichne_tabelle(Auszug);
         			} else {
             			model = (RACTableModel)table.getModel();
-            			model.aktualisiere(open.getSelectedFile().toString(),iZeilen);	
+            			model.aktualisiere(Auszug);	
         			}
         			//nach dem erfolgreichen einlesen der zu importierenden daten
         			//den Button aktivieren
         			btnImp.setEnabled(true);
         		} else {
-        			System.out.println("Zu wenige Zeilen in der einzulesenden Datei!");
+        			System.out.println("Keine Buchungen in Datei " + open.getSelectedFile().toString() + "gefunden!");
         			RACWindow.remove(sp);
         			RACWindow.validate();
         			RACWindow.repaint();
         		}
             }
         });
-		
 		
 		btnImp = new JButton("importieren");
 		btnImp.setBounds(150,17,115,35);
@@ -199,21 +202,20 @@ public class Rac {
 		RACWindow.validate();
 		RACWindow.repaint();
 		
+		//Datei auswählen lassen
 		open.showOpenDialog(RACWindow);
 		
-		BigOneTools tool = new BigOneTools();
-		if(tool.ermittle_anzahl_zeilen(open.getSelectedFile().toString()) >= 10) {
-			zeichne_tabelle(open.getSelectedFile().toString());
+		ReadCamt Auszug = new ReadCamt(open.getSelectedFile().toString());
+		if(Auszug.getBuchungsanzahl() > 0) {
+			zeichne_tabelle(Auszug);
 		} else {
-			System.out.println("Zu wenige Zeilen in der einzulesenden Datei!");
+			System.out.println("Keine Buchungen in Datei " + open.getSelectedFile().toString() + "gefunden!");
 		}
 		RACWindow.setVisible(true);
 	}
-	private void zeichne_tabelle(String strFile) {
-		
-		BigOneTools tool = new BigOneTools();
-		
-		table = new JTable(new RACTableModel(strFile,tool.ermittle_anzahl_zeilen(open.getSelectedFile().toString())));
+	private void zeichne_tabelle(ReadCamt Auszug) {
+
+		table = new JTable(new RACTableModel(Auszug));
 		RACTableCellRenderer ren  = new RACTableCellRenderer(cn);
 		table.setDefaultRenderer( Object.class, ren );
 		table.getColumnModel().getColumn(5).setCellEditor(new LiquiDateTableCellEditor());

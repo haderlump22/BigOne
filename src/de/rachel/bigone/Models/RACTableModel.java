@@ -1,23 +1,25 @@
 package de.rachel.bigone.Models;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-
 import javax.swing.table.AbstractTableModel;
 
 import de.rachel.bigone.BigOneTools;
+import de.rachel.bigone.ReadCamt;
 
 public class RACTableModel extends AbstractTableModel{
 	private static final long serialVersionUID = -2431676313753205738L;
-	private String strDateiName;
-	private String[] columnName = new String[]{"Wertstellung","s/h","Betrag","Buchungshinweist","Empfänger","LiquiMon","Ereigniss"};
+	private String[] columnName = new String[]{"Wertstellung","s/h","Betrag","Buchungshinweis","Empfänger","LiquiMon","Ereignis"};
 	private String[][] daten;
 	private String[][] strLager;
+	private static int ValueDate = 0;
+	private static int CreditDebitIndicator = 1;
+	private static int Amount = 2;
+	private static int Unstructured = 3;	//Unstrukturierter Verwendungszweck 140zeichen max
+	private static int Creditor = 4;
+	private static int LiquiMonth = 5;
+	private static int AccountBookingEvent = 6;
 	
-	public RACTableModel(String strWert, int iZeilen){
-		strDateiName = strWert;
-		daten = lese_werte(strDateiName, iZeilen);
+	public RACTableModel(ReadCamt Auszug){
+		daten = lese_werte(Auszug);
 	}
 	public int getColumnCount() {
 		return columnName.length;
@@ -44,72 +46,35 @@ public class RACTableModel extends AbstractTableModel{
 			daten[row][col] = null;
         fireTableCellUpdated(row, col);
     }
-	private String[][] lese_werte(String strDateiName, int iZeilen) {
+	private String[][] lese_werte(ReadCamt Auszug) {
 		/*
-		 * liest bestimmte felder einer Text datei ein ein Array
-		 * ein, bei der Postbank fangen ab Zeile 10 die datensaetze an
-		 * - ausserdem werden betraege jetzt mit euro symbol dargestellt 
-		 *   zeichensatz ist hier windows-1252
-		 * - ab JUN 2016 wurde das EUR Symbol vor den Betrag gestellt
-		 * - ab NOV 2016 wurde das EUR Symbol wieder hinter den Betrag gestellt ARSCHLOECHER!!!
+		 * Daten des Auszugs aus einer XML CAMT Datei werden hier
+		 * in das notwendige Array der Tabelle Models ein
 		 */
-   		int iAktZeile = 0;
-		String strLager[][] = null;
-		strLager = new String[iZeilen - 9][7];
-		String[] strZeilenTeile;
+		String strLager[][] = new String[Auszug.getBuchungsanzahl()][7];
 		
-		try {
-			BufferedReader in = new BufferedReader(new FileReader(strDateiName));
-			String zeile = null;
-			while ((zeile = in.readLine()) != null) {
-				iAktZeile++; //zeilenzaehler
-				
-				if(iAktZeile >= 10) {
-					strZeilenTeile = zeile.split(";");
-					for (int iFeld = 0; iFeld < strZeilenTeile.length; iFeld++) {
-						switch (iFeld) {
-						case 1://Wertstellung
-							strLager[iAktZeile - 10][0] = BigOneTools.datum_wandeln(strZeilenTeile[iFeld].replace("\"",""),0);
-							strLager[iAktZeile - 10][5] = BigOneTools.datum_wandeln("01" + strZeilenTeile[iFeld].replace("\"","").substring(2),0);
-							break;
-						case 3://Buchungshinweis
-							strLager[iAktZeile - 10][3] = strZeilenTeile[iFeld].replace("\"","");
-							break;
-						case 5://Empfaenger
-							if(strZeilenTeile[iFeld].isEmpty())
-								strLager[iAktZeile - 10][4] = "LEER";
-							else
-								strLager[iAktZeile - 10][4] = strZeilenTeile[iFeld].replace("\"","");
-							break;
-						case 6://Betrag
-							if(strZeilenTeile[iFeld].replace("\"","").substring(0,1).charAt(0) == '-') {
-								//eurosymbol mit leerzeichen vor betrag
-								//strLager[iAktZeile - 10][2] = strZeilenTeile[iFeld].replace("\"","").substring(3).replace(".","").replace(',', '.'); //wert vom syntax schon fuer mysql db vorbereiten
-								
-								//eurosymbol mit leerzeichen hinter dem betrag
-								//das letzte substring ist dafuer das das eurosymbol und das leerzeichen am ende des betrages verschwinden
-								strLager[iAktZeile - 10][2] = strZeilenTeile[iFeld].replace("\"","").replace(".","").replace(',', '.').substring(1, strZeilenTeile[iFeld].length() - 4); //wert vom syntax schon fuer mysql db vorbereiten
-								strLager[iAktZeile - 10][1] = "s";
-							}
-							else {
-								//eurosymbol mit leerzeichen hinter dem betrag
-								strLager[iAktZeile - 10][2] = strZeilenTeile[iFeld].replace("\"","").replace(".","").replace(',', '.').substring(0, strZeilenTeile[iFeld].length() - 4);
-								
-								//eurosymbol mit leerzeichen vor betrag
-								//strLager[iAktZeile - 10][2] = strZeilenTeile[iFeld].replace("\"","").substring(2).replace(".","").replace(',', '.');
-								strLager[iAktZeile - 10][1] = "h";
-							}
-							break;	
-						}
-					}
-					//am ende der verarbeitung einer Zeile wird das ereigniss fest auf
-					//HaushGeld (46) gesetzt
-					strLager[iAktZeile - 10][6] = "HaushGeld (46)";
-				}
-			}
-			in.close();
-		} catch (IOException e) {
-			e.printStackTrace();
+		for(int iAktuelleBuchung = 0; iAktuelleBuchung < Auszug.getBuchungsanzahl(); iAktuelleBuchung++){		
+			strLager[iAktuelleBuchung][ValueDate] = Auszug.getValDt(iAktuelleBuchung);
+			
+			strLager[iAktuelleBuchung][LiquiMonth] = Auszug.getValDt(iAktuelleBuchung).substring(0, 8) + "01";
+			
+			strLager[iAktuelleBuchung][Unstructured] = Auszug.getUstrd(iAktuelleBuchung);
+			
+			strLager[iAktuelleBuchung][Creditor] = Auszug.getCdtr(iAktuelleBuchung);
+			
+			strLager[iAktuelleBuchung][Amount] = Auszug.getAmt(iAktuelleBuchung); 
+			
+			//Das Soll Haben wird aus dem Feld CreditDebitIndicator gebildet
+			//CRDT ist haben Buchung
+			//DBIT ist soll Buchung
+			if(Auszug.getCdtDbtInd(iAktuelleBuchung).equals("CRDT"))
+				strLager[iAktuelleBuchung][CreditDebitIndicator] = "h";
+			if(Auszug.getCdtDbtInd(iAktuelleBuchung).equals("DBIT"))
+				strLager[iAktuelleBuchung][CreditDebitIndicator] = "s";
+
+			//am ende der verarbeitung einer Zeile wird das ereigniss fest auf
+			//HaushGeld (46) gesetzt
+			strLager[iAktuelleBuchung][AccountBookingEvent] = "HaushGeld (46)";
 		}
 		return strLager;
 	}
@@ -152,8 +117,8 @@ public class RACTableModel extends AbstractTableModel{
 			fireTableDataChanged();
 		}
 	}
-	public void aktualisiere(String strValue, int iZeilen) {
-		daten = lese_werte(strValue, iZeilen);
+	public void aktualisiere(ReadCamt Auszug) {
+		daten = lese_werte(Auszug);
 		fireTableDataChanged();
 	}
 }
