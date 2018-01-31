@@ -12,6 +12,7 @@ import java.sql.Connection;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
@@ -38,6 +39,7 @@ public class Rac {
 	private JButton btnImp;
 	private JFileChooser open;
 	private JScrollPane sp;
+	private JLabel IbanInfo, Iban;
 
 	Rac(Connection LoginCN){
 		cn = LoginCN;
@@ -79,13 +81,16 @@ public class Rac {
         				zeichne_tabelle(Auszug);
         			} else {
             			model = (RACTableModel)table.getModel();
-            			model.aktualisiere(Auszug);	
+            			model.aktualisiere(Auszug);
+            			
+            			//set the IbanInfo Label
+            			Iban.setText(Auszug.getIBAN());
         			}
         			//nach dem erfolgreichen einlesen der zu importierenden daten
         			//den Button aktivieren
         			btnImp.setEnabled(true);
         		} else {
-        			System.out.println("Keine Buchungen in Datei " + open.getSelectedFile().toString() + "gefunden!");
+        			System.out.println("Keine Buchungen in der Datei " + open.getSelectedFile().toString() + "gefunden!");
         			RACWindow.remove(sp);
         			RACWindow.validate();
         			RACWindow.repaint();
@@ -197,8 +202,16 @@ public class Rac {
             }
         });
 
+		//add IbanInfo Label, IBAN is get from the CAMT File (or in a ZIP File that contains
+		//more than one CAMT file, the IBAN is get from the first File in the ZIP)
+		IbanInfo = new JLabel("IBAN des Auszugs:");
+		IbanInfo.setBounds(300, 17, 120, 17);
+		Iban = new JLabel("DE43 2595 0130 0035 0759 90");
+		Iban.setBounds(300, 34, 180, 17);
+		
 		RACWindow.add(btnOpen);
 		RACWindow.add(btnImp);
+		RACWindow.add(IbanInfo);
 		RACWindow.validate();
 		RACWindow.repaint();
 		
