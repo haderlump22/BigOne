@@ -85,6 +85,8 @@ public class Rac {
             			
             			//set the IbanInfo Label
             			Iban.setText(Auszug.getIBAN());
+            			RACWindow.validate();
+            			RACWindow.repaint();
         			}
         			//nach dem erfolgreichen einlesen der zu importierenden daten
         			//den Button aktivieren
@@ -205,13 +207,14 @@ public class Rac {
 		//add IbanInfo Label, IBAN is get from the CAMT File (or in a ZIP File that contains
 		//more than one CAMT file, the IBAN is get from the first File in the ZIP)
 		IbanInfo = new JLabel("IBAN des Auszugs:");
-		IbanInfo.setBounds(300, 17, 120, 17);
+		IbanInfo.setBounds(300, 17, 140, 17);
 		Iban = new JLabel("DE43 2595 0130 0035 0759 90");
 		Iban.setBounds(300, 34, 180, 17);
 		
 		RACWindow.add(btnOpen);
 		RACWindow.add(btnImp);
 		RACWindow.add(IbanInfo);
+		RACWindow.add(Iban);
 		RACWindow.validate();
 		RACWindow.repaint();
 		
@@ -221,6 +224,9 @@ public class Rac {
 		ReadCamt Auszug = new ReadCamt(open.getSelectedFile().toString());
 		if(Auszug.getBuchungsanzahl() > 0) {
 			zeichne_tabelle(Auszug);
+			Iban.setText(Auszug.getIBAN());
+			RACWindow.validate();
+			RACWindow.repaint();
 		} else {
 			System.out.println("Keine Buchungen in Datei " + open.getSelectedFile().toString() + "gefunden!");
 		}
