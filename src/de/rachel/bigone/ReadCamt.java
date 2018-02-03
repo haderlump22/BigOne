@@ -116,4 +116,19 @@ public class ReadCamt {
 	public String getIBAN(){
 		return sIBAN;
 	}
+	public String getFormatedIBAN() {
+		String sFormatedIBAN = "";
+		int iCounter = 0;
+		
+		for(int i = 0; i < sIBAN.length(); i++) {
+			sFormatedIBAN = sFormatedIBAN + sIBAN.charAt(i);
+			iCounter++;
+			if(iCounter == 4) {
+				sFormatedIBAN = sFormatedIBAN + " ";
+				iCounter = 0;
+			}
+		}
+		
+		return sFormatedIBAN;
+	}
 }
