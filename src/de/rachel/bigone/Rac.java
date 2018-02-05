@@ -84,7 +84,7 @@ public class Rac {
             			model.aktualisiere(Auszug);
             			
             			//set the IbanInfo Label
-            			Iban.setText(Auszug.getIBAN());
+            			Iban.setText(Auszug.getFormatedIBAN());
             			RACWindow.validate();
             			RACWindow.repaint();
         			}
@@ -208,8 +208,8 @@ public class Rac {
 		//more than one CAMT file, the IBAN is get from the first File in the ZIP)
 		IbanInfo = new JLabel("IBAN des Auszugs:");
 		IbanInfo.setBounds(300, 17, 140, 17);
-		Iban = new JLabel("DE43 2595 0130 0035 0759 90");
-		Iban.setBounds(300, 34, 180, 17);
+		Iban = new JLabel("");
+		Iban.setBounds(300, 34, 200, 17);
 		
 		RACWindow.add(btnOpen);
 		RACWindow.add(btnImp);
@@ -224,7 +224,7 @@ public class Rac {
 		ReadCamt Auszug = new ReadCamt(open.getSelectedFile().toString());
 		if(Auszug.getBuchungsanzahl() > 0) {
 			zeichne_tabelle(Auszug);
-			Iban.setText(Auszug.getIBAN());
+			Iban.setText(Auszug.getFormatedIBAN());
 			RACWindow.validate();
 			RACWindow.repaint();
 		} else {
