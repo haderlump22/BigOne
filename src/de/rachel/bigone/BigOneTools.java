@@ -3,7 +3,12 @@ package de.rachel.bigone;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.sql.Connection;
 
+/**
+ * some little tools for work
+ *
+ */
 public class BigOneTools {
 	private String strFileName;
 	
@@ -53,5 +58,19 @@ public class BigOneTools {
 			strErg = strTag+"."+strMonat+"."+strJahr;
 		}
 		return strErg;
+	}
+
+	static public String getKontenId(String IBAN, Connection cn) {
+		//ermittelt die KontenID der angegebenen IBAN aus der Tabelle konten
+		DBTools getter = new DBTools(cn);
+		
+		String sql = "select konten_id from konten WHERE iban = '" + IBAN + "'";
+		getter.select(sql, 1);
+		
+		//wenn genau ein Datensatz gefunden wurde dann die ID zurückgeben
+		if (getter.getRowCount() == 0)
+			return (String) getter.getValueAt(0, 0);
+		else
+			return "";
 	}
 }

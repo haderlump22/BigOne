@@ -40,6 +40,7 @@ public class Rac {
 	private JFileChooser open;
 	private JScrollPane sp;
 	private JLabel IbanInfo, Iban;
+	private ReadCamt Auszug;
 
 	Rac(Connection LoginCN){
 		cn = LoginCN;
@@ -74,7 +75,7 @@ public class Rac {
             	
         		open.showOpenDialog(RACWindow);
 
-        		ReadCamt Auszug = new ReadCamt(open.getSelectedFile().toString());
+        		Auszug = new ReadCamt(open.getSelectedFile().toString());
         		
         		if(Auszug.getBuchungsanzahl() > 0) {
         			if(table == null) {
@@ -106,12 +107,12 @@ public class Rac {
             public void actionPerformed(ActionEvent ae){
             	//Tabelle zeilenweise durchlaufen und 
             	//daten in die DB einfuegen
-            	String sql="";
-            	boolean insert_details_success = true;
-            	boolean insert_tankdaten_success = true;
-            	DBTools pusher = new DBTools(cn);
-            	DBTools getter = new DBTools(cn);
-            	model = (RACTableModel)table.getModel();
+				String sql = "";
+				boolean insert_details_success = true;
+				boolean insert_tankdaten_success = true;
+				DBTools pusher = new DBTools(cn);
+				DBTools getter = new DBTools(cn);
+				model = (RACTableModel) table.getModel();
             	
             	//tabellendaten von der letzten Zeile zur ersten hin importieren
             	//damit die altesten buchungen als erste in der Tabelle geschrieben
@@ -119,16 +120,12 @@ public class Rac {
             	for(int i = model.getRowCount() -1 ; i >= 0; i--) {
             		insert_details_success = true;
             		
-            		sql = "INSERT into transaktionen " +
-            			"(soll_haben, konten_id, datum, betrag, buchtext, ereigniss_id, liqui_monat) " +
- 	      			   	"VALUES " +
- 	      			   	"('" + model.getValueAt(i, 1) + "', " +
- 	      			   	"'12', '" +
- 	      			   	model.getValueAt(i, 0) + "'," +
- 	      			   	model.getValueAt(i, 2) + ",'" +
- 	      			   	model.getValueAt(i, 3).toString().replace("'", "''") + "'," +
- 	      			   	BigOneTools.extractEreigId(model.getValueAt(i, 6).toString()) + ",'" +
- 	      			   	model.getValueAt(i, 5) + "');";
+					sql = "INSERT into transaktionen "
+							+ "(soll_haben, konten_id, datum, betrag, buchtext, ereigniss_id, liqui_monat) " + "VALUES "
+							+ "('" + model.getValueAt(i, 1) + "', " + BigOneTools.getKontenId(Auszug.getIBAN(), cn) + ", '" + model.getValueAt(i, 0) + "',"
+							+ model.getValueAt(i, 2) + ",'" + model.getValueAt(i, 3).toString().replace("'", "''")
+							+ "'," + BigOneTools.extractEreigId(model.getValueAt(i, 6).toString()) + ",'"
+							+ model.getValueAt(i, 5) + "');";
             		
             		//neuen datensatz einfuegen und den erfolg pruefen
             		//falls Datensatz nicht eingefuegt werden konnt
@@ -221,7 +218,7 @@ public class Rac {
 		//Datei auswählen lassen
 		open.showOpenDialog(RACWindow);
 		
-		ReadCamt Auszug = new ReadCamt(open.getSelectedFile().toString());
+		Auszug = new ReadCamt(open.getSelectedFile().toString());
 		if(Auszug.getBuchungsanzahl() > 0) {
 			zeichne_tabelle(Auszug);
 			Iban.setText(Auszug.getIBAN());
