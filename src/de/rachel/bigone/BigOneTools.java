@@ -65,11 +65,12 @@ public class BigOneTools {
 		DBTools getter = new DBTools(cn);
 		
 		String sql = "select konten_id from konten WHERE iban = '" + IBAN + "'";
+
 		getter.select(sql, 1);
 		
 		//wenn genau ein Datensatz gefunden wurde dann die ID zurückgeben
-		if (getter.getRowCount() == 0)
-			return (String) getter.getValueAt(0, 0);
+		if (getter.getRowCount() == 1)
+			return getter.getValueAt(0, 0).toString();
 		else
 			return "";
 	}
