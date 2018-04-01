@@ -1,11 +1,11 @@
 package de.rachel.bigone;
-import java.io.File;
 import java.io.IOException;
 
 import javax.xml.parsers.*;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 public class ReadCamt {
@@ -20,7 +20,7 @@ public class ReadCamt {
 	private static int Unstructured = 3;	//Unstrukturierter Verwendungszweck 140zeichen max
 	private static int Creditor = 4;
 	
-	ReadCamt(String PathAndFile){
+	ReadCamt(InputSource PathAndFile){
 		
 		KontoAuszug = parseXML(PathAndFile);
 		
@@ -44,11 +44,14 @@ public class ReadCamt {
 			}
 		}
 	}
-	private Document parseXML(String PathAndFile){
+	ReadCamt(String[][] buchungen) {
+		this.buchungen = buchungen.clone();
+	}
+	private Document parseXML(InputSource PathAndFile){
 		DocumentBuilder DocBuilder = getDocBuilder();
 		
 		try {
-			return DocBuilder.parse(new File(PathAndFile));
+			return DocBuilder.parse(PathAndFile);
 		} catch (SAXException e) {
 			e.printStackTrace();
 			return null;
@@ -130,5 +133,8 @@ public class ReadCamt {
 		}
 		
 		return sFormatedIBAN;
+	}
+	public String[][] getBuchungen() {
+		return buchungen;
 	}
 }
