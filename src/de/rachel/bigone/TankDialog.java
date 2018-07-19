@@ -26,7 +26,7 @@ public class TankDialog extends JFrame {
 	TankDialog(JFrame dialogOwner, String strBetrag, Connection LoginCN){
 		cn = LoginCN;
 		final JDialog dialog = new JDialog(dialogOwner, "Tankdaten: " + strBetrag, true);
-		dialog.setSize(220,250);
+		dialog.setSize(220,260);
 		dialog.setLayout(null);
 		dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		

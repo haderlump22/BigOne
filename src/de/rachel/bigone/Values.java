@@ -43,7 +43,7 @@ public class Values {
 	Values(Connection LoginCN){
 		cn = LoginCN;
 		valuewindow = new JFrame("Beträge finden");
-		valuewindow.setSize(785,480);
+		valuewindow.setSize(785,490);
 		valuewindow.setLocation(200,200);
 		valuewindow.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		valuewindow.setLayout(null);

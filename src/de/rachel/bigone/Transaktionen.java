@@ -34,7 +34,7 @@ public class Transaktionen {
 	Transaktionen(Connection LoginCN){
 		cn = LoginCN;
 		mainwindow = new JFrame("Transaktionen");
-		mainwindow.setSize(800,500);
+		mainwindow.setSize(800,510);
 		mainwindow.setLocation(200,200);
 		mainwindow.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		mainwindow.setLayout(null);

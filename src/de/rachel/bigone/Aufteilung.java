@@ -34,7 +34,7 @@ public class Aufteilung extends JFrame{
 	Aufteilung(JFrame dialogOwner, double flGesBetrag, Connection LoginCN){
 		cn = LoginCN;
 		final JDialog dialog = new JDialog(dialogOwner, "Aufteilung", true);
-		dialog.setSize(300,250);
+		dialog.setSize(300,260);
 		dialog.setLayout(null);
 		dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		
