@@ -45,7 +45,7 @@ public class Rac {
 	Rac(Connection LoginCN){
 		cn = LoginCN;
 		RACWindow = new JFrame("Kontoauszug einlesen");
-		RACWindow.setSize(785,480);
+		RACWindow.setSize(785,490);
 		RACWindow.setLocation(200,200);
 		RACWindow.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		RACWindow.setLayout(null);

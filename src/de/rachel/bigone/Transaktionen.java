@@ -34,7 +34,7 @@ public class Transaktionen {
 	Transaktionen(Connection LoginCN){
 		cn = LoginCN;
 		mainwindow = new JFrame("Transaktionen");
-		mainwindow.setSize(800,500);
+		mainwindow.setSize(800,510);
 		mainwindow.setLocation(200,200);
 		mainwindow.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		mainwindow.setLayout(null);
@@ -400,7 +400,7 @@ public class Transaktionen {
 	private void fill_cmbEreigniss() {
 		DBTools getter = new DBTools(cn);
 		
-		getter.select("SELECT ereigniss_id, ereigniss_krzbez FROM kontenereignisse order by 2;",2);
+		getter.select("SELECT ereigniss_id, ereigniss_krzbez FROM kontenereignisse WHERE gueltig = 'TRUE' order by 2;",2);
 		
 		Object[][] cmbEreinissValues = getter.getData();
 		
