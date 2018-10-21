@@ -137,4 +137,7 @@ public class ReadCamt {
 	public String[][] getBuchungen() {
 		return buchungen;
 	}
+	public void setIBAN(String sIBAN) {
+		this.sIBAN = sIBAN;
+	}
 }

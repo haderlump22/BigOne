@@ -300,11 +300,19 @@ public class Rac {
 				try {
 					zf = new ZipFile(open.getSelectedFile());
 					
+					// da am ende das Auzugsobjekt nur aus den im tmpAuszug Array gesammelten Daten erzeugt wird, fehlt
+					// die IBAN, diese muss aus den Einzelauszügen des gesammt Zip Files gelesen und zwischengespeichert werden
+					// da die IBAN in allen Einzelauszügen de Zipfiles die gleiche ist, kann sie bei jedem Schleifenumlauf überschrieben werden
+					String tmpIBAN = "";
+					
 					// für jede Datei im ZIP Archiv
 					for (ZipEntry entry : Collections.list( zf.entries() ))
 					{
 						try {
 							tmpAuszug = new ReadCamt(new InputSource(zf.getInputStream(entry)));
+							
+							// merken der aktuellen IBAN
+							tmpIBAN = tmpAuszug.getIBAN();
 							
 							//array zusammenketten
 							buchungen = Stream.concat(Arrays.stream(buchungen), Arrays.stream(tmpAuszug.getBuchungen())).toArray(String[][]::new);
@@ -317,6 +325,9 @@ public class Rac {
 					}
 				Auszug = new ReadCamt(buchungen);
 				
+				//setzen der IBAN des Auszugs mit dem gemerkten Wert aus dein einzelauszügen des ZIP Files
+				Auszug.setIBAN(tmpIBAN);
+			
 				//zipfile wieder schliessen
 				zf.close();
 				return Auszug;
