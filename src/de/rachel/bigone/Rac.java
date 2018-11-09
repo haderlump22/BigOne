@@ -7,7 +7,16 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.sql.Connection;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.stream.Stream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipException;
+import java.util.zip.ZipFile;
 
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -19,11 +28,12 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+import org.xml.sax.InputSource;
+
 import de.rachel.bigone.Editors.ComboTableCellEditor;
 import de.rachel.bigone.Editors.LiquiDateTableCellEditor;
 import de.rachel.bigone.Models.RACTableModel;
 import de.rachel.bigone.Renderer.RACTableCellRenderer;
-
 
 public class Rac {
 	private Connection cn = null;
@@ -40,7 +50,9 @@ public class Rac {
 	private JFileChooser open;
 	private JScrollPane sp;
 	private JLabel IbanInfo, Iban;
-	private ReadCamt Auszug;
+	private ReadCamt Auszug = null;
+	private ReadCamt tmpAuszug = null;
+	String[][] buchungen = new String[0][0];
 
 	Rac(Connection LoginCN){
 		cn = LoginCN;
@@ -55,8 +67,8 @@ public class Rac {
 		//fontTxtFields = new Font("Arial",Font.PLAIN,16);
 		
 		open = new JFileChooser();
-		//beim OpenDialog sollen nur XML Dateien angezeigt werden
-		open.setFileFilter(new FileNameExtensionFilter("XML", "xml"));
+		//beim OpenDialog sollen nur XML und ZIP angezeigt werden
+		open.setFileFilter(new FileNameExtensionFilter("CAMT FILES", "xml", "zip"));
 		
 		popmen = new JPopupMenu(); 
 		JMenuItem delrow = new JMenuItem("Zeile löschen");
@@ -73,27 +85,29 @@ public class Rac {
 		btnOpen.addActionListener(new ActionListener(){ 
             public void actionPerformed(ActionEvent ae){
             	
+            	//Datei erneut auswählenlassen
         		open.showOpenDialog(RACWindow);
-
-        		Auszug = new ReadCamt(open.getSelectedFile().toString());
         		
-        		if(Auszug.getBuchungsanzahl() > 0) {
-        			if(table == null) {
-        				zeichne_tabelle(Auszug);
-        			} else {
-            			model = (RACTableModel)table.getModel();
-            			model.aktualisiere(Auszug);
-            			
-            			//set the IbanInfo Label
-            			Iban.setText(Auszug.getFormatedIBAN());
-            			RACWindow.validate();
-            			RACWindow.repaint();
-        			}
-        			//nach dem erfolgreichen einlesen der zu importierenden daten
-        			//den Button aktivieren
-        			btnImp.setEnabled(true);
+        		//Auszug erneut in Abhängigkeit der Quelldatei (xml oder zip) generieren
+        		Auszug = CreateAuszug(open);
+        		
+        		if (Auszug != null && Auszug.getBuchungsanzahl() > 0) {
+            			if(table == null) {
+            				zeichne_tabelle(Auszug);
+            			} else {
+                			model = (RACTableModel)table.getModel();
+                			model.aktualisiere(Auszug);
+                			
+                			//set the IbanInfo Label
+                			Iban.setText(Auszug.getFormatedIBAN());
+                			RACWindow.validate();
+                			RACWindow.repaint();
+            			}
+            			//nach dem erfolgreichen einlesen der zu importierenden daten
+            			//den Button aktivieren
+            			btnImp.setEnabled(true);
         		} else {
-        			System.out.println("Keine Buchungen in der Datei " + open.getSelectedFile().toString() + "gefunden!");
+        			System.out.println("Keine Datei oder keine Buchungen in der Datei " + open.getSelectedFile().toString() + "gefunden!");
         			RACWindow.remove(sp);
         			RACWindow.validate();
         			RACWindow.repaint();
@@ -201,32 +215,36 @@ public class Rac {
             }
         });
 
-		//add IbanInfo Label, IBAN is get from the CAMT File (or in a ZIP File that contains
-		//more than one CAMT file, the IBAN is get from the first File in the ZIP)
+		// add IbanInfo Label, IBAN is get from the CAMT File (or in a ZIP File that
+		// contains
+		// more than one CAMT file, the IBAN is get from the first File in the ZIP)
 		IbanInfo = new JLabel("IBAN des Auszugs:");
 		IbanInfo.setBounds(300, 17, 140, 17);
 		Iban = new JLabel("");
 		Iban.setBounds(300, 34, 200, 17);
-		
+
 		RACWindow.add(btnOpen);
 		RACWindow.add(btnImp);
 		RACWindow.add(IbanInfo);
 		RACWindow.add(Iban);
 		RACWindow.validate();
 		RACWindow.repaint();
-		
-		//Datei auswählen lassen
+
+		// Datei auswählen lassen
 		open.showOpenDialog(RACWindow);
+
+		// Auszug in Abhängigkeit der Quelldatei (xml oder zip) generieren
+		Auszug = CreateAuszug(open);
 		
-		Auszug = new ReadCamt(open.getSelectedFile().toString());
-		if(Auszug.getBuchungsanzahl() > 0) {
+		if (Auszug != null && Auszug.getBuchungsanzahl() > 0) {
 			zeichne_tabelle(Auszug);
 			Iban.setText(Auszug.getFormatedIBAN());
 			RACWindow.validate();
 			RACWindow.repaint();
 		} else {
-			System.out.println("Keine Buchungen in Datei " + open.getSelectedFile().toString() + "gefunden!");
+			System.out.println("Keine Datei oder Buchungen in Datei " + open.getSelectedFile().toString() + "gefunden!");
 		}
+		
 		RACWindow.setVisible(true);
 	}
 	private void zeichne_tabelle(ReadCamt Auszug) {
@@ -264,5 +282,69 @@ public class Rac {
 		RACWindow.add(sp);
 		RACWindow.validate();
 		RACWindow.repaint();
+	}
+	private ReadCamt CreateAuszug(JFileChooser open) {
+		if (open.getSelectedFile() != null) {
+			if(open.getSelectedFile().toString().endsWith(".xml")){
+				try {
+					Auszug = new ReadCamt(new InputSource(new FileInputStream(open.getSelectedFile().toString())));
+					
+					return Auszug;
+				} catch (FileNotFoundException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+					return null;
+				}
+			} else {
+				ZipFile zf = null;
+				try {
+					zf = new ZipFile(open.getSelectedFile());
+					
+					// da am ende das Auzugsobjekt nur aus den im tmpAuszug Array gesammelten Daten erzeugt wird, fehlt
+					// die IBAN, diese muss aus den Einzelauszügen des gesammt Zip Files gelesen und zwischengespeichert werden
+					// da die IBAN in allen Einzelauszügen de Zipfiles die gleiche ist, kann sie bei jedem Schleifenumlauf überschrieben werden
+					String tmpIBAN = "";
+					
+					// für jede Datei im ZIP Archiv
+					for (ZipEntry entry : Collections.list( zf.entries() ))
+					{
+						try {
+							tmpAuszug = new ReadCamt(new InputSource(zf.getInputStream(entry)));
+							
+							// merken der aktuellen IBAN
+							tmpIBAN = tmpAuszug.getIBAN();
+							
+							//array zusammenketten
+							buchungen = Stream.concat(Arrays.stream(buchungen), Arrays.stream(tmpAuszug.getBuchungen())).toArray(String[][]::new);
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+							zf.close();
+							return null;
+						}
+					}
+				Auszug = new ReadCamt(buchungen);
+				
+				//setzen der IBAN des Auszugs mit dem gemerkten Wert aus dein einzelauszügen des ZIP Files
+				Auszug.setIBAN(tmpIBAN);
+			
+				//zipfile wieder schliessen
+				zf.close();
+				return Auszug;
+				
+				} catch (ZipException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+					return null;
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+					return null;
+				}
+			}
+		} else {
+			System.out.println("Keine Datei ausgewählt!");
+			return null;
+		}
 	}
 }
