@@ -17,7 +17,7 @@ import org.json.simple.parser.ParseException;
  *
  */
 public class Config {
-	private String DbDrv, DbUrl, DbName;
+	private String DbDrv, DbUrl, DbName, DbUserName, DbPw;
 	Config() {
 		File ConfigDir = new File(System.getProperty("user.home") + "/BigOneConfig");
 		File ConfigFile = new File(ConfigDir.getPath()+"/BigOneConfig.json");
@@ -59,6 +59,8 @@ public class Config {
             DbDrv = (String) jsonObject.get("DbDrv");
             DbUrl = (String) jsonObject.get("DbUrl");
             DbName = (String) jsonObject.get("DbName");
+            DbUserName = (String) jsonObject.get("DbUserName");
+            DbPw = (String) jsonObject.get("DbPw");
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -90,6 +92,8 @@ public class Config {
 		obj.put("DbDrv", "org.postgresql.Driver");
 		obj.put("DbUrl", "jdbc:postgresql://localhost:5432/");
 		obj.put("DbName", "bigone");
+		obj.put("DbUser", "DbUser");
+		obj.put("DbPw", "DbPw");
 
 		try {
 
@@ -108,5 +112,11 @@ public class Config {
 	}
 	public String getDbName() {
 		return DbName;
+	}
+	public String getDbUserName() {
+		return DbUserName;
+	}
+	public String getDbPw() {
+		return DbPw;
 	}
 }

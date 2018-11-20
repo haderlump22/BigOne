@@ -24,14 +24,13 @@ public class Login {
 	private JPasswordField txtPW;
 	private JButton btnLogin;
 	private String strB, strPW;
-	private String strDbDrv="org.postgresql.Driver";
-	private String strDbUrl="jdbc:postgresql://localhost:5432/";
-	private String strDatabase = "bigone";
 	private Connection cn = null;
 		
 	public Login(JFrame dialogOwner) {
+		Config currentConfig = new Config();
+		
 		login = new JDialog(dialogOwner,"LOGIN",true);
-		login.setSize(290,150);
+		login.setSize(290,165);
 		login.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 		login.setLayout(null);
 		login.getContentPane().setBackground(Color.white);
@@ -47,11 +46,11 @@ public class Login {
    		
    		txtBenutzer = new JTextField();
    		txtBenutzer.setBounds(120,40,120,25);
-   		//txtBenutzer.setText("");
+   		txtBenutzer.setText(currentConfig.getDbUserName());
 
    		txtPW = new JPasswordField("");
    		txtPW.setBounds(120,70,120,25);
-   		//txtPW.setText("");
+   		txtPW.setText(currentConfig.getDbPw());
    		
    		btnLogin = new JButton("Login");
    		btnLogin.setBounds(100,100,90,25);
@@ -64,8 +63,8 @@ public class Login {
   	        	
    				try {
    					// Select fitting database driver and connect:
-   					Class.forName( strDbDrv );
-   					cn = DriverManager.getConnection( strDbUrl + strDatabase, strB, strPW );
+   					Class.forName( currentConfig.getDbDrv() );
+   					cn = DriverManager.getConnection( currentConfig.getDbUrl() + currentConfig.getDbName(), strB, strPW );
    					login.dispose();
    				} 
    				catch( Exception ex ) {
