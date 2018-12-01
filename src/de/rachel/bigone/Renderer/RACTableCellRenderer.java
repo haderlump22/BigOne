@@ -42,18 +42,14 @@ public class RACTableCellRenderer implements TableCellRenderer {
 
 	      if(column == 0) {
 	    	 label.setHorizontalAlignment(JLabel.CENTER);
-	    	 if(value != null) {
-	    		 label.setText(BigOneTools.datum_wandeln(value.toString(),1));
-	    		 if(checkValue(row, table))
-	    			 label.setBackground(Color.RED);
-	    	 }
-    		 
+    		 label.setText(BigOneTools.datum_wandeln(value.toString(),1));
+    		 if(checkValue(row, table))
+    			 label.setBackground(Color.RED);
 	      }
 
 	      if(column == 2) {
 	    	 label.setHorizontalAlignment(JLabel.RIGHT);
-	    	 if(value != null)
-	    		 label.setText(value.toString().replace('.', ','));
+    		 label.setText(value.toString().replace('.', ','));
 		  }
 
 	      if(column == 5) {

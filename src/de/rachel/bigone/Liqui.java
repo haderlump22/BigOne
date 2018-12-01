@@ -57,7 +57,7 @@ public class Liqui {
 	Liqui(Connection LoginCN){
 		cn = LoginCN;
 		liquiwindow = new JFrame("Liquistatus");
-		liquiwindow.setSize(800,570);
+		liquiwindow.setSize(800,560);
 		liquiwindow.setLocation(200,200);
 		liquiwindow.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		liquiwindow.setLayout(null);

@@ -1,11 +1,11 @@
 package de.rachel.bigone;
+import java.io.File;
 import java.io.IOException;
 
 import javax.xml.parsers.*;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 public class ReadCamt {
@@ -20,7 +20,7 @@ public class ReadCamt {
 	private static int Unstructured = 3;	//Unstrukturierter Verwendungszweck 140zeichen max
 	private static int Creditor = 4;
 	
-	ReadCamt(InputSource PathAndFile){
+	ReadCamt(String PathAndFile){
 		
 		KontoAuszug = parseXML(PathAndFile);
 		
@@ -44,14 +44,11 @@ public class ReadCamt {
 			}
 		}
 	}
-	ReadCamt(String[][] buchungen) {
-		this.buchungen = buchungen.clone();
-	}
-	private Document parseXML(InputSource PathAndFile){
+	private Document parseXML(String PathAndFile){
 		DocumentBuilder DocBuilder = getDocBuilder();
 		
 		try {
-			return DocBuilder.parse(PathAndFile);
+			return DocBuilder.parse(new File(PathAndFile));
 		} catch (SAXException e) {
 			e.printStackTrace();
 			return null;
@@ -118,26 +115,5 @@ public class ReadCamt {
 	}
 	public String getIBAN(){
 		return sIBAN;
-	}
-	public String getFormatedIBAN() {
-		String sFormatedIBAN = "";
-		int iCounter = 0;
-		
-		for(int i = 0; i < sIBAN.length(); i++) {
-			sFormatedIBAN = sFormatedIBAN + sIBAN.charAt(i);
-			iCounter++;
-			if(iCounter == 4) {
-				sFormatedIBAN = sFormatedIBAN + " ";
-				iCounter = 0;
-			}
-		}
-		
-		return sFormatedIBAN;
-	}
-	public String[][] getBuchungen() {
-		return buchungen;
-	}
-	public void setIBAN(String sIBAN) {
-		this.sIBAN = sIBAN;
 	}
 }

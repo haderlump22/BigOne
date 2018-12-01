@@ -34,7 +34,7 @@ public class Aufteilung extends JFrame{
 	Aufteilung(JFrame dialogOwner, double flGesBetrag, Connection LoginCN){
 		cn = LoginCN;
 		final JDialog dialog = new JDialog(dialogOwner, "Aufteilung", true);
-		dialog.setSize(300,260);
+		dialog.setSize(300,250);
 		dialog.setLayout(null);
 		dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		
@@ -189,7 +189,7 @@ public class Aufteilung extends JFrame{
 	private void fill_cmbEreigniss() {
 		DBTools getter = new DBTools(cn);
 
-		getter.select( "SELECT ereigniss_id, ereigniss_krzbez FROM kontenereignisse WHERE gueltig = 'TRUE' order by 2;",2 );
+		getter.select( "SELECT ereigniss_id, ereigniss_krzbez FROM kontenereignisse order by 2;",2 );
 		
 		Object[][] cmbValues = getter.getData();
 		
