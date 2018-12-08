@@ -18,6 +18,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+import com.toedter.calendar.JDateChooser;
+
 import de.rachel.bigone.Editors.ComboTableCellEditor;
 import de.rachel.bigone.Editors.LiquiDateTableCellEditor;
 import de.rachel.bigone.Models.RACTableModel;
@@ -38,6 +40,7 @@ public class Rac {
 	private JButton btnImp;
 	private JFileChooser open;
 	private JScrollPane sp;
+	private JDateChooser dateFrom, dateTo;
 
 	Rac(Connection LoginCN){
 		cn = LoginCN;
@@ -196,9 +199,17 @@ public class Rac {
             btnImp.setEnabled(false);
             }
         });
-
+		
+		dateFrom = new JDateChooser();
+		dateFrom.setBounds(655, 17, 100, 20);
+		dateTo = new JDateChooser();
+		dateTo.setBounds(655, 40, 100, 20);
+		
+		
 		RACWindow.add(btnOpen);
 		RACWindow.add(btnImp);
+		RACWindow.add(dateFrom);
+		RACWindow.add(dateTo);
 		RACWindow.validate();
 		RACWindow.repaint();
 		
