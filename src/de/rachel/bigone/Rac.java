@@ -12,10 +12,13 @@ import java.sql.Connection;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JMenuItem;
+import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.border.TitledBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import com.toedter.calendar.JDateChooser;
@@ -41,11 +44,13 @@ public class Rac {
 	private JFileChooser open;
 	private JScrollPane sp;
 	private JDateChooser dateFrom, dateTo;
+	private JLabel lblDateFrom, lblDateTo;
+	private JPanel pnlTimeRangeSection;
 
 	Rac(Connection LoginCN){
 		cn = LoginCN;
 		RACWindow = new JFrame("Kontoauszug einlesen");
-		RACWindow.setSize(785,480);
+		RACWindow.setSize(785,530);
 		RACWindow.setLocation(200,200);
 		RACWindow.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		RACWindow.setLayout(null);
@@ -200,16 +205,35 @@ public class Rac {
             }
         });
 		
+		// create the time range section
+		pnlTimeRangeSection = new JPanel();
+		pnlTimeRangeSection.setLayout(null);
+		pnlTimeRangeSection.setBounds(605,17,150,70);
+		pnlTimeRangeSection.setBorder(new TitledBorder("Zeitraum"));
+		
+		lblDateFrom = new JLabel("von");
+		lblDateFrom.setBounds(10, 15, 30, 20);
+		
 		dateFrom = new JDateChooser();
-		dateFrom.setBounds(655, 17, 100, 20);
+		dateFrom.setBounds(40, 15, 100, 20);
+		
+		lblDateTo = new JLabel("bis");
+		lblDateTo.setBounds(10, 40, 30, 20);
+		
 		dateTo = new JDateChooser();
-		dateTo.setBounds(655, 40, 100, 20);
+		dateTo.setBounds(40, 40, 100, 20);
 		
 		
+		pnlTimeRangeSection.add(lblDateFrom);
+		pnlTimeRangeSection.add(dateFrom);
+		pnlTimeRangeSection.add(lblDateTo);
+		pnlTimeRangeSection.add(dateTo);
+		
+		
+		// put all to the Frame
 		RACWindow.add(btnOpen);
 		RACWindow.add(btnImp);
-		RACWindow.add(dateFrom);
-		RACWindow.add(dateTo);
+		RACWindow.add(pnlTimeRangeSection);
 		RACWindow.validate();
 		RACWindow.repaint();
 		
@@ -254,7 +278,7 @@ public class Rac {
 		});
 		
 		sp = new JScrollPane(table);
-		sp.setBounds(30,70,725,355);
+		sp.setBounds(30,120,725,355);
 		
 		RACWindow.add(sp);
 		RACWindow.validate();
