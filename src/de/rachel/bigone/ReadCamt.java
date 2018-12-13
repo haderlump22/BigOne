@@ -12,7 +12,7 @@ public class ReadCamt {
 	private Document KontoAuszug;
 	private String[][] buchungen;
 	private int buchungsAnzahl;
-	private String sIBAN;
+	private String sIBAN = "";
 	private String[] NodeToFind = {"ValDt","CdtDbtInd","Amt","Ustrd","Cdtr"};
 	private static int ValueDate = 0;
 	private static int CreditDebitIndicator = 1;
@@ -115,5 +115,22 @@ public class ReadCamt {
 	}
 	public String getIBAN(){
 		return sIBAN;
+	}
+	public String getIbanFormatted() {
+		// format the IBAN String with Spaces after every 4th Character
+		String sIbanFormatted = "";
+		int iIbanCharacters = 0;
+		int iCounter = 0;
+		
+		for (iIbanCharacters = 0; iIbanCharacters < this.getIBAN().length(); iIbanCharacters++) {
+			if(iCounter == 4) {
+				sIbanFormatted = sIbanFormatted + " ";
+				iCounter = 0;
+			}
+			sIbanFormatted = sIbanFormatted + this.getIBAN().charAt(iIbanCharacters);
+			iCounter++;
+		}
+		
+		return sIbanFormatted;
 	}
 }

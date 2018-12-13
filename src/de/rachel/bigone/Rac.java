@@ -44,8 +44,8 @@ public class Rac {
 	private JFileChooser open;
 	private JScrollPane sp;
 	private JDateChooser dateFrom, dateTo;
-	private JLabel lblDateFrom, lblDateTo;
-	private JPanel pnlTimeRangeSection;
+	private JLabel lblDateFrom, lblDateTo, lblIbanValue;
+	private JPanel pnlTimeRangeSection, pnlIbanInfo;
 
 	Rac(Connection LoginCN){
 		cn = LoginCN;
@@ -84,6 +84,7 @@ public class Rac {
         		
         		if(Auszug.getBuchungsanzahl() > 0) {
         			if(table == null) {
+        				lblIbanValue.setText(Auszug.getIbanFormatted());
         				zeichne_tabelle(Auszug);
         			} else {
             			model = (RACTableModel)table.getModel();
@@ -229,11 +230,22 @@ public class Rac {
 		pnlTimeRangeSection.add(lblDateTo);
 		pnlTimeRangeSection.add(dateTo);
 		
+		// create the IBAN Info
+		pnlIbanInfo = new JPanel();
+		pnlIbanInfo.setLayout(null);
+		pnlIbanInfo.setBounds(275, 17, 220, 45);
+		pnlIbanInfo.setBorder(new TitledBorder("IBAN"));
+		
+		lblIbanValue = new JLabel();
+		lblIbanValue.setBounds(10, 15, 200, 20);
+
+		pnlIbanInfo.add(lblIbanValue);
 		
 		// put all to the Frame
 		RACWindow.add(btnOpen);
 		RACWindow.add(btnImp);
 		RACWindow.add(pnlTimeRangeSection);
+		RACWindow.add(pnlIbanInfo);
 		RACWindow.validate();
 		RACWindow.repaint();
 		
@@ -242,6 +254,7 @@ public class Rac {
 		
 		ReadCamt Auszug = new ReadCamt(open.getSelectedFile().toString());
 		if(Auszug.getBuchungsanzahl() > 0) {
+			lblIbanValue.setText(Auszug.getIbanFormatted());
 			zeichne_tabelle(Auszug);
 		} else {
 			System.out.println("Keine Buchungen in Datei " + open.getSelectedFile().toString() + "gefunden!");

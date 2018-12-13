@@ -10,10 +10,12 @@ Some Infos
   from germany Postbank. Other Filetypes i don't know.
 - There is no chance to contact your Bank out of my Programm. Its only local.
 
-20150722 22:39
-- put the sourcefiles in the Repository
-- give a sql Script by, which create DB and Tables
-- create my own Pictures for the Transaktion Formular.
+20181209
+- now the Program uses the jcalendar lib from toedter.com for some
+  Date Picker
+
+20171113 13:06
+- now you can Import your Data from a XML File in the CAMT Format
 
 20160503 23:00
 - add a Login Formular to get Username and Password
@@ -24,5 +26,9 @@ Some Infos
   Connection that is createt by the new Login Class.
 - Fix some Things that not enjoy me... ;-)
 
-20171113 13:06
-- now you can Import your Data from a XML File in the CAMT Format
+20150722 22:39
+- put the sourcefiles in the Repository
+- give a sql Script by, which create DB and Tables
+- create my own Pictures for the Transaktion Formular.
+
+
