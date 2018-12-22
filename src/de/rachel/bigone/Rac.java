@@ -7,7 +7,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.sql.Connection;
+import java.text.SimpleDateFormat;
 
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -49,6 +52,8 @@ public class Rac {
 
 	Rac(Connection LoginCN){
 		cn = LoginCN;
+		SimpleDateFormat SQLDATE = new SimpleDateFormat("yyyy-MM-dd");
+		
 		RACWindow = new JFrame("Kontoauszug einlesen");
 		RACWindow.setSize(785,530);
 		RACWindow.setLocation(200,200);
@@ -206,7 +211,7 @@ public class Rac {
             }
         });
 		
-		// create the time range section
+		// create the time range section that clean the Array from Rows that outside the Timerange
 		pnlTimeRangeSection = new JPanel();
 		pnlTimeRangeSection.setLayout(null);
 		pnlTimeRangeSection.setBounds(605,17,150,70);
@@ -217,12 +222,46 @@ public class Rac {
 		
 		dateFrom = new JDateChooser();
 		dateFrom.setBounds(40, 15, 100, 20);
+		dateFrom.addPropertyChangeListener(new PropertyChangeListener() {
+			
+			@Override
+			public void propertyChange(PropertyChangeEvent evt) {
+				// if select a Date Property and it is not null
+				if (evt.getPropertyName() == "date" && evt.getNewValue() != null) {
+					// before compare the Dates, check is not null
+					if (dateTo.getDate() != null) {
+						if (dateFrom.getDate().before(dateTo.getDate())) {
+							// Arraycleaning can start
+						} else {
+							System.out.println("bis Datum ist kleiner als das von Datum!!!");
+						}
+					}
+				}
+			}
+		});
+
 		
 		lblDateTo = new JLabel("bis");
 		lblDateTo.setBounds(10, 40, 30, 20);
 		
 		dateTo = new JDateChooser();
 		dateTo.setBounds(40, 40, 100, 20);
+		dateTo.addPropertyChangeListener(new PropertyChangeListener() {
+			
+			@Override
+			public void propertyChange(PropertyChangeEvent evt) {
+				if (evt.getPropertyName() == "date" && evt.getNewValue() != null) {
+					// before compare the Dates, check is not null
+					if (dateFrom.getDate() != null) {
+						if (dateFrom.getDate().before(dateTo.getDate())) {
+							// Arraycleaning can start
+						} else {
+							System.out.println("bis Datum ist kleiner als das von Datum!!!");
+						}
+					}
+				}
+			}
+		});
 		
 		
 		pnlTimeRangeSection.add(lblDateFrom);
