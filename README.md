@@ -10,6 +10,9 @@ Some Infos
   from germany Postbank. Other Filetypes i don't know.
 - There is no chance to contact your Bank out of my Programm. Its only local.
 
+20181226
+- complete the Datepicker Code to remove unused Rows from the Import Data
+
 20181209
 - now the Program uses the jcalendar lib from toedter.com for some
   Date Picker
