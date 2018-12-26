@@ -52,7 +52,6 @@ public class Rac {
 
 	Rac(Connection LoginCN){
 		cn = LoginCN;
-		SimpleDateFormat SQLDATE = new SimpleDateFormat("yyyy-MM-dd");
 		
 		RACWindow = new JFrame("Kontoauszug einlesen");
 		RACWindow.setSize(785,530);
@@ -73,7 +72,7 @@ public class Rac {
 		delrow.addActionListener(new ActionListener(){ 
 	        public void actionPerformed(ActionEvent ae){ 
 	        	model = (RACTableModel)table.getModel();
-				model.removeRow(table.getSelectedRow());
+				model.removeRow(table.getSelectedRow(), true);
 	        }
 	    });
 		popmen.add(delrow); 
@@ -223,7 +222,6 @@ public class Rac {
 		dateFrom = new JDateChooser();
 		dateFrom.setBounds(40, 15, 100, 20);
 		dateFrom.addPropertyChangeListener(new PropertyChangeListener() {
-			
 			@Override
 			public void propertyChange(PropertyChangeEvent evt) {
 				// if select a Date Property and it is not null
@@ -232,6 +230,8 @@ public class Rac {
 					if (dateTo.getDate() != null) {
 						if (dateFrom.getDate().before(dateTo.getDate())) {
 							// Arraycleaning can start
+							model = (RACTableModel)table.getModel();
+							model.removeUnusedRows(dateFrom.getDate(), dateTo.getDate());
 						} else {
 							System.out.println("bis Datum ist kleiner als das von Datum!!!");
 						}
@@ -247,7 +247,6 @@ public class Rac {
 		dateTo = new JDateChooser();
 		dateTo.setBounds(40, 40, 100, 20);
 		dateTo.addPropertyChangeListener(new PropertyChangeListener() {
-			
 			@Override
 			public void propertyChange(PropertyChangeEvent evt) {
 				if (evt.getPropertyName() == "date" && evt.getNewValue() != null) {
@@ -255,6 +254,8 @@ public class Rac {
 					if (dateFrom.getDate() != null) {
 						if (dateFrom.getDate().before(dateTo.getDate())) {
 							// Arraycleaning can start
+							model = (RACTableModel)table.getModel();
+							model.removeUnusedRows(dateFrom.getDate(), dateTo.getDate());
 						} else {
 							System.out.println("bis Datum ist kleiner als das von Datum!!!");
 						}

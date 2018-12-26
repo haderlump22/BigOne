@@ -1,5 +1,9 @@
 package de.rachel.bigone.Models;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import javax.swing.table.AbstractTableModel;
 
 import de.rachel.bigone.BigOneTools;
@@ -17,6 +21,7 @@ public class RACTableModel extends AbstractTableModel{
 	private static int Creditor = 4;
 	private static int LiquiMonth = 5;
 	private static int AccountBookingEvent = 6;
+	SimpleDateFormat SQLDATE = new SimpleDateFormat("yyyy-MM-dd");
 	
 	public RACTableModel(ReadCamt Auszug){
 		daten = lese_werte(Auszug);
@@ -78,7 +83,7 @@ public class RACTableModel extends AbstractTableModel{
 		}
 		return strLager;
 	}
-	public void removeRow(int iZeile) {
+	public void removeRow(int iZeile, boolean refreshImmediately) {
 		//mit dieser methode wird die  
 		//gewaehlte Zeile aus dem Array entfernt
 		if(iZeile >= 0 && iZeile <= daten.length) {
@@ -113,12 +118,40 @@ public class RACTableModel extends AbstractTableModel{
 			//kopiert, noch 4 element kopiert werden. 6 - 2 ist 4 !! passt also  
 			System.arraycopy(strLager, iZeile + 1, daten, iZeile, daten.length - iZeile);
 			
-			//tabellendarstellung aktualisieren
-			fireTableDataChanged();
+			//tabellendarstellung aktualisieren wenn es gewollt ist
+			if (refreshImmediately)
+				fireTableDataChanged();
 		}
 	}
 	public void aktualisiere(ReadCamt Auszug) {
 		daten = lese_werte(Auszug);
 		fireTableDataChanged();
 	}
+
+	public void removeUnusedRows(Date von, Date bis) {
+		// remove all Rows that are not in the Timerange
+		
+		// remove the hour, minutes and seconds to compare only the yyyy-mm-dd
+		String sVon = SQLDATE.format(von);
+		String sBis = SQLDATE.format(bis);
+		
+		// check rows
+		for (int iZeile = 0; iZeile < daten.length; iZeile++) {
+			// if is not in the timerange, remove it
+			try {
+				if (SQLDATE.parse(daten[iZeile][ValueDate]).before(SQLDATE.parse(sVon)) || SQLDATE.parse(daten[iZeile][ValueDate]).after(SQLDATE.parse(sBis))) {
+					this.removeRow(iZeile, false);
+					
+					// because we delete one Row in the array and the row after move to the actual index, wie must go on on the same index,
+					iZeile--;
+				}
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
+		//tabellendarstellung aktualisieren 
+		fireTableDataChanged();
+	}	
 }
