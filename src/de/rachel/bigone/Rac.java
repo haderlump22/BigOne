@@ -110,101 +110,115 @@ public class Rac {
 		btnImp.setBounds(150,17,115,35);
 		btnImp.addActionListener(new ActionListener(){ 
             public void actionPerformed(ActionEvent ae){
-            	//Tabelle zeilenweise durchlaufen und 
-            	//daten in die DB einfuegen
+
             	String sql="";
+            	String AccountId = "";
             	boolean insert_details_success = true;
             	boolean insert_tankdaten_success = true;
             	DBTools pusher = new DBTools(cn);
             	DBTools getter = new DBTools(cn);
+            	DBTools AccountIdGetter = new DBTools(cn);
             	model = (RACTableModel)table.getModel();
             	
-            	//tabellendaten von der letzten Zeile zur ersten hin importieren
-            	//damit die altesten buchungen als erste in der Tabelle geschrieben
-            	//werden
-            	for(int i = model.getRowCount() -1 ; i >= 0; i--) {
-            		insert_details_success = true;
-            		
-            		sql = "INSERT into transaktionen " +
-            			"(soll_haben, konten_id, datum, betrag, buchtext, ereigniss_id, liqui_monat) " +
- 	      			   	"VALUES " +
- 	      			   	"('" + model.getValueAt(i, 1) + "', " +
- 	      			   	"'12', '" +
- 	      			   	model.getValueAt(i, 0) + "'," +
- 	      			   	model.getValueAt(i, 2) + ",'" +
- 	      			   	model.getValueAt(i, 3).toString().replace("'", "''") + "'," +
- 	      			   	BigOneTools.extractEreigId(model.getValueAt(i, 6).toString()) + ",'" +
- 	      			   	model.getValueAt(i, 5) + "');";
-            		
-            		//neuen datensatz einfuegen und den erfolg pruefen
-            		//falls Datensatz nicht eingefuegt werden konnt
-            		//mit dem naechsten weiter machen und nicht abbrechen
-            		if(pusher.insert(sql) == false) {
-            			System.out.println("Fehler beim Import des Datensatzes Nr: " + i);
-            			continue;
-            		}
-            		//die Ereignissid pruefen und eventuelle Tankdaten oder
-            		//aufteilungen in die DB Tabellen eintragen
-            		switch(BigOneTools.extractEreigId(model.getValueAt(i, 6).toString())) {
-            		case AUFTEILUNG:
-            			//Aufteilungen zur Eintragung aufnehmen
-                        //das Programm arbeitet weiter wenn
-                        //dialog geschlossen wird
-                        Aufteilung aufteil = new Aufteilung(RACWindow, Double.valueOf(model.getValueAt(i, 2).toString()).doubleValue(), cn);
-                        
-                        //da gerade der letzte Datensatz in die tabelle transaktionen eingetragen
-                        //wurde kann man auch schon dessen ID feststellen
-                        getter.select("SELECT max(transaktions_id) from transaktionen;", 1);
-                        
-                        String[][] datenAuft = aufteil.getDaten();
-                        
-						for(String[] arg : datenAuft) {
-						    String sql_auft = "INSERT INTO aufteilung " +
-						  			   "( transaktions_id, betrag, ereigniss_id, liqui) " +
-						  			   "VALUES " +
-						  			   "(" + getter.getValueAt(0, 0) + ", " +
-						  			   arg[1] + ", " +
-						  			   arg[0] + ", " +
-						  			   arg[2] + ");";
-						    //System.out.println(sql_auft);  
-						    if(pusher.insert(sql_auft) == false) {
-						    	System.out.println("Fehler beim Einfuegen der Detaildatensaetze zu Datensatz Nr: " + i);
-						    	insert_details_success = false;
-						    	continue; 	// mit dem naechsten Datensatz beim einfuegen weitermachen
-						    }
-						}
-            			break;
-            		case TANKEN:
-            			//tankwerte zur eintragung aufnehmen
-                        //das Programm arbeitet weiter wenn
-                        //dialog geschlossen wird
-                        TankDialog td = new TankDialog(RACWindow,model.getValueAt(i, 2).toString(),cn);
-                        getter.select("SELECT max(transaktions_id) from transaktionen;", 1);
-                        
-                        String sql_tanken = "INSERT INTO tankdaten " +
- 	      			   				"( transaktions_id, liter, km, kraftstoff_id, datum_bar, betrag_bar, kfz_id) " +
- 	      			   				"VALUES " +
- 	      			   				"(" + getter.getValueAt(0, 0) + ", " +
- 	      			   				td.get_liter() + ", " +
- 	      			   				td.get_km() + ", " +
- 	      			   				td.get_treibstoff_id() + ", " +
- 	      			   				"NULL, " +
- 	      			   				"NULL, " +
- 	      			   				td.get_kfz_id() + ");";
-                        
-                        //neuen datensatz einfuegen und den erfolg pruefen
-                		if(pusher.insert(sql_tanken) == false) {
-                			System.out.println("Fehler beim Einfuegen der Tankdaten zu Datensatz Nr: " + i);
-                			insert_tankdaten_success = false;
-                			break;
+            	// insert each Row in the DB
+            	// if exist a Account ID to the IBAN that comes from the Bank Statement
+            	if (lblIbanValue.getText() != "") {
+            		// because the IBAN in the Lable contains Spaces for easy to read, they must delete before get some Data from the DB
+            		AccountIdGetter.select("SELECT konten_id FROM konten WHERE iban = '" + lblIbanValue.getText().replaceAll(" ", "") + "'", 1);
+                	AccountId = AccountIdGetter.getValueAt(0, 0).toString();
+                	
+                	//tabellendaten von der letzten Zeile zur ersten hin importieren
+                	//damit die altesten buchungen als erste in der Tabelle geschrieben
+                	//werden
+                	for(int i = model.getRowCount() -1 ; i >= 0; i--) {
+                		insert_details_success = true;
+                		
+                		sql = "INSERT into transaktionen " +
+                			"(soll_haben, konten_id, datum, betrag, buchtext, ereigniss_id, liqui_monat) " +
+     	      			   	"VALUES " +
+     	      			   	"('" + model.getValueAt(i, 1) + "', " +
+     	      			   	"'" + AccountId + "', '" +
+     	      			   	model.getValueAt(i, 0) + "'," +
+     	      			   	model.getValueAt(i, 2) + ",'" +
+     	      			   	model.getValueAt(i, 3).toString().replace("'", "''") + "'," +
+     	      			   	BigOneTools.extractEreigId(model.getValueAt(i, 6).toString()) + ",'" +
+     	      			   	model.getValueAt(i, 5) + "');";
+                		
+                		//neuen datensatz einfuegen und den erfolg pruefen
+                		//falls Datensatz nicht eingefuegt werden konnt
+                		//mit dem naechsten weiter machen und nicht abbrechen
+                		if(pusher.insert(sql) == false) {
+                			System.out.println("Fehler beim Import des Datensatzes Nr: " + i);
+                			continue;
                 		}
-            		}
+                		//die Ereignissid pruefen und eventuelle Tankdaten oder
+                		//aufteilungen in die DB Tabellen eintragen
+                		switch(BigOneTools.extractEreigId(model.getValueAt(i, 6).toString())) {
+                		case AUFTEILUNG:
+                			//Aufteilungen zur Eintragung aufnehmen
+                            //das Programm arbeitet weiter wenn
+                            //dialog geschlossen wird
+                            Aufteilung aufteil = new Aufteilung(RACWindow, Double.valueOf(model.getValueAt(i, 2).toString()).doubleValue(), cn);
+                            
+                            //da gerade der letzte Datensatz in die tabelle transaktionen eingetragen
+                            //wurde kann man auch schon dessen ID feststellen
+                            getter.select("SELECT max(transaktions_id) from transaktionen;", 1);
+                            
+                            String[][] datenAuft = aufteil.getDaten();
+                            
+    						for(String[] arg : datenAuft) {
+    						    String sql_auft = "INSERT INTO aufteilung " +
+    						  			   "( transaktions_id, betrag, ereigniss_id, liqui) " +
+    						  			   "VALUES " +
+    						  			   "(" + getter.getValueAt(0, 0) + ", " +
+    						  			   arg[1] + ", " +
+    						  			   arg[0] + ", " +
+    						  			   arg[2] + ");";
+    						    //System.out.println(sql_auft);  
+    						    if(pusher.insert(sql_auft) == false) {
+    						    	System.out.println("Fehler beim Einfuegen der Detaildatensaetze zu Datensatz Nr: " + i);
+    						    	insert_details_success = false;
+    						    	continue; 	// mit dem naechsten Datensatz beim einfuegen weitermachen
+    						    }
+    						}
+                			break;
+                		case TANKEN:
+                			//tankwerte zur eintragung aufnehmen
+                            //das Programm arbeitet weiter wenn
+                            //dialog geschlossen wird
+                            TankDialog td = new TankDialog(RACWindow,model.getValueAt(i, 2).toString(),cn);
+                            getter.select("SELECT max(transaktions_id) from transaktionen;", 1);
+                            
+                            String sql_tanken = "INSERT INTO tankdaten " +
+     	      			   				"( transaktions_id, liter, km, kraftstoff_id, datum_bar, betrag_bar, kfz_id) " +
+     	      			   				"VALUES " +
+     	      			   				"(" + getter.getValueAt(0, 0) + ", " +
+     	      			   				td.get_liter() + ", " +
+     	      			   				td.get_km() + ", " +
+     	      			   				td.get_treibstoff_id() + ", " +
+     	      			   				"NULL, " +
+     	      			   				"NULL, " +
+     	      			   				td.get_kfz_id() + ");";
+                            
+                            //neuen datensatz einfuegen und den erfolg pruefen
+                    		if(pusher.insert(sql_tanken) == false) {
+                    			System.out.println("Fehler beim Einfuegen der Tankdaten zu Datensatz Nr: " + i);
+                    			insert_tankdaten_success = false;
+                    			break;
+                    		}
+                		}
+                		
+                		if(insert_details_success == false || insert_tankdaten_success == false) {
+                			continue; 	//ist ein fehler aufgetreten dann mit dem naechsten datensatz
+                			 		//beim einfuegen weitermachen
+                		}
+                	}
+            	} else {
+            		System.out.println("Keine IBAN vorhanden. Kann Daten nicht importieren");
             		
-            		if(insert_details_success == false || insert_tankdaten_success == false) {
-            			continue; 	//ist ein fehler aufgetreten dann mit dem naechsten datensatz
-            			 		//beim einfuegen weitermachen
-            		}
             	}
+            	
+            	
             //nach erfolgreicher importierung den Improtbutton deaktivieren
             btnImp.setEnabled(false);
             }
