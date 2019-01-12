@@ -21,6 +21,7 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.JTextField;
 import javax.swing.border.TitledBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
@@ -219,8 +220,14 @@ public class Rac {
             	}
             	
             	
-            //nach erfolgreicher importierung den Improtbutton deaktivieren
-            btnImp.setEnabled(false);
+            // nach erfolgreicher importierung 
+            	
+            	// disable the import Button
+            	btnImp.setEnabled(false);
+            
+            	// set the Timerange to null
+            	((JTextField)dateFrom.getDateEditor().getUiComponent()).setText("");
+            	((JTextField)dateTo.getDateEditor().getUiComponent()).setText("");
             }
         });
 		
