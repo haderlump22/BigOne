@@ -87,7 +87,7 @@ public class Values {
 	    	 
 			}
 			public void focusGained(FocusEvent fe) {
-				txtValue.setText("");
+				txtValue.selectAll();
 			}
 		});
 		txtValue.addKeyListener(new KeyListener() {
