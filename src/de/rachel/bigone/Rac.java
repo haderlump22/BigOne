@@ -10,7 +10,6 @@ import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.sql.Connection;
-import java.text.SimpleDateFormat;
 
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -66,7 +65,7 @@ public class Rac {
 		
 		open = new JFileChooser();
 		//beim OpenDialog sollen nur XML Dateien angezeigt werden
-		open.setFileFilter(new FileNameExtensionFilter("XML", "xml"));
+		open.setFileFilter(new FileNameExtensionFilter("XML/CSV", "xml", "csv"));
 		
 		popmen = new JPopupMenu(); 
 		JMenuItem delrow = new JMenuItem("Zeile löschen");
