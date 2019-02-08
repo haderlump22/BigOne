@@ -15,6 +15,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import javax.swing.JComboBox;
 import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JMenuItem;
@@ -36,10 +37,11 @@ public class Values {
 	private Connection cn = null;
 	private JFrame valuewindow;
 	private JFormattedTextField txtValue, txtLiquiDate;
-	private Font fontTxtFields;
+	private Font fontTxtFields, fontCmbBoxes;
 	private JTable table;
 	private ValuesTableModel model; 
 	private JPopupMenu popmen;
+	private JComboBox<String> cmbKto;
 
 	Values(Connection LoginCN){
 		cn = LoginCN;
@@ -52,6 +54,7 @@ public class Values {
 
 		//schriftenfestlegungen
 		fontTxtFields = new Font("Arial",Font.PLAIN,16);
+		fontCmbBoxes = new Font("Arial",Font.PLAIN,14);
 		
 		popmen = new JPopupMenu(); 
 		JMenuItem ktonfo = new JMenuItem("Kontoinfo");
@@ -102,7 +105,7 @@ public class Values {
 				// TODO Automatisch erstellter Methoden-Stub
 				if(ke.getKeyCode() == KeyEvent.VK_ENTER) {
 					model = (ValuesTableModel)table.getModel();
-					model.aktualisiere(txtValue.getText().replace(".", "").replace(',', '.'),BigOneTools.datum_wandeln(txtLiquiDate.getText(), 0));
+					model.aktualisiere(txtValue.getText().replace(".", "").replace(',', '.'),BigOneTools.datum_wandeln(txtLiquiDate.getText(), 0), cmbKto.getSelectedItem().toString().replace(" ", ""));
 				}
 			}
 
@@ -134,9 +137,17 @@ public class Values {
 		txtLiquiDate.setFont(fontTxtFields);
 		//aktuellen Monat als Liquimonat setzten
 		txtLiquiDate.setText("01-" + now.substring(3, 5) + "-20" + now.substring(8));
+		
+		// add Account choose and fill it with valid Account IDs (IBAN)
+		cmbKto = new JComboBox<String>();
+		cmbKto.setBounds(260,25,250,25);
+		cmbKto.setFont(fontCmbBoxes);
+		// fill it with Values
+		fill_cmbKto();
 
 		valuewindow.add(txtValue);
 		valuewindow.add(txtLiquiDate);
+		valuewindow.add(cmbKto);
 				
 		zeichne_tabelle();
 		
@@ -145,7 +156,7 @@ public class Values {
 	}
    	private void zeichne_tabelle() {
 
-		table = new JTable(new ValuesTableModel(txtValue.getText().replace(".", "").replace(',', '.'),BigOneTools.datum_wandeln(txtLiquiDate.getText(), 0),cn));
+		table = new JTable(new ValuesTableModel(txtValue.getText().replace(".", "").replace(',', '.'), BigOneTools.datum_wandeln(txtLiquiDate.getText(), 0), cmbKto.getSelectedItem().toString().replace(" ", ""), cn));
 		ValuesTableCellRenderer ren = new ValuesTableCellRenderer();
 		table.setDefaultRenderer( Object.class, ren );
 		table.getColumnModel().getColumn(2).setCellEditor(new DateTableCellEditor());
@@ -180,5 +191,34 @@ public class Values {
 		valuewindow.add(sp);
 		valuewindow.validate();
 		valuewindow.repaint();
+	}
+	private void fill_cmbKto() {
+		DBTools getter = new DBTools(cn);
+		
+		getter.select("SELECT konten.iban, konten.bemerkung " +
+	      		"FROM konten " +
+	      		"where konten.gueltig = TRUE;",1);
+		
+		Object[][] cmbKtoValues = getter.getData();
+		
+		for(Object[] cmbKtoValue : cmbKtoValues)
+	        cmbKto.addItem(getIbanFormatted(cmbKtoValue[0].toString()));
+	}
+	public String getIbanFormatted(String UnformattedIban) {
+		// format the IBAN String with Spaces after every 4th Character
+		String sIbanFormatted = "";
+		int iIbanCharacters = 0;
+		int iCounter = 0;
+		
+		for (iIbanCharacters = 0; iIbanCharacters < UnformattedIban.length(); iIbanCharacters++) {
+			if(iCounter == 4) {
+				sIbanFormatted = sIbanFormatted + " ";
+				iCounter = 0;
+			}
+			sIbanFormatted = sIbanFormatted + UnformattedIban.charAt(iIbanCharacters);
+			iCounter++;
+		}
+		
+		return sIbanFormatted;
 	}
 }

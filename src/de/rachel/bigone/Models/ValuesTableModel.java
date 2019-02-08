@@ -7,16 +7,13 @@ import de.rachel.bigone.DBTools;
 public class ValuesTableModel extends AbstractTableModel{
 	private static final long serialVersionUID = -2431676313753205738L;
 	private Connection cn = null;
-	private String strBetrag, strLiquiDate;
 	private String[] columnName = new String[]{"TransID","s/h","Datum","Betrag","Buchtext","LiquiMon","Ereigniss"};
 	private Object[][] daten;
 	private String strTransID; 
-	public ValuesTableModel(String strWert, String strLiquiDate, Connection LoginCN){
+	public ValuesTableModel(String strBetrag, String strLiquiDate, String sIban, Connection LoginCN){
 		//System.out.println(strLiquiDate);
 		cn = LoginCN;
-		strBetrag = strWert;
-		this.strLiquiDate = strLiquiDate;
-		daten = lese_werte(strBetrag, this.strLiquiDate);
+		daten = lese_werte(strBetrag, strLiquiDate, sIban);
 	}
 	public int getColumnCount() {
 		return columnName.length;
@@ -48,7 +45,7 @@ public class ValuesTableModel extends AbstractTableModel{
         else
         	schreibe_neue_daten(row,col,"NULL",strTransID);
     }
-	private Object[][] lese_werte(String strValue, String strLiquiDate) {
+	private Object[][] lese_werte(String strValue, String strLiquiDate, String sIban) {
 		/*
 		 * liest in abhaengigkeit der werte aus den 
 		 * comboboxen und des optionsfeldes die werte aus der 
@@ -58,12 +55,14 @@ public class ValuesTableModel extends AbstractTableModel{
 
  		getter.select("select t.transaktions_id, t.soll_haben, t.datum, t.betrag, " +
 				"t.buchtext, t.liqui_monat, k.ereigniss_krzbez " +
-				"from transaktionen t, kontenereignisse k " +
+				"from transaktionen t, kontenereignisse k, konten kto " +
 				"where t.betrag = "+ strValue +
 				" and k.ereigniss_id = t.ereigniss_id " +
-				" and t.liqui_monat = '" + strLiquiDate + "' order by t.datum;",7);
+				" and t.liqui_monat = '" + strLiquiDate + "'" +
+				" and t.konten_id = kto.konten_id " +
+				" and kto.iban = '" + sIban + "'" +
+				" order by t.datum;",7);
 
-		
 		return getter.getData();
 	}
 	private void schreibe_neue_daten(int row, int col, String strNewValue, String strTransID) {
@@ -104,9 +103,8 @@ public class ValuesTableModel extends AbstractTableModel{
 
 		updater.update(strSqlUpdate);
 	}
-	public void aktualisiere(String strValue, String strLiquiDate) {
-		this.strLiquiDate = strLiquiDate;
-		daten = lese_werte(strValue, this.strLiquiDate);
+	public void aktualisiere(String strValue, String strLiquiDate, String sIban) {
+		daten = lese_werte(strValue, strLiquiDate, sIban);
 		fireTableDataChanged();
 	}
 }
