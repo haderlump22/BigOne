@@ -23,6 +23,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 import javax.swing.text.MaskFormatter;
 import javax.swing.text.NumberFormatter;
 
@@ -87,7 +88,12 @@ public class Values {
 	    	 
 			}
 			public void focusGained(FocusEvent fe) {
-				txtValue.selectAll();
+				SwingUtilities.invokeLater(new Runnable() {
+		            @Override
+		            public void run() {
+						txtValue.selectAll();
+		            }
+		        });
 			}
 		});
 		txtValue.addKeyListener(new KeyListener() {
