@@ -57,7 +57,7 @@ public class ReadCamt {
 			// chech witch Bank is the Account from
 			// 0 nothing is found
 			// 1 ING DIBA
-			int iBank = checkBank(csvContent);
+			int iBank = checkBank();
 			
 			switch (iBank) {
 			case 0:
@@ -233,30 +233,64 @@ public class ReadCamt {
 		return iRows;
 	}
 	private void readDibaData(String[] csvContent) {
-		// the IBAN is in the 4th Row
-		this.sIBAN = csvContent[3].split(";")[1].replaceAll(" ", "");
+		int iHeaderRow;
 		
+		// search IBAN in the csvContent
+		this.sIBAN = searchIban().replaceAll(" ", "");
+
 		// check how many usable Datarows are in the csv
-		// the length of the csvContent Array minus the not usable Rows (1-14)
-		this.buchungen = new String[csvContent.length - 14][5];
+		// the length of the csvContent Array minus the not usable Rows one to that line that 
+		// begins with "Buchung;Valuta"
+		iHeaderRow = findHeaderRow();
 		
-		// the Diba Data begin in the row 15
-		for (int i = 14; i < csvContent.length; i++) {
-			buchungen[i - 14][ValueDate] = BigOneTools.datum_wandeln(csvContent[i].split(";")[1], 0);
+		// reinitial the Array buchunge new
+		this.buchungen = new String[csvContent.length - iHeaderRow - 1][5];
+
+		// the Diba Data begin in the row after the Header
+		for (int i = iHeaderRow + 1; i < csvContent.length; i++) {
+			buchungen[i - (iHeaderRow + 1)][ValueDate] = BigOneTools.datum_wandeln(csvContent[i].split(";")[1], 0);
 			
 			// the Credit or Dbit Inticator is in the csv Data not a separate field
 			// they is indicates by e minus or nothing bevore the amount
-			buchungen[i - 14][CreditDebitIndicator] = getCreditDebitIndicator(csvContent[i].split(";")[5]);
+			buchungen[i - (iHeaderRow + 1)][CreditDebitIndicator] = getCreditDebitIndicator(csvContent[i].split(";")[5]);
 			
 			// the amount in the csv is german, we have to replace the thousand dot with null
 			// and the decimal separator with a dot
-			buchungen[i - 14][Amount] = delteSign(csvContent[i].split(";")[5].replace(".", "").replaceAll(",", ".")); 
-			buchungen[i - 14][Unstructured] = csvContent[i].split(";")[4];
-			buchungen[i - 14][Creditor] = csvContent[i].split(";")[2];
+			buchungen[i - (iHeaderRow + 1)][Amount] = delteSign(csvContent[i].split(";")[7].replace(".", "").replaceAll(",", ".")); 
+			buchungen[i - (iHeaderRow + 1)][Unstructured] = csvContent[i].split(";")[4];
+			buchungen[i - (iHeaderRow + 1)][Creditor] = csvContent[i].split(";")[2];
 		}
 	}
-	private int checkBank(String[] csvContent) {
-		// int the CSV Data we can check from witch Bank they are
+	private int findHeaderRow() {
+		// find the Row that contians the Headers like "Buchung" or "Valuta"
+		for (int i = 0; i < csvContent.length; i++) {
+			// only if the String isn't empty
+			if (!csvContent[i].equals("")) {
+				if (csvContent[i].matches("^Buchung;Valuta.*")) {
+					return i;
+				}
+			}
+		}
+		return 0;
+	}
+	private String searchIban() {
+		// search in the whole Array at a german IBAN
+		for (int i = 0; i < csvContent.length; i++) {
+			// only if the String isn't empty
+			if (!csvContent[i].equals("")) {
+				String[] rowParts = csvContent[i].split(";");
+				
+				for (int i2 = 0; i2 < rowParts.length; i2++) {
+					if (rowParts[i2].matches("^DE\\d{2}\\s?([0-9]{4}\\s?){4}[0-9]{2}$")) {
+						return rowParts[i2];
+					}
+				}
+			}
+		}
+		return null;
+	}
+	private int checkBank() {
+		// in the CSV Data we can check from witch Bank they are
 		for (int i = 0; i < csvContent.length; i++) {
 			String[] rowParts = csvContent[i].split(";");
 			
