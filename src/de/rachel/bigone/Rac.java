@@ -111,8 +111,9 @@ public class Rac {
 		btnImp.addActionListener(new ActionListener(){ 
             public void actionPerformed(ActionEvent ae){
 
-            	String sql="";
+            	String sql= "";
             	String AccountId = "";
+            	String sLiquiMonat = "";
             	boolean insert_details_success = true;
             	boolean insert_tankdaten_success = true;
             	DBTools pusher = new DBTools(cn);
@@ -133,6 +134,12 @@ public class Rac {
                 	for(int i = model.getRowCount() -1 ; i >= 0; i--) {
                 		insert_details_success = true;
                 		
+                		// set the Value for liqui_monat in case of the model Value at field 5
+                		if (model.getValueAt(i,  5) == null) {
+                			sLiquiMonat = "NULL";
+                		} else {
+                			sLiquiMonat = "'" + model.getValueAt(i, 5) + "'";
+                		}
                 		sql = "INSERT into transaktionen " +
                 			"(soll_haben, konten_id, datum, betrag, buchtext, ereigniss_id, liqui_monat) " +
      	      			   	"VALUES " +
@@ -141,8 +148,8 @@ public class Rac {
      	      			   	model.getValueAt(i, 0) + "'," +
      	      			   	model.getValueAt(i, 2) + ",'" +
      	      			   	model.getValueAt(i, 3).toString().replace("'", "''") + "'," +
-     	      			   	BigOneTools.extractEreigId(model.getValueAt(i, 6).toString()) + ",'" +
-     	      			   	model.getValueAt(i, 5) + "');";
+     	      			   	BigOneTools.extractEreigId(model.getValueAt(i, 6).toString()) + "," +
+     	      			   	sLiquiMonat +");";
                 		
                 		//neuen datensatz einfuegen und den erfolg pruefen
                 		//falls Datensatz nicht eingefuegt werden konnt
