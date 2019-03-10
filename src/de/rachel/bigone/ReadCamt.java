@@ -252,7 +252,7 @@ public class ReadCamt {
 			
 			// the Credit or Dbit Inticator is in the csv Data not a separate field
 			// they is indicates by e minus or nothing bevore the amount
-			buchungen[i - (iHeaderRow + 1)][CreditDebitIndicator] = getCreditDebitIndicator(csvContent[i].split(";")[5]);
+			buchungen[i - (iHeaderRow + 1)][CreditDebitIndicator] = getCreditDebitIndicator(csvContent[i].split(";")[7].replace(".", "").replaceAll(",", "."));
 			
 			// the amount in the csv is german, we have to replace the thousand dot with null
 			// and the decimal separator with a dot

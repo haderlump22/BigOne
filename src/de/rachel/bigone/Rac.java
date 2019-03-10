@@ -331,7 +331,7 @@ public class Rac {
 	private void zeichne_tabelle(ReadCamt Auszug) {
 
 		table = new JTable(new RACTableModel(Auszug));
-		RACTableCellRenderer ren  = new RACTableCellRenderer(cn);
+		RACTableCellRenderer ren  = new RACTableCellRenderer(cn, lblIbanValue.getText());
 		table.setDefaultRenderer( Object.class, ren );
 		table.getColumnModel().getColumn(5).setCellEditor(new LiquiDateTableCellEditor());
 		table.getColumnModel().getColumn(6).setCellEditor(new ComboTableCellEditor(cn));

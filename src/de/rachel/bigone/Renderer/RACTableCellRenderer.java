@@ -16,9 +16,15 @@ import java.util.GregorianCalendar;
 
 public class RACTableCellRenderer implements TableCellRenderer {
 	private Connection cn = null;
+	private String sAccountId = "";
 	
-	public RACTableCellRenderer(Connection LoginCN) {
-		cn = LoginCN;
+	public RACTableCellRenderer(Connection LoginCN, String sIbanValue) {
+		this.cn = LoginCN;
+		DBTools AccountIdGetter = new DBTools(cn);
+		
+		// because the IBAN in the Lable contains Spaces for easy to read, they must delete before get some Data from the DB
+		AccountIdGetter.select("SELECT konten_id FROM konten WHERE iban = '" + sIbanValue.replaceAll(" ", "") + "'", 1);
+    	sAccountId = AccountIdGetter.getValueAt(0, 0).toString();
 	}
 	public Component getTableCellRendererComponent(
 	      JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
@@ -86,7 +92,7 @@ public class RACTableCellRenderer implements TableCellRenderer {
 			//Sql string vorbereiten
 			String sql = "select count(*) from transaktionen " +
 						 "where betrag = "+ table.getModel().getValueAt(row, 2).toString() + " and " +
-						 "konten_id = 12 and " +
+						 "konten_id = "+ sAccountId + " and " +
 						 "datum >= '" + iYear + "-" + (iMonth + 1) + "-1' and " +
 						 "datum <= '" + iYear + "-" + (iMonth + 1) + "-" + calendar.getActualMaximum(Calendar.DAY_OF_MONTH) + "';";
 			//System.out.println(sql);
