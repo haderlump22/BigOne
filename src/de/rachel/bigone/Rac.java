@@ -82,26 +82,28 @@ public class Rac {
 		btnOpen.addActionListener(new ActionListener(){ 
             public void actionPerformed(ActionEvent ae){
             	
-        		open.showOpenDialog(RACWindow);
-
-        		ReadCamt Auszug = new ReadCamt(open.getSelectedFile().toString());
-        		
-        		if(Auszug.getBuchungsanzahl() > 0) {
-        			if(table == null) {
-        				lblIbanValue.setText(Auszug.getIbanFormatted());
-        				zeichne_tabelle(Auszug);
-        			} else {
-            			model = (RACTableModel)table.getModel();
-            			model.aktualisiere(Auszug);	
-        			}
-        			//nach dem erfolgreichen einlesen der zu importierenden daten
-        			//den Button aktivieren
-        			btnImp.setEnabled(true);
+        		if (open.showOpenDialog(RACWindow) != JFileChooser.CANCEL_OPTION) {
+            		ReadCamt Auszug = new ReadCamt(open.getSelectedFile().toString());
+            		
+            		if(Auszug.getBuchungsanzahl() > 0) {
+            			if(table == null) {
+            				lblIbanValue.setText(Auszug.getIbanFormatted());
+            				zeichne_tabelle(Auszug);
+            			} else {
+                			model = (RACTableModel)table.getModel();
+                			model.aktualisiere(Auszug);	
+            			}
+            			//nach dem erfolgreichen einlesen der zu importierenden daten
+            			//den Button aktivieren
+            			btnImp.setEnabled(true);
+            		} else {
+            			System.out.println("Keine Buchungen in Datei " + open.getSelectedFile().toString() + "gefunden!");
+            			RACWindow.remove(sp);
+            			RACWindow.validate();
+            			RACWindow.repaint();
+            		}
         		} else {
-        			System.out.println("Keine Buchungen in Datei " + open.getSelectedFile().toString() + "gefunden!");
-        			RACWindow.remove(sp);
-        			RACWindow.validate();
-        			RACWindow.repaint();
+        			btnImp.setEnabled(false);
         		}
             }
         });
@@ -317,15 +319,19 @@ public class Rac {
 		RACWindow.repaint();
 		
 		//Datei auswählen lassen
-		open.showOpenDialog(RACWindow);
-		
-		ReadCamt Auszug = new ReadCamt(open.getSelectedFile().toString());
-		if(Auszug.getBuchungsanzahl() > 0) {
-			lblIbanValue.setText(Auszug.getIbanFormatted());
-			zeichne_tabelle(Auszug);
+		if (open.showOpenDialog(RACWindow) !=  JFileChooser.CANCEL_OPTION) {
+			ReadCamt Auszug = new ReadCamt(open.getSelectedFile().toString());
+			if(Auszug.getBuchungsanzahl() > 0) {
+				lblIbanValue.setText(Auszug.getIbanFormatted());
+				zeichne_tabelle(Auszug);
+				btnImp.setEnabled(true);
+			} else {
+				System.out.println("Keine Buchungen in Datei " + open.getSelectedFile().toString() + "gefunden!");
+			}
 		} else {
-			System.out.println("Keine Buchungen in Datei " + open.getSelectedFile().toString() + "gefunden!");
+			btnImp.setEnabled(false);
 		}
+
 		RACWindow.setVisible(true);
 	}
 	private void zeichne_tabelle(ReadCamt Auszug) {
