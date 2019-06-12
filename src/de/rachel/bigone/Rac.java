@@ -91,7 +91,8 @@ public class Rac {
             				zeichne_tabelle(Auszug);
             			} else {
                 			model = (RACTableModel)table.getModel();
-                			model.aktualisiere(Auszug);	
+                			model.aktualisiere(Auszug);
+                			model.fireTableDataChanged();
             			}
             			//nach dem erfolgreichen einlesen der zu importierenden daten
             			//den Button aktivieren
