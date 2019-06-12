@@ -74,7 +74,7 @@ public class RACTableCellRenderer implements TableCellRenderer {
 			//versucht anhand der Datensaetze der Importdatei
 			//aenliche in der Datenbank zu finden und rot zu markieren
 			//dabei wird auf die Menge der Datensaetze mit dem selben
-			//Betrag innerhalb eines Monats (01 bis 31) fuer das girokonto geprueft
+			//Betrag innerhalb eines Monats (01 bis 31) fuer das konto geprueft
 			//es wird hier aus performancegrunden nur eine zelle 
 			//eingefaerbt anstatt die ganze zeile
 			//fuer die ganze zeile muesste diese funktion auch
