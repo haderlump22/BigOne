@@ -18,6 +18,7 @@ public class ReadCamt {
 	private String[] csvContent;
 	private int buchungsAnzahl;
 	private String sIBAN = "";
+	private String AccountOwner = "";
 	private String[] NodeToFind = {"ValDt","CdtDbtInd","Amt","Ustrd","Cdtr"};
 	private static int ValueDate = 0;
 	private static int CreditDebitIndicator = 1;
@@ -134,6 +135,9 @@ public class ReadCamt {
 		
 		return sIbanFormatted;
 	}
+	public String getAccountOwner() {
+		return this.AccountOwner;
+	}
 	private String findSubs(Node listItem, String NodeName, String FindValue){
 		NodeList Subs = listItem.getChildNodes();
 		
@@ -237,6 +241,7 @@ public class ReadCamt {
 		
 		// search IBAN in the csvContent
 		this.sIBAN = searchIban().replaceAll(" ", "");
+		this.AccountOwner = searchAccountOwner();
 
 		// check how many usable Datarows are in the csv
 		// the length of the csvContent Array minus the not usable Rows one to that line that 
@@ -288,6 +293,21 @@ public class ReadCamt {
 			}
 		}
 		return null;
+	}
+	private String searchAccountOwner() {
+		// search in the whole Array at the Line that begin with "Kunde"
+		for (int i = 0; i < csvContent.length; i++) {
+			// only if the String isn't empty
+			if (!csvContent[i].equals("")) {
+				String[] rowParts = csvContent[i].split(";");
+				
+				if (rowParts[0].equals("Kunde")) {
+					return rowParts[1];
+				}
+			}
+		}
+		
+		return "";
 	}
 	private int checkBank() {
 		// in the CSV Data we can check from witch Bank they are

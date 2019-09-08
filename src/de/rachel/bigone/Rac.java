@@ -88,6 +88,7 @@ public class Rac {
             		if(Auszug.getBuchungsanzahl() > 0) {
             			// set a eventualy new IBAN
             			lblIbanValue.setText(Auszug.getIbanFormatted());
+            			lblIbanValue.setToolTipText(Auszug.getAccountOwner());
             			
             			if(table == null) {
             				zeichne_tabelle(Auszug);
@@ -328,6 +329,7 @@ public class Rac {
 			ReadCamt Auszug = new ReadCamt(open.getSelectedFile().toString());
 			if(Auszug.getBuchungsanzahl() > 0) {
 				lblIbanValue.setText(Auszug.getIbanFormatted());
+				lblIbanValue.setToolTipText(Auszug.getAccountOwner());
 				zeichne_tabelle(Auszug);
 				btnImp.setEnabled(true);
 			} else {
