@@ -86,14 +86,18 @@ public class Rac {
             		ReadCamt Auszug = new ReadCamt(open.getSelectedFile().toString());
             		
             		if(Auszug.getBuchungsanzahl() > 0) {
+            			// set a eventualy new IBAN
+            			lblIbanValue.setText(Auszug.getIbanFormatted());
+            			
             			if(table == null) {
-            				lblIbanValue.setText(Auszug.getIbanFormatted());
             				zeichne_tabelle(Auszug);
             			} else {
+            				RACTableCellRenderer ren  = new RACTableCellRenderer(cn, lblIbanValue.getText());
+            				table.setDefaultRenderer( Object.class, ren );
                 			model = (RACTableModel)table.getModel();
                 			model.aktualisiere(Auszug);
-                			model.fireTableDataChanged();
             			}
+            			
             			//nach dem erfolgreichen einlesen der zu importierenden daten
             			//den Button aktivieren
             			btnImp.setEnabled(true);
