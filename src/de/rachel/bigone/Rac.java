@@ -81,6 +81,9 @@ public class Rac {
 		btnOpen.setBounds(30,17,115,35);
 		btnOpen.addActionListener(new ActionListener(){ 
             public void actionPerformed(ActionEvent ae){
+            	// before get a new AcountList clear the DateFrom and DateTo
+            	dateFrom.setCalendar(null);
+            	dateTo.setCalendar(null);
             	
         		if (open.showOpenDialog(RACWindow) != JFileChooser.CANCEL_OPTION) {
             		ReadCamt Auszug = new ReadCamt(open.getSelectedFile().toString());
