@@ -49,6 +49,7 @@ public class Rac {
 	private JDateChooser dateFrom, dateTo;
 	private JLabel lblDateFrom, lblDateTo, lblIbanValue;
 	private JPanel pnlTimeRangeSection, pnlIbanInfo;
+	private String BankStatementFile;
 
 	Rac(Connection LoginCN){
 		cn = LoginCN;
@@ -81,12 +82,13 @@ public class Rac {
 		btnOpen.setBounds(30,17,115,35);
 		btnOpen.addActionListener(new ActionListener(){ 
             public void actionPerformed(ActionEvent ae){
-            	// before get a new AcountList clear the DateFrom and DateTo
+            	// clear Date Fields if open a new Statement of Account
             	dateFrom.setCalendar(null);
             	dateTo.setCalendar(null);
             	
         		if (open.showOpenDialog(RACWindow) != JFileChooser.CANCEL_OPTION) {
-            		ReadCamt Auszug = new ReadCamt(open.getSelectedFile().toString());
+					BankStatementFile = open.getSelectedFile().toString();
+            		ReadCamt Auszug = new ReadCamt(BankStatementFile);
             		
             		if(Auszug.getBuchungsanzahl() > 0) {
             			// set a eventualy new IBAN
@@ -329,7 +331,8 @@ public class Rac {
 		
 		//Datei auswählen lassen
 		if (open.showOpenDialog(RACWindow) !=  JFileChooser.CANCEL_OPTION) {
-			ReadCamt Auszug = new ReadCamt(open.getSelectedFile().toString());
+			BankStatementFile = open.getSelectedFile().toString();
+			ReadCamt Auszug = new ReadCamt(BankStatementFile);
 			if(Auszug.getBuchungsanzahl() > 0) {
 				lblIbanValue.setText(Auszug.getIbanFormatted());
 				lblIbanValue.setToolTipText(Auszug.getAccountOwner());
