@@ -176,7 +176,6 @@ public class ReadCamt {
 			try {
 				KontoauszugCsv = new BufferedReader(new FileReader(PathAndFile));
 			} catch (FileNotFoundException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 
@@ -187,7 +186,6 @@ public class ReadCamt {
 				try {
 					sContent[i] = KontoauszugCsv.readLine();
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
@@ -213,7 +211,6 @@ public class ReadCamt {
 		try {
 			KontoauszugCsv = new BufferedReader(new FileReader(PathAndFile));
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
@@ -224,14 +221,12 @@ public class ReadCamt {
 			while (KontoauszugCsv.readLine() != null)
 				iRows++;
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 			
 		try {
 			KontoauszugCsv.close();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return iRows;

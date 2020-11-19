@@ -20,7 +20,6 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.JTextField;
 import javax.swing.border.TitledBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
@@ -244,9 +243,16 @@ public class Rac {
             	// disable the import Button
             	btnImp.setEnabled(false);
             
-            	// set the Timerange to null
-            	((JTextField)dateFrom.getDateEditor().getUiComponent()).setText("");
-            	((JTextField)dateTo.getDateEditor().getUiComponent()).setText("");
+				// set the Timerange to null
+				dateFrom.setCalendar(null);
+            	dateTo.setCalendar(null);
+				
+				// show all Rows from the originally opened Bankfile to choose an new Timerange
+				ReadCamt Auszug = new ReadCamt(BankStatementFile);
+				RACTableCellRenderer ren  = new RACTableCellRenderer(cn, lblIbanValue.getText());
+				table.setDefaultRenderer( Object.class, ren );
+				model = (RACTableModel)table.getModel();
+				model.aktualisiere(Auszug);
             }
         });
 		
@@ -272,6 +278,9 @@ public class Rac {
 							// Arraycleaning can start
 							model = (RACTableModel)table.getModel();
 							model.removeUnusedRows(dateFrom.getDate(), dateTo.getDate());
+
+							// after choose Timerange enabled Import Button
+							btnImp.setEnabled(true);
 						} else {
 							System.out.println("bis Datum ist kleiner als das von Datum!!!");
 						}
@@ -296,6 +305,9 @@ public class Rac {
 							// Arraycleaning can start
 							model = (RACTableModel)table.getModel();
 							model.removeUnusedRows(dateFrom.getDate(), dateTo.getDate());
+
+							// after choose Timerange enabled Import Button
+							btnImp.setEnabled(true);
 						} else {
 							System.out.println("bis Datum ist kleiner als das von Datum!!!");
 						}

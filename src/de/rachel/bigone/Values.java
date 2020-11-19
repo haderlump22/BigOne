@@ -102,7 +102,6 @@ public class Values {
 		txtValue.addKeyListener(new KeyListener() {
 
 			public void keyPressed(KeyEvent ke) {
-				// TODO Automatisch erstellter Methoden-Stub
 				if(ke.getKeyCode() == KeyEvent.VK_ENTER) {
 					model = (ValuesTableModel)table.getModel();
 					model.aktualisiere(txtValue.getText().replace(".", "").replace(',', '.'),BigOneTools.datum_wandeln(txtLiquiDate.getText(), 0), cmbKto.getSelectedItem().toString().replace(" ", ""));
@@ -110,15 +109,13 @@ public class Values {
 			}
 
 			public void keyReleased(KeyEvent ke) {
-				// TODO Automatisch erstellter Methoden-Stub
 				if(ke.getKeyCode() == KeyEvent.VK_ENTER) {
 					txtValue.requestFocus();
 				}
 			}
 
 			public void keyTyped(KeyEvent arg0) {
-				// TODO Automatisch erstellter Methoden-Stub
-				
+			
 			}
 			
 		});
@@ -129,7 +126,6 @@ public class Values {
 		try {
 			txtLiquiDate = new JFormattedTextField(new MaskFormatter("##-##-20##"));
 		} catch (ParseException e1) {
-			// TODO Automatisch erstellter Catch-Block
 			e1.printStackTrace();
 		}
 		txtLiquiDate.setBounds(140,25,110,25);

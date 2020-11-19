@@ -6,7 +6,6 @@ import java.util.Date;
 
 import javax.swing.table.AbstractTableModel;
 
-import de.rachel.bigone.BigOneTools;
 import de.rachel.bigone.ReadCamt;
 
 public class RACTableModel extends AbstractTableModel{
@@ -146,7 +145,6 @@ public class RACTableModel extends AbstractTableModel{
 					iZeile--;
 				}
 			} catch (ParseException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
