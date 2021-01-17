@@ -20,20 +20,29 @@ public class ComboTableCellEditor extends AbstractCellEditor implements TableCel
 	}
 	public Component getTableCellEditorComponent( 
 	      JTable table, Object value, boolean isSelected, int rowIndex, int colIndex ) { 
-	    	//noch keine eintraege in combobox sind
-		  	//diese fuellen
-		  	if(component.getItemCount() == 0) {
-	    		fill_component();
-	    	}
-	    	return component; 
+			// isSelected habe ich hier abgefragt weil das ankliken einer Zelle aus einer anderen Zeile herraus
+			// immer eine nicht aufgeklapte Combobox erzeugt hat die sich dabei aber nicht aufklappte
+			if (isSelected) {
+				// wenn noch keine eintraege in combobox sind
+				// wird diese gefüllt
+				if(component.getItemCount() == 0) {
+					fill_component();
+				}
+				return component;
+			} else {
+				return null;
+			} 
 	  } 
     public Object getCellEditorValue() 
     { 
-    	//damit bei erneuter auswahl immer der erste eintrag selectiert ist
+		//damit bei erneuter auswahl immer der erste eintrag selectiert ist
     	//dieser kleine umweg
-    	String strLager = new String(component.getSelectedItem().toString());
-    	component.setSelectedIndex(0);
-    	return strLager;
+    	// String strLager = new String(component.getSelectedItem().toString());
+    	// component.setSelectedIndex(0);
+		// return strLager;
+		
+		// die bisherige Auswahl soll bestehen bleiben
+		return component.getSelectedItem().toString();
 		
     }
 	private void fill_component() {
