@@ -18,21 +18,20 @@ public class ComboTableCellEditor extends AbstractCellEditor implements TableCel
 	public ComboTableCellEditor(Connection LoginCN) {
 		cn = LoginCN;
 	}
-	public Component getTableCellEditorComponent( 
-	      JTable table, Object value, boolean isSelected, int rowIndex, int colIndex ) { 
-			// isSelected habe ich hier abgefragt weil das ankliken einer Zelle aus einer anderen Zeile herraus
-			// immer eine nicht aufgeklapte Combobox erzeugt hat die sich dabei aber nicht aufklappte
-			if (isSelected) {
-				// wenn noch keine eintraege in combobox sind
-				// wird diese gefüllt
-				if(component.getItemCount() == 0) {
-					fill_component();
-				}
-				return component;
-			} else {
-				return null;
-			} 
-	  } 
+	public Component getTableCellEditorComponent( JTable table, Object value, boolean isSelected, int rowIndex, int colIndex ) { 
+		// isSelected habe ich hier abgefragt weil das ankliken einer Zelle aus einer anderen Zeile herraus
+		// immer eine nicht aufgeklapte Combobox erzeugt hat die sich dabei aber nicht aufklappte
+		if (isSelected) {
+			// wenn noch keine eintraege in combobox sind
+			// wird diese gefüllt
+			if(component.getItemCount() == 0) {
+				fill_component();
+			}
+			return component;
+		} else {
+			return null;
+		} 
+	}
     public Object getCellEditorValue() 
     { 
 		//damit bei erneuter auswahl immer der erste eintrag selectiert ist

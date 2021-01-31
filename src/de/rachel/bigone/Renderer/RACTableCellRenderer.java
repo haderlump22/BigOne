@@ -26,8 +26,7 @@ public class RACTableCellRenderer implements TableCellRenderer {
 		AccountIdGetter.select("SELECT konten_id FROM konten WHERE iban = '" + sIbanValue.replaceAll(" ", "") + "'", 1);
     	sAccountId = AccountIdGetter.getValueAt(0, 0).toString();
 	}
-	public Component getTableCellRendererComponent(
-	      JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
 		
 	      JLabel label;
 

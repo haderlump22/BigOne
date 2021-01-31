@@ -151,5 +151,5 @@ public class RACTableModel extends AbstractTableModel{
 		
 		//tabellendarstellung aktualisieren 
 		fireTableDataChanged();
-	}	
+	}
 }
