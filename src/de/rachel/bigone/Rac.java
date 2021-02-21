@@ -26,7 +26,7 @@ import com.toedter.calendar.JDateChooser;
 
 import de.rachel.bigone.Editors.ComboTableCellEditor;
 import de.rachel.bigone.Editors.LiquiDateTableCellEditor;
-import de.rachel.bigone.Listeners.RACSelectionListener;
+// import de.rachel.bigone.Listeners.RACSelectionListener;
 import de.rachel.bigone.Models.RACTableModel;
 import de.rachel.bigone.Renderer.RACTableCellRenderer;
 
@@ -358,7 +358,7 @@ public class Rac {
 		// festlegen von diversen Verhaltensweisen der Tabelle
 		RACTableCellRenderer ren = new RACTableCellRenderer(cn, lblIbanValue.getText());
 		table.setDefaultRenderer(Object.class, ren); //vieleicht auch direkt als new in klammern???
-		table.getSelectionModel().addListSelectionListener(new RACSelectionListener(table));
+		// table.getSelectionModel().addListSelectionListener(new RACSelectionListener(table));
 		table.getColumnModel().getColumn(5).setCellEditor(new LiquiDateTableCellEditor());
 		table.getColumnModel().getColumn(6).setCellEditor(new ComboTableCellEditor(cn));
 
@@ -384,6 +384,10 @@ public class Rac {
 					// wird diese Zeile erst selectiert
 					JTable table = (JTable)me.getSource();
 					int RowAtMousePoint = table.rowAtPoint(me.getPoint());
+					
+					// vorherige Selection aufheben
+					table.clearSelection();
+
 					// diese eine Zeile selectieren
 					table.addRowSelectionInterval(RowAtMousePoint,RowAtMousePoint);
 
