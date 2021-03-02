@@ -5,7 +5,9 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.sql.Connection;
 
-import javax.swing.*;
+import javax.swing.AbstractCellEditor;
+import javax.swing.JComboBox;
+import javax.swing.JTable;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 import javax.swing.table.TableCellEditor;
@@ -25,13 +27,7 @@ public class ComboTableCellEditor extends AbstractCellEditor implements TableCel
 		cn = LoginCN;
 	}
 
-	public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int rowIndex,
-			int colIndex) {
-		// isSelected habe ich hier abgefragt weil das ankliken einer Zelle aus einer
-		// anderen Zeile herraus
-		// immer eine nicht aufgeklapte Combobox erzeugt hat die sich dabei aber nicht
-		// aufklappte
-
+	public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int rowIndex, int colIndex) {
 	
 		// notwendig damit eine Auswahl für ein beenden des Editmodus der Zelle sorgt
 		component.addItemListener(new ItemListener() {
@@ -61,7 +57,7 @@ public class ComboTableCellEditor extends AbstractCellEditor implements TableCel
             @Override
             public void popupMenuCanceled(PopupMenuEvent e) {
 
-            }
+			}
         });
 
 		// nur wenn die Combobox keine Einträge hat wird sie gefüllt

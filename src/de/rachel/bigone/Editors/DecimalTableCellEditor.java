@@ -1,7 +1,10 @@
 package de.rachel.bigone.Editors;
 
 import java.awt.Component;
-import javax.swing.*;
+
+import javax.swing.AbstractCellEditor;
+import javax.swing.JTable;
+import javax.swing.JTextField;
 import javax.swing.table.TableCellEditor;
 
 public class DecimalTableCellEditor extends AbstractCellEditor implements TableCellEditor {
