@@ -8,7 +8,13 @@ import java.awt.event.FocusListener;
 import java.sql.Connection;
 import java.text.DecimalFormat;
 
-import javax.swing.*;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JDialog;
+import javax.swing.JFormattedTextField;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.WindowConstants;
 import javax.swing.text.NumberFormatter;
 
 public class TankDialog extends JFrame {

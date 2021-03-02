@@ -1,15 +1,35 @@
 package de.rachel.bigone;
 
-//define Imports
-import javax.swing.*;
-
-import java.awt.*;
+import java.awt.Font;
+import java.awt.GridLayout;
 
 import javax.swing.text.*;
-import javax.swing.border.*;
+import javax.swing.BorderFactory;
+import javax.swing.ButtonGroup;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JFormattedTextField;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JRadioButton;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.border.TitledBorder;
 
-import java.awt.event.*;
-import java.sql.*;
+import java.awt.event.ItemListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.KeyListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.FocusListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+
+import java.sql.Connection;
+
 import java.text.DecimalFormat;
 import java.text.ParseException;
 
