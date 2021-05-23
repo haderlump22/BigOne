@@ -3,6 +3,8 @@ package de.rachel.bigone.Editors;
 import java.awt.Component;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.sql.Connection;
 
 import javax.swing.AbstractCellEditor;
@@ -25,10 +27,6 @@ public class ComboTableCellEditor extends AbstractCellEditor implements TableCel
 
 	public ComboTableCellEditor(Connection LoginCN) {
 		cn = LoginCN;
-	}
-
-	public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int rowIndex, int colIndex) {
-	
 		// notwendig damit eine Auswahl für ein beenden des Editmodus der Zelle sorgt
 		component.addItemListener(new ItemListener() {
 
@@ -39,6 +37,29 @@ public class ComboTableCellEditor extends AbstractCellEditor implements TableCel
 				}
 			}
         });
+
+		//test keylistener
+		component.addKeyListener(new KeyListener() {
+
+			@Override
+			public void keyPressed(KeyEvent e) {
+				// TODO Auto-generated method stub
+				//cellEditingStopped = false;
+			}
+
+			@Override
+			public void keyReleased(KeyEvent e) {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void keyTyped(KeyEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+		});
 
 		// auch wichtig damit der Editing Modus der Celle beendet wird
 		component.addPopupMenuListener(new PopupMenuListener() {
@@ -59,8 +80,10 @@ public class ComboTableCellEditor extends AbstractCellEditor implements TableCel
 
 			}
         });
+	}
 
-		// nur wenn die Combobox keine Einträge hat wird sie gefüllt
+	public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int rowIndex, int colIndex) {
+		// nur wenn die Combobox keine Einträge hat wird sie gefüllt, damit sie nicht bei jedem Aufruf von getTableCellEditorComponent gefüllt wird
 		if (component.getItemCount() == 0) {
 			fill_component();
 		}
