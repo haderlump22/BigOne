@@ -10,7 +10,7 @@ import de.rachel.bigone.ReadCamt;
 
 public class RACTableModel extends AbstractTableModel{
 	private static final long serialVersionUID = -2431676313753205738L;
-	private String[] columnName = new String[]{"Wertstellung","s/h","Betrag","Buchungshinweis","Empfänger","LiquiMon","Ereignis"};
+	private String[] columnName = new String[]{"Wertstellung","s/h","Betrag","Buchungshinweis","DBIT/CRDT","LiquiMon","Ereignis"};
 	private String[][] daten;
 	private String[][] strLager;
 	private static int ValueDate = 0;
@@ -50,11 +50,12 @@ public class RACTableModel extends AbstractTableModel{
 			daten[row][col] = null;
         fireTableCellUpdated(row, col);
     }
+	/**
+	 * Daten des Auszugs werden hier
+	 * in das Array des Table Models eingelesen
+	 */
 	private String[][] lese_werte(ReadCamt Auszug) {
-		/*
-		 * Daten des Auszugs aus einer XML CAMT Datei werden hier
-		 * in das notwendige Array der Tabelle Models ein
-		 */
+		
 		String strLager[][] = new String[Auszug.getBuchungsanzahl()][7];
 		
 		for(int iAktuelleBuchung = 0; iAktuelleBuchung < Auszug.getBuchungsanzahl(); iAktuelleBuchung++){		
@@ -62,22 +63,25 @@ public class RACTableModel extends AbstractTableModel{
 			
 			strLager[iAktuelleBuchung][LiquiMonth] = Auszug.getValDt(iAktuelleBuchung).substring(0, 8) + "01";
 			
+			// todo
+			// - noch der Absender oder Empfänger der Buchung in Klammern hinten angehangen werden
+			// - Gültigkeit der EC karte aus dem Buchungstext entfernen (Folgenr. 02 Verfalld. 2212) oder auch (Folgenr. 002 Verfalld. 2212)
 			strLager[iAktuelleBuchung][Unstructured] = Auszug.getUstrd(iAktuelleBuchung);
 			
 			strLager[iAktuelleBuchung][Creditor] = Auszug.getCdtr(iAktuelleBuchung);
 			
 			strLager[iAktuelleBuchung][Amount] = Auszug.getAmt(iAktuelleBuchung); 
 			
-			//Das Soll Haben wird aus dem Feld CreditDebitIndicator gebildet
-			//CRDT ist haben Buchung
-			//DBIT ist soll Buchung
+			// Das Soll Haben wird aus dem Feld CreditDebitIndicator gebildet
+			// CRDT ist haben Buchung
+			// DBIT ist soll Buchung
 			if(Auszug.getCdtDbtInd(iAktuelleBuchung).equals("CRDT"))
 				strLager[iAktuelleBuchung][CreditDebitIndicator] = "h";
 			if(Auszug.getCdtDbtInd(iAktuelleBuchung).equals("DBIT"))
 				strLager[iAktuelleBuchung][CreditDebitIndicator] = "s";
 
-			//am ende der verarbeitung einer Zeile wird das ereigniss fest auf
-			//HaushGeld (46) gesetzt
+			// am ende der verarbeitung einer Zeile wird das ereigniss fest auf
+			// HaushGeld (46) gesetzt
 			strLager[iAktuelleBuchung][AccountBookingEvent] = "HaushGeld (46)";
 		}
 		return strLager;

@@ -24,7 +24,7 @@ public class ReadCamt {
 	private int buchungsAnzahl;
 	private String sIBAN = "";
 	private String AccountOwner = "";
-	private String[] NodeToFind = {"ValDt","CdtDbtInd","Amt","Ustrd","Cdtr"};
+	private String[] NodeToFind = {"ValDt","CdtDbtInd","Amt","Ustrd","Cdtr","Dbtr"};
 	private static int ValueDate = 0;
 	private static int CreditDebitIndicator = 1;
 	private static int Amount = 2;
@@ -53,7 +53,13 @@ public class ReadCamt {
 					buchungen[i][CreditDebitIndicator] = findSubs(rows.item(i), NodeToFind[1], "").trim();
 					buchungen[i][Amount] = findSubs(rows.item(i), NodeToFind[2], "").trim();
 					buchungen[i][Unstructured] = findSubs(rows.item(i), NodeToFind[3], "").trim();
-					buchungen[i][Creditor] = findSubs(rows.item(i), NodeToFind[4], "").trim();
+					// if is a CRDT accounting Record, then get the Debitor, in case of DBIT accounting Record
+					// get the Creditor
+					if (buchungen[i][CreditDebitIndicator].equals("CRDT")) {
+						buchungen[i][Creditor] = findSubs(rows.item(i), NodeToFind[5], "").trim();
+					} else {
+						buchungen[i][Creditor] = findSubs(rows.item(i), NodeToFind[4], "").trim();
+					}
 				}
 			}
 		} else {
@@ -143,33 +149,34 @@ public class ReadCamt {
 	public String getAccountOwner() {
 		return this.AccountOwner;
 	}
-	private String findSubs(Node listItem, String NodeName, String FindValue){
+
+	private String findSubs(Node listItem, String NodeName, String ValueToFind) {
 		NodeList Subs = listItem.getChildNodes();
-		
-		for(int i = 0; i < Subs.getLength(); i++){
+
+		for (int i = 0; i < Subs.getLength(); i++) {
 			Node Item = Subs.item(i);
 
-			if(Item.getNodeName().equals(NodeName)){
-				if(NodeName.equals("Cdtr")){
-					//der Kreditor steht im Nm Tag unter Cdtr, aber nicht immer an gleicher Stelle
-					//deshalb wird das Item Nm gesucht und dessen Textcontent zur�ckgeben
-					for(int b = 0; b < Item.getChildNodes().getLength(); b++){
-						if(Item.getChildNodes().item(b).getNodeName().equals("Nm"))
-							FindValue = Item.getChildNodes().item(b).getTextContent();
+			if (Item.getNodeName().equals(NodeName)) {
+				if (NodeName.equals("Cdtr") || NodeName.equals("Dbtr") ) {
+					// der Kreditor steht im Nm Tag unter Cdtr, aber nicht immer an gleicher Stelle
+					// deshalb wird das Item Nm gesucht und dessen Textcontent zur�ckgeben
+					for (int b = 0; b < Item.getChildNodes().getLength(); b++) {
+						if (Item.getChildNodes().item(b).getNodeName().equals("Nm"))
+							ValueToFind = Item.getChildNodes().item(b).getTextContent();
 					}
-				}else{
-					FindValue = FindValue.trim() + " " + Item.getTextContent().trim();
+				} else {
+					ValueToFind = ValueToFind.trim() + " " + Item.getTextContent().trim();
 				}
 
-				if(!NodeName.equals("Ustrd"))
-						break;
-			}else{
-				if(Item.hasChildNodes()){
-					FindValue = findSubs(Item, NodeName, FindValue);
+				if (!NodeName.equals("Ustrd"))
+					break;
+			} else {
+				if (Item.hasChildNodes()) {
+					ValueToFind = findSubs(Item, NodeName, ValueToFind);
 				}
 			}
 		}
-		return FindValue;
+		return ValueToFind;
 	}
 	private String[] ReadCsv(String PathAndFile) {
 		String[] sContent = new String[0];
