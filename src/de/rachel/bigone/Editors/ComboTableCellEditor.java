@@ -32,7 +32,9 @@ public class ComboTableCellEditor extends AbstractCellEditor implements TableCel
 
 			@Override
 			public void itemStateChanged(ItemEvent e) {
-				if (e.getStateChange() == ItemEvent.SELECTED) {
+				// cellEdititngStopped wird hier mit überprüft, damit, wenn ein Tastendruck die Änderung (auswahl eines anderen Elements)
+				// bewirkt, die Combobox nicht geschlossen wird
+				if (e.getStateChange() == ItemEvent.SELECTED && cellEditingStopped) {
 					fireEditingStopped();
 				}
 			}
@@ -43,14 +45,14 @@ public class ComboTableCellEditor extends AbstractCellEditor implements TableCel
 
 			@Override
 			public void keyPressed(KeyEvent e) {
-				// TODO Auto-generated method stub
-				//cellEditingStopped = false;
+				// damit das StateChange Event die cobobox nicht schliesst
+				cellEditingStopped = false;
 			}
 
 			@Override
 			public void keyReleased(KeyEvent e) {
 				// TODO Auto-generated method stub
-
+				
 			}
 
 			@Override
