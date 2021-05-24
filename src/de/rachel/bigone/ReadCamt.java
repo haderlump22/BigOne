@@ -16,7 +16,12 @@ import org.xml.sax.SAXException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-
+/**
+ * Einlesen von
+ * 
+ * - SEPA Dateien des Formats (SEPA CAMT.053) Bank To Customer Statement = Kontoauszug
+ * - Kontoauszug Diba im CSV Format
+ */
 public class ReadCamt {
 	private Document KontoAuszug;
 	private String[][] buchungen;

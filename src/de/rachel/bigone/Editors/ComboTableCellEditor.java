@@ -15,11 +15,11 @@ import javax.swing.event.PopupMenuListener;
 import javax.swing.table.TableCellEditor;
 
 import de.rachel.bigone.DBTools;
-
+/**
+ * Generiert eine Combobox für die Auswahl eines Kontoereignis beim Importieren von 
+ * Kontobewegungen.
+ */
 public class ComboTableCellEditor extends AbstractCellEditor implements TableCellEditor {
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 4917922491523056278L;
 	private JComboBox<String> component = new JComboBox<String>();
 	private Connection cn = null;

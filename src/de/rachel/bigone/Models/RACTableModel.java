@@ -16,8 +16,8 @@ public class RACTableModel extends AbstractTableModel{
 	private static int ValueDate = 0;
 	private static int CreditDebitIndicator = 1;
 	private static int Amount = 2;
-	private static int Unstructured = 3;	//Unstrukturierter Verwendungszweck 140zeichen max
-	private static int Creditor = 4;
+	private static int Unstructured = 3;	// Unstrukturierter Verwendungszweck 140zeichen max
+	private static int CdtrDbtr = 4;		// Creditor bzw. Debitor
 	private static int LiquiMonth = 5;
 	private static int AccountBookingEvent = 6;
 	SimpleDateFormat SQLDATE = new SimpleDateFormat("yyyy-MM-dd");
@@ -64,11 +64,10 @@ public class RACTableModel extends AbstractTableModel{
 			strLager[iAktuelleBuchung][LiquiMonth] = Auszug.getValDt(iAktuelleBuchung).substring(0, 8) + "01";
 			
 			// todo
-			// - noch der Absender oder Empfänger der Buchung in Klammern hinten angehangen werden
 			// - Gültigkeit der EC karte aus dem Buchungstext entfernen (Folgenr. 02 Verfalld. 2212) oder auch (Folgenr. 002 Verfalld. 2212)
-			strLager[iAktuelleBuchung][Unstructured] = Auszug.getUstrd(iAktuelleBuchung);
+			strLager[iAktuelleBuchung][Unstructured] = Auszug.getUstrd(iAktuelleBuchung) + " (" + Auszug.getCdtr(iAktuelleBuchung) + ")";
 			
-			strLager[iAktuelleBuchung][Creditor] = Auszug.getCdtr(iAktuelleBuchung);
+			strLager[iAktuelleBuchung][CdtrDbtr] = Auszug.getCdtr(iAktuelleBuchung);
 			
 			strLager[iAktuelleBuchung][Amount] = Auszug.getAmt(iAktuelleBuchung); 
 			
