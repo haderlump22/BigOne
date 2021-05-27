@@ -35,6 +35,7 @@ public class ReadCamt {
 	private static int Amount = 2;
 	private static int Unstructured = 3;	//Unstrukturierter Verwendungszweck 140zeichen max
 	private static int Creditor = 4;
+	private static int Debitor = 5;
 	
 	ReadCamt(String PathAndFile) {
 		
@@ -45,7 +46,7 @@ public class ReadCamt {
 			if (KontoAuszug != null) {
 				buchungsAnzahl = KontoAuszug.getElementsByTagName("Ntry").getLength();
 				
-				buchungen = new String[buchungsAnzahl][5];
+				buchungen = new String[buchungsAnzahl][6];
 				
 				//set IBAN from EBICs File
 				sIBAN = findSubs(KontoAuszug.getElementsByTagName("Acct").item(0), "IBAN", "").trim();
@@ -58,12 +59,13 @@ public class ReadCamt {
 					buchungen[i][CreditDebitIndicator] = findSubs(rows.item(i), NodeToFind[1], "").trim();
 					buchungen[i][Amount] = findSubs(rows.item(i), NodeToFind[2], "").trim();
 					buchungen[i][Unstructured] = findSubs(rows.item(i), NodeToFind[3], "").trim();
-					// if is a CRDT accounting Record, then get the Debitor, in case of DBIT accounting Record
-					// get the Creditor
+					
 					if (buchungen[i][CreditDebitIndicator].equals("CRDT")) {
-						buchungen[i][Creditor] = findSubs(rows.item(i), NodeToFind[5], "").trim();
+						buchungen[i][Creditor] = null;
+						buchungen[i][Debitor] = findSubs(rows.item(i), NodeToFind[5], "").trim();
 					} else {
 						buchungen[i][Creditor] = findSubs(rows.item(i), NodeToFind[4], "").trim();
+						buchungen[i][Debitor] = null;
 					}
 				}
 			}
@@ -131,6 +133,9 @@ public class ReadCamt {
 	public String getCdtr(int iZeile){
 		return buchungen[iZeile][Creditor];
 	}
+	public String getDbtr(int iZeile) {
+		return buchungen[iZeile][Debitor];
+	}
 	public String getIBAN(){
 		return sIBAN;
 	}
@@ -163,7 +168,7 @@ public class ReadCamt {
 
 			if (Item.getNodeName().equals(NodeName)) {
 				if (NodeName.equals("Cdtr") || NodeName.equals("Dbtr") ) {
-					// der Kreditor steht im Nm Tag unter Cdtr, aber nicht immer an gleicher Stelle
+					// der Kreditor steht im Nm Tag unter Cdtr, bzw. der Debitor unter Dbtr, aber nicht immer an gleicher Stelle
 					// deshalb wird das Item Nm gesucht und dessen Textcontent zur�ckgeben
 					for (int b = 0; b < Item.getChildNodes().getLength(); b++) {
 						if (Item.getChildNodes().item(b).getNodeName().equals("Nm"))
@@ -173,6 +178,9 @@ public class ReadCamt {
 					ValueToFind = ValueToFind.trim() + " " + Item.getTextContent().trim();
 				}
 
+				// Ustrd (Verwednungszweck) kommt mehrfach hintereinander vor
+				// deshalb wird bei diesem Node nicht abgebrochen
+				// bei allen anderen endet das Auslesen an dieser Stelle
 				if (!NodeName.equals("Ustrd"))
 					break;
 			} else {
@@ -276,6 +284,7 @@ public class ReadCamt {
 			buchungen[i - (iHeaderRow + 1)][Amount] = delteSign(csvContent[i].split(";")[7].replace(".", "").replaceAll(",", ".")); 
 			buchungen[i - (iHeaderRow + 1)][Unstructured] = csvContent[i].split(";")[4];
 			buchungen[i - (iHeaderRow + 1)][Creditor] = csvContent[i].split(";")[2];
+			buchungen[i - (iHeaderRow + 1)][Debitor] = csvContent[i].split(";")[2]; // wird nicht extra aufgeführt deshalb wird der selbe wert gelesen
 		}
 	}
 	private int findHeaderRow() {

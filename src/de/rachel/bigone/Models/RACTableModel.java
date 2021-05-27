@@ -67,17 +67,19 @@ public class RACTableModel extends AbstractTableModel{
 			// - Gültigkeit der EC karte aus dem Buchungstext entfernen (Folgenr. 02 Verfalld. 2212) oder auch (Folgenr. 002 Verfalld. 2212)
 			strLager[iAktuelleBuchung][Unstructured] = Auszug.getUstrd(iAktuelleBuchung) + " (" + Auszug.getCdtr(iAktuelleBuchung) + ")";
 			
-			strLager[iAktuelleBuchung][CdtrDbtr] = Auszug.getCdtr(iAktuelleBuchung);
-			
 			strLager[iAktuelleBuchung][Amount] = Auszug.getAmt(iAktuelleBuchung); 
 			
-			// Das Soll Haben wird aus dem Feld CreditDebitIndicator gebildet
-			// CRDT ist haben Buchung
-			// DBIT ist soll Buchung
-			if(Auszug.getCdtDbtInd(iAktuelleBuchung).equals("CRDT"))
+			// je nachdem ob creditorische oder debitorische Buchung
+			// bestimmte Werte des Arrays mit anderen Werten füllen
+			if (Auszug.getCdtDbtInd(iAktuelleBuchung).equals("CRDT")) {
+				strLager[iAktuelleBuchung][CdtrDbtr] = Auszug.getDbtr(iAktuelleBuchung);
 				strLager[iAktuelleBuchung][CreditDebitIndicator] = "h";
-			if(Auszug.getCdtDbtInd(iAktuelleBuchung).equals("DBIT"))
+			}
+
+			if (Auszug.getCdtDbtInd(iAktuelleBuchung).equals("DBIT")) {
+				strLager[iAktuelleBuchung][CdtrDbtr] = Auszug.getCdtr(iAktuelleBuchung);
 				strLager[iAktuelleBuchung][CreditDebitIndicator] = "s";
+			}
 
 			// am ende der verarbeitung einer Zeile wird das ereigniss fest auf
 			// HaushGeld (46) gesetzt
@@ -113,7 +115,7 @@ public class RACTableModel extends AbstractTableModel{
 			//alle restlichen datensaetze in das neue array kopieren, dort aber mit der
 			//Zielposition an der vorher die zu loeschende Zeile stand, also iZeile!!!
 			//Die menge der zu kopierenden Datensaetze laesst sich auch wieder
-			//mithilfe von iZiele ermitteln. einfach von der gesammtlaenge des neuen Arrays 
+			//mithilfe von iZeile ermitteln. einfach von der gesammtlaenge des neuen Arrays 
 			//der Wert von iZeile abziehen.
 			//bsp: iZeile ist 2. dann muessen beim zweiten kopiervorgang, der die restlichen
 			//daten in das neue array(welches jetzt z.B 6 stat 7  Datensaetze lang ist)
