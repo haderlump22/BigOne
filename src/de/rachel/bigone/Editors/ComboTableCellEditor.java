@@ -74,7 +74,8 @@ public class ComboTableCellEditor extends AbstractCellEditor implements TableCel
             @Override
             public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
                 cellEditingStopped = true;
-                fireEditingCanceled();
+				fireEditingStopped();
+                //fireEditingCanceled();
             }
 
             @Override
@@ -96,8 +97,7 @@ public class ComboTableCellEditor extends AbstractCellEditor implements TableCel
     public boolean stopCellEditing() {
         return cellEditingStopped;
     }
-    public Object getCellEditorValue() 
-    { 
+    public Object getCellEditorValue() { 
 		//damit bei erneuter auswahl immer der erste eintrag selectiert ist
     	//dieser kleine umweg
     	// String strLager = new String(component.getSelectedItem().toString());

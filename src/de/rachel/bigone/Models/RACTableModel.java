@@ -63,10 +63,6 @@ public class RACTableModel extends AbstractTableModel{
 			
 			strLager[iAktuelleBuchung][LiquiMonth] = Auszug.getValDt(iAktuelleBuchung).substring(0, 8) + "01";
 			
-			// todo
-			// - Gültigkeit der EC karte aus dem Buchungstext entfernen (Folgenr. 02 Verfalld. 2212) oder auch (Folgenr. 002 Verfalld. 2212)
-			strLager[iAktuelleBuchung][Unstructured] = Auszug.getUstrd(iAktuelleBuchung) + " (" + Auszug.getCdtr(iAktuelleBuchung) + ")";
-			
 			strLager[iAktuelleBuchung][Amount] = Auszug.getAmt(iAktuelleBuchung); 
 			
 			// je nachdem ob creditorische oder debitorische Buchung
@@ -74,11 +70,17 @@ public class RACTableModel extends AbstractTableModel{
 			if (Auszug.getCdtDbtInd(iAktuelleBuchung).equals("CRDT")) {
 				strLager[iAktuelleBuchung][CdtrDbtr] = Auszug.getDbtr(iAktuelleBuchung);
 				strLager[iAktuelleBuchung][CreditDebitIndicator] = "h";
+				// todo
+				// - Gültigkeit der EC karte aus dem Buchungstext entfernen (Folgenr. 02 Verfalld. 2212) oder auch (Folgenr. 002 Verfalld. 2212)
+				strLager[iAktuelleBuchung][Unstructured] = Auszug.getUstrd(iAktuelleBuchung) + " (" + Auszug.getDbtr(iAktuelleBuchung) + ")";
 			}
 
 			if (Auszug.getCdtDbtInd(iAktuelleBuchung).equals("DBIT")) {
 				strLager[iAktuelleBuchung][CdtrDbtr] = Auszug.getCdtr(iAktuelleBuchung);
 				strLager[iAktuelleBuchung][CreditDebitIndicator] = "s";
+				// todo
+				// - Gültigkeit der EC karte aus dem Buchungstext entfernen (Folgenr. 02 Verfalld. 2212) oder auch (Folgenr. 002 Verfalld. 2212)
+				strLager[iAktuelleBuchung][Unstructured] = Auszug.getUstrd(iAktuelleBuchung) + " (" + Auszug.getCdtr(iAktuelleBuchung) + ")";
 			}
 
 			// am ende der verarbeitung einer Zeile wird das ereigniss fest auf

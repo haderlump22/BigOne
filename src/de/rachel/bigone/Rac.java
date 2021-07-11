@@ -377,24 +377,24 @@ public class Rac {
 		table.getColumnModel().getColumn(6).setMaxWidth(120);
 
 
-		table.addMouseListener( new MouseAdapter() { 
-			public void mouseReleased( MouseEvent me ) { 
+		table.addMouseListener(new MouseAdapter() {
+			public void mouseReleased(MouseEvent me) {
 				if (me.getButton() == MouseEvent.BUTTON3) {
 					// wenn die Zeile auf der der Rechtsklick ausgefürht wurde nicht selectiert war
 					// wird diese Zeile erst selectiert
-					JTable table = (JTable)me.getSource();
+					JTable table = (JTable) me.getSource();
 					int RowAtMousePoint = table.rowAtPoint(me.getPoint());
-					
+
 					// vorherige Selection aufheben
 					table.clearSelection();
 
 					// diese eine Zeile selectieren
-					table.addRowSelectionInterval(RowAtMousePoint,RowAtMousePoint);
+					table.addRowSelectionInterval(RowAtMousePoint, RowAtMousePoint);
 
-					//popup zum Löschen der selectierten Zeile anzeigen
-		      		popmen.show(me.getComponent(), me.getX(), me.getY()); 
+					// popup zum Löschen der selectierten Zeile anzeigen
+					popmen.show(me.getComponent(), me.getX(), me.getY());
 				}
-		  	} 
+			}
 		});
 		
 		sp = new JScrollPane(table);
