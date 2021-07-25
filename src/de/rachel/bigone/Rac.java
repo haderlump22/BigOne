@@ -1,11 +1,7 @@
 package de.rachel.bigone;
 
-//import java.awt.Font;
-
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.sql.Connection;
@@ -14,9 +10,7 @@ import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JMenuItem;
 import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.border.TitledBorder;
@@ -26,7 +20,7 @@ import com.toedter.calendar.JDateChooser;
 
 import de.rachel.bigone.Editors.ComboTableCellEditor;
 import de.rachel.bigone.Editors.LiquiDateTableCellEditor;
-// import de.rachel.bigone.Listeners.RACSelectionListener;
+import de.rachel.bigone.Listeners.RACMouseListener;
 import de.rachel.bigone.Models.RACTableModel;
 import de.rachel.bigone.Renderer.RACTableCellRenderer;
 
@@ -34,11 +28,8 @@ public class Rac {
 	private Connection cn = null;
 	private static final int TANKEN = 6;
 	private static final int AUFTEILUNG = 52;
-	// private static final int KONTOID = 7;
 	private JFrame RACWindow;
-	// private Font fontTxtFields;
 	private JTable table;
-	private JPopupMenu popmen;
 	private RACTableModel model;
 	private JButton btnOpen;
 	private JButton btnImp;
@@ -59,22 +50,9 @@ public class Rac {
 		RACWindow.setLayout(null);
 		RACWindow.setResizable(false);
 
-		// schriftenfestlegungen
-		// fontTxtFields = new Font("Arial",Font.PLAIN,16);
-
 		open = new JFileChooser();
-		// beim OpenDialog sollen nur XML Dateien angezeigt werden
+		// beim OpenDialog sollen nur XML oder CSV Dateien angezeigt werden
 		open.setFileFilter(new FileNameExtensionFilter("XML/CSV", "xml", "csv"));
-
-		popmen = new JPopupMenu();
-		JMenuItem delrow = new JMenuItem("Zeile löschen");
-		delrow.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent ae) {
-				model = (RACTableModel) table.getModel();
-				model.removeRow(table.getSelectedRow(), true);
-			}
-		});
-		popmen.add(delrow);
 
 		btnOpen = new JButton("Auszug öffnen");
 		btnOpen.setBounds(30, 17, 115, 35);
@@ -376,26 +354,8 @@ public class Rac {
 		table.getColumnModel().getColumn(6).setMinWidth(120);
 		table.getColumnModel().getColumn(6).setMaxWidth(120);
 
-
-		table.addMouseListener(new MouseAdapter() {
-			public void mouseReleased(MouseEvent me) {
-				if (me.getButton() == MouseEvent.BUTTON3) {
-					// wenn die Zeile auf der der Rechtsklick ausgefürht wurde nicht selectiert war
-					// wird diese Zeile erst selectiert
-					JTable table = (JTable) me.getSource();
-					int RowAtMousePoint = table.rowAtPoint(me.getPoint());
-
-					// vorherige Selection aufheben
-					table.clearSelection();
-
-					// diese eine Zeile selectieren
-					table.addRowSelectionInterval(RowAtMousePoint, RowAtMousePoint);
-
-					// popup zum Löschen der selectierten Zeile anzeigen
-					popmen.show(me.getComponent(), me.getX(), me.getY());
-				}
-			}
-		});
+		// selbst definierten Mouselistener der RAC Tabelle hinzufügen
+		table.addMouseListener(new RACMouseListener(table));
 		
 		sp = new JScrollPane(table);
 		sp.setBounds(30,120,725,355);
