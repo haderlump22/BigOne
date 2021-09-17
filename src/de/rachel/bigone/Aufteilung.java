@@ -22,7 +22,7 @@ import javax.swing.text.NumberFormatter;
 
 public class Aufteilung extends JFrame{
 	/**
-	 * 
+	 * TODO Ereignisse anzeigen wenn sie gültig sind
 	 */
 	private static final long serialVersionUID = -2262653597062890751L;
 	private JLabel lblBetrag, lblEreigniss, lblRestInfo;
@@ -196,7 +196,7 @@ public class Aufteilung extends JFrame{
 	private void fill_cmbEreigniss() {
 		DBTools getter = new DBTools(cn);
 
-		getter.select( "SELECT ereigniss_id, ereigniss_krzbez FROM kontenereignisse order by 2;",2 );
+		getter.select("SELECT ereigniss_id, ereigniss_krzbez FROM kontenereignisse WHERE gueltig = 'TRUE' order by 2;",2);
 		
 		Object[][] cmbValues = getter.getData();
 		
