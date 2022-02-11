@@ -591,17 +591,30 @@ public class Liqui {
 		int iZaehler;
 		double dblSumFixKosten=0;
 		double dblErgSql;
-		DBTools getter = new DBTools(cn);
-		
+		DBTools getterSoll = new DBTools(cn);
+		DBTools getterHaben = new DBTools(cn);
+
 		for(iZaehler = 0; iZaehler < daten.length; iZaehler++)
 		{
-			getter.select("select sum(betrag) from transaktionen where ereigniss_id = " + daten[iZaehler][1].toString() +
+			// die Sollsumme des Betrags errechenen
+			getterSoll.select("select sum(betrag) from transaktionen where ereigniss_id = " + daten[iZaehler][1].toString() +
 					" and konten_id = " + KontenID + " and soll_haben = 's' and liqui_monat = '" + sAbrMonat + "';", 1);
 			
-			if(getter.getRowCount() > 0 && getter.getValueAt(0, 0) != null)
-		    	  dblErgSql = roundScale2(Double.valueOf(getter.getValueAt(0, 0).toString()).doubleValue());
-		      else
-		    	  dblErgSql = 0;
+			// eventuelle Habenbuchungen für Monatsfixkostenermitteln
+			// z.B. ein Rücküberweisung von zuviel überwiesenen HaushaltHolle Beträgen
+			getterHaben.select("select sum(betrag) from transaktionen where ereigniss_id = " + daten[iZaehler][1].toString() +
+					" and konten_id = " + KontenID + " and soll_haben = 'h' and liqui_monat = '" + sAbrMonat + "';", 1);
+			
+			// sowohl in getterHaben als auch in getter Soll kommt nur ein Datensatz raus der kann aber NULL enthalten
+			if(getterSoll.getValueAt(0, 0) != null)
+				dblErgSql = roundScale2(Double.valueOf(getterSoll.getValueAt(0, 0).toString()).doubleValue());
+			else
+				dblErgSql = 0;
+
+			// wenn ein Habenbetrag für diese FixKostenpositon existiert wird sie von der eben
+			// ermittelten Sollsumme abgezogen	
+			if(getterHaben.getValueAt(0, 0) != null)
+				dblErgSql = dblErgSql - roundScale2(Double.valueOf(getterHaben.getValueAt(0, 0).toString()).doubleValue());
 			
 		    //==========================================================================
 		    //==========================================================================
@@ -627,7 +640,7 @@ public class Liqui {
 		    	dblSumFixKosten = dblSumFixKosten + roundScale2(dblErgSql);
 		    }
 		    //falls fuer den eigentlich budgetierten Wert gilt "nur das was wirklich
-		    //ausgegeben wurde" dann auch nur das zu der Summe der Fixkosten hinzurechen
+		    //ausgegeben wurde" (sprich NICHT hart) dann auch nur das zu der Summe der Fixkosten hinzurechen
 		    //ansonsten, im fall "hart" den Budgetierten Wert
 		    if(dblErgSql == 0)
 		    {
