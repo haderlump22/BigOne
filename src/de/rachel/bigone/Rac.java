@@ -155,7 +155,7 @@ public class Rac {
 								// das Programm arbeitet weiter wenn
 								// dialog geschlossen wird
 								Aufteilung aufteil = new Aufteilung(RACWindow,
-										Double.valueOf(model.getValueAt(i, 2).toString()).doubleValue(), cn);
+										Double.valueOf(model.getValueAt(i, 2).toString()).doubleValue(), model.getValueAt(i, 3).toString(), cn);
 
 								// da gerade der letzte Datensatz in die tabelle transaktionen eingetragen
 								// wurde kann man auch schon dessen ID feststellen

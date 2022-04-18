@@ -310,64 +310,64 @@ public class Transaktionen {
 				return;    //-programm wird abgebrochen!
 			}        
 			
-			 lager.strDatum = BigOneTools.datum_wandeln(txtDatum.getText(),0);
+			lager.strDatum = BigOneTools.datum_wandeln(txtDatum.getText(),0);
 			 
-			 //die wiederholung der ersetzung ist bedingt durch die formatierung
-			 //des textfeldes erst muss der punkt als tausendertrenner entfernt 
-			 //werden dann das komma als dezimaltrenner in einen punkt umgewandelt
-			 //werden damit es dem amerikanischen zahlenformat entspricht und in die
-			 //mysql db passt
-			 lager.strBetrag = txtBetrag.getText().replace(".","").replace(',','.');
-			 			 
-			 lager.strBuchtext = txtBeschreibung.getText();
-             if (chkLiqui.isSelected())
-                lager.strLiquiDate = BigOneTools.datum_wandeln(txtLiquiDate.getText(),0);
-             else
-             	lager.strLiquiDate = "NULL";
-                          
-             lager.iEreigId = BigOneTools.extractEreigId(cmbEreigniss.getSelectedItem().toString());
-             
-             //hier werden diverse unterformulare aufgerufen um
-             //detailierte informatioenen zu einer Transaktionen aufzunehmen
-             switch( lager.iEreigId) {
-             case TANKEN:
-                 //tankwerte zur eintragung aufnehmen
-                 //das Programm arbeitet weiter wenn
-                 //dialog geschlossen wird
-                 TankDialog td = new TankDialog(mainwindow, txtBetrag.getText(),cn);
-                 
-                 lager.strKfzId = td.get_kfz_id();
-                 lager.strTreibstoffId = td.get_treibstoff_id();
-                 lager.strKm = td.get_km();
-                 lager.strLiter = td.get_liter();
-                 
-                 //nun die Daten einfuegen
-                 transaktionsdaten_einfuegen(lager);
-                 //der funktion wird die ebend durch einfuegen des
-                 //transaktionsdatensatzes erzeugte transaktionsid uebergeben
-                 //plus dem lager objekt
-                 tankdaten_einfuegen(get_max_transaktions_id(), lager);
-                 
-                 break;
-             case AUFTEILUNG:
-            	 //aufteilungsdaten aufnehmen
-            	 //das Programm arbeitet weiter wenn
-                 //dialog geschlossen wird
-            	 Aufteilung auft = new Aufteilung(mainwindow, Double.valueOf(lager.strBetrag).doubleValue(),cn);
-            	 
-            	 datenAuft = auft.getDaten();
-            	 
-            	 //nun die Daten einfuegen
-                 transaktionsdaten_einfuegen(lager);
-                 //der funktion wird die ebend durch einfuegen des
-                 //transaktionsdatensatzes erzeugte transaktionsid uebergeben
-                 //plus dem lager objekt
-                 aufteilungsdaten_einfuegen(get_max_transaktions_id(),datenAuft);
-            	 
-                 break;
-             default: 
-            	 transaktionsdaten_einfuegen(lager);
-             }
+			//die wiederholung der ersetzung ist bedingt durch die formatierung
+			//des textfeldes erst muss der punkt als tausendertrenner entfernt 
+			//werden dann das komma als dezimaltrenner in einen punkt umgewandelt
+			//werden damit es dem amerikanischen zahlenformat entspricht und in die
+			//mysql db passt
+			lager.strBetrag = txtBetrag.getText().replace(".","").replace(',','.');
+						
+			lager.strBuchtext = txtBeschreibung.getText();
+			if (chkLiqui.isSelected())
+			lager.strLiquiDate = BigOneTools.datum_wandeln(txtLiquiDate.getText(),0);
+			else
+			lager.strLiquiDate = "NULL";
+						
+			lager.iEreigId = BigOneTools.extractEreigId(cmbEreigniss.getSelectedItem().toString());
+			
+			//hier werden diverse unterformulare aufgerufen um
+			//detailierte informatioenen zu einer Transaktionen aufzunehmen
+			switch( lager.iEreigId) {
+			case TANKEN:
+				//tankwerte zur eintragung aufnehmen
+				//das Programm arbeitet weiter wenn
+				//dialog geschlossen wird
+				TankDialog td = new TankDialog(mainwindow, txtBetrag.getText(),cn);
+				
+				lager.strKfzId = td.get_kfz_id();
+				lager.strTreibstoffId = td.get_treibstoff_id();
+				lager.strKm = td.get_km();
+				lager.strLiter = td.get_liter();
+				
+				//nun die Daten einfuegen
+				transaktionsdaten_einfuegen(lager);
+				//der funktion wird die ebend durch einfuegen des
+				//transaktionsdatensatzes erzeugte transaktionsid uebergeben
+				//plus dem lager objekt
+				tankdaten_einfuegen(get_max_transaktions_id(), lager);
+				
+				break;
+			case AUFTEILUNG:
+				//aufteilungsdaten aufnehmen
+				//das Programm arbeitet weiter wenn
+				//dialog geschlossen wird
+				Aufteilung auft = new Aufteilung(mainwindow, Double.valueOf(lager.strBetrag).doubleValue(), lager.strBuchtext, cn);
+				
+				datenAuft = auft.getDaten();
+				
+				//nun die Daten einfuegen
+				transaktionsdaten_einfuegen(lager);
+				//der funktion wird die ebend durch einfuegen des
+				//transaktionsdatensatzes erzeugte transaktionsid uebergeben
+				//plus dem lager objekt
+				aufteilungsdaten_einfuegen(get_max_transaktions_id(),datenAuft);
+				
+				break;
+			default: 
+				transaktionsdaten_einfuegen(lager);
+			}
 		}
 		CleanAll();
 	}

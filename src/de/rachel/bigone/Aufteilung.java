@@ -25,7 +25,7 @@ public class Aufteilung extends JFrame{
 	 * TODO Ereignisse anzeigen wenn sie gültig sind
 	 */
 	private static final long serialVersionUID = -2262653597062890751L;
-	private JLabel lblBetrag, lblEreigniss, lblRestInfo;
+	private JLabel lblBetrag, lblEreigniss, lblRestInfo, lblBuchText;
 	private JCheckBox chkLiquiFaehig;
 	private JComboBox<String> cmbEreigniss;
 	private JButton btnIncr, btnSave;
@@ -38,7 +38,7 @@ public class Aufteilung extends JFrame{
 	//werden kann (in dieser reihenfolge)
 	private String[][] daten = null, lager = null;
 	
-	Aufteilung(JFrame dialogOwner, double flGesBetrag, Connection LoginCN){
+	Aufteilung(JFrame dialogOwner, double flGesBetrag, String strBuchText, Connection LoginCN){
 		cn = LoginCN;
 		final JDialog dialog = new JDialog(dialogOwner, "Aufteilung", true);
 		dialog.setSize(300,250);
@@ -150,9 +150,13 @@ public class Aufteilung extends JFrame{
 		});
 		
 		lblRestInfo = new JLabel("noch " + String.valueOf(flGesBetLager).replace('.',',') + " EUR");
-		lblRestInfo.setBounds(10,170,290,25);
+		lblRestInfo.setBounds(10,160,290,25);
 		lblRestInfo.setHorizontalAlignment(JLabel.CENTER);
-		
+
+		lblBuchText = new JLabel("Buchungstext (tooltip)");
+		lblBuchText.setBounds(10,180,290,25);
+		lblBuchText.setHorizontalAlignment(JLabel.CENTER);
+		lblBuchText.setToolTipText(strBuchText);
 		
 		dialog.add(chkLiquiFaehig);
 		dialog.add(lblBetrag);
@@ -162,6 +166,7 @@ public class Aufteilung extends JFrame{
 		dialog.add(btnIncr);
 		dialog.add(btnSave);
 		dialog.add(lblRestInfo);
+		dialog.add(lblBuchText);
 		
 		dialog.setVisible(true);
 	}

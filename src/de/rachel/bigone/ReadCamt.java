@@ -269,7 +269,7 @@ public class ReadCamt {
 		iHeaderRow = findHeaderRow();
 		
 		// reinitial the Array buchunge new
-		this.buchungen = new String[csvContent.length - iHeaderRow - 1][5];
+		this.buchungen = new String[csvContent.length - iHeaderRow - 1][6];
 
 		// the Diba Data begin in the row after the Header
 		for (int i = iHeaderRow + 1; i < csvContent.length; i++) {
