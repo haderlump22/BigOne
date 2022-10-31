@@ -140,6 +140,14 @@ public class RACTableModel extends AbstractTableModel{
 
 		}
 	}
+	public void setAllLiquiToNull() {
+		// setzt alle Liqudatumswerte der Tabelle auf NULL
+		for (int i = 0; i < daten.length; i++) {
+			daten[i][LiquiMonth] = null;
+		}
+		// änderungen in der Darstellung aktualisieren#
+		fireTableDataChanged();
+	}
 	public void aktualisiere(ReadCamt Auszug) {
 		daten = lese_werte(Auszug);
 		fireTableDataChanged();

@@ -25,15 +25,24 @@ public class RACMouseListener extends MouseAdapter {
 			}
 		});
         // Menüeintrag für das NULLen des Liquidatums
-        JMenuItem NullLiqui = new JMenuItem("Liqui=>NULL");
+        JMenuItem NullLiqui = new JMenuItem("aktuellen Liqui=>NULL");
 		NullLiqui.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
 				model = (RACTableModel) table.getModel();
 				model.setLiquiToNull(table.getSelectedRow());
 			}
 		});
+        // Menüeintrag für das NULLen aller Liquidatumswerte
+        JMenuItem NullAllLiqui = new JMenuItem("alle Liqui=>NULL");
+		NullAllLiqui.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent ae) {
+				model = (RACTableModel) table.getModel();
+				model.setAllLiquiToNull();
+			}
+		});
 		popmen.add(delrow);
         popmen.add(NullLiqui);
+        popmen.add(NullAllLiqui);
     }
     public void mouseReleased(MouseEvent me) {
         if (me.getButton() == MouseEvent.BUTTON3) {
