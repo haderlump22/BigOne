@@ -276,7 +276,7 @@ public class ReadCamt {
 			buchungen[i - (iHeaderRow + 1)][ValueDate] = BigOneTools.datum_wandeln(csvContent[i].split(";")[1], 0);
 			
 			// the Credit or Dbit Inticator is in the csv Data not a separate field
-			// they is indicates by e minus or nothing bevore the amount
+			// they is indicates by e minus or nothing bevore the amount (creditorische Buchung = haben / Debitorische Buchung = soll)
 			buchungen[i - (iHeaderRow + 1)][CreditDebitIndicator] = getCreditDebitIndicator(csvContent[i].split(";")[7].replace(".", "").replaceAll(",", "."));
 			
 			// the amount in the csv is german, we have to replace the thousand dot with null
