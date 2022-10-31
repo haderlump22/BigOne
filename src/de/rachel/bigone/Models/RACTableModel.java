@@ -129,6 +129,17 @@ public class RACTableModel extends AbstractTableModel{
 				fireTableDataChanged();
 		}
 	}
+	public void setLiquiToNull(int iZeile) {
+		// mit dieser Methode kann der Wert des Liquidatums der aktuellen Zeile auf NULL gesetzt werden
+		// weil der Editor ja jetzt das Format vorgibt, und so das Liquidatum NICHT mehr durch manuelle 
+		// Eingabe auf NULL gesetzt werden kann
+		if(iZeile >= 0 && iZeile <= daten.length) {
+			//lagerarray mit der selben groesse wie das orginal erzeugen
+			daten[iZeile][LiquiMonth] = null;
+			fireTableCellUpdated(iZeile, LiquiMonth);
+
+		}
+	}
 	public void aktualisiere(ReadCamt Auszug) {
 		daten = lese_werte(Auszug);
 		fireTableDataChanged();

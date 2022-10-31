@@ -16,14 +16,24 @@ public class RACMouseListener extends MouseAdapter {
 
     public RACMouseListener(JTable table) {
         popmen = new JPopupMenu();
-		JMenuItem delrow = new JMenuItem("Zeile löschen");
+		// Menüeintrag für das Löschen einer Zeile
+        JMenuItem delrow = new JMenuItem("Zeile löschen");
 		delrow.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
 				model = (RACTableModel) table.getModel();
 				model.removeRow(table.getSelectedRow(), true);
 			}
 		});
+        // Menüeintrag für das NULLen des Liquidatums
+        JMenuItem NullLiqui = new JMenuItem("Liqui=>NULL");
+		NullLiqui.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent ae) {
+				model = (RACTableModel) table.getModel();
+				model.setLiquiToNull(table.getSelectedRow());
+			}
+		});
 		popmen.add(delrow);
+        popmen.add(NullLiqui);
     }
     public void mouseReleased(MouseEvent me) {
         if (me.getButton() == MouseEvent.BUTTON3) {
