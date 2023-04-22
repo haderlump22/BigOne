@@ -54,4 +54,21 @@ public class BigOneTools {
 		}
 		return strErg;
 	}
+	static public String getIbanFormatted(String UnformattedIban) {
+		// format the IBAN String with Spaces after every 4th Character
+		String sIbanFormatted = "";
+		int iIbanCharacters = 0;
+		int iCounter = 0;
+		
+		for (iIbanCharacters = 0; iIbanCharacters < UnformattedIban.length(); iIbanCharacters++) {
+			if(iCounter == 4) {
+				sIbanFormatted = sIbanFormatted + " ";
+				iCounter = 0;
+			}
+			sIbanFormatted = sIbanFormatted + UnformattedIban.charAt(iIbanCharacters);
+			iCounter++;
+		}
+		
+		return sIbanFormatted;
+	}
 }

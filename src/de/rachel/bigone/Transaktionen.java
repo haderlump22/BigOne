@@ -39,15 +39,15 @@ public class Transaktionen {
 	private Connection cn = null;
 	private JFrame mainwindow;
 	private JPanel sh, bank, liqui, details;
-	private JLabel transaktion, eurol, euror, lblKto, lblBLZ, lblDatum, lblBetrag, lblBeschreibung;
+	private JLabel transaktion, eurol, euror, lblDatum, lblBetrag, lblBeschreibung;
 	private JLabel lblEreigniss, lblInfoFeld;
-	private Font fontTop, fontTxtFields, fontCmbBoxes;
+	private Font fontTop, fontTxtFields, fontCmbBoxes, fontIban;
 	private JFormattedTextField txtLiquiDate, txtBetrag, txtDatum;
 	private JTextArea txtBeschreibung;
 	private JCheckBox chkLiqui;
 	private JRadioButton rb1, rb2;
 	private ButtonGroup grpsh;
-	private JComboBox<String> cmbBLZ, cmbKto, cmbEreigniss;
+	private JComboBox<String> Iban, cmbEreigniss;
 	private JButton btnSave, btnClean;
 	private String[][] datenAuft;
 		
@@ -60,15 +60,16 @@ public class Transaktionen {
 		mainwindow.setLayout(null);
 		mainwindow.setResizable(false);
 
-		//schriftenfestlegungen
+		//fontsettings
 		fontTop= new Font("Arial",Font.BOLD,38);
 		fontTxtFields = new Font("Arial",Font.PLAIN,16);
 		fontCmbBoxes = new Font("Arial",Font.PLAIN,16);
+		fontIban = new Font("Arial",Font.PLAIN,14);
 		
 		//Kopf des Fensters layouten
 		transaktion = new JLabel("Transaktionen",JLabel.CENTER);
 		transaktion.setFont(fontTop);
-		transaktion.setBounds(260,43,280,38);
+		transaktion.setBounds(260,35,280,38);
 		//transaktion.setBorder(new EtchedBorder());
 		
 		ImageIcon imgEuro = new ImageIcon(getClass().getResource("images/Euro.png"));
@@ -99,45 +100,21 @@ public class Transaktionen {
 		bank.setLayout(null);
 		bank.setBounds(100,230,200,90);
 		bank.setBorder(new TitledBorder("Bankverbingung"));
-		//die Comboboxen und Bezeichnungen fuer die Bankverbindungen definieren und 
-		//mitels 2 hilfspanels in ein unterpanel namens bank setzen
-		lblBLZ = new JLabel("BLZ");
-		lblBLZ.setBounds(10,20,30,25);
-		lblKto = new JLabel("Kto");
-		lblKto.setBounds(10,55,30,25);
-		cmbBLZ = new JComboBox<String>();
-		cmbBLZ.setBounds(40,20,150,25);
-		cmbBLZ.setFont(fontCmbBoxes);
-		fill_cmbBank();
-		cmbBLZ.setSelectedIndex(1);
-				
-		//ereigniss fuer die fuellung der Kontocombobox in 
-		//abhaengigkeit der BLZ combobox festlegen
-		cmbBLZ.addItemListener( new ItemListener() {
-		      public void itemStateChanged( ItemEvent e ) {
-		    	  if(e.getStateChange() == 1) {
-		    		  cmbKto.removeAllItems();
-		    		  fill_cmbKto(cmbBLZ.getSelectedItem().toString().substring(0,cmbBLZ.getSelectedItem().toString().indexOf(' ')));
-		    	  }
-		      }
-		 } );
-		
-		cmbKto = new JComboBox<String>();
-		cmbKto.setBounds(40,55,150,25);
-		cmbKto.setFont(fontCmbBoxes);
+
+		// add Account choose and fill it with valid Account IDs (IBAN)
+		Iban = new JComboBox<String>();
+		Iban.setBounds(260,77,250,25);
+		Iban.setFont(fontIban);
+		// fill it with Values
+		fill_Iban();
+
 		//widgets auf das bankpanel legen
-		bank.add(lblBLZ);
-		bank.add(cmbBLZ);
-		bank.add(lblKto);
-		bank.add(cmbKto);
-		//damit die Konten auch schon beim ersten aufruf des Formulars gefuellt werden
-		//und nicht erst wenn man das erste mal die BLZ combobox betaetigt
-		fill_cmbKto(cmbBLZ.getSelectedItem().toString().substring(0,cmbBLZ.getSelectedItem().toString().indexOf(' ')));
-		
+		//bank.add(Iban);
+
 		//Panel fuer die Liquditaetseinstellungen layouten
 		liqui = new JPanel();
 		liqui.setLayout(null);
-		liqui.setBounds(100,340,200,90);
+		liqui.setBounds(100,230,200,90);
 		liqui.setBorder(new TitledBorder("Liquirelevant"));
 		//Checkbox und Textfeld definieren und in das LiquiPanel setzen 
 		chkLiqui = new JCheckBox("Einrechenbar",true);
@@ -283,7 +260,7 @@ public class Transaktionen {
 	    mainwindow.add(transaktion); 
 	    mainwindow.add(euror);
 	    mainwindow.add(sh);
-	    mainwindow.add(bank);
+	    mainwindow.add(Iban);
 	    mainwindow.add(liqui);
 	    mainwindow.add(details);
 	    mainwindow.add(btnSave);
@@ -299,93 +276,93 @@ public class Transaktionen {
 	private void SaveData() {
 		if(fuellung_pruefen()) {
 			//objekt zum zwischenspeichern der Werte anlegen
-			DataToSave lager = new DataToSave();
+			DataToSave BankStatementLine = new DataToSave();
 			
-			lager.sh = soll_oder_haben();
-			lager.iKontoId = konto_id_finden(getBLZ(cmbBLZ.getSelectedItem().toString()),getKto(cmbKto.getSelectedItem().toString()));
+			BankStatementLine.sh = soll_oder_haben();
+			BankStatementLine.iKontoId = getKontoId(Iban.toString());
 						 
-			if (lager.iKontoId == -1) 
+			if (BankStatementLine.iKontoId == -1) 
 			{
 			    lblInfoFeld.setText("Fehler bei Konten!");
 				return;    //-programm wird abgebrochen!
 			}        
 			
-			lager.strDatum = BigOneTools.datum_wandeln(txtDatum.getText(),0);
+			BankStatementLine.strDatum = BigOneTools.datum_wandeln(txtDatum.getText(),0);
 			 
 			//die wiederholung der ersetzung ist bedingt durch die formatierung
 			//des textfeldes erst muss der punkt als tausendertrenner entfernt 
 			//werden dann das komma als dezimaltrenner in einen punkt umgewandelt
 			//werden damit es dem amerikanischen zahlenformat entspricht und in die
 			//mysql db passt
-			lager.strBetrag = txtBetrag.getText().replace(".","").replace(',','.');
+			BankStatementLine.strBetrag = txtBetrag.getText().replace(".","").replace(',','.');
 						
-			lager.strBuchtext = txtBeschreibung.getText();
+			BankStatementLine.strBuchtext = txtBeschreibung.getText();
 			if (chkLiqui.isSelected())
-			lager.strLiquiDate = BigOneTools.datum_wandeln(txtLiquiDate.getText(),0);
+			BankStatementLine.strLiquiDate = BigOneTools.datum_wandeln(txtLiquiDate.getText(),0);
 			else
-			lager.strLiquiDate = "NULL";
+			BankStatementLine.strLiquiDate = "NULL";
 						
-			lager.iEreigId = BigOneTools.extractEreigId(cmbEreigniss.getSelectedItem().toString());
+			BankStatementLine.iEreigId = BigOneTools.extractEreigId(cmbEreigniss.getSelectedItem().toString());
 			
 			//hier werden diverse unterformulare aufgerufen um
 			//detailierte informatioenen zu einer Transaktionen aufzunehmen
-			switch( lager.iEreigId) {
+			switch( BankStatementLine.iEreigId) {
 			case TANKEN:
 				//tankwerte zur eintragung aufnehmen
 				//das Programm arbeitet weiter wenn
 				//dialog geschlossen wird
 				TankDialog td = new TankDialog(mainwindow, txtBetrag.getText(),cn);
 				
-				lager.strKfzId = td.get_kfz_id();
-				lager.strTreibstoffId = td.get_treibstoff_id();
-				lager.strKm = td.get_km();
-				lager.strLiter = td.get_liter();
+				BankStatementLine.strKfzId = td.get_kfz_id();
+				BankStatementLine.strTreibstoffId = td.get_treibstoff_id();
+				BankStatementLine.strKm = td.get_km();
+				BankStatementLine.strLiter = td.get_liter();
 				
 				//nun die Daten einfuegen
-				transaktionsdaten_einfuegen(lager);
+				transaktionsdaten_einfuegen(BankStatementLine);
 				//der funktion wird die ebend durch einfuegen des
 				//transaktionsdatensatzes erzeugte transaktionsid uebergeben
-				//plus dem lager objekt
-				tankdaten_einfuegen(get_max_transaktions_id(), lager);
+				//plus dem BankStatementLine objekt
+				tankdaten_einfuegen(get_max_transaktions_id(), BankStatementLine);
 				
 				break;
 			case AUFTEILUNG:
 				//aufteilungsdaten aufnehmen
 				//das Programm arbeitet weiter wenn
 				//dialog geschlossen wird
-				Aufteilung auft = new Aufteilung(mainwindow, Double.valueOf(lager.strBetrag).doubleValue(), lager.strBuchtext, cn);
+				Aufteilung auft = new Aufteilung(mainwindow, Double.valueOf(BankStatementLine.strBetrag).doubleValue(), BankStatementLine.strBuchtext, cn);
 				
 				datenAuft = auft.getDaten();
 				
 				//nun die Daten einfuegen
-				transaktionsdaten_einfuegen(lager);
+				transaktionsdaten_einfuegen(BankStatementLine);
 				//der funktion wird die ebend durch einfuegen des
 				//transaktionsdatensatzes erzeugte transaktionsid uebergeben
-				//plus dem lager objekt
+				//plus dem BankStatementLine objekt
 				aufteilungsdaten_einfuegen(get_max_transaktions_id(),datenAuft);
 				
 				break;
 			default: 
-				transaktionsdaten_einfuegen(lager);
+				transaktionsdaten_einfuegen(BankStatementLine);
 			}
 		}
 		CleanAll();
 	}
-	private void tankdaten_einfuegen(int transaktions_id, DataToSave lager) {
+	private void tankdaten_einfuegen(int transaktions_id, DataToSave BankStatementLine) {
 		//fuegt die Tanktaden in die entsprechende Tabelle anhand der im
-		//lager hinterlegten werte ein
+		//BankStatementLine hinterlegten werte ein
 		DBTools pusher = new DBTools(cn);
 		
 		pusher.insert("INSERT INTO tankdaten " +
 	      			   "( transaktions_id, liter, km, kraftstoff_id, datum_bar, betrag_bar, kfz_id) " +
 	      			   "VALUES " +
 	      			   "(" + transaktions_id + ", " +
-	      			   lager.strLiter + ", " +
-	      			   lager.strKm + ", " +
-	      			   lager.strTreibstoffId + ", " +
+	      			   BankStatementLine.strLiter + ", " +
+	      			   BankStatementLine.strKm + ", " +
+	      			   BankStatementLine.strTreibstoffId + ", " +
 	      			   "NULL, " +
 	      			   "NULL, " +
-	      			   lager.strKfzId + ");");
+	      			   BankStatementLine.strKfzId + ");");
 	      
 	}
 	private int get_max_transaktions_id() {
@@ -414,7 +391,6 @@ public class Transaktionen {
 		txtBeschreibung.setText("");
 		lblInfoFeld.setText("");
 		cmbEreigniss.setSelectedIndex(0);
-		cmbBLZ.setSelectedIndex(1);
 		txtDatum.requestFocus();
 	}
 	private void fill_cmbEreigniss() {
@@ -427,30 +403,6 @@ public class Transaktionen {
 	    for(Object[] cmbEreignissValue : cmbEreinissValues)
 	    	cmbEreigniss.addItem(cmbEreignissValue[1] + " (" + cmbEreignissValue[0]+")");
 	}
-	private void fill_cmbBank() {
-		DBTools getter = new DBTools(cn);
-		
-		getter.select("SELECT blz, kreditinstitut FROM kreditinstitut where gilt_bis IS NULL order by 1;",2);
-		
-		Object[][] cmbBankValues = getter.getData();
-		
-	    for(Object[] cmbBankValue : cmbBankValues)
-	        cmbBLZ.addItem(cmbBankValue[0] + " (" + cmbBankValue[1] + ")");
-	}
-	private void fill_cmbKto(String strAuswahl) {
-		DBTools getter = new DBTools(cn);
-		
-		getter.select("SELECT konten.kontonummer, personen.vorname " +
-	      		"FROM konten, kreditinstitut, personen " +
-	      		"where konten.kreditinstitut_id = kreditinstitut.kreditinstitut_id " +
-	      		"and kreditinstitut.blz = '"+ strAuswahl +"' " +
-	      		"and konten.personen_id = personen.personen_id;",2);
-		
-		Object[][] cmbKtoValues = getter.getData();
-		
-		for(Object[] cmbKtoValue : cmbKtoValues)
-	        cmbKto.addItem(cmbKtoValue[0] + " (" + cmbKtoValue[1] + ")");
-	}
 	private boolean fuellung_pruefen() {
 		
 		return true;
@@ -461,16 +413,14 @@ public class Transaktionen {
 		else
 			return "h";
 	}
-	private int konto_id_finden(String strBLZ, String strKto) {
+	private int getKontoId(String Iban) {
 		Number intKontoId;
 		
 		DBTools getter = new DBTools(cn);
 		
-	    getter.select("SELECT ko.konten_id FROM kreditinstitut kr, konten ko " +
-	    		  "where kr.blz = '" + strBLZ + "' " +
-	    		  "and kr.gilt_bis is NULL " +
-	    		  "and ko.kreditinstitut_id = kr.kreditinstitut_id " +
-	    		  "and ko.kontonummer = '" + strKto + "' ;",1);
+	    getter.select("SELECT ko.konten_id FROM konten ko " +
+	    		  "where ko.gueltig = true " +
+	    		  "and ko.iban = '" + Iban + "' ", 1);
 	    
 	    if(getter.getRowCount() == 1)
 	    	intKontoId = (Number) getter.getValueAt(0, 0);
@@ -479,32 +429,26 @@ public class Transaktionen {
 
 	    return intKontoId.intValue();
 	}
-	private String getBLZ(String strBLZroh) {
-		return strBLZroh.substring(0,strBLZroh.indexOf(' '));
-	}
-	private String getKto(String strKtoroh) {
-		return strKtoroh.substring(0,strKtoroh.indexOf(' '));
-	}
-	private void transaktionsdaten_einfuegen(DataToSave lager) {
+	private void transaktionsdaten_einfuegen(DataToSave BankStatementLine) {
 		DBTools pusher = new DBTools(cn);
 		
 	    String sql = "INSERT INTO transaktionen " +
 	      			   "( soll_haben, konten_id, datum, betrag, buchtext, ereigniss_id, liqui_monat) " +
 	      			   "VALUES " +
-	      			   "('" + lager.sh + "', " +
-	      			   lager.iKontoId + ", '" +
-	      			   lager.strDatum + "', " +
-	      			   lager.strBetrag + ", '" +
-	      			   lager.strBuchtext + "', " +
-	      			   lager.iEreigId + ", ";
+	      			   "('" + BankStatementLine.sh + "', " +
+	      			   BankStatementLine.iKontoId + ", '" +
+	      			   BankStatementLine.strDatum + "', " +
+	      			   BankStatementLine.strBetrag + ", '" +
+	      			   BankStatementLine.strBuchtext + "', " +
+	      			   BankStatementLine.iEreigId + ", ";
 	      			   
 	      			   //falls das feld fuer das Liquidatum NULL sein
 	      			   //soll darf kein hochkomma an dieser stelle 
 	      			   //im sqlstatement vorkommen
-	      			   if(lager.strLiquiDate == "NULL")
-	      				   sql = sql + lager.strLiquiDate + ");";
+	      			   if(BankStatementLine.strLiquiDate == "NULL")
+	      				   sql = sql + BankStatementLine.strLiquiDate + ");";
 	      			   else
-	      				   sql = sql + "'" + lager.strLiquiDate + "');";
+	      				   sql = sql + "'" + BankStatementLine.strLiquiDate + "');";
 	      
 		pusher.insert(sql);
 	}
@@ -524,5 +468,17 @@ public class Transaktionen {
 	    //System.out.println(sql);
 	    pusher.insert(sql);
 		}
+	}
+	private void fill_Iban() {
+		DBTools getter = new DBTools(cn);
+		
+		getter.select("SELECT konten.iban, konten.bemerkung " +
+	      		"FROM konten " +
+	      		"where konten.gueltig = TRUE;",2);
+		
+		Object[][] cmbKtoValues = getter.getData();
+		
+		for(Object[] cmbKtoValue : cmbKtoValues)
+	        Iban.addItem(BigOneTools.getIbanFormatted(cmbKtoValue[0].toString()));
 	}
 }
