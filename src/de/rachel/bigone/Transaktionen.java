@@ -19,8 +19,6 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.border.TitledBorder;
 
-import java.awt.event.ItemListener;
-import java.awt.event.ItemEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.FocusListener;
@@ -69,15 +67,15 @@ public class Transaktionen {
 		//Kopf des Fensters layouten
 		transaktion = new JLabel("Transaktionen",JLabel.CENTER);
 		transaktion.setFont(fontTop);
-		transaktion.setBounds(260,35,280,38);
+		transaktion.setBounds(230,35,320,38);
 		//transaktion.setBorder(new EtchedBorder());
 		
 		ImageIcon imgEuro = new ImageIcon(getClass().getResource("images/Euro.png"));
 		eurol = new JLabel(imgEuro, JLabel.CENTER);
-		eurol.setBounds(100,20,81,84);
+		eurol.setBounds(90,20,81,84);
 		//eurol.setBorder(new EtchedBorder());
 		euror = new JLabel(imgEuro, JLabel.CENTER);
-		euror.setBounds(619,20,81,84);
+		euror.setBounds(629,20,81,84);
 		//euror.setBorder(new EtchedBorder());
 		
 		//Panel fuer S/H layouten
@@ -95,21 +93,12 @@ public class Transaktionen {
 		sh.add(rb1);
 		sh.add(rb2);
 		
-		//Panels fuer die Bankverbindung layouten
-		bank = new JPanel();
-		bank.setLayout(null);
-		bank.setBounds(100,230,200,90);
-		bank.setBorder(new TitledBorder("Bankverbingung"));
-
 		// add Account choose and fill it with valid Account IDs (IBAN)
 		Iban = new JComboBox<String>();
-		Iban.setBounds(260,77,250,25);
+		Iban.setBounds(270,77,250,25);
 		Iban.setFont(fontIban);
 		// fill it with Values
 		fill_Iban();
-
-		//widgets auf das bankpanel legen
-		//bank.add(Iban);
 
 		//Panel fuer die Liquditaetseinstellungen layouten
 		liqui = new JPanel();
@@ -279,7 +268,7 @@ public class Transaktionen {
 			DataToSave BankStatementLine = new DataToSave();
 			
 			BankStatementLine.sh = soll_oder_haben();
-			BankStatementLine.iKontoId = getKontoId(Iban.toString());
+			BankStatementLine.iKontoId = getKontoId(Iban.getSelectedItem().toString().replace(" ", ""));
 						 
 			if (BankStatementLine.iKontoId == -1) 
 			{
@@ -298,9 +287,9 @@ public class Transaktionen {
 						
 			BankStatementLine.strBuchtext = txtBeschreibung.getText();
 			if (chkLiqui.isSelected())
-			BankStatementLine.strLiquiDate = BigOneTools.datum_wandeln(txtLiquiDate.getText(),0);
+				BankStatementLine.strLiquiDate = BigOneTools.datum_wandeln(txtLiquiDate.getText(),0);
 			else
-			BankStatementLine.strLiquiDate = "NULL";
+				BankStatementLine.strLiquiDate = "NULL";
 						
 			BankStatementLine.iEreigId = BigOneTools.extractEreigId(cmbEreigniss.getSelectedItem().toString());
 			
@@ -415,7 +404,7 @@ public class Transaktionen {
 	}
 	private int getKontoId(String Iban) {
 		Number intKontoId;
-		
+
 		DBTools getter = new DBTools(cn);
 		
 	    getter.select("SELECT ko.konten_id FROM konten ko " +
@@ -427,7 +416,7 @@ public class Transaktionen {
 	    else
 	    	intKontoId = -1;
 
-	    return intKontoId.intValue();
+		return intKontoId.intValue();
 	}
 	private void transaktionsdaten_einfuegen(DataToSave BankStatementLine) {
 		DBTools pusher = new DBTools(cn);
