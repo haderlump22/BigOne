@@ -234,7 +234,7 @@ public class Transaktionen {
 		btnClean.setBounds(550,360,110,55);
 		btnClean.addActionListener(new ActionListener(){ 
             public void actionPerformed(ActionEvent ae){ 
-                CleanAll();
+                setSomeDefaultValues();
             }
         });
 		
@@ -268,44 +268,44 @@ public class Transaktionen {
 			DataToSave BankStatementLine = new DataToSave();
 			
 			BankStatementLine.sh = soll_oder_haben();
-			BankStatementLine.iKontoId = getKontoId(Iban.getSelectedItem().toString().replace(" ", ""));
+			BankStatementLine.KontoId = getKontoId(Iban.getSelectedItem().toString().replace(" ", ""));
 						 
-			if (BankStatementLine.iKontoId == -1) 
+			if (BankStatementLine.KontoId == -1) 
 			{
 			    lblInfoFeld.setText("Fehler bei Konten!");
 				return;    //-programm wird abgebrochen!
 			}        
 			
-			BankStatementLine.strDatum = BigOneTools.datum_wandeln(txtDatum.getText(),0);
+			BankStatementLine.Datum = BigOneTools.datum_wandeln(txtDatum.getText(),0);
 			 
 			//die wiederholung der ersetzung ist bedingt durch die formatierung
 			//des textfeldes erst muss der punkt als tausendertrenner entfernt 
 			//werden dann das komma als dezimaltrenner in einen punkt umgewandelt
 			//werden damit es dem amerikanischen zahlenformat entspricht und in die
 			//mysql db passt
-			BankStatementLine.strBetrag = txtBetrag.getText().replace(".","").replace(',','.');
+			BankStatementLine.Betrag = txtBetrag.getText().replace(".","").replace(',','.');
 						
-			BankStatementLine.strBuchtext = txtBeschreibung.getText();
+			BankStatementLine.Buchungstext = txtBeschreibung.getText();
 			if (chkLiqui.isSelected())
-				BankStatementLine.strLiquiDate = BigOneTools.datum_wandeln(txtLiquiDate.getText(),0);
+				BankStatementLine.LiquiDate = BigOneTools.datum_wandeln(txtLiquiDate.getText(),0);
 			else
-				BankStatementLine.strLiquiDate = "NULL";
+				BankStatementLine.LiquiDate = "NULL";
 						
-			BankStatementLine.iEreigId = BigOneTools.extractEreigId(cmbEreigniss.getSelectedItem().toString());
+			BankStatementLine.EreignisId = BigOneTools.extractEreigId(cmbEreigniss.getSelectedItem().toString());
 			
 			//hier werden diverse unterformulare aufgerufen um
 			//detailierte informatioenen zu einer Transaktionen aufzunehmen
-			switch( BankStatementLine.iEreigId) {
+			switch( BankStatementLine.EreignisId) {
 			case TANKEN:
 				//tankwerte zur eintragung aufnehmen
 				//das Programm arbeitet weiter wenn
 				//dialog geschlossen wird
 				TankDialog td = new TankDialog(mainwindow, txtBetrag.getText(),cn);
 				
-				BankStatementLine.strKfzId = td.get_kfz_id();
-				BankStatementLine.strTreibstoffId = td.get_treibstoff_id();
-				BankStatementLine.strKm = td.get_km();
-				BankStatementLine.strLiter = td.get_liter();
+				BankStatementLine.KfzId = td.get_kfz_id();
+				BankStatementLine.TreibstoffId = td.get_treibstoff_id();
+				BankStatementLine.KilometerZahl = td.get_km();
+				BankStatementLine.LiterZahl = td.get_liter();
 				
 				//nun die Daten einfuegen
 				transaktionsdaten_einfuegen(BankStatementLine);
@@ -319,7 +319,7 @@ public class Transaktionen {
 				//aufteilungsdaten aufnehmen
 				//das Programm arbeitet weiter wenn
 				//dialog geschlossen wird
-				Aufteilung auft = new Aufteilung(mainwindow, Double.valueOf(BankStatementLine.strBetrag).doubleValue(), BankStatementLine.strBuchtext, cn);
+				Aufteilung auft = new Aufteilung(mainwindow, Double.valueOf(BankStatementLine.Betrag).doubleValue(), BankStatementLine.Buchungstext, cn);
 				
 				datenAuft = auft.getDaten();
 				
@@ -335,7 +335,7 @@ public class Transaktionen {
 				transaktionsdaten_einfuegen(BankStatementLine);
 			}
 		}
-		CleanAll();
+		setSomeDefaultValues();
 	}
 	private void tankdaten_einfuegen(int transaktions_id, DataToSave BankStatementLine) {
 		//fuegt die Tanktaden in die entsprechende Tabelle anhand der im
@@ -346,12 +346,12 @@ public class Transaktionen {
 	      			   "( transaktions_id, liter, km, kraftstoff_id, datum_bar, betrag_bar, kfz_id) " +
 	      			   "VALUES " +
 	      			   "(" + transaktions_id + ", " +
-	      			   BankStatementLine.strLiter + ", " +
-	      			   BankStatementLine.strKm + ", " +
-	      			   BankStatementLine.strTreibstoffId + ", " +
+	      			   BankStatementLine.LiterZahl + ", " +
+	      			   BankStatementLine.KilometerZahl + ", " +
+	      			   BankStatementLine.TreibstoffId + ", " +
 	      			   "NULL, " +
 	      			   "NULL, " +
-	      			   BankStatementLine.strKfzId + ");");
+	      			   BankStatementLine.KfzId + ");");
 	      
 	}
 	private int get_max_transaktions_id() {
@@ -369,20 +369,18 @@ public class Transaktionen {
 
 	    return max_transaktons_id.intValue();
 	}
-	private void CleanAll() {
-		//hier werden alle Werte und Inhalte des Dialogs wieder 
-		//auf die Startwerte zurueckgesetzt
-
-		// auf Soll setzen
+	private void setSomeDefaultValues() {
+		// hier werden notwendige Werte und Inhalte des Dialogs
+		// wieder auf default gesetzt
 		soll.setSelected(true);
-		// chkLiqui.setSelected(true);
-		// txtLiquiDate.setText(null);
-		// txtDatum.setText(null);
 		txtBetrag.setText("0,00");
 		txtBetrag.requestFocus();
 		txtBeschreibung.setText("");
 		lblInfoFeld.setText("");
 
+		// chkLiqui.setSelected(true);
+		// txtLiquiDate.setText(null);
+		// txtDatum.setText(null);
 		// cmbEreigniss.setSelectedIndex(0);
 		// txtDatum.requestFocus();
 	}
@@ -407,7 +405,7 @@ public class Transaktionen {
 			return "h";
 	}
 	private int getKontoId(String Iban) {
-		Number intKontoId;
+		Number KontoId;
 
 		DBTools getter = new DBTools(cn);
 		
@@ -416,11 +414,11 @@ public class Transaktionen {
 	    		  "and ko.iban = '" + Iban + "' ", 1);
 	    
 	    if(getter.getRowCount() == 1)
-	    	intKontoId = (Number) getter.getValueAt(0, 0);
+	    	KontoId = (Number) getter.getValueAt(0, 0);
 	    else
-	    	intKontoId = -1;
+	    	KontoId = -1;
 
-		return intKontoId.intValue();
+		return KontoId.intValue();
 	}
 	private void transaktionsdaten_einfuegen(DataToSave BankStatementLine) {
 		DBTools pusher = new DBTools(cn);
@@ -429,19 +427,19 @@ public class Transaktionen {
 	      			   "( soll_haben, konten_id, datum, betrag, buchtext, ereigniss_id, liqui_monat) " +
 	      			   "VALUES " +
 	      			   "('" + BankStatementLine.sh + "', " +
-	      			   BankStatementLine.iKontoId + ", '" +
-	      			   BankStatementLine.strDatum + "', " +
-	      			   BankStatementLine.strBetrag + ", '" +
-	      			   BankStatementLine.strBuchtext + "', " +
-	      			   BankStatementLine.iEreigId + ", ";
+	      			   BankStatementLine.KontoId + ", '" +
+	      			   BankStatementLine.Datum + "', " +
+	      			   BankStatementLine.Betrag + ", '" +
+	      			   BankStatementLine.Buchungstext + "', " +
+	      			   BankStatementLine.EreignisId + ", ";
 	      			   
 	      			   //falls das feld fuer das Liquidatum NULL sein
 	      			   //soll darf kein hochkomma an dieser stelle 
 	      			   //im sqlstatement vorkommen
-	      			   if(BankStatementLine.strLiquiDate == "NULL")
-	      				   sql = sql + BankStatementLine.strLiquiDate + ");";
+	      			   if(BankStatementLine.LiquiDate == "NULL")
+	      				   sql = sql + BankStatementLine.LiquiDate + ");";
 	      			   else
-	      				   sql = sql + "'" + BankStatementLine.strLiquiDate + "');";
+	      				   sql = sql + "'" + BankStatementLine.LiquiDate + "');";
 	      
 		pusher.insert(sql);
 	}
