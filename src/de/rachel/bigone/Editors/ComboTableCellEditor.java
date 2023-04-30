@@ -27,7 +27,7 @@ public class ComboTableCellEditor extends AbstractCellEditor implements TableCel
 
 	public ComboTableCellEditor(Connection LoginCN) {
 		cn = LoginCN;
-		// notwendig damit eine Auswahl für ein beenden des Editmodus der Zelle sorgt
+		// notwendig damit eine Auswahl, für das Beenden des Editmodus der Zelle sorgt
 		component.addItemListener(new ItemListener() {
 
 			@Override

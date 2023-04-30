@@ -43,7 +43,7 @@ public class Transaktionen {
 	private JFormattedTextField txtLiquiDate, txtBetrag, txtDatum;
 	private JTextArea txtBeschreibung;
 	private JCheckBox chkLiqui;
-	private JRadioButton rb1, rb2;
+	private JRadioButton soll, haben;
 	private ButtonGroup grpsh;
 	private JComboBox<String> Iban, cmbEreigniss;
 	private JButton btnSave, btnClean;
@@ -83,15 +83,15 @@ public class Transaktionen {
 		sh.setBounds(100,120,200,90);
 		sh.setBorder(new TitledBorder("S/H"));
 		//Optionsbuttons fuer S/H definieren, gruppieren und in das S/H Panel setzen setzen
-		rb1 = new JRadioButton( "Soll" );
-		rb2 = new JRadioButton( "Haben" );
-		rb1.setSelected(true);
+		soll = new JRadioButton( "Soll" );
+		haben = new JRadioButton( "Haben" );
+		soll.setSelected(true);
 		grpsh = new ButtonGroup();
-		grpsh.add(rb1);
-		grpsh.add(rb2);
+		grpsh.add(soll);
+		grpsh.add(haben);
 		//widgets auf das S/Hpanel legen
-		sh.add(rb1);
-		sh.add(rb2);
+		sh.add(soll);
+		sh.add(haben);
 		
 		// add Account choose and fill it with valid Account IDs (IBAN)
 		Iban = new JComboBox<String>();
@@ -372,15 +372,19 @@ public class Transaktionen {
 	private void CleanAll() {
 		//hier werden alle Werte und Inhalte des Dialogs wieder 
 		//auf die Startwerte zurueckgesetzt
-		rb1.setSelected(true);
-		chkLiqui.setSelected(true);
-		txtLiquiDate.setText(null);
-		txtDatum.setText(null);
+
+		// auf Soll setzen
+		soll.setSelected(true);
+		// chkLiqui.setSelected(true);
+		// txtLiquiDate.setText(null);
+		// txtDatum.setText(null);
 		txtBetrag.setText("0,00");
+		txtBetrag.requestFocus();
 		txtBeschreibung.setText("");
 		lblInfoFeld.setText("");
-		cmbEreigniss.setSelectedIndex(0);
-		txtDatum.requestFocus();
+
+		// cmbEreigniss.setSelectedIndex(0);
+		// txtDatum.requestFocus();
 	}
 	private void fill_cmbEreigniss() {
 		DBTools getter = new DBTools(cn);
@@ -397,7 +401,7 @@ public class Transaktionen {
 		return true;
 	}
 	private String soll_oder_haben() {
-		if(rb1.isSelected())
+		if(soll.isSelected())
 			return "s";
 		else
 			return "h";
