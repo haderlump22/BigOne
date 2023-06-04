@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.time.LocalDate;
 
 import javax.swing.JOptionPane;
 
@@ -76,6 +77,7 @@ public class ReadCamt {
 			// chech witch Bank is the Account from
 			// 0 nothing is found
 			// 1 ING DIBA
+			// 2 Postbank csv
 			int iBank = checkBank();
 			
 			switch (iBank) {
@@ -87,6 +89,10 @@ public class ReadCamt {
 				// read the DIBA Content in this Object like the CAMT Data above
 				readDibaData(csvContent);
 				break;
+			case 2:
+			// read the DIBA Content in this Object like the CAMT Data above
+			readPostbankData(csvContent);
+			break;
 			default:
 				break;
 			}
@@ -287,6 +293,48 @@ public class ReadCamt {
 			buchungen[i - (iHeaderRow + 1)][Debitor] = csvContent[i].split(";")[2]; // wird nicht extra aufgeführt deshalb wird der selbe wert gelesen
 		}
 	}
+	private void readPostbankData(String[] csvContent) {
+		int iHeaderRow;
+		
+		// IBAN is in Line 3 in the csvContent
+		this.sIBAN = csvContent[2].split(";")[2];
+
+		// AccountOwner ar not present in Postbank CSV
+		this.AccountOwner = "";
+
+		// Headerrow is in Line 8
+		iHeaderRow = 7;
+		
+		// reinitial the Array buchungen new
+		this.buchungen = new String[csvContent.length - 1 - 8][6];
+
+		// the Diba Data begin in the row after the Header, end ends 1 line bevor the last
+		for (int i = iHeaderRow + 1; i < (csvContent.length - 1); i++) {
+			// the Date in this fields has no leading zeros
+			// so i converted in so one
+			Integer year, month, day;
+			String convertedDate;
+			year = Integer.parseInt(csvContent[i].split(";")[1].split("\\.")[2]);
+			month = Integer.parseInt(csvContent[i].split(";")[1].split("\\.")[1]);
+			day = Integer.parseInt(csvContent[i].split(";")[1].split("\\.")[0]);
+
+			// Date as String in Format yyyy-MM-dd
+			convertedDate = LocalDate.of(year, month, day).toString();
+			
+			buchungen[i - (iHeaderRow + 1)][ValueDate] = convertedDate;
+			
+			// the Credit or Dbit Inticator is in the csv Data not a separate field
+			// they is indicates by a minus or nothing bevore the amount (creditorische Buchung = haben / Debitorische Buchung = soll)
+			buchungen[i - (iHeaderRow + 1)][CreditDebitIndicator] = getCreditDebitIndicator(csvContent[i].split(";")[11].replace(".", "").replaceAll(",", "."));
+			
+			// the amount in the csv is german, we have to replace the thousand dot with null
+			// and the decimal separator with a dot
+			buchungen[i - (iHeaderRow + 1)][Amount] = delteSign(csvContent[i].split(";")[11].replace(".", "").replaceAll(",", ".")); 
+			buchungen[i - (iHeaderRow + 1)][Unstructured] = csvContent[i].split(";")[4];
+			buchungen[i - (iHeaderRow + 1)][Creditor] = csvContent[i].split(";")[3];
+			buchungen[i - (iHeaderRow + 1)][Debitor] = csvContent[i].split(";")[3]; // wird nicht extra aufgeführt deshalb wird der selbe wert gelesen
+		}
+	}
 	private int findHeaderRow() {
 		// find the Row that contians the Headers like "Buchung" or "Valuta"
 		for (int i = 0; i < csvContent.length; i++) {
@@ -331,19 +379,21 @@ public class ReadCamt {
 		return "";
 	}
 	private int checkBank() {
+		String[] rowParts;
 		// in the CSV Data we can check from witch Bank they are
-		for (int i = 0; i < csvContent.length; i++) {
-			String[] rowParts = csvContent[i].split(";");
-			
-			// check if the Result hat min 2 Parts with the right Content
-			if (rowParts.length == 2) {
-				// the only Bank we know at this Point ist the ING DIBA
-				// the String "Bank" followed by "ING"
-				if (rowParts[0].equals("Bank") && rowParts[1].equals("ING")) {
-					return 1;
-				}
-			}
+		
+		// in line 5 we find the info for the ING
+		rowParts = csvContent[4].split(";");
+		if (rowParts[0].equals("Bank") && rowParts[1].equals("ING")) {
+			return 1;
 		}
+
+		// or in line 3 we find the info for the Postbank
+		rowParts = csvContent[2].split(";");
+		if (rowParts[0].equals("Postbank Giro plus")) {
+			return 2;
+		}
+
 		return 0;
 	}
 }
