@@ -539,7 +539,12 @@ public class Liqui {
 		
 		getter.select(sql, 1);
 		
-		return Double.valueOf(getter.getValueAt(0, 0).toString()).doubleValue();
+		// check whether income was set per person at all, if not, give back zero
+		if (getter.getValueAt(0, 0) == null) {
+			return 0;
+		} else {
+			return Double.valueOf(getter.getValueAt(0, 0).toString()).doubleValue();
+		}
 	}
 	private void calculate_profit(String sAbrMonat) {
 		double dblMtlJahrKosten, dblEin, dblAus, dblSummeFixkosten, dblNutzBetrag;
