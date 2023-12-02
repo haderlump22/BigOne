@@ -295,6 +295,8 @@ public class ReadCamt {
 	}
 	private void readPostbankData(String[] csvContent) {
 		int iHeaderRow;
+		String AccountBalance;
+		boolean isGermanFormat = true;
 		
 		// IBAN is in Line 3 in the csvContent
 		this.sIBAN = csvContent[2].split(";")[2];
@@ -304,6 +306,16 @@ public class ReadCamt {
 
 		// Headerrow is in Line 8
 		iHeaderRow = 7;
+
+		// Postbank sometimes change the Format of Numbers (sometime German (3.222,67) sometime englisch (3,112.23) )
+		// At the amount of the account balance in line 6 ca we check what Format is it at this time
+		AccountBalance = csvContent[5].split(";")[4];
+
+		// look at the Third place from behind, if there is a dot the Format is not German
+		Character DecimalSeparator = AccountBalance.charAt(AccountBalance.length() - 3);
+		if (DecimalSeparator.equals('.')) {
+			isGermanFormat = false;
+		}
 		
 		// reinitial the Array buchungen new
 		this.buchungen = new String[csvContent.length - 1 - 8][6];
@@ -329,7 +341,11 @@ public class ReadCamt {
 			
 			// the amount in the csv is german, we have to replace the thousand dot with null
 			// and the decimal separator with a dot
-			buchungen[i - (iHeaderRow + 1)][Amount] = delteSign(csvContent[i].split(";")[11].replace(".", "").replaceAll(",", ".")); 
+			if (isGermanFormat) {
+				buchungen[i - (iHeaderRow + 1)][Amount] = delteSign(csvContent[i].split(";")[11].replace(".", "").replaceAll(",", ".")); 
+			} else {
+				buchungen[i - (iHeaderRow + 1)][Amount] = delteSign(csvContent[i].split(";")[11].replaceAll(",", "")); 
+			}
 			buchungen[i - (iHeaderRow + 1)][Unstructured] = csvContent[i].split(";")[4];
 			buchungen[i - (iHeaderRow + 1)][Creditor] = csvContent[i].split(";")[3];
 			buchungen[i - (iHeaderRow + 1)][Debitor] = csvContent[i].split(";")[3]; // wird nicht extra aufgeführt deshalb wird der selbe wert gelesen
