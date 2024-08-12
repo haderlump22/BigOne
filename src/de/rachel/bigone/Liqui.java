@@ -136,7 +136,7 @@ public class Liqui {
 		
 		//Textfeld fuer Hinweise zum errechneten Betrag
 		txtHinweis = new JTextArea();
-		txtHinweis.setBounds(195, 30, 230, 205);
+		txtHinweis.setBounds(195, 30, 260, 205);
 		txtHinweis.setBorder(BorderFactory.createEtchedBorder());
 		txtHinweis.setEditable(false); //infos sollen nur vom Programm gesetzt werden
 		
@@ -398,10 +398,14 @@ public class Liqui {
 						
 						//calc the proportion of the sums in percent, to the total Sum of all persons
 						txtHinweisAufteilung.append("Sparbetrag: "+Double.toString(dResidualValue).replace(".", ",")+"\n");
-						for(int PersonCounter = 0; PersonCounter < PersonAmount.length; PersonCounter++) {
+						for (int PersonCounter = 0; PersonCounter < PersonAmount.length; PersonCounter++) {
+							String tmpPersonName = cmbPerson.getItemAt(PersonCounter + 1).toString();
+							String PersonName = tmpPersonName.substring(0, tmpPersonName.indexOf(" "));
 							double percent = roundScale2((PersonAmount[PersonCounter] * 100) / TotalPersonAmount);
 							double dValue = roundScale2((percent * dResidualValue) / 100);
-							txtHinweisAufteilung.append(Double.toString(percent).replace(".", ",") + "% / " + Double.toString(dValue).replace(".", ",")+"\n");
+							txtHinweisAufteilung.append(PersonName + ": "
+									+ Double.toString(percent).replace(".", ",") + "% / "
+									+ Double.toString(dValue).replace(".", ",") + "\n");
 						}
 					}
 				}
@@ -409,7 +413,7 @@ public class Liqui {
 		
 			//Textfeld fuer Hinweise zum errechneten Betrag
 			txtHinweisAufteilung = new JTextArea();
-			txtHinweisAufteilung.setBounds(330, 90, 180, 180);
+			txtHinweisAufteilung.setBounds(330, 90, 220, 180);
 			txtHinweisAufteilung.setBorder(BorderFactory.createEtchedBorder());
 			txtHinweisAufteilung.setEditable(false); //infos sollen nur vom Programm gesetzt werden
 			
@@ -567,7 +571,7 @@ public class Liqui {
 		//der eieignissid 47 Jahresausgaben)
 		dblAus = summiere_ausgaben(sAbrMonat);
 		//System.out.println("Ausgaben: " + dblAus);
-		txtHinweis.append("Ausgaben: " + dblAus+"\n");
+		txtHinweis.append("Ausgaben (ohne Fixkosten): " + dblAus+"\n");
 		
 		//die liquiditaetsfahigen teile von aufteilungsdatensaetzen zusammenaddieren
 		//dabei werden einzeln haben und soll anteile zusammengerechnet
