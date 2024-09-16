@@ -47,9 +47,9 @@ public class ValuesTableModel extends AbstractTableModel{
     }
 	private Object[][] lese_werte(String strValue, String strLiquiDate, String sIban) {
 		/*
-		 * liest in abhaengigkeit der werte aus den 
-		 * comboboxen und des optionsfeldes die werte aus der 
-		 * DB und traegt sie in das String Array ein
+		 * ermittelt die dem Betrag entsprechenden Datensätze
+		 * des ausgewählten Kontos und des gesetzten Liquizeitraumes 
+		 * zur Darstellung in der Tabelle
 		 */
    		DBTools getter = new DBTools(cn);
 
