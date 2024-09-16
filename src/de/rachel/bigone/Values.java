@@ -40,7 +40,6 @@ public class Values {
 	private Font fontTxtFields, fontCmbBoxes;
 	private JTable table;
 	private ValuesTableModel model; 
-	private JPopupMenu popmen;
 	private JComboBox<String> cmbKto;
 
 	Values(Connection LoginCN){
@@ -55,30 +54,6 @@ public class Values {
 		//schriftenfestlegungen
 		fontTxtFields = new Font("Arial",Font.PLAIN,16);
 		fontCmbBoxes = new Font("Arial",Font.PLAIN,14);
-		
-		popmen = new JPopupMenu(); 
-		JMenuItem ktonfo = new JMenuItem("Kontoinfo");
-		ktonfo.addActionListener(new ActionListener(){ 
-	        public void actionPerformed(ActionEvent ae){
-	        	String transaktions_id;
-				model = (ValuesTableModel)table.getModel();
-				transaktions_id = "" + model.getValueAt(table.getSelectedRow(), 0);
-				
-				DBTools getter = new DBTools(cn);
-				String sql = "SELECT k.kreditinstitut, ko.bemerkung, p.name, p.vorname, ko.kontonummer, k.blz FROM kreditinstitut k, personen p, konten ko, transaktionen t " +
-							"WHERE t.transaktions_id = "+ transaktions_id +" AND t.konten_id = ko.konten_id AND p.personen_id = ko.personen_id AND k.kreditinstitut_id = ko.kreditinstitut_id;";
-				getter.select(sql, 6);
-				
-				//zusammenfuegen der selectierten Werte fuer die MsgBox
-				String infotext = getter.getValueAt(0, 0) + "(" + getter.getValueAt(0, 5) + ")\n";
-				infotext = infotext + getter.getValueAt(0, 1) + "(" + getter.getValueAt(0, 4) + ")\n";
-				infotext = infotext + getter.getValueAt(0, 2) + ", ";
-				infotext = infotext + getter.getValueAt(0, 3);
-				
-				JOptionPane.showMessageDialog(valuewindow, infotext, "Kontoinfo ID= " + transaktions_id, JOptionPane.INFORMATION_MESSAGE);
-	        }
-	    });
-		popmen.add(ktonfo);
 		
 		//textfeld fuer den zu suchenden Betrag definieren
 		txtValue = new JFormattedTextField(new NumberFormatter(new DecimalFormat("#,##0.00")));
@@ -174,13 +149,6 @@ public class Values {
 		table.getColumnModel().getColumn(6).setMinWidth(120);
 		table.getColumnModel().getColumn(6).setMaxWidth(120);
 
-		table.addMouseListener( new MouseAdapter(){ 
-			public void mouseReleased( MouseEvent me ) { 
-				if ( me.getButton() == MouseEvent.BUTTON3 ) 
-					popmen.show( me.getComponent(), me.getX(), me.getY() ); 
-			} 
-		});
-		
 		JScrollPane sp = new JScrollPane(table);
 		sp.setBounds(30,70,725,355);
 		
