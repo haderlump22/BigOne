@@ -6,6 +6,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.sql.Connection;
@@ -78,12 +80,17 @@ public class Values {
 			}
 		});
 		txtValue.addKeyListener(new KeyListener() {
+			private String LiquiDate;
 
 			public void keyPressed(KeyEvent ke) {
 				if (ke.getKeyCode() == KeyEvent.VK_ENTER) {
+					if (withLiquiDate.isSelected()) {
+						LiquiDate = BigOneTools.datum_wandeln(txtLiquiDate.getText(), 0);
+					} else {
+						LiquiDate = "";
+					}
 					model = (ValuesTableModel) table.getModel();
-					model.aktualisiere(txtValue.getText().replace(".", "").replace(',', '.'),
-							BigOneTools.datum_wandeln(txtLiquiDate.getText(), 0),
+					model.aktualisiere(txtValue.getText().replace(".", "").replace(',', '.'), LiquiDate,
 							cmbKto.getSelectedItem().toString().replace(" ", ""));
 				}
 			}
@@ -120,6 +127,21 @@ public class Values {
 
 		// and fill it with Values
 		fill_cmbKto();
+
+		// setting the Tooltip for the shown Value after first filling
+		cmbKto.setToolTipText(getAccountDescription(cmbKto.getSelectedItem().toString().replace(" ", "")));
+
+		// add an ActionListener to set the Tooltip with the Accountdescription of the selected IBAN
+		cmbKto.addItemListener(new ItemListener() {
+
+			@Override
+			public void itemStateChanged(ItemEvent e) {
+				if (e.getStateChange() == ItemEvent.SELECTED) {
+					// set Tooltip of the Account Combobox with the Hint of the Account
+					cmbKto.setToolTipText(getAccountDescription(e.getItem().toString().replace(" ", "")));
+				}
+			}
+		});
 
 		// Create the check box to specify whether liquidatum is in Query or not
 		withLiquiDate = new JCheckBox("mit Liquidatum suchen", true);
@@ -196,5 +218,19 @@ public class Values {
 
 		for (Object[] cmbKtoValue : cmbKtoValues)
 			cmbKto.addItem(BigOneTools.getIbanFormatted(cmbKtoValue[0].toString()));
+	}
+
+	private String getAccountDescription(String IBAN) {
+		//get the transaction wording to the transaktions_id
+		DBTools getter = new DBTools(cn);
+	
+		getter.select("SELECT bemerkung FROM konten " + 
+				"WHERE iban = '" + IBAN + "'", 1);
+		
+		if(getter.getRowCount() > 0) {
+			return getter.getValueAt(0, 0).toString();
+		}else {
+			return "not found";
+		}
 	}
 }
