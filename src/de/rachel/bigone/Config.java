@@ -86,9 +86,10 @@ public class Config {
 			return false;
 	}
 	
+	@SuppressWarnings("unchecked")
 	private void writeTemplateConfig(FileWriter ConfigFile) {
 		JSONObject obj = new JSONObject();
-		
+
 		obj.put("DbDrv", "org.postgresql.Driver");
 		obj.put("DbUrl", "jdbc:postgresql://localhost:5432/");
 		obj.put("DbName", "bigone");

@@ -36,7 +36,7 @@ public class Transaktionen {
 	private static final int AUFTEILUNG = 52;
 	private Connection cn = null;
 	private JFrame mainwindow;
-	private JPanel sh, bank, liqui, details;
+	private JPanel sh, liqui, details;
 	private JLabel transaktion, eurol, euror, lblDatum, lblBetrag, lblBeschreibung;
 	private JLabel lblEreigniss, lblInfoFeld;
 	private Font fontTop, fontTxtFields, fontCmbBoxes, fontIban;
