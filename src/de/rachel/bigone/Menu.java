@@ -91,11 +91,44 @@ public class Menu {
         }
     });
 	tables.add(jahres);
+
+	// Haushaltskonto Bereich
+	JMenu Haushaltskonto = new JMenu("Haushaltskonto");
+
+	// Untermenüs Haushaltskonto
+	JMenuItem Gehaltsgrundlagen = new JMenuItem("Gehaltsgrundlagen");
+	JMenuItem Ausgaben = new JMenuItem("Ausgaben");
+	JMenuItem Ueberweisungsbetrag = new JMenuItem("Überweisungsbetrag");
+
+	// Listener für die Untermenüns
+	Gehaltsgrundlagen.addActionListener(new ActionListener(){ 
+        public void actionPerformed(ActionEvent ae){ 
+            new SalaryBases(cn);
+        }
+    });
+
+	Ausgaben.addActionListener(new ActionListener(){ 
+        public void actionPerformed(ActionEvent ae){ 
+            //new Rac();
+        }
+    });
+
+	Ueberweisungsbetrag.addActionListener(new ActionListener(){ 
+        public void actionPerformed(ActionEvent ae){ 
+            //new Rac();
+        }
+    });
+
+	// Untermenüns an Menüpunkt heften
+	Haushaltskonto.add(Gehaltsgrundlagen);
+	Haushaltskonto.add(Ausgaben);
+	Haushaltskonto.add(Ueberweisungsbetrag);
 	
 	//Einzellmenues in die menuebar einbetten
 	mbar.add(prog);
 	mbar.add(quer);
 	mbar.add(tables);
+	mbar.add(Haushaltskonto);
 	
 	//menue an das fenster haengen
 	menuwindow.setJMenuBar(mbar);
