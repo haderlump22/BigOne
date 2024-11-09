@@ -5,14 +5,22 @@ import java.sql.Connection;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
+
+import de.rachel.bigone.Models.SumOfIncomePerPartyTableModel;
+import de.rachel.bigone.Renderer.SumOfIncomePerPartyTableCellRenderer;
+import de.rachel.bigone.Renderer.ValuesTableCellRenderer;
+
+import javax.swing.JTable;
 
 public class SalaryBases {
     private Connection cn = null;
 
     private JFrame SalaryBasesWindow;
-    private JPanel pnlSumOfIncomePerParty;
-    private JScrollPane spSumOfIncomePerParty;
+    private JPanel pnlCurrentSumOfIncomePerParty;
+    private JScrollPane spCurrentSumOfIncomePerParty;
+    private JTable SumOfIncomePerPartyTable;
 
     SalaryBases(Connection LoginCN) {
         cn = LoginCN;
@@ -24,20 +32,28 @@ public class SalaryBases {
 		SalaryBasesWindow.setLayout(null);
 		SalaryBasesWindow.setResizable(false);
 
-        pnlSumOfIncomePerParty = new JPanel();
-		pnlSumOfIncomePerParty.setLayout(null);
-		pnlSumOfIncomePerParty.setBounds(10, 10, 500, 80);
-		pnlSumOfIncomePerParty.setBorder(new TitledBorder("mtl. Einkünfte"));
+        pnlCurrentSumOfIncomePerParty = new JPanel();
+		pnlCurrentSumOfIncomePerParty.setLayout(null);
+		pnlCurrentSumOfIncomePerParty.setBounds(10, 10, 500, 100);
+		pnlCurrentSumOfIncomePerParty.setBorder(new TitledBorder("mtl. Einkünfte"));
+
+        // create Table for Current Income Sums of each Party
+        createSumOfIncomePerPartyTable();
 
         // scrollpane for the tabel with the values
-        spSumOfIncomePerParty = new JScrollPane();
-        pnlSumOfIncomePerParty.add(spSumOfIncomePerParty);
+        spCurrentSumOfIncomePerParty = new JScrollPane(SumOfIncomePerPartyTable);
+        spCurrentSumOfIncomePerParty.setBounds(15,20,460,70);
+        pnlCurrentSumOfIncomePerParty.add(spCurrentSumOfIncomePerParty);
   
         // put all to the Frame
-        SalaryBasesWindow.add(pnlSumOfIncomePerParty);
+        SalaryBasesWindow.add(pnlCurrentSumOfIncomePerParty);
         SalaryBasesWindow.validate();
         SalaryBasesWindow.repaint();
-
+        
         SalaryBasesWindow.setVisible(true);
+    }
+    private void createSumOfIncomePerPartyTable () {
+        SumOfIncomePerPartyTable = new JTable(new SumOfIncomePerPartyTableModel(cn));
+		SumOfIncomePerPartyTable.setDefaultRenderer( Object.class, new SumOfIncomePerPartyTableCellRenderer() );
     }
 }
