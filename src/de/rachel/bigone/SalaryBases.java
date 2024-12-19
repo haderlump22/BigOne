@@ -5,12 +5,10 @@ import java.sql.Connection;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
 
 import de.rachel.bigone.Models.SumOfIncomePerPartyTableModel;
 import de.rachel.bigone.Renderer.SumOfIncomePerPartyTableCellRenderer;
-import de.rachel.bigone.Renderer.ValuesTableCellRenderer;
 
 import javax.swing.JTable;
 
