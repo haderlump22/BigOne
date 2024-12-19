@@ -47,7 +47,9 @@ public class ValuesTableModel extends AbstractTableModel {
 			daten[row][col] = value.toString();
 		else
 			daten[row][col] = null;
+
 		fireTableCellUpdated(row, col);
+		
 		if (value != null)
 			schreibe_neue_daten(row, col, value.toString(), strTransID);
 		else
