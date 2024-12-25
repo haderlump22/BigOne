@@ -30,24 +30,24 @@ public class SumOfIncomePerPartyTableCellRenderer implements TableCellRenderer {
             label.setBackground(table.getSelectionBackground());
             label.setForeground(table.getSelectionForeground());
          }
+
          if (column == 0) {
             label.setHorizontalAlignment(JLabel.LEFT);
          }
+
          if (column == 1) {
             label.setHorizontalAlignment(JLabel.RIGHT);
             DecimalFormat formatter = new DecimalFormat("#.00");
             label.setText(formatter.format((Number) value));
          }
+
          if (column == 2) {
             label.setHorizontalAlignment(JLabel.RIGHT);
-            // Double.valueOf(value.toString()) / 100
-            DecimalFormat formatter = new DecimalFormat("#.00%");
-            label.setText(formatter.format((Double.valueOf(value.toString()) / 100)));
+            label.setText("%.02f".formatted((Double) value));
          }
          return label;
       } else {
          return label;
       }
-
    }
 }
