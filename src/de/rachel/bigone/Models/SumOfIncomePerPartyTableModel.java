@@ -42,11 +42,11 @@ public class SumOfIncomePerPartyTableModel extends AbstractTableModel{
 		Object[][] daten;
 		Double SummeOfAllIncome = 0.0;
 
- 		getter.select(
+		getter.select(
 				"SELECT p.name || ', ' || SUBSTRING(p.vorname, 1, 1) || '.' as party, sum(gg.betrag) as betrag, 0 AS anteil from personen p, ha_gehaltsgrundlagen gg where gilt_bis is NULL and p.personen_id = gg.partei_id group by p.name, p.vorname order by p.name;",
 				3);
-		
-				daten = getter.getData();
+
+		daten = getter.getData();
 
 		// calculate the percent Value for Column 3
 		
