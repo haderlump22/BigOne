@@ -74,6 +74,11 @@ public class Values {
 				SwingUtilities.invokeLater(new Runnable() {
 					@Override
 					public void run() {
+						if (table.isEditing()) {
+							table.getCellEditor().stopCellEditing();
+							table.clearSelection();
+						}
+							
 						txtValue.selectAll();
 					}
 				});
