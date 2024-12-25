@@ -122,12 +122,10 @@ public class Values {
    	private void zeichne_tabelle() {
 
 		table = new JTable(new ValuesTableModel(txtValue.getText().replace(".", "").replace(',', '.'), BigOneTools.datum_wandeln(txtLiquiDate.getText(), 0), cmbKto.getSelectedItem().toString().replace(" ", ""), cn));
-		ValuesTableCellRenderer ren = new ValuesTableCellRenderer();
-		table.setDefaultRenderer( Object.class, ren );
+		table.setDefaultRenderer( Object.class, new ValuesTableCellRenderer() );
 		table.getColumnModel().getColumn(2).setCellEditor(new DateTableCellEditor());
 		table.getColumnModel().getColumn(3).setCellEditor(new DecimalTableCellEditor());
 		table.getColumnModel().getColumn(5).setCellEditor(new DateTableCellEditor());
-		//table.setDefaultEditor(Object.class, new ValuesTableCellEditor());
 				
 		//fuer einige spalten feste breiten einrichten
 		table.getColumnModel().getColumn(0).setMinWidth(55);
