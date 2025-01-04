@@ -1,17 +1,23 @@
 package de.rachel.bigone.Models;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.swing.table.AbstractTableModel;
 import de.rachel.bigone.DBTools;
 
 public class SumOfIncomePerPartyTableModel extends AbstractTableModel{
 	private Connection cn = null;
 	private String[] columnName = new String[] { "Name", "Summe", "Anteil in Prozent" };
-	private Object[][] daten;
+	private	Double SumOfAllIncome = 0.0;
+	private record TableRow(String Name, Double Sum){};
+	private List<TableRow> TableData = new ArrayList<>();
 
 	public SumOfIncomePerPartyTableModel(Connection LoginCN) {
 		cn = LoginCN;
-		daten = lese_werte();
+		lese_werte();
 	}
 
 	public int getColumnCount() {
@@ -19,7 +25,7 @@ public class SumOfIncomePerPartyTableModel extends AbstractTableModel{
 	}
 
 	public int getRowCount() {
-		return daten.length;
+		return TableData.size();
 	}
 
 	public String getColumnName(int col) {
@@ -27,39 +33,58 @@ public class SumOfIncomePerPartyTableModel extends AbstractTableModel{
 	}
 
 	public Object getValueAt(int row, int col) {
-		return daten[row][col];
+		TableRow Zeile = TableData.get(row);
+		Object ReturnValue = null;
+
+		switch (col) {
+			case 0:
+				ReturnValue = Zeile.Name;
+				break;
+			case 1:
+				ReturnValue = Zeile.Sum;
+				break;
+			case 2:
+				// for Column 3 (Percentvalue) the Value must be calculated separatly
+				ReturnValue = (Zeile.Sum * 100) / SumOfAllIncome;
+				break;
+			default:
+				break;
+		}
+
+		return ReturnValue;
 	}
 
 	public boolean isCellEditable(int row, int col) {
 		return false;
 	}
 
-	private Object[][] lese_werte() {
+	private void lese_werte() {
 		/*
 		 * get the current Income of everey Party
 		 */
    		DBTools getter = new DBTools(cn);
-		Object[][] daten;
-		Double SummeOfAllIncome = 0.0;
+		ResultSet rs;
 
 		getter.select(
-				"SELECT p.name || ', ' || SUBSTRING(p.vorname, 1, 1) || '.' as party, sum(gg.betrag) as betrag, 0 AS anteil from personen p, ha_gehaltsgrundlagen gg where gilt_bis is NULL and p.personen_id = gg.partei_id group by p.name, p.vorname order by p.name;",
-				3);
+				"SELECT p.name || ', ' || SUBSTRING(p.vorname, 1, 1) || '.' as party, sum(gg.betrag) as betrag from personen p, ha_gehaltsgrundlagen gg where gilt_bis is NULL and p.personen_id = gg.partei_id group by p.name, p.vorname order by p.name;",
+				2);
 
-		daten = getter.getData();
-
+		rs = getter.getResultSet();
+		try {
+			rs.beforeFirst();
+			
+			while (rs.next()) {
+				TableData.add(new TableRow(rs.getString("party"), rs.getDouble("betrag")));
+			}
+		} catch (Exception e) {
+			System.out.println("SumOfIncomPerPartyTableModel - lese_werte(): " + e.toString());
+		}
 		// calculate the percent Value for Column 3
 		
 		// first get the sum of all Values in Column 2
-		for (int i = 0; i < daten.length; i++) {
-			SummeOfAllIncome = SummeOfAllIncome + Double.valueOf(daten[i][1].toString());
+		for (TableRow Zeile : TableData) {
+			SumOfAllIncome = SumOfAllIncome+ Zeile.Sum;
 		}
-
-		// Determine for every Incom the percentage share
-		for (int i = 0; i < daten.length; i++) {
-			daten[i][2] = (Double.valueOf(daten[i][1].toString()) * 100) / SummeOfAllIncome;
-		}
-
-		return daten;
+		System.out.println(SumOfAllIncome);
 	}
 }
