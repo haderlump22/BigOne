@@ -1,7 +1,6 @@
 package de.rachel.bigone.Renderer;
 
 import java.awt.Component;
-import java.text.DecimalFormat;
 
 import javax.swing.JLabel;
 import javax.swing.JTable;
@@ -37,8 +36,7 @@ public class SumOfIncomePerPartyTableCellRenderer implements TableCellRenderer {
 
          if (column == 1) {
             label.setHorizontalAlignment(JLabel.RIGHT);
-            DecimalFormat formatter = new DecimalFormat("#.00");
-            label.setText(formatter.format((Number) value));
+            label.setText("%.02f".formatted((Number) value));
          }
 
          if (column == 2) {
