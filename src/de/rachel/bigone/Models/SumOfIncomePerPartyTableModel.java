@@ -6,14 +6,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.table.AbstractTableModel;
+
 import de.rachel.bigone.DBTools;
+import de.rachel.bigone.records.SumOfIncomePerPartyTableRow;
 
 public class SumOfIncomePerPartyTableModel extends AbstractTableModel{
 	private Connection cn = null;
 	private String[] columnName = new String[] { "Name", "Summe", "Anteil in Prozent" };
 	private	Double SumOfAllIncome = 0.0;
-	private record TableRow(String Name, Double Sum){};
-	private List<TableRow> TableData = new ArrayList<>();
+	private List<SumOfIncomePerPartyTableRow> TableData = new ArrayList<>();
 
 	public SumOfIncomePerPartyTableModel(Connection LoginCN) {
 		cn = LoginCN;
@@ -33,19 +34,19 @@ public class SumOfIncomePerPartyTableModel extends AbstractTableModel{
 	}
 
 	public Object getValueAt(int row, int col) {
-		TableRow Zeile = TableData.get(row);
+		SumOfIncomePerPartyTableRow Zeile = TableData.get(row);
 		Object ReturnValue = null;
 
 		switch (col) {
 			case 0:
-				ReturnValue = Zeile.Name;
+				ReturnValue = Zeile.Name();
 				break;
 			case 1:
-				ReturnValue = Zeile.Sum;
+				ReturnValue = Zeile.Sum();
 				break;
 			case 2:
 				// for Column 3 (Percentvalue) the Value must be calculated separatly
-				ReturnValue = (Zeile.Sum * 100) / SumOfAllIncome;
+				ReturnValue = (Zeile.Sum() * 100) / SumOfAllIncome;
 				break;
 			default:
 				break;
@@ -72,19 +73,18 @@ public class SumOfIncomePerPartyTableModel extends AbstractTableModel{
 		rs = getter.getResultSet();
 		try {
 			rs.beforeFirst();
-			
+
 			while (rs.next()) {
-				TableData.add(new TableRow(rs.getString("party"), rs.getDouble("betrag")));
+				TableData.add(new SumOfIncomePerPartyTableRow(rs.getString("party"), rs.getDouble("betrag")));
 			}
 		} catch (Exception e) {
 			System.out.println("SumOfIncomPerPartyTableModel - lese_werte(): " + e.toString());
 		}
 		// calculate the percent Value for Column 3
-		
+
 		// first get the sum of all Values in Column 2
-		for (TableRow Zeile : TableData) {
-			SumOfAllIncome = SumOfAllIncome+ Zeile.Sum;
+		for (SumOfIncomePerPartyTableRow Zeile : TableData) {
+			SumOfAllIncome = SumOfAllIncome+ Zeile.Sum();
 		}
-		System.out.println(SumOfAllIncome);
 	}
 }

@@ -34,7 +34,7 @@ public class SalaryBases {
 
         CurrentSumOfIncomePerPartyPanel = new JPanel();
         CurrentSumOfIncomePerPartyPanel.setLayout(null);
-        CurrentSumOfIncomePerPartyPanel.setBounds(10, 10, 490, 100);
+        CurrentSumOfIncomePerPartyPanel.setBounds(10, 10, 305, 100);
         CurrentSumOfIncomePerPartyPanel.setBorder(new TitledBorder("mtl. Einkünfte"));
 
         IncomeDetailTablePanel = new JPanel();
@@ -50,7 +50,7 @@ public class SalaryBases {
 
         // scrollpane for the tabel with the sums of values
         CurrentSumOfIncomePerPartyScrollPane = new JScrollPane(SumOfIncomePerPartyTable);
-        CurrentSumOfIncomePerPartyScrollPane.setBounds(15, 20, 460, 70);
+        CurrentSumOfIncomePerPartyScrollPane.setBounds(15, 20, 275, 70);
         CurrentSumOfIncomePerPartyPanel.add(CurrentSumOfIncomePerPartyScrollPane);
 
         // scrollpane for the Detail Table
@@ -70,10 +70,24 @@ public class SalaryBases {
     private void createSumOfIncomePerPartyTable() {
         SumOfIncomePerPartyTable = new JTable(new SumOfIncomePerPartyTableModel(cn));
         SumOfIncomePerPartyTable.setDefaultRenderer(Object.class, new SumOfIncomePerPartyTableCellRenderer());
+
+        // define the width for some columns
+        SumOfIncomePerPartyTable.getColumnModel().getColumn(0).setMinWidth(100);
+        SumOfIncomePerPartyTable.getColumnModel().getColumn(0).setMaxWidth(100);
+        SumOfIncomePerPartyTable.getColumnModel().getColumn(1).setMinWidth(70);
+        SumOfIncomePerPartyTable.getColumnModel().getColumn(1).setMaxWidth(70);
     }
 
     private void createIncomeDetailTable() {
         IncomeDetailTable = new JTable(new IncomeDetailTableModel(cn));
         IncomeDetailTable.setDefaultRenderer(Object.class, new IncomeDetailTableCellRenderer());
+
+        // define the width for some columns
+        IncomeDetailTable.getColumnModel().getColumn(0).setMinWidth(100);
+        IncomeDetailTable.getColumnModel().getColumn(0).setMaxWidth(100);
+        IncomeDetailTable.getColumnModel().getColumn(1).setMinWidth(70);
+        IncomeDetailTable.getColumnModel().getColumn(1).setMaxWidth(70);
+        IncomeDetailTable.getColumnModel().getColumn(2).setMinWidth(78);
+        IncomeDetailTable.getColumnModel().getColumn(2).setMaxWidth(78);
     }
 }
