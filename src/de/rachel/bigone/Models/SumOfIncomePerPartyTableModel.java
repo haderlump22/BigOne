@@ -8,7 +8,7 @@ import java.util.List;
 import javax.swing.table.AbstractTableModel;
 
 import de.rachel.bigone.DBTools;
-import de.rachel.bigone.records.SumOfIncomePerPartyTableRow;
+import de.rachel.bigone.Records.SumOfIncomePerPartyTableRow;
 
 public class SumOfIncomePerPartyTableModel extends AbstractTableModel{
 	private Connection cn = null;
