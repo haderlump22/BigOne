@@ -7,10 +7,10 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.border.TitledBorder;
 
-import de.rachel.bigone.Models.IncomeDetailTableModel;
-import de.rachel.bigone.Models.SumOfIncomePerPartyTableModel;
-import de.rachel.bigone.Renderer.IncomeDetailTableCellRenderer;
-import de.rachel.bigone.Renderer.SumOfIncomePerPartyTableCellRenderer;
+import de.rachel.bigone.Models.SalaryBasesIncomeDetailTableModel;
+import de.rachel.bigone.Models.SalaryBasesSumOfIncomePerPartyTableModel;
+import de.rachel.bigone.Renderer.SalaryBasesIncomeDetailTableCellRenderer;
+import de.rachel.bigone.Renderer.SalaryBasesSumOfIncomePerPartyTableCellRenderer;
 
 import javax.swing.JTable;
 
@@ -68,8 +68,8 @@ public class SalaryBases {
     }
 
     private void createSumOfIncomePerPartyTable() {
-        SumOfIncomePerPartyTable = new JTable(new SumOfIncomePerPartyTableModel(cn));
-        SumOfIncomePerPartyTable.setDefaultRenderer(Object.class, new SumOfIncomePerPartyTableCellRenderer());
+        SumOfIncomePerPartyTable = new JTable(new SalaryBasesSumOfIncomePerPartyTableModel(cn));
+        SumOfIncomePerPartyTable.setDefaultRenderer(Object.class, new SalaryBasesSumOfIncomePerPartyTableCellRenderer());
 
         // define the width for some columns
         SumOfIncomePerPartyTable.getColumnModel().getColumn(0).setMinWidth(100);
@@ -79,8 +79,8 @@ public class SalaryBases {
     }
 
     private void createIncomeDetailTable() {
-        IncomeDetailTable = new JTable(new IncomeDetailTableModel(cn));
-        IncomeDetailTable.setDefaultRenderer(Object.class, new IncomeDetailTableCellRenderer());
+        IncomeDetailTable = new JTable(new SalaryBasesIncomeDetailTableModel(cn));
+        IncomeDetailTable.setDefaultRenderer(Object.class, new SalaryBasesIncomeDetailTableCellRenderer());
 
         // define the width for some columns
         IncomeDetailTable.getColumnModel().getColumn(0).setMinWidth(100);

@@ -8,15 +8,15 @@ import java.util.List;
 import javax.swing.table.AbstractTableModel;
 
 import de.rachel.bigone.DBTools;
-import de.rachel.bigone.Records.SumOfIncomePerPartyTableRow;
+import de.rachel.bigone.Records.SalaryBasesSumOfIncomePerPartyTableRow;
 
-public class SumOfIncomePerPartyTableModel extends AbstractTableModel{
+public class SalaryBasesSumOfIncomePerPartyTableModel extends AbstractTableModel{
 	private Connection cn = null;
 	private String[] columnName = new String[] { "Name", "Summe", "Anteil in Prozent" };
 	private	Double SumOfAllIncome = 0.0;
-	private List<SumOfIncomePerPartyTableRow> TableData = new ArrayList<>();
+	private List<SalaryBasesSumOfIncomePerPartyTableRow> TableData = new ArrayList<>();
 
-	public SumOfIncomePerPartyTableModel(Connection LoginCN) {
+	public SalaryBasesSumOfIncomePerPartyTableModel(Connection LoginCN) {
 		cn = LoginCN;
 		lese_werte();
 	}
@@ -34,7 +34,7 @@ public class SumOfIncomePerPartyTableModel extends AbstractTableModel{
 	}
 
 	public Object getValueAt(int row, int col) {
-		SumOfIncomePerPartyTableRow Zeile = TableData.get(row);
+		SalaryBasesSumOfIncomePerPartyTableRow Zeile = TableData.get(row);
 		Object ReturnValue = null;
 
 		switch (col) {
@@ -75,7 +75,7 @@ public class SumOfIncomePerPartyTableModel extends AbstractTableModel{
 			rs.beforeFirst();
 
 			while (rs.next()) {
-				TableData.add(new SumOfIncomePerPartyTableRow(rs.getString("party"), rs.getDouble("betrag")));
+				TableData.add(new SalaryBasesSumOfIncomePerPartyTableRow(rs.getString("party"), rs.getDouble("betrag")));
 			}
 		} catch (Exception e) {
 			System.out.println("SumOfIncomPerPartyTableModel - lese_werte(): " + e.toString());
@@ -83,7 +83,7 @@ public class SumOfIncomePerPartyTableModel extends AbstractTableModel{
 		// calculate the percent Value for Column 3
 
 		// first get the sum of all Values in Column 2
-		for (SumOfIncomePerPartyTableRow Zeile : TableData) {
+		for (SalaryBasesSumOfIncomePerPartyTableRow Zeile : TableData) {
 			SumOfAllIncome = SumOfAllIncome+ Zeile.Sum();
 		}
 	}

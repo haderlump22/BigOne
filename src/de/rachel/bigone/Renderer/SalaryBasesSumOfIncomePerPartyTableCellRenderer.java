@@ -1,15 +1,12 @@
 package de.rachel.bigone.Renderer;
 
 import java.awt.Component;
-import java.text.DecimalFormat;
 
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
 
-import de.rachel.bigone.BigOneTools;
-
-public class IncomeDetailTableCellRenderer implements TableCellRenderer {
+public class SalaryBasesSumOfIncomePerPartyTableCellRenderer implements TableCellRenderer {
 
    public Component getTableCellRendererComponent(
          JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
@@ -39,13 +36,12 @@ public class IncomeDetailTableCellRenderer implements TableCellRenderer {
 
          if (column == 1) {
             label.setHorizontalAlignment(JLabel.RIGHT);
-            DecimalFormat formatter = new DecimalFormat("#.00");
-            label.setText(formatter.format((Number) value));
+            label.setText("%.02f".formatted((Number) value));
          }
 
          if (column == 2) {
-            label.setHorizontalAlignment(JLabel.CENTER);
-            label.setText(BigOneTools.datum_wandeln(value.toString(),1));
+            label.setHorizontalAlignment(JLabel.RIGHT);
+            label.setText("%.02f".formatted((Double) value));
          }
          return label;
       } else {

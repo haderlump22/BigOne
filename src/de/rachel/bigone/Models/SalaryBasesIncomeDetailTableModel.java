@@ -4,12 +4,12 @@ import java.sql.Connection;
 import javax.swing.table.AbstractTableModel;
 import de.rachel.bigone.DBTools;
 
-public class IncomeDetailTableModel extends AbstractTableModel{
+public class SalaryBasesIncomeDetailTableModel extends AbstractTableModel{
 	private Connection cn = null;
 	private String[] columnName = new String[] { "Name", "Betrag", "gilt bis", "Art" };
 	private Object[][] daten;
 
-	public IncomeDetailTableModel(Connection LoginCN) {
+	public SalaryBasesIncomeDetailTableModel(Connection LoginCN) {
 		cn = LoginCN;
 		daten = lese_werte();
 	}
