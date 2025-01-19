@@ -5,9 +5,11 @@ import java.sql.Connection;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-// import javax.swing.JScrollPane;
-// import javax.swing.JTable;
+import javax.swing.JTable;
 import javax.swing.border.TitledBorder;
+
+import de.rachel.bigone.Models.ExpenditureDetailTableModel;
+import de.rachel.bigone.Models.ExpenditureSumPerPartyTableModel;
 
 public class Expenditure {
     private Connection cn = null;
@@ -15,7 +17,7 @@ public class Expenditure {
     private JFrame ExpenditureWindow;
     private JPanel ExpenditureDetailPanel, ExpenditureSumPerPartyPanel;
     private JScrollPane ExpenditureSumPerPartyScrollPane, ExpenditureDetailScrollPane;
-    // private JTable SumOfIncomePerPartyTable, IncomeDetailTable;
+    private JTable ExpenditureSumPerPartyTable, ExpenditureDetailTable;
 
     Expenditure(Connection LoginCN) {
         cn = LoginCN;
@@ -37,13 +39,19 @@ public class Expenditure {
         ExpenditureDetailPanel.setBounds(10, 120, 690, 370);
         ExpenditureDetailPanel.setBorder(new TitledBorder("Details der Ausgaben"));
 
+        // create table for expenditure sum per party
+        createExpenditureDetailTable();
+
+        // create table for expenditure detail
+        createExpenditureSumPerPartyTable();
+
         // scrollpane for the table with the sums Expenditures per Party
-        ExpenditureSumPerPartyScrollPane = new JScrollPane();
+        ExpenditureSumPerPartyScrollPane = new JScrollPane(ExpenditureSumPerPartyTable);
         ExpenditureSumPerPartyScrollPane.setBounds(15, 20, 275, 70);
         ExpenditureSumPerPartyPanel.add(ExpenditureSumPerPartyScrollPane);
 
         // scrollpane for the Expenditures Detail Table
-        ExpenditureDetailScrollPane = new JScrollPane();
+        ExpenditureDetailScrollPane = new JScrollPane(ExpenditureDetailTable);
         ExpenditureDetailScrollPane.setBounds(15, 20, 660, 340);
         ExpenditureDetailPanel.add(ExpenditureDetailScrollPane);
 
@@ -54,5 +62,27 @@ public class Expenditure {
         ExpenditureWindow.repaint();
 
         ExpenditureWindow.setVisible(true);
+    }
+
+    private void createExpenditureSumPerPartyTable() {
+        ExpenditureSumPerPartyTable = new JTable(new ExpenditureSumPerPartyTableModel(cn));
+        // ExpenditureSumPerPartyTable.setDefaultRenderer(Object.class, new ExpenditureSumPerPartyTableCellRenderer());
+
+        // define the width for some columns
+        // ExpenditureSumPerPartyTable.getColumnModel().getColumn(0).setMinWidth(100);
+        // ExpenditureSumPerPartyTable.getColumnModel().getColumn(0).setMaxWidth(100);
+        // ExpenditureSumPerPartyTable.getColumnModel().getColumn(1).setMinWidth(70);
+        // ExpenditureSumPerPartyTable.getColumnModel().getColumn(1).setMaxWidth(70);
+    }
+
+    private void createExpenditureDetailTable() {
+        ExpenditureDetailTable = new JTable(new ExpenditureDetailTableModel(cn));
+        // ExpenditureDetailTable.setDefaultRenderer(Object.class, new ExpenditureDetailTableCellRenderer());
+
+        // define the width for some columns
+        // ExpenditureDetailTable.getColumnModel().getColumn(0).setMinWidth(100);
+        // ExpenditureDetailTable.getColumnModel().getColumn(0).setMaxWidth(100);
+        // ExpenditureDetailTable.getColumnModel().getColumn(1).setMinWidth(70);
+        // ExpenditureDetailTable.getColumnModel().getColumn(1).setMaxWidth(70);
     }
 }
