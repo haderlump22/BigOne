@@ -80,7 +80,6 @@ public class SalaryBasesSumOfIncomePerPartyTableModel extends AbstractTableModel
 		} catch (Exception e) {
 			System.out.println("SumOfIncomPerPartyTableModel - lese_werte(): " + e.toString());
 		}
-		// calculate the percent Value for Column 3
 
 		// first get the sum of all Values in Column 2
 		for (SalaryBasesSumOfIncomePerPartyTableRow Zeile : TableData) {

@@ -10,6 +10,7 @@ import javax.swing.border.TitledBorder;
 
 import de.rachel.bigone.Models.ExpenditureDetailTableModel;
 import de.rachel.bigone.Models.ExpenditureSumPerPartyTableModel;
+import de.rachel.bigone.Renderer.ExpenditureDetailTableCellRenderer;
 
 public class Expenditure {
     private Connection cn = null;
@@ -77,12 +78,12 @@ public class Expenditure {
 
     private void createExpenditureDetailTable() {
         ExpenditureDetailTable = new JTable(new ExpenditureDetailTableModel(cn));
-        // ExpenditureDetailTable.setDefaultRenderer(Object.class, new ExpenditureDetailTableCellRenderer());
+        ExpenditureDetailTable.setDefaultRenderer(Object.class, new ExpenditureDetailTableCellRenderer());
 
         // define the width for some columns
-        // ExpenditureDetailTable.getColumnModel().getColumn(0).setMinWidth(100);
-        // ExpenditureDetailTable.getColumnModel().getColumn(0).setMaxWidth(100);
-        // ExpenditureDetailTable.getColumnModel().getColumn(1).setMinWidth(70);
-        // ExpenditureDetailTable.getColumnModel().getColumn(1).setMaxWidth(70);
+        ExpenditureDetailTable.getColumnModel().getColumn(0).setMinWidth(110);
+        ExpenditureDetailTable.getColumnModel().getColumn(0).setMaxWidth(110);
+        ExpenditureDetailTable.getColumnModel().getColumn(6).setMinWidth(70);
+        ExpenditureDetailTable.getColumnModel().getColumn(6).setMaxWidth(70);
     }
 }

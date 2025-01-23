@@ -12,7 +12,7 @@ import de.rachel.bigone.Records.ExpenditureDetailTableRow;
 
 public class ExpenditureDetailTableModel extends AbstractTableModel {
     private Connection cn = null;
-    private String[] columnName = new String[] { "Bezeichung", "Betrag", "Aufteilungsart", "gilt bis", "Person", "Betrag", "Person", "Betrag" };
+    private String[] columnName = new String[] { "Bezeichung", "Betrag", "Aufteilungsart", "gilt bis", "Person", "Betrag", "Person", "Betrag", "Hinweis" };
     private List<ExpenditureDetailTableRow> TableData = new ArrayList<>();
 
     public ExpenditureDetailTableModel(Connection LoginCN) {
@@ -44,10 +44,10 @@ public class ExpenditureDetailTableModel extends AbstractTableModel {
                 ReturnValue = Zeile.Amount();
                 break;
             case 2:
-                ReturnValue = Zeile.ValidUntil();
+                ReturnValue = Zeile.DivideType();
                 break;
             case 3:
-                ReturnValue = Zeile.DivideType();
+                ReturnValue = Zeile.ValidUntil();
                 break;
             case 4:
                 ReturnValue = Zeile.PartyName1();
@@ -86,7 +86,7 @@ public class ExpenditureDetailTableModel extends AbstractTableModel {
                 "SELECT haa.bezeichnung, haa.betrag, haa.aufteilungsart, haa.gilt_bis,\n" +
                         "p1.name || ', ' || SUBSTRING(p1.vorname, 1, 1) || '.' as party1, haaa1.betrag betragP1,\n" +
                         "p2.name || ', ' || SUBSTRING(p2.vorname, 1, 1) || '.' as party2, haaa2.betrag betragP2,\n" +
-                        "haa.bemerkung\\n" + //
+                        "haa.bemerkung\n" + //
                         "from ha_ausgaben haa, ha_ausgaben_aufteilung haaa1, ha_ausgaben_aufteilung haaa2, personen p1, personen p2\n"
                         +
                         "where haaa1.\"ausgabenId\" = haa.\"ausgabenId\"\n" +
@@ -103,7 +103,7 @@ public class ExpenditureDetailTableModel extends AbstractTableModel {
             rs.beforeFirst();
 
             while (rs.next()) {
-                TableData.add(new ExpenditureDetailTableRow(rs.getString("bezeichung"), rs.getDouble("betrag"),
+                TableData.add(new ExpenditureDetailTableRow(rs.getString("bezeichnung"), rs.getDouble("betrag"),
                         rs.getString("aufteilungsart"), rs.getDate("gilt_bis"), rs.getString("party1"), rs.getDouble("betragP1"),
                         rs.getString("party2"), rs.getDouble("betragP2"), rs.getString("bemerkung")));
             }
