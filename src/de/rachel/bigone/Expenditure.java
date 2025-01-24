@@ -11,6 +11,7 @@ import javax.swing.border.TitledBorder;
 import de.rachel.bigone.Models.ExpenditureDetailTableModel;
 import de.rachel.bigone.Models.ExpenditureSumPerPartyTableModel;
 import de.rachel.bigone.Renderer.ExpenditureDetailTableCellRenderer;
+import de.rachel.bigone.Renderer.ExpenditureSumPerPartyTableCellRenderer;
 
 public class Expenditure {
     private Connection cn = null;
@@ -37,7 +38,7 @@ public class Expenditure {
 
         ExpenditureDetailPanel = new JPanel();
         ExpenditureDetailPanel.setLayout(null);
-        ExpenditureDetailPanel.setBounds(10, 120, 690, 370);
+        ExpenditureDetailPanel.setBounds(10, 120, 380, 370);
         ExpenditureDetailPanel.setBorder(new TitledBorder("Details der Ausgaben"));
 
         // create table for expenditure sum per party
@@ -53,7 +54,7 @@ public class Expenditure {
 
         // scrollpane for the Expenditures Detail Table
         ExpenditureDetailScrollPane = new JScrollPane(ExpenditureDetailTable);
-        ExpenditureDetailScrollPane.setBounds(15, 20, 660, 340);
+        ExpenditureDetailScrollPane.setBounds(15, 20, 350, 340);
         ExpenditureDetailPanel.add(ExpenditureDetailScrollPane);
 
         // put all to the Frame
@@ -67,7 +68,7 @@ public class Expenditure {
 
     private void createExpenditureSumPerPartyTable() {
         ExpenditureSumPerPartyTable = new JTable(new ExpenditureSumPerPartyTableModel(cn));
-        // ExpenditureSumPerPartyTable.setDefaultRenderer(Object.class, new ExpenditureSumPerPartyTableCellRenderer());
+        ExpenditureSumPerPartyTable.setDefaultRenderer(Object.class, new ExpenditureSumPerPartyTableCellRenderer());
 
         // define the width for some columns
         // ExpenditureSumPerPartyTable.getColumnModel().getColumn(0).setMinWidth(100);
@@ -83,7 +84,6 @@ public class Expenditure {
         // define the width for some columns
         ExpenditureDetailTable.getColumnModel().getColumn(0).setMinWidth(110);
         ExpenditureDetailTable.getColumnModel().getColumn(0).setMaxWidth(110);
-        ExpenditureDetailTable.getColumnModel().getColumn(6).setMinWidth(70);
-        ExpenditureDetailTable.getColumnModel().getColumn(6).setMaxWidth(70);
+
     }
 }

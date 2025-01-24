@@ -50,17 +50,6 @@ public class ExpenditureDetailTableCellRenderer implements TableCellRenderer {
          if (column == 3) {
             label.setHorizontalAlignment(JLabel.LEFT);
             label.setText(new SimpleDateFormat("MMM yyyy").format((Date) value));
-            // label.setText(BigOneTools.datum_wandeln(value.toString(),1));
-         }
-
-         if (column == 5) {
-            label.setHorizontalAlignment(JLabel.RIGHT);
-            label.setText("%.02f".formatted((Double) value));
-         }
-
-         if (column == 7) {
-            label.setHorizontalAlignment(JLabel.RIGHT);
-            label.setText("%.02f".formatted((Double) value));
          }
 
          return label;
