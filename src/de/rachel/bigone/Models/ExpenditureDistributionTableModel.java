@@ -8,16 +8,15 @@ import java.util.List;
 import javax.swing.table.AbstractTableModel;
 
 import de.rachel.bigone.DBTools;
-import de.rachel.bigone.Records.ExpenditureDetailTableRow;
+import de.rachel.bigone.Records.ExpenditureDistributionTableRow;
 
-public class ExpenditureDetailTableModel extends AbstractTableModel {
+public class ExpenditureDistributionTableModel extends AbstractTableModel {
     private Connection cn = null;
-    private String[] columnName = new String[] { "Bezeichung", "Betrag", "Aufteilungsart", "gilt bis" };
-    private List<ExpenditureDetailTableRow> TableData = new ArrayList<>();
+    private String[] columnName = new String[] { "Name", "Betrag" };
+    private List<ExpenditureDistributionTableRow> TableData = new ArrayList<>();
 
-    public ExpenditureDetailTableModel(Connection LoginCN) {
+    public ExpenditureDistributionTableModel(Connection LoginCN) {
         cn = LoginCN;
-        lese_werte();
     }
 
     public int getColumnCount() {
@@ -33,24 +32,15 @@ public class ExpenditureDetailTableModel extends AbstractTableModel {
     }
 
     public Object getValueAt(int row, int col) {
-        ExpenditureDetailTableRow Zeile = TableData.get(row);
+        ExpenditureDistributionTableRow Zeile = TableData.get(row);
         Object ReturnValue = null;
 
         switch (col) {
-            case -1: //it only called by a listener thats creates the little distibution table
-                ReturnValue = Zeile.ExpenditureId();
-                break;
             case 0:
-                ReturnValue = Zeile.Description();
+                ReturnValue = Zeile.NameOfParty();
                 break;
             case 1:
                 ReturnValue = Zeile.Amount();
-                break;
-            case 2:
-                ReturnValue = Zeile.DivideType();
-                break;
-            case 3:
-                ReturnValue = Zeile.ValidUntil();
                 break;
             default:
                 break;
@@ -63,7 +53,7 @@ public class ExpenditureDetailTableModel extends AbstractTableModel {
         return false;
     }
 
-    private void lese_werte() {
+    private void lese_werte(Integer ExpenditureId) {
         /*
          * get all known expenditure over the time, actual and old one
          */
@@ -71,9 +61,11 @@ public class ExpenditureDetailTableModel extends AbstractTableModel {
         ResultSet rs;
 
         getter.select(
-                "SELECT \"ausgabenId\", bezeichnung, betrag, aufteilungsart, gilt_bis\n" + //
-                        "from ha_ausgaben\n" +
-                        "order by gilt_bis DESC, betrag DESC",
+                "SELECT haaa.\"ausgabenAufteilungId\", p.name || ', ' || SUBSTRING(p.vorname, 1, 1) || '.' AS party, betrag\n" +
+                    "FROM ha_ausgaben_aufteilung haaa, personen p\n" +
+                    "WHERE haaa.\"parteiId\" = p.personen_id\n" +
+                    "AND haaa.\"ausgabenId\" = " + ExpenditureId.toString() + "\n" +
+                    "ORDER BY party",
                 2);
 
         rs = getter.getResultSet();
@@ -81,11 +73,17 @@ public class ExpenditureDetailTableModel extends AbstractTableModel {
             rs.beforeFirst();
 
             while (rs.next()) {
-                TableData.add(new ExpenditureDetailTableRow(rs.getInt("ausgabenId"), rs.getString("bezeichnung"), rs.getDouble("betrag"),
-                        rs.getString("aufteilungsart"), rs.getDate("gilt_bis")));
+                TableData.add(new ExpenditureDistributionTableRow(rs.getInt("ausgabenAufteilungId"), rs.getString("party"), rs.getDouble("betrag")));
             }
         } catch (Exception e) {
             System.out.println("ExpenditureDetailTableModel - lese_werte(): " + e.toString());
         }
     }
+
+    public void aktualisiere(Integer ExpenditureId) {
+        // before adding new data, remove the old in the TableData List
+        TableData.clear();
+		lese_werte(ExpenditureId);
+		fireTableDataChanged();
+	}
 }
