@@ -37,7 +37,7 @@ public class ExpenditureDetailTableModel extends AbstractTableModel {
         Object ReturnValue = null;
 
         switch (col) {
-            case -1: //it only called by a listener thats creates the little distibution table
+            case -1: //it only called by the listener "ExpenditureDetailTableSelectionListener"
                 ReturnValue = Zeile.ExpenditureId();
                 break;
             case 0:
@@ -51,6 +51,9 @@ public class ExpenditureDetailTableModel extends AbstractTableModel {
                 break;
             case 3:
                 ReturnValue = Zeile.ValidUntil();
+                break;
+            case 4: // //it only called by the listener "ExpenditureDetailTableSelectionListener"
+                ReturnValue = Zeile.ExpenditureHint();
                 break;
             default:
                 break;
@@ -71,7 +74,7 @@ public class ExpenditureDetailTableModel extends AbstractTableModel {
         ResultSet rs;
 
         getter.select(
-                "SELECT \"ausgabenId\", bezeichnung, betrag, aufteilungsart, gilt_bis\n" + //
+                "SELECT \"ausgabenId\", bezeichnung, betrag, aufteilungsart, gilt_bis, bemerkung\n" + //
                         "from ha_ausgaben\n" +
                         "order by gilt_bis DESC, betrag DESC",
                 2);
@@ -82,7 +85,7 @@ public class ExpenditureDetailTableModel extends AbstractTableModel {
 
             while (rs.next()) {
                 TableData.add(new ExpenditureDetailTableRow(rs.getInt("ausgabenId"), rs.getString("bezeichnung"), rs.getDouble("betrag"),
-                        rs.getString("aufteilungsart"), rs.getDate("gilt_bis")));
+                        rs.getString("aufteilungsart"), rs.getDate("gilt_bis"), rs.getString("bemerkung")));
             }
         } catch (Exception e) {
             System.out.println("ExpenditureDetailTableModel - lese_werte(): " + e.toString());

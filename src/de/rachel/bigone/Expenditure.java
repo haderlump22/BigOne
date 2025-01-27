@@ -8,11 +8,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.border.TitledBorder;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 
 import de.rachel.bigone.Listeners.ExpenditureDetailTableSelectionListener;
-import de.rachel.bigone.Listeners.RACMouseListener;
 import de.rachel.bigone.Models.ExpenditureDetailTableModel;
 import de.rachel.bigone.Models.ExpenditureDistributionTableModel;
 import de.rachel.bigone.Models.ExpenditureSumPerPartyTableModel;
@@ -23,15 +20,17 @@ public class Expenditure {
     private Connection cn = null;
 
     private JFrame ExpenditureWindow;
-    private JPanel ExpenditureDetailPanel, ExpenditureSumPerPartyPanel, ExpenditureDistributionPanel;
-    private JScrollPane ExpenditureSumPerPartyScrollPane, ExpenditureDetailScrollPane, ExpenditureDistributionScrollPane;
+    private JPanel ExpenditureDetailPanel, ExpenditureSumPerPartyPanel, ExpenditureDistributionPanel,
+            ExpenditureHintPanel;
+    private JScrollPane ExpenditureSumPerPartyScrollPane, ExpenditureDetailScrollPane,
+            ExpenditureDistributionScrollPane, ExpenditureHintScrollPane;
     private JTable ExpenditureSumPerPartyTable, ExpenditureDetailTable, ExpenditureDistributionTable;
 
     Expenditure(Connection LoginCN) {
         cn = LoginCN;
 
         ExpenditureWindow = new JFrame("Ausgaben");
-        ExpenditureWindow.setSize(785, 530);
+        ExpenditureWindow.setSize(650, 530);
         ExpenditureWindow.setLocation(200, 200);
         ExpenditureWindow.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         ExpenditureWindow.setLayout(null);
@@ -52,6 +51,11 @@ public class Expenditure {
         ExpenditureDistributionPanel.setBounds(410, 120, 230, 100);
         ExpenditureDistributionPanel.setBorder(new TitledBorder("Ausgaben Aufteilung"));
 
+        ExpenditureHintPanel = new JPanel();
+        ExpenditureHintPanel.setLayout(null);
+        ExpenditureHintPanel.setBounds(410, 230, 230, 100);
+        ExpenditureHintPanel.setBorder(new TitledBorder("Ausgaben Hinweise"));
+
         // create table for expenditure sum per party
         createExpenditureSumPerPartyTable();
 
@@ -70,24 +74,33 @@ public class Expenditure {
         ExpenditureDetailScrollPane.setBounds(15, 20, 350, 340);
         ExpenditureDetailPanel.add(ExpenditureDetailScrollPane);
 
-        ExpenditureDistributionScrollPane = new JScrollPane(new JTextArea("...bitte Ausgabe auswäheln um\n die Aufteilung hier anzuzeigen..."));
-        // ExpenditureDistributionScrollPane = new JScrollPane(ExpenditureDistributionTable);
+        ExpenditureDistributionScrollPane = new JScrollPane(
+                new JTextArea("...bitte Ausgabe auswäheln um\n die Aufteilung hier anzuzeigen..."));
+        // ExpenditureDistributionScrollPane = new
+        // JScrollPane(ExpenditureDistributionTable);
         ExpenditureDistributionScrollPane.setBounds(15, 20, 200, 70);
         ExpenditureDistributionPanel.add(ExpenditureDistributionScrollPane);
+
+        ExpenditureHintScrollPane = new JScrollPane(new JTextArea());
+        ExpenditureHintScrollPane.setBounds(15, 20, 200, 70);
+        ExpenditureHintPanel.add(ExpenditureHintScrollPane);
 
         // put all to the Frame
         ExpenditureWindow.add(ExpenditureSumPerPartyPanel);
         ExpenditureWindow.add(ExpenditureDetailPanel);
         ExpenditureWindow.add(ExpenditureDistributionPanel);
+        ExpenditureWindow.add(ExpenditureHintPanel);
         ExpenditureWindow.validate();
         ExpenditureWindow.repaint();
 
         ExpenditureWindow.setVisible(true);
 
         // add self defined SelectionListener for the detail table
-        // that listener will show the distributioninfos of the selected expenditure for each party
+        // that listener will show the distributioninfos of the selected expenditure for
+        // each party
         // in a separate table (ExpenditureDistributionTable)
-        ExpenditureDetailTable.getSelectionModel().addListSelectionListener(new ExpenditureDetailTableSelectionListener(ExpenditureDetailTable, ExpenditureDistributionScrollPane, ExpenditureDistributionTable));
+        ExpenditureDetailTable.getSelectionModel().addListSelectionListener(new ExpenditureDetailTableSelectionListener(
+                ExpenditureDetailTable, ExpenditureDistributionScrollPane, ExpenditureDistributionTable));
 
         // test to get the thicknes of one of the vertical scrollbars
         // System.out.println(ExpenditureSumPerPartyScrollPane.getVerticalScrollBar().getWidth());
@@ -120,6 +133,5 @@ public class Expenditure {
         // define the width for some columns
         ExpenditureDistributionTable.getColumnModel().getColumn(0).setMinWidth(120);
         ExpenditureDistributionTable.getColumnModel().getColumn(0).setMaxWidth(120);
-
     }
 }
