@@ -1,17 +1,22 @@
 package de.rachel.bigone.Models;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.swing.table.AbstractTableModel;
 import de.rachel.bigone.DBTools;
+import de.rachel.bigone.Records.SalaryBasesIncomeDetailTableRow;
 
 public class SalaryBasesIncomeDetailTableModel extends AbstractTableModel{
 	private Connection cn = null;
 	private String[] columnName = new String[] { "Name", "Betrag", "gilt bis", "Art" };
-	private Object[][] daten;
+	private List<SalaryBasesIncomeDetailTableRow> TableData = new ArrayList<>();
 
 	public SalaryBasesIncomeDetailTableModel(Connection LoginCN) {
 		cn = LoginCN;
-		daten = lese_werte();
+		lese_werte();
 	}
 
 	public int getColumnCount() {
@@ -19,7 +24,7 @@ public class SalaryBasesIncomeDetailTableModel extends AbstractTableModel{
 	}
 
 	public int getRowCount() {
-		return daten.length;
+		return TableData.size();
 	}
 
 	public String getColumnName(int col) {
@@ -27,26 +32,53 @@ public class SalaryBasesIncomeDetailTableModel extends AbstractTableModel{
 	}
 
 	public Object getValueAt(int row, int col) {
-		return daten[row][col];
+		SalaryBasesIncomeDetailTableRow Zeile = TableData.get(row);
+		Object ReturnValue = null;
+
+		switch (col) {
+			case 0:
+				ReturnValue = Zeile.NameOfParty();
+				break;
+			case 1:
+				ReturnValue = Zeile.Amount();
+				break;
+			case 2:
+				ReturnValue = Zeile.ValidUntil();
+				break;
+			case 3:
+				ReturnValue = Zeile.Type();
+				break;
+			default:
+				break;
+		}
+
+		return ReturnValue;
 	}
 
 	public boolean isCellEditable(int row, int col) {
 		return false;
 	}
 
-	private Object[][] lese_werte() {
+	private void lese_werte() {
 		/*
 		 * get the current Income of everey Party
 		 */
 		DBTools getter = new DBTools(cn);
-		Object[][] daten;
+		ResultSet rs;
 
 		getter.select(
 				"SELECT p.name || ', ' || SUBSTRING(p.vorname, 1, 1) || '.' as party, betrag, gilt_bis, art from personen p, ha_gehaltsgrundlagen gg where p.personen_id = gg.partei_id order by gilt_bis DESC, party, betrag DESC;",
 				4);
 
-		daten = getter.getData();
+		rs = getter.getResultSet();
+		try {
+			rs.beforeFirst();
 
-		return daten;
+			while (rs.next()) {
+				TableData.add(new SalaryBasesIncomeDetailTableRow(rs.getString("party"), rs.getDouble("betrag"), rs.getDate("gilt_bis"), rs.getString("art")));
+			}
+		} catch (Exception e) {
+			System.out.println("SalaryBasesIncomeDetailTableModel - lese_werte(): " + e.toString());
+		}
 	}
 }
