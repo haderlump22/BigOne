@@ -40,6 +40,9 @@ public class ExpenditureDetailTableModel extends AbstractTableModel {
             case -1: //it only called by the listener "ExpenditureDetailTableSelectionListener"
                 ReturnValue = Zeile.ExpenditureId();
                 break;
+            case -2: // //it only called by the listener "ExpenditureDetailTableSelectionListener"
+                ReturnValue = Zeile.ExpenditureHint();
+                break;
             case 0:
                 ReturnValue = Zeile.Description();
                 break;
@@ -51,9 +54,6 @@ public class ExpenditureDetailTableModel extends AbstractTableModel {
                 break;
             case 3:
                 ReturnValue = Zeile.ValidUntil();
-                break;
-            case 4: // //it only called by the listener "ExpenditureDetailTableSelectionListener"
-                ReturnValue = Zeile.ExpenditureHint();
                 break;
             default:
                 break;

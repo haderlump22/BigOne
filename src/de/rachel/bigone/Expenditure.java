@@ -25,6 +25,7 @@ public class Expenditure {
     private JScrollPane ExpenditureSumPerPartyScrollPane, ExpenditureDetailScrollPane,
             ExpenditureDistributionScrollPane, ExpenditureHintScrollPane;
     private JTable ExpenditureSumPerPartyTable, ExpenditureDetailTable, ExpenditureDistributionTable;
+    private JTextArea HintArea = new JTextArea();
 
     Expenditure(Connection LoginCN) {
         cn = LoginCN;
@@ -81,7 +82,12 @@ public class Expenditure {
         ExpenditureDistributionScrollPane.setBounds(15, 20, 200, 70);
         ExpenditureDistributionPanel.add(ExpenditureDistributionScrollPane);
 
-        ExpenditureHintScrollPane = new JScrollPane(new JTextArea());
+        // some settings for the jtextarea before putting to JScrollPane
+        HintArea.setLineWrap(true);
+        HintArea.setWrapStyleWord(true);
+        HintArea.setEditable(false);
+
+        ExpenditureHintScrollPane = new JScrollPane(HintArea);
         ExpenditureHintScrollPane.setBounds(15, 20, 200, 70);
         ExpenditureHintPanel.add(ExpenditureHintScrollPane);
 
@@ -100,7 +106,7 @@ public class Expenditure {
         // each party
         // in a separate table (ExpenditureDistributionTable)
         ExpenditureDetailTable.getSelectionModel().addListSelectionListener(new ExpenditureDetailTableSelectionListener(
-                ExpenditureDetailTable, ExpenditureDistributionScrollPane, ExpenditureDistributionTable));
+                ExpenditureDetailTable, ExpenditureDistributionScrollPane, ExpenditureDistributionTable, HintArea));
 
         // test to get the thicknes of one of the vertical scrollbars
         // System.out.println(ExpenditureSumPerPartyScrollPane.getVerticalScrollBar().getWidth());
