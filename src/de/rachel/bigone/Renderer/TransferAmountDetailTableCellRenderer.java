@@ -9,7 +9,7 @@ import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
 
-public class SalaryBasesIncomeDetailTableCellRenderer implements TableCellRenderer {
+public class TransferAmountDetailTableCellRenderer implements TableCellRenderer {
 
    public Component getTableCellRendererComponent(
          JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
