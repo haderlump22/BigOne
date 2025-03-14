@@ -115,7 +115,7 @@ public class Menu {
 
 	Ueberweisungsbetrag.addActionListener(new ActionListener(){
         public void actionPerformed(ActionEvent ae){
-            //new Rac();
+            new TransferAmount(cn);
         }
     });
 
