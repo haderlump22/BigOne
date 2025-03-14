@@ -99,7 +99,6 @@ public class Menu {
 	JMenuItem Gehaltsgrundlagen = new JMenuItem("Gehaltsgrundlagen");
 	JMenuItem Ausgaben = new JMenuItem("Ausgaben");
 	JMenuItem Ueberweisungsbetrag = new JMenuItem("Überweisungsbetrag");
-	JMenuItem Haushaltsimport = new JMenuItem("Import Haushaltskonto");
 	JMenuItem Haushaltsabschluss = new JMenuItem("Haushaltsabschluss");
 
 	// Listener für die Untermenüns
@@ -121,12 +120,6 @@ public class Menu {
         }
     });
 
-	Haushaltsimport.addActionListener(new ActionListener(){
-        public void actionPerformed(ActionEvent ae){
-            // new TransferAmount(cn);
-        }
-    });
-
 	Haushaltsabschluss.addActionListener(new ActionListener(){
         public void actionPerformed(ActionEvent ae){
             // new TransferAmount(cn);
@@ -137,7 +130,6 @@ public class Menu {
 	Haushaltskonto.add(Gehaltsgrundlagen);
 	Haushaltskonto.add(Ausgaben);
 	Haushaltskonto.add(Ueberweisungsbetrag);
-	Haushaltskonto.add(Haushaltsimport);
 	Haushaltskonto.add(Haushaltsabschluss);
 
 	//Einzellmenues in die menuebar einbetten
