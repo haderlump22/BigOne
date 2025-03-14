@@ -41,14 +41,14 @@ public class Menu {
     });
 	prog.add(trans);
 
-	JMenu quer = new JMenu("Abfragen");
-	JMenuItem liqui = new JMenuItem("Liqui");
-	liqui.addActionListener(new ActionListener(){
+	JMenu Accounts = new JMenu("Konten");
+	JMenuItem Abschluss = new JMenuItem("Abschluss");
+	Abschluss.addActionListener(new ActionListener(){
         public void actionPerformed(ActionEvent ae){
-            new Liqui(cn);
+            new Abschluss(cn);
         }
     });
-	quer.add(liqui);
+	Accounts.add(Abschluss);
 
 	JMenuItem values = new JMenuItem("Beträge finden");
 	values.addActionListener(new ActionListener(){
@@ -56,7 +56,7 @@ public class Menu {
             new Values(cn);
         }
     });
-	quer.add(values);
+	Accounts.add(values);
 
 	JMenuItem kdab = new JMenuItem("Kontostand");
 	kdab.addActionListener(new ActionListener(){
@@ -64,7 +64,7 @@ public class Menu {
             new KeyDateAccountBalance(cn);
         }
     });
-	quer.add(kdab);
+	Accounts.add(kdab);
 
 	JMenuItem rac = new JMenuItem("Import");
 	rac.addActionListener(new ActionListener(){
@@ -72,7 +72,7 @@ public class Menu {
             new Rac(cn);
         }
     });
-	quer.add(rac);
+	Accounts.add(rac);
 
 	JMenu tables = new JMenu("Tabellen");
 
@@ -99,6 +99,8 @@ public class Menu {
 	JMenuItem Gehaltsgrundlagen = new JMenuItem("Gehaltsgrundlagen");
 	JMenuItem Ausgaben = new JMenuItem("Ausgaben");
 	JMenuItem Ueberweisungsbetrag = new JMenuItem("Überweisungsbetrag");
+	JMenuItem Haushaltsimport = new JMenuItem("Import Haushaltskonto");
+	JMenuItem Haushaltsabschluss = new JMenuItem("Haushaltsabschluss");
 
 	// Listener für die Untermenüns
 	Gehaltsgrundlagen.addActionListener(new ActionListener(){
@@ -119,14 +121,28 @@ public class Menu {
         }
     });
 
+	Haushaltsimport.addActionListener(new ActionListener(){
+        public void actionPerformed(ActionEvent ae){
+            // new TransferAmount(cn);
+        }
+    });
+
+	Haushaltsabschluss.addActionListener(new ActionListener(){
+        public void actionPerformed(ActionEvent ae){
+            // new TransferAmount(cn);
+        }
+    });
+
 	// Untermenüns an Menüpunkt heften
 	Haushaltskonto.add(Gehaltsgrundlagen);
 	Haushaltskonto.add(Ausgaben);
 	Haushaltskonto.add(Ueberweisungsbetrag);
+	Haushaltskonto.add(Haushaltsimport);
+	Haushaltskonto.add(Haushaltsabschluss);
 
 	//Einzellmenues in die menuebar einbetten
 	mbar.add(prog);
-	mbar.add(quer);
+	mbar.add(Accounts);
 	mbar.add(tables);
 	mbar.add(Haushaltskonto);
 
