@@ -52,7 +52,7 @@ public class Rac {
 
 		open = new JFileChooser();
 		// beim OpenDialog sollen nur XML oder CSV Dateien angezeigt werden
-		open.setFileFilter(new FileNameExtensionFilter("XML/CSV", "xml", "csv"));
+		open.setFileFilter(new FileNameExtensionFilter("XML/CSV/ZIP", "xml", "csv", "zip"));
 
 		btnOpen = new JButton("Auszug öffnen");
 		btnOpen.setBounds(30, 17, 115, 35);
@@ -356,10 +356,10 @@ public class Rac {
 
 		// selbst definierten Mouselistener der RAC Tabelle hinzufügen
 		table.addMouseListener(new RACMouseListener(table));
-		
+
 		sp = new JScrollPane(table);
 		sp.setBounds(30,120,725,355);
-		
+
 		RACWindow.add(sp);
 		RACWindow.validate();
 		RACWindow.repaint();
