@@ -320,7 +320,7 @@ public class Rac {
 				zeichne_tabelle(Auszug);
 				btnImp.setEnabled(true);
 			} else {
-				System.out.println("Keine Buchungen in Datei " + open.getSelectedFile().toString() + "gefunden!");
+				System.out.println("Keine Buchungen in Datei " + open.getSelectedFile().toString() + " gefunden!");
 			}
 		} else {
 			btnImp.setEnabled(false);

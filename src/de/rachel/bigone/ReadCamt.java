@@ -126,7 +126,12 @@ public class ReadCamt {
 		}
 	}
 	public int getBuchungsanzahl(){
-		return buchungen.length;
+		if (buchungen == null) {
+			// falls nicht initialisiert
+			return 0;
+		} else {
+			return buchungen.length;
+		}
 	}
 	public String getValDt(int iZeile){
 		return buchungen[iZeile][ValueDate];
@@ -278,23 +283,32 @@ public class ReadCamt {
 		// begins with "Buchung;Valuta"
 		iHeaderRow = findHeaderRow();
 
-		// reinitial the Array buchunge new
-		this.buchungen = new String[csvContent.length - iHeaderRow - 1][6];
+		// only if the Line was found we go on
+		if (iHeaderRow > 0) {
+			// reinitial the Array buchunge new
+			this.buchungen = new String[csvContent.length - iHeaderRow - 1][6];
 
-		// the Diba Data begin in the row after the Header
-		for (int i = iHeaderRow + 1; i < csvContent.length; i++) {
-			buchungen[i - (iHeaderRow + 1)][ValueDate] = BigOneTools.datum_wandeln(csvContent[i].split(";")[1], 0);
+			// the Diba Data begin in the row after the Header
+			for (int i = iHeaderRow + 1; i < csvContent.length; i++) {
+				buchungen[i - (iHeaderRow + 1)][ValueDate] = BigOneTools.datum_wandeln(csvContent[i].split(";")[1], 0);
 
-			// the Credit or Dbit Inticator is in the csv Data not a separate field
-			// they is indicates by e minus or nothing bevore the amount (creditorische Buchung = haben / Debitorische Buchung = soll)
-			buchungen[i - (iHeaderRow + 1)][CreditDebitIndicator] = getCreditDebitIndicator(csvContent[i].split(";")[7].replace(".", "").replaceAll(",", "."));
+				// the Credit or Dbit Inticator is in the csv Data not a separate field
+				// they is indicates by e minus or nothing bevore the amount (creditorische
+				// Buchung = haben / Debitorische Buchung = soll)
+				buchungen[i - (iHeaderRow + 1)][CreditDebitIndicator] = getCreditDebitIndicator(
+						csvContent[i].split(";")[7].replace(".", "").replaceAll(",", "."));
 
-			// the amount in the csv is german, we have to replace the thousand dot with null
-			// and the decimal separator with a dot
-			buchungen[i - (iHeaderRow + 1)][Amount] = delteSign(csvContent[i].split(";")[7].replace(".", "").replaceAll(",", "."));
-			buchungen[i - (iHeaderRow + 1)][Unstructured] = csvContent[i].split(";")[4];
-			buchungen[i - (iHeaderRow + 1)][Creditor] = csvContent[i].split(";")[2];
-			buchungen[i - (iHeaderRow + 1)][Debitor] = csvContent[i].split(";")[2]; // wird nicht extra aufgeführt deshalb wird der selbe wert gelesen
+				// the amount in the csv is german, we have to replace the thousand dot with
+				// null
+				// and the decimal separator with a dot
+				buchungen[i - (iHeaderRow + 1)][Amount] = delteSign(
+						csvContent[i].split(";")[7].replace(".", "").replaceAll(",", "."));
+				buchungen[i - (iHeaderRow + 1)][Unstructured] = csvContent[i].split(";")[4];
+				buchungen[i - (iHeaderRow + 1)][Creditor] = csvContent[i].split(";")[2];
+				buchungen[i - (iHeaderRow + 1)][Debitor] = csvContent[i].split(";")[2]; // wird nicht extra aufgeführt
+																						// deshalb wird der selbe wert
+																						// gelesen
+			}
 		}
 	}
 	private void readPostbankData(String[] csvContent) {
@@ -360,7 +374,7 @@ public class ReadCamt {
 		for (int i = 0; i < csvContent.length; i++) {
 			// only if the String isn't empty
 			if (!csvContent[i].equals("")) {
-				if (csvContent[i].matches("^Buchung;Valuta.*")) {
+				if (csvContent[i].matches("^Buchung;Wertstellungsdatum.*")) {
 					return i;
 				}
 			}
