@@ -19,7 +19,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 /**
  * Einlesen von
- * 
+ *
  * - SEPA Dateien des Formats (SEPA CAMT.053) Bank To Customer Statement = Kontoauszug
  * - Kontoauszug Diba im CSV Format
  */
@@ -37,30 +37,33 @@ public class ReadCamt {
 	private static int Unstructured = 3;	//Unstrukturierter Verwendungszweck 140zeichen max
 	private static int Creditor = 4;
 	private static int Debitor = 5;
-	
+
 	ReadCamt(String PathAndFile) {
-		
+
 		// decide what FileType must be read
-		if (PathAndFile.endsWith("xml")) {
+		if (PathAndFile.endsWith("ZIP") || PathAndFile.endsWith("zip")) {
+			// extract Zip File and read each xml file to one Array
+
+		} else if (PathAndFile.endsWith("xml")) {
 			KontoAuszug = parseXML(PathAndFile);
-			
+
 			if (KontoAuszug != null) {
 				buchungsAnzahl = KontoAuszug.getElementsByTagName("Ntry").getLength();
-				
+
 				buchungen = new String[buchungsAnzahl][6];
-				
+
 				//set IBAN from EBICs File
 				sIBAN = findSubs(KontoAuszug.getElementsByTagName("Acct").item(0), "IBAN", "").trim();
-				
+
 				//write Entrys from EBICs File in to Array
 				NodeList rows = KontoAuszug.getElementsByTagName("Ntry");
-				
+
 				for(int i = 0; i < rows.getLength(); i++){
 					buchungen[i][ValueDate] = findSubs(rows.item(i), NodeToFind[0], "").trim();
 					buchungen[i][CreditDebitIndicator] = findSubs(rows.item(i), NodeToFind[1], "").trim();
 					buchungen[i][Amount] = findSubs(rows.item(i), NodeToFind[2], "").trim();
 					buchungen[i][Unstructured] = findSubs(rows.item(i), NodeToFind[3], "").trim();
-					
+
 					if (buchungen[i][CreditDebitIndicator].equals("CRDT")) {
 						buchungen[i][Creditor] = null;
 						buchungen[i][Debitor] = findSubs(rows.item(i), NodeToFind[5], "").trim();
@@ -73,34 +76,35 @@ public class ReadCamt {
 		} else {
 			// the other possibility is csv
 			csvContent = ReadCsv(PathAndFile);
-			
+
 			// chech witch Bank is the Account from
 			// 0 nothing is found
 			// 1 ING DIBA
 			// 2 Postbank csv
 			int iBank = checkBank();
-			
+
 			switch (iBank) {
-			case 0:
-				JOptionPane.showMessageDialog(null, "CSV Daten konten keiner bekannten Bank zugeordnet werden!", "Achtung", JOptionPane.INFORMATION_MESSAGE);
-				System.exit(0);
-				break;
-			case 1:
-				// read the DIBA Content in this Object like the CAMT Data above
-				readDibaData(csvContent);
-				break;
-			case 2:
-			// read the DIBA Content in this Object like the CAMT Data above
-			readPostbankData(csvContent);
-			break;
-			default:
-				break;
+				case 0:
+					JOptionPane.showMessageDialog(null, "CSV Daten konten keiner bekannten Bank zugeordnet werden!",
+							"Achtung", JOptionPane.INFORMATION_MESSAGE);
+					System.exit(0);
+					break;
+				case 1:
+					// read the DIBA Content in this Object like the CAMT Data above
+					readDibaData(csvContent);
+					break;
+				case 2:
+					// read the DIBA Content in this Object like the CAMT Data above
+					readPostbankData(csvContent);
+					break;
+				default:
+					break;
 			}
-		}	
+		}
 	}
 	private Document parseXML(String PathAndFile){
 		DocumentBuilder DocBuilder = getDocBuilder();
-		
+
 		try {
 			return DocBuilder.parse(new File(PathAndFile));
 		} catch (SAXException e) {
@@ -113,7 +117,7 @@ public class ReadCamt {
 	}
 	private DocumentBuilder getDocBuilder(){
 		DocumentBuilderFactory DocBuilderFactory = DocumentBuilderFactory.newInstance();;
-		
+
 		try {
 			return DocBuilderFactory.newDocumentBuilder();
 		} catch (ParserConfigurationException e1) {
@@ -122,7 +126,12 @@ public class ReadCamt {
 		}
 	}
 	public int getBuchungsanzahl(){
-		return buchungen.length;
+		if (buchungen == null) {
+			// falls nicht initialisiert
+			return 0;
+		} else {
+			return buchungen.length;
+		}
 	}
 	public String getValDt(int iZeile){
 		return buchungen[iZeile][ValueDate];
@@ -150,7 +159,7 @@ public class ReadCamt {
 		String sIbanFormatted = "";
 		int iIbanCharacters = 0;
 		int iCounter = 0;
-		
+
 		for (iIbanCharacters = 0; iIbanCharacters < this.getIBAN().length(); iIbanCharacters++) {
 			if(iCounter == 4) {
 				sIbanFormatted = sIbanFormatted + " ";
@@ -159,7 +168,7 @@ public class ReadCamt {
 			sIbanFormatted = sIbanFormatted + this.getIBAN().charAt(iIbanCharacters);
 			iCounter++;
 		}
-		
+
 		return sIbanFormatted;
 	}
 	public String getAccountOwner() {
@@ -200,7 +209,7 @@ public class ReadCamt {
 	private String[] ReadCsv(String PathAndFile) {
 		String[] sContent = new String[0];
 		int iRows = 0;
-		
+
 		// if the CSV File has more than 0 Rows
 		if ((iRows = getCsvRowCount(PathAndFile)) > 0) {
 			BufferedReader KontoauszugCsv = null;
@@ -244,17 +253,17 @@ public class ReadCamt {
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
-		
+
 		// count the Rows
 		int iRows = 0;
-		
+
 		try {
 			while (KontoauszugCsv.readLine() != null)
 				iRows++;
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-			
+
 		try {
 			KontoauszugCsv.close();
 		} catch (IOException e) {
@@ -264,40 +273,49 @@ public class ReadCamt {
 	}
 	private void readDibaData(String[] csvContent) {
 		int iHeaderRow;
-		
+
 		// search IBAN in the csvContent
 		this.sIBAN = searchIban().replaceAll(" ", "");
 		this.AccountOwner = searchAccountOwner();
 
 		// check how many usable Datarows are in the csv
-		// the length of the csvContent Array minus the not usable Rows one to that line that 
+		// the length of the csvContent Array minus the not usable Rows one to that line that
 		// begins with "Buchung;Valuta"
 		iHeaderRow = findHeaderRow();
-		
-		// reinitial the Array buchunge new
-		this.buchungen = new String[csvContent.length - iHeaderRow - 1][6];
 
-		// the Diba Data begin in the row after the Header
-		for (int i = iHeaderRow + 1; i < csvContent.length; i++) {
-			buchungen[i - (iHeaderRow + 1)][ValueDate] = BigOneTools.datum_wandeln(csvContent[i].split(";")[1], 0);
-			
-			// the Credit or Dbit Inticator is in the csv Data not a separate field
-			// they is indicates by e minus or nothing bevore the amount (creditorische Buchung = haben / Debitorische Buchung = soll)
-			buchungen[i - (iHeaderRow + 1)][CreditDebitIndicator] = getCreditDebitIndicator(csvContent[i].split(";")[7].replace(".", "").replaceAll(",", "."));
-			
-			// the amount in the csv is german, we have to replace the thousand dot with null
-			// and the decimal separator with a dot
-			buchungen[i - (iHeaderRow + 1)][Amount] = delteSign(csvContent[i].split(";")[7].replace(".", "").replaceAll(",", ".")); 
-			buchungen[i - (iHeaderRow + 1)][Unstructured] = csvContent[i].split(";")[4];
-			buchungen[i - (iHeaderRow + 1)][Creditor] = csvContent[i].split(";")[2];
-			buchungen[i - (iHeaderRow + 1)][Debitor] = csvContent[i].split(";")[2]; // wird nicht extra aufgeführt deshalb wird der selbe wert gelesen
+		// only if the Line was found we go on
+		if (iHeaderRow > 0) {
+			// reinitial the Array buchunge new
+			this.buchungen = new String[csvContent.length - iHeaderRow - 1][6];
+
+			// the Diba Data begin in the row after the Header
+			for (int i = iHeaderRow + 1; i < csvContent.length; i++) {
+				buchungen[i - (iHeaderRow + 1)][ValueDate] = BigOneTools.datum_wandeln(csvContent[i].split(";")[1], 0);
+
+				// the Credit or Dbit Inticator is in the csv Data not a separate field
+				// they is indicates by e minus or nothing bevore the amount (creditorische
+				// Buchung = haben / Debitorische Buchung = soll)
+				buchungen[i - (iHeaderRow + 1)][CreditDebitIndicator] = getCreditDebitIndicator(
+						csvContent[i].split(";")[7].replace(".", "").replaceAll(",", "."));
+
+				// the amount in the csv is german, we have to replace the thousand dot with
+				// null
+				// and the decimal separator with a dot
+				buchungen[i - (iHeaderRow + 1)][Amount] = delteSign(
+						csvContent[i].split(";")[7].replace(".", "").replaceAll(",", "."));
+				buchungen[i - (iHeaderRow + 1)][Unstructured] = csvContent[i].split(";")[4];
+				buchungen[i - (iHeaderRow + 1)][Creditor] = csvContent[i].split(";")[2];
+				buchungen[i - (iHeaderRow + 1)][Debitor] = csvContent[i].split(";")[2]; // wird nicht extra aufgeführt
+																						// deshalb wird der selbe wert
+																						// gelesen
+			}
 		}
 	}
 	private void readPostbankData(String[] csvContent) {
 		int iHeaderRow;
 		String AccountBalance;
 		boolean isGermanFormat = true;
-		
+
 		// IBAN is in Line 3 in the csvContent
 		this.sIBAN = csvContent[2].split(";")[2];
 
@@ -316,7 +334,7 @@ public class ReadCamt {
 		if (DecimalSeparator.equals('.')) {
 			isGermanFormat = false;
 		}
-		
+
 		// reinitial the Array buchungen new
 		this.buchungen = new String[csvContent.length - 1 - 8][6];
 
@@ -332,19 +350,19 @@ public class ReadCamt {
 
 			// Date as String in Format yyyy-MM-dd
 			convertedDate = LocalDate.of(year, month, day).toString();
-			
+
 			buchungen[i - (iHeaderRow + 1)][ValueDate] = convertedDate;
-			
+
 			// the Credit or Dbit Inticator is in the csv Data not a separate field
 			// they is indicates by a minus or nothing bevore the amount (creditorische Buchung = haben / Debitorische Buchung = soll)
 			buchungen[i - (iHeaderRow + 1)][CreditDebitIndicator] = getCreditDebitIndicator(csvContent[i].split(";")[11].replace(".", "").replaceAll(",", "."));
-			
+
 			// the amount in the csv is german, we have to replace the thousand dot with null
 			// and the decimal separator with a dot
 			if (isGermanFormat) {
-				buchungen[i - (iHeaderRow + 1)][Amount] = delteSign(csvContent[i].split(";")[11].replace(".", "").replaceAll(",", ".")); 
+				buchungen[i - (iHeaderRow + 1)][Amount] = delteSign(csvContent[i].split(";")[11].replace(".", "").replaceAll(",", "."));
 			} else {
-				buchungen[i - (iHeaderRow + 1)][Amount] = delteSign(csvContent[i].split(";")[11].replaceAll(",", "")); 
+				buchungen[i - (iHeaderRow + 1)][Amount] = delteSign(csvContent[i].split(";")[11].replaceAll(",", ""));
 			}
 			buchungen[i - (iHeaderRow + 1)][Unstructured] = csvContent[i].split(";")[4];
 			buchungen[i - (iHeaderRow + 1)][Creditor] = csvContent[i].split(";")[3];
@@ -356,7 +374,7 @@ public class ReadCamt {
 		for (int i = 0; i < csvContent.length; i++) {
 			// only if the String isn't empty
 			if (!csvContent[i].equals("")) {
-				if (csvContent[i].matches("^Buchung;Valuta.*")) {
+				if (csvContent[i].matches("^Buchung;Wertstellungsdatum.*")) {
 					return i;
 				}
 			}
@@ -369,7 +387,7 @@ public class ReadCamt {
 			// only if the String isn't empty
 			if (!csvContent[i].equals("")) {
 				String[] rowParts = csvContent[i].split(";");
-				
+
 				for (int i2 = 0; i2 < rowParts.length; i2++) {
 					if (rowParts[i2].matches("^DE\\d{2}\\s?([0-9]{4}\\s?){4}[0-9]{2}$")) {
 						return rowParts[i2];
@@ -385,19 +403,19 @@ public class ReadCamt {
 			// only if the String isn't empty
 			if (!csvContent[i].equals("")) {
 				String[] rowParts = csvContent[i].split(";");
-				
+
 				if (rowParts[0].equals("Kunde")) {
 					return rowParts[1];
 				}
 			}
 		}
-		
+
 		return "";
 	}
 	private int checkBank() {
 		String[] rowParts;
 		// in the CSV Data we can check from witch Bank they are
-		
+
 		// in line 5 we find the info for the ING
 		rowParts = csvContent[4].split(";");
 		if (rowParts[0].equals("Bank") && rowParts[1].equals("ING")) {
