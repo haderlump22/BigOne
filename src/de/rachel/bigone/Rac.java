@@ -86,6 +86,7 @@ public class Rac {
 					} else {
 						System.out
 								.println("Keine Buchungen in Datei " + open.getSelectedFile().toString() + "gefunden!");
+						btnImp.setEnabled(false);
 						RACWindow.remove(sp);
 						RACWindow.validate();
 						RACWindow.repaint();
@@ -321,6 +322,7 @@ public class Rac {
 				btnImp.setEnabled(true);
 			} else {
 				System.out.println("Keine Buchungen in Datei " + open.getSelectedFile().toString() + " gefunden!");
+				btnImp.setEnabled(false);
 			}
 		} else {
 			btnImp.setEnabled(false);
