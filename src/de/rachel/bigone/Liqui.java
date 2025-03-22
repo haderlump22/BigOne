@@ -210,8 +210,11 @@ public class Liqui {
 				// do someone only when elements exist
 				if (lstModelAllIncome.getSize() > 0) {
 					String elementValue = lstModelAllIncome.getElementAt(lstAllIncome.getSelectedIndex());
-					lblBuchtext.setToolTipText(getBuchText(
-							elementValue.substring(elementValue.indexOf("(") + 1, elementValue.indexOf(")"))));
+					String postingText = getBuchText(
+						elementValue.substring(elementValue.indexOf("(") + 1, elementValue.indexOf(")")));
+
+					lblBuchtext.setText("Buchungstext: " + postingText);
+					lblBuchtext.setToolTipText(postingText);
 
 					// chek if a splitted part of the transaktions_id of the selectet Value is
 					// already put to a
@@ -400,8 +403,8 @@ public class Liqui {
 			}
 		});
 
-		lblBuchtext = new JLabel("Buchungstext (Tooltip)");
-		lblBuchtext.setBounds(20, 275, 300, 20);
+		lblBuchtext = new JLabel("Buchungstext: ");
+		lblBuchtext.setBounds(20, 275, 600, 20);
 
 		btnCalcPercentualPortion = new JButton("Anteilberechnung");
 		btnCalcPercentualPortion.setBounds(330, 65, 160, 20);
