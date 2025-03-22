@@ -30,8 +30,8 @@ public class ExpenditureDetailTableSelectionListener implements ListSelectionLis
     public void valueChanged(ListSelectionEvent e) {
         ListSelectionModel lsm = (ListSelectionModel) e.getSource();
 
-        // wenn auswahl fertig
-        if (!lsm.getValueIsAdjusting()) {
+        // wenn auswahl fertig UND auch etwas selectiert ist
+        if (!lsm.getValueIsAdjusting() && !lsm.isSelectionEmpty()) {
             // refresh Tablemodeldata of the dristributiontable with the choosen id of the
             // detailtable
             ExpenditureId = (Integer) ExpenditureDetailTable.getValueAt(ExpenditureDetailTable.getSelectedRow(), -1);
