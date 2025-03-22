@@ -7,6 +7,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.border.TitledBorder;
 
+import de.rachel.bigone.Listeners.IncomeDetailTableMouseListener;
 import de.rachel.bigone.Models.SalaryBasesIncomeDetailTableModel;
 import de.rachel.bigone.Models.SalaryBasesSumOfIncomePerPartyTableModel;
 import de.rachel.bigone.Renderer.SalaryBasesIncomeDetailTableCellRenderer;
@@ -89,5 +90,8 @@ public class SalaryBases {
         IncomeDetailTable.getColumnModel().getColumn(1).setMaxWidth(70);
         IncomeDetailTable.getColumnModel().getColumn(2).setMinWidth(78);
         IncomeDetailTable.getColumnModel().getColumn(2).setMaxWidth(78);
+
+        // selbst definierten Mouselistener hinzufügen
+		IncomeDetailTable.addMouseListener(new IncomeDetailTableMouseListener(IncomeDetailTable));
     }
 }

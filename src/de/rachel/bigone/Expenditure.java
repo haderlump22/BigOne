@@ -9,7 +9,9 @@ import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.border.TitledBorder;
 
+import de.rachel.bigone.Listeners.ExpenditureDetailTableMouseListener;
 import de.rachel.bigone.Listeners.ExpenditureDetailTableSelectionListener;
+import de.rachel.bigone.Listeners.IncomeDetailTableMouseListener;
 import de.rachel.bigone.Models.ExpenditureDetailTableModel;
 import de.rachel.bigone.Models.ExpenditureDistributionTableModel;
 import de.rachel.bigone.Models.ExpenditureSumPerPartyTableModel;
@@ -130,6 +132,10 @@ public class Expenditure {
         // define the width for some columns
         ExpenditureDetailTable.getColumnModel().getColumn(0).setMinWidth(110);
         ExpenditureDetailTable.getColumnModel().getColumn(0).setMaxWidth(110);
+
+
+        // selbst definierten Mouselistener hinzufügen
+		ExpenditureDetailTable.addMouseListener(new ExpenditureDetailTableMouseListener(ExpenditureDetailTable));
     }
 
     private void createExpenditureDistributionTable() {
