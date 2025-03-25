@@ -11,11 +11,11 @@ import javax.swing.JOptionPane;
 
 // import de.rachel.bigone.Models.SalaryBasesIncomeDetailTableModel;
 
-public class TransferAmountMouseListener extends MouseAdapter {
+public class TransferAmountDetailTableMouseListener extends MouseAdapter {
     private JPopupMenu popmen;
     // private SalaryBasesIncomeDetailTableModel model;
 
-    public TransferAmountMouseListener(JTable TransferAmountDetailTable) {
+    public TransferAmountDetailTableMouseListener(JTable TransferAmountDetailTable) {
         popmen = new JPopupMenu();
         // Menüeintrag für das Löschen einer Zeile
         JMenuItem createSuccessor = new JMenuItem("nachfolger anlegen");

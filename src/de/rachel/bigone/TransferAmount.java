@@ -7,7 +7,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.border.TitledBorder;
 
-import de.rachel.bigone.Listeners.TransferAmountMouseListener;
+import de.rachel.bigone.Listeners.TransferAmountDetailTableMouseListener;
 import de.rachel.bigone.Models.TransferAmountDetailTableModel;
 import de.rachel.bigone.Renderer.TransferAmountDetailTableCellRenderer;
 
@@ -65,6 +65,6 @@ public class TransferAmount {
         TransferAmountDetailTable.getColumnModel().getColumn(2).setMaxWidth(80);
 
         // selbst definierten Mouselistener hinzufügen
-		TransferAmountDetailTable.addMouseListener(new TransferAmountMouseListener(TransferAmountDetailTable));
+		TransferAmountDetailTable.addMouseListener(new TransferAmountDetailTableMouseListener(TransferAmountDetailTable));
     }
 }
