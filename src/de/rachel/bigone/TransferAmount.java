@@ -65,6 +65,6 @@ public class TransferAmount {
         TransferAmountDetailTable.getColumnModel().getColumn(2).setMaxWidth(80);
 
         // selbst definierten Mouselistener hinzufügen
-		TransferAmountDetailTable.addMouseListener(new TransferAmountDetailTableMouseListener(TransferAmountDetailTable));
+		TransferAmountDetailTable.addMouseListener(new TransferAmountDetailTableMouseListener(TransferAmountDetailTable, TransferAmountWindow));
     }
 }

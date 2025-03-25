@@ -6,6 +6,10 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import javax.swing.JPopupMenu;
 import javax.swing.JTable;
+
+import de.rachel.bigone.dialogs.TransferAmountDetailTableCreateSuccessorDialog;
+
+import javax.swing.JFrame;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 
@@ -15,12 +19,13 @@ public class TransferAmountDetailTableMouseListener extends MouseAdapter {
     private JPopupMenu popmen;
     // private SalaryBasesIncomeDetailTableModel model;
 
-    public TransferAmountDetailTableMouseListener(JTable TransferAmountDetailTable) {
+    public TransferAmountDetailTableMouseListener(JTable TransferAmountDetailTable, JFrame TransferAmountWindow) {
         popmen = new JPopupMenu();
         // Menüeintrag für das Löschen einer Zeile
         JMenuItem createSuccessor = new JMenuItem("nachfolger anlegen");
         createSuccessor.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ae) {
+                TransferAmountDetailTableCreateSuccessorDialog dialog = new TransferAmountDetailTableCreateSuccessorDialog(TransferAmountWindow);
                 JOptionPane.showMessageDialog(null, "ALERT MESSAGE", "TITLE", JOptionPane.WARNING_MESSAGE);
             }
         });
