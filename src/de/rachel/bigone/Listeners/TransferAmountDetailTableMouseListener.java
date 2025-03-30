@@ -26,7 +26,7 @@ public class TransferAmountDetailTableMouseListener extends MouseAdapter {
         createSuccessor.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ae) {
                 TransferAmountDetailTableCreateSuccessorDialog dialog = new TransferAmountDetailTableCreateSuccessorDialog(TransferAmountWindow);
-                JOptionPane.showMessageDialog(null, "ALERT MESSAGE", "TITLE", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(null, dialog.getPersonOfTransferAmount(), "TITLE", JOptionPane.WARNING_MESSAGE);
             }
         });
         popmen.add(createSuccessor);
