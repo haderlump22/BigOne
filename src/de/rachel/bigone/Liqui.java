@@ -207,6 +207,9 @@ public class Liqui {
 
 			@Override
 			public void mouseClicked(MouseEvent e) {
+				// first deselect Elements of the other list (lstIncomPerPerson)
+				lstIncomPerPerson.clearSelection();
+
 				// do someone only when elements exist
 				if (lstModelAllIncome.getSize() > 0) {
 					String elementValue = lstModelAllIncome.getElementAt(lstAllIncome.getSelectedIndex());
@@ -241,6 +244,53 @@ public class Liqui {
 
 		lstIncomPerPerson = new JList<String>(lstModelIncomePerPerson);
 		lstIncomPerPerson.setFont(fontLists);
+		lstIncomPerPerson.addMouseListener(new MouseListener() {
+			@Override
+			public void mouseReleased(MouseEvent e) {
+			}
+
+			@Override
+			public void mousePressed(MouseEvent e) {
+			}
+
+			@Override
+			public void mouseExited(MouseEvent e) {
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent e) {
+			}
+
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				// first deselect Elements of the other list (lstAllIncom)
+				lstAllIncome.clearSelection();
+
+				// do someone only when elements exist
+				if (lstModelIncomePerPerson.getSize() > 0) {
+					String elementValue = lstModelIncomePerPerson.getElementAt(lstIncomPerPerson.getSelectedIndex());
+					String postingText = getBuchText(
+						elementValue.substring(elementValue.indexOf("(") + 1, elementValue.indexOf(")")));
+
+					lblBuchtext.setText("Buchungstext: " + postingText);
+					lblBuchtext.setToolTipText(postingText);
+
+					// chek if a splitted part of the transaktions_id of the selectet Value is
+					// already put to a
+					// person, if it is so, the checkbox split must checked and protect against
+					// unchecked
+					if (existSplittedPartInIpp(
+							elementValue.substring(elementValue.indexOf("(") + 1, elementValue.indexOf(")")))) {
+						chkAufteilung.setSelected(true);
+						chkAufteilung.setEnabled(false);
+					} else {
+						chkAufteilung.setSelected(false);
+						chkAufteilung.setEnabled(true);
+					}
+				}
+
+			}
+		});
 
 		spIncomePerPerson = new JScrollPane(lstIncomPerPerson);
 		spIncomePerPerson.setBounds(220, 65, 100, 205);
