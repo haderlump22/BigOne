@@ -11,18 +11,18 @@ import java.awt.event.FocusListener;
 import java.text.DecimalFormat;
 
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 import javax.swing.text.NumberFormatter;
 
 public class TransferAmountDetailTableCreateSuccessorDialog extends JFrame {
     private JLabel lblPersonOfTransferAmount, lblTransferAmountValue, lblHeadline;
-    private JTextField txtPersonOfTransferAmount;
+    private JComboBox<String> cmbPersonOfTransferAmount;
     private JFormattedTextField txtTransferAmountValue;
     private JButton btnSaveNewTransferAmount;
     private final JDialog newTransferAmountDialog;
@@ -38,8 +38,8 @@ public class TransferAmountDetailTableCreateSuccessorDialog extends JFrame {
         lblPersonOfTransferAmount = new JLabel("Person für Ausgabe");
         lblPersonOfTransferAmount.setPreferredSize(new Dimension(150, 25));
 
-        txtPersonOfTransferAmount = new JTextField();
-        txtPersonOfTransferAmount.setPreferredSize(new Dimension(150, 25));
+        cmbPersonOfTransferAmount = new JComboBox<String>();
+        cmbPersonOfTransferAmount.setPreferredSize(new Dimension(150, 25));
 
         lblTransferAmountValue = new JLabel("Ausgaben Betrag");
         lblTransferAmountValue.setPreferredSize(new Dimension(150, 25));
@@ -104,7 +104,7 @@ public class TransferAmountDetailTableCreateSuccessorDialog extends JFrame {
         // place Textfield for Person
         gbc.gridx = 2;
         gbc.gridy = 1;
-        newTransferAmountDialog.add(txtPersonOfTransferAmount, gbc);
+        newTransferAmountDialog.add(cmbPersonOfTransferAmount, gbc);
 
         // place Label of AmountTextfield
         gbc.gridx = 1;
@@ -127,7 +127,10 @@ public class TransferAmountDetailTableCreateSuccessorDialog extends JFrame {
     }
 
     public String getPersonOfTransferAmount() {
-        return txtPersonOfTransferAmount.getText();
+        return cmbPersonOfTransferAmount.getSelectedItem().toString();
     }
 
+    public void createSuccessor() {
+
+    }
 }

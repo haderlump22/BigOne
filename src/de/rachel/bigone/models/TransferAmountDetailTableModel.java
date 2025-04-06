@@ -84,4 +84,13 @@ public class TransferAmountDetailTableModel extends AbstractTableModel {
 			System.out.println("TransferAmountDetailTableModel - lese_werte(): " + e.toString());
 		}
 	}
+	public boolean isDateFilled(int RowNumber) {
+		TransferAmountDetailTableRow Zeile = TableData.get(RowNumber);
+
+		if (Zeile.ValidUntil() == null) {
+			return false;
+		} else {
+			return true;
+		}
+	}
 }

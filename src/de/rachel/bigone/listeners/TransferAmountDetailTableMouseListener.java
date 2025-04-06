@@ -8,6 +8,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.JTable;
 
 import de.rachel.bigone.dialogs.TransferAmountDetailTableCreateSuccessorDialog;
+import de.rachel.bigone.models.TransferAmountDetailTableModel;
 
 import javax.swing.JFrame;
 import javax.swing.JMenuItem;
@@ -25,8 +26,20 @@ public class TransferAmountDetailTableMouseListener extends MouseAdapter {
         JMenuItem createSuccessor = new JMenuItem("nachfolger anlegen");
         createSuccessor.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ae) {
-                TransferAmountDetailTableCreateSuccessorDialog dialog = new TransferAmountDetailTableCreateSuccessorDialog(TransferAmountWindow);
-                JOptionPane.showMessageDialog(null, dialog.getPersonOfTransferAmount(), "TITLE", JOptionPane.WARNING_MESSAGE);
+                final TransferAmountDetailTableModel modelOfSourceTable;
+
+                // show Popup only on Rows where Datefield is not filled
+                modelOfSourceTable = (TransferAmountDetailTableModel) TransferAmountDetailTable.getModel();
+
+                if (modelOfSourceTable.isDateFilled(TransferAmountDetailTable.getSelectedRow())) {
+                    JOptionPane.showMessageDialog(null,
+                            "Nachfolger kann nicht angelegt werden.\nEnddatum schon enthalten",
+                            "Nachfolger nicht möglich", JOptionPane.WARNING_MESSAGE);
+                } else {
+                    TransferAmountDetailTableCreateSuccessorDialog dialog = new TransferAmountDetailTableCreateSuccessorDialog(
+                            TransferAmountWindow);
+                    dialog.createSuccessor();
+                }
             }
         });
         popmen.add(createSuccessor);
