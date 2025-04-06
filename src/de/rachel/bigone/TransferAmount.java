@@ -7,9 +7,9 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.border.TitledBorder;
 
-import de.rachel.bigone.Listeners.TransferAmountDetailTableMouseListener;
-import de.rachel.bigone.Models.TransferAmountDetailTableModel;
-import de.rachel.bigone.Renderer.TransferAmountDetailTableCellRenderer;
+import de.rachel.bigone.listeners.TransferAmountDetailTableMouseListener;
+import de.rachel.bigone.models.TransferAmountDetailTableModel;
+import de.rachel.bigone.renderer.TransferAmountDetailTableCellRenderer;
 
 import javax.swing.JTable;
 

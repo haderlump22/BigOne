@@ -22,10 +22,10 @@ import javax.swing.SwingUtilities;
 import javax.swing.text.MaskFormatter;
 import javax.swing.text.NumberFormatter;
 
-import de.rachel.bigone.Editors.DateTableCellEditor;
-import de.rachel.bigone.Editors.DecimalTableCellEditor;
-import de.rachel.bigone.Models.ValuesTableModel;
-import de.rachel.bigone.Renderer.ValuesTableCellRenderer;
+import de.rachel.bigone.editors.DateTableCellEditor;
+import de.rachel.bigone.editors.DecimalTableCellEditor;
+import de.rachel.bigone.models.ValuesTableModel;
+import de.rachel.bigone.renderer.ValuesTableCellRenderer;
 
 public class Values {
 	private Connection cn = null;
@@ -33,7 +33,7 @@ public class Values {
 	private JFormattedTextField txtValue, txtLiquiDate;
 	private Font fontTxtFields, fontCmbBoxes;
 	private JTable table;
-	private ValuesTableModel model; 
+	private ValuesTableModel model;
 	private JComboBox<String> cmbKto;
 
 	Values(Connection LoginCN){
@@ -48,16 +48,16 @@ public class Values {
 		//schriftenfestlegungen
 		fontTxtFields = new Font("Arial",Font.PLAIN,16);
 		fontCmbBoxes = new Font("Arial",Font.PLAIN,14);
-		
+
 		//textfeld fuer den zu suchenden Betrag definieren
 		txtValue = new JFormattedTextField(new NumberFormatter(new DecimalFormat("#,##0.00")));
-		txtValue.setBounds(30,25,100,25);		
+		txtValue.setBounds(30,25,100,25);
 		txtValue.setHorizontalAlignment(JFormattedTextField.RIGHT);
 		txtValue.setFont(fontTxtFields);
 		txtValue.setText("0,00");
 		txtValue.addFocusListener( new FocusListener() {
 			public void focusLost( FocusEvent fe ) {
-	    	 
+
 			}
 			public void focusGained(FocusEvent fe) {
 				SwingUtilities.invokeLater(new Runnable() {
@@ -84,12 +84,12 @@ public class Values {
 			}
 
 			public void keyTyped(KeyEvent arg0) {
-			
+
 			}
-			
+
 		});
-		
-		
+
+
 		String now = new SimpleDateFormat("dd.MM.yyyy").format(new Date());
 		//String now = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss").format(new Date());
 		try {
@@ -102,7 +102,7 @@ public class Values {
 		txtLiquiDate.setFont(fontTxtFields);
 		//aktuellen Monat als Liquimonat setzten
 		txtLiquiDate.setText("01-" + now.substring(3, 5) + "-20" + now.substring(8));
-		
+
 		// add Account choose and fill it with valid Account IDs (IBAN)
 		cmbKto = new JComboBox<String>();
 		cmbKto.setBounds(260,25,250,25);
@@ -113,9 +113,9 @@ public class Values {
 		valuewindow.add(txtValue);
 		valuewindow.add(txtLiquiDate);
 		valuewindow.add(cmbKto);
-				
+
 		zeichne_tabelle();
-		
+
 		valuewindow.setVisible(true);
 
 	}
@@ -126,7 +126,7 @@ public class Values {
 		table.getColumnModel().getColumn(2).setCellEditor(new DateTableCellEditor());
 		table.getColumnModel().getColumn(3).setCellEditor(new DecimalTableCellEditor());
 		table.getColumnModel().getColumn(5).setCellEditor(new DateTableCellEditor());
-				
+
 		//fuer einige spalten feste breiten einrichten
 		table.getColumnModel().getColumn(0).setMinWidth(55);
 		table.getColumnModel().getColumn(0).setMaxWidth(55);
@@ -143,20 +143,20 @@ public class Values {
 
 		JScrollPane sp = new JScrollPane(table);
 		sp.setBounds(30,70,725,355);
-		
+
 		valuewindow.add(sp);
 		valuewindow.validate();
 		valuewindow.repaint();
 	}
 	private void fill_cmbKto() {
 		DBTools getter = new DBTools(cn);
-		
+
 		getter.select("SELECT konten.iban, konten.bemerkung " +
 	      		"FROM konten " +
 	      		"where konten.gueltig = TRUE;",1);
-		
+
 		Object[][] cmbKtoValues = getter.getData();
-		
+
 		for(Object[] cmbKtoValue : cmbKtoValues)
 	        cmbKto.addItem(BigOneTools.getIbanFormatted(cmbKtoValue[0].toString()));
 	}
