@@ -1,4 +1,4 @@
-package de.rachel.bigone.Listeners;
+package de.rachel.bigone.listeners;
 
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
@@ -6,9 +6,10 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import javax.swing.JPopupMenu;
 import javax.swing.JTable;
-import javax.swing.JMenuItem;
 
-import de.rachel.bigone.Models.RACTableModel;
+import de.rachel.bigone.models.RACTableModel;
+
+import javax.swing.JMenuItem;
 
 public class RACMouseListener extends MouseAdapter {
     private JPopupMenu popmen;

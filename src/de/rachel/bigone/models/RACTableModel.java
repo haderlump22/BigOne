@@ -1,4 +1,4 @@
-package de.rachel.bigone.Models;
+package de.rachel.bigone.models;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -21,7 +21,7 @@ public class RACTableModel extends AbstractTableModel{
 	private static int LiquiMonth = 5;
 	private static int AccountBookingEvent = 6;
 	SimpleDateFormat SQLDATE = new SimpleDateFormat("yyyy-MM-dd");
-	
+
 	public RACTableModel(ReadCamt Auszug){
 		daten = lese_werte(Auszug);
 	}
@@ -55,16 +55,16 @@ public class RACTableModel extends AbstractTableModel{
 	 * in das Array des Table Models eingelesen
 	 */
 	private String[][] lese_werte(ReadCamt Auszug) {
-		
+
 		String strLager[][] = new String[Auszug.getBuchungsanzahl()][7];
-		
-		for(int iAktuelleBuchung = 0; iAktuelleBuchung < Auszug.getBuchungsanzahl(); iAktuelleBuchung++){		
+
+		for(int iAktuelleBuchung = 0; iAktuelleBuchung < Auszug.getBuchungsanzahl(); iAktuelleBuchung++){
 			strLager[iAktuelleBuchung][ValueDate] = Auszug.getValDt(iAktuelleBuchung);
-			
+
 			strLager[iAktuelleBuchung][LiquiMonth] = Auszug.getValDt(iAktuelleBuchung).substring(0, 8) + "01";
-			
-			strLager[iAktuelleBuchung][Amount] = Auszug.getAmt(iAktuelleBuchung); 
-			
+
+			strLager[iAktuelleBuchung][Amount] = Auszug.getAmt(iAktuelleBuchung);
+
 			// je nachdem ob creditorische oder debitorische Buchung
 			// bestimmte Werte des Arrays mit anderen Werten füllen
 			if (Auszug.getCdtDbtInd(iAktuelleBuchung).equals("CRDT")) {
@@ -90,18 +90,18 @@ public class RACTableModel extends AbstractTableModel{
 		return strLager;
 	}
 	public void removeRow(int iZeile, boolean refreshImmediately) {
-		//mit dieser methode wird die  
+		//mit dieser methode wird die
 		//gewaehlte Zeile aus dem Array entfernt
 		if(iZeile >= 0 && iZeile <= daten.length) {
 			//lagerarray mit der selben groesse wie das orginal erzeugen
 			strLager = new String[daten.length][7];
-			
+
 			//alle daten aus orginalarray in das lager kopieren
 			System.arraycopy(daten, 0, strLager, 0, daten.length);
-			
+
 			//daten array neu dimensionieren aber mit einer zeile weniger
 			daten = new String[strLager.length - 1][7];
-			
+
 			//nun die ersten zeilen bis zu der zu loeschenden in das
 			//redimensionierte orginalarray kopieren
 			//da die zeilen zahlung bei 0 beginnt zeigt iZeile nicht nur
@@ -112,18 +112,18 @@ public class RACTableModel extends AbstractTableModel{
 			//der mit dem Index 2 in das neue array kopieren muss und das sind dann genau
 			//2 Stueck. Und 2 ist ja auch der wert von iZeile.
 			System.arraycopy(strLager, 0, daten, 0, iZeile);
-			
+
 			//fuer den restlichen kopiervorgang muss man jetzt ab der Zeile nach iZeile
 			//alle restlichen datensaetze in das neue array kopieren, dort aber mit der
 			//Zielposition an der vorher die zu loeschende Zeile stand, also iZeile!!!
 			//Die menge der zu kopierenden Datensaetze laesst sich auch wieder
-			//mithilfe von iZeile ermitteln. einfach von der gesammtlaenge des neuen Arrays 
+			//mithilfe von iZeile ermitteln. einfach von der gesammtlaenge des neuen Arrays
 			//der Wert von iZeile abziehen.
 			//bsp: iZeile ist 2. dann muessen beim zweiten kopiervorgang, der die restlichen
 			//daten in das neue array(welches jetzt z.B 6 stat 7  Datensaetze lang ist)
-			//kopiert, noch 4 element kopiert werden. 6 - 2 ist 4 !! passt also  
+			//kopiert, noch 4 element kopiert werden. 6 - 2 ist 4 !! passt also
 			System.arraycopy(strLager, iZeile + 1, daten, iZeile, daten.length - iZeile);
-			
+
 			//tabellendarstellung aktualisieren wenn es gewollt ist
 			if (refreshImmediately)
 				fireTableDataChanged();
@@ -131,7 +131,7 @@ public class RACTableModel extends AbstractTableModel{
 	}
 	public void setLiquiToNull(int iZeile) {
 		// mit dieser Methode kann der Wert des Liquidatums der aktuellen Zeile auf NULL gesetzt werden
-		// weil der Editor ja jetzt das Format vorgibt, und so das Liquidatum NICHT mehr durch manuelle 
+		// weil der Editor ja jetzt das Format vorgibt, und so das Liquidatum NICHT mehr durch manuelle
 		// Eingabe auf NULL gesetzt werden kann
 		if(iZeile >= 0 && iZeile <= daten.length) {
 			//lagerarray mit der selben groesse wie das orginal erzeugen
@@ -155,18 +155,18 @@ public class RACTableModel extends AbstractTableModel{
 
 	public void removeUnusedRows(Date von, Date bis) {
 		// remove all Rows that are not in the Timerange
-		
+
 		// remove the hour, minutes and seconds to compare only the yyyy-mm-dd
 		String sVon = SQLDATE.format(von);
 		String sBis = SQLDATE.format(bis);
-		
+
 		// check rows
 		for (int iZeile = 0; iZeile < daten.length; iZeile++) {
 			// if is not in the timerange, remove it
 			try {
 				if (SQLDATE.parse(daten[iZeile][ValueDate]).before(SQLDATE.parse(sVon)) || SQLDATE.parse(daten[iZeile][ValueDate]).after(SQLDATE.parse(sBis))) {
 					this.removeRow(iZeile, false);
-					
+
 					// because we delete one Row in the array and the row after move to the actual index, wie must go on on the same index,
 					iZeile--;
 				}
@@ -174,8 +174,8 @@ public class RACTableModel extends AbstractTableModel{
 				e.printStackTrace();
 			}
 		}
-		
-		//tabellendarstellung aktualisieren 
+
+		//tabellendarstellung aktualisieren
 		fireTableDataChanged();
 	}
 }

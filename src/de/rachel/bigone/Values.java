@@ -27,10 +27,10 @@ import javax.swing.SwingUtilities;
 import javax.swing.text.MaskFormatter;
 import javax.swing.text.NumberFormatter;
 
-import de.rachel.bigone.Editors.DateTableCellEditor;
-import de.rachel.bigone.Editors.DecimalTableCellEditor;
-import de.rachel.bigone.Models.ValuesTableModel;
-import de.rachel.bigone.Renderer.ValuesTableCellRenderer;
+import de.rachel.bigone.editors.DateTableCellEditor;
+import de.rachel.bigone.editors.DecimalTableCellEditor;
+import de.rachel.bigone.models.ValuesTableModel;
+import de.rachel.bigone.renderer.ValuesTableCellRenderer;
 
 /**
  * @author Normen Rachel
@@ -78,7 +78,7 @@ public class Values {
 							table.getCellEditor().stopCellEditing();
 							table.clearSelection();
 						}
-							
+
 						txtValue.selectAll();
 					}
 				});
@@ -165,7 +165,7 @@ public class Values {
 					withLiquiDate.setText("ohne Liquidatum suchen");
 				}
 			}
-		});		
+		});
 
 		// put all Elements on the Window
 		valuewindow.add(txtValue);
@@ -228,10 +228,10 @@ public class Values {
 	private String getAccountDescription(String IBAN) {
 		//get the transaction wording to the transaktions_id
 		DBTools getter = new DBTools(cn);
-	
-		getter.select("SELECT bemerkung FROM konten " + 
+
+		getter.select("SELECT bemerkung FROM konten " +
 				"WHERE iban = '" + IBAN + "'", 1);
-		
+
 		if(getter.getRowCount() > 0) {
 			return getter.getValueAt(0, 0).toString();
 		}else {

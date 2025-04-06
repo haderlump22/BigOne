@@ -1,4 +1,4 @@
-package de.rachel.bigone.Editors;
+package de.rachel.bigone.editors;
 
 import java.awt.Component;
 import java.awt.event.ItemEvent;
@@ -16,7 +16,7 @@ import javax.swing.table.TableCellEditor;
 
 import de.rachel.bigone.DBTools;
 /**
- * Generiert eine Combobox für die Auswahl eines Kontoereignis beim Importieren von 
+ * Generiert eine Combobox für die Auswahl eines Kontoereignis beim Importieren von
  * Kontobewegungen.
  */
 public class ComboTableCellEditor extends AbstractCellEditor implements TableCellEditor {
@@ -52,13 +52,13 @@ public class ComboTableCellEditor extends AbstractCellEditor implements TableCel
 			@Override
 			public void keyReleased(KeyEvent e) {
 				// TODO Auto-generated method stub
-				
+
 			}
 
 			@Override
 			public void keyTyped(KeyEvent e) {
 				// TODO Auto-generated method stub
-				
+
 			}
 
 		});
@@ -97,24 +97,24 @@ public class ComboTableCellEditor extends AbstractCellEditor implements TableCel
     public boolean stopCellEditing() {
         return cellEditingStopped;
     }
-    public Object getCellEditorValue() { 
+    public Object getCellEditorValue() {
 		//damit bei erneuter auswahl immer der erste eintrag selectiert ist
     	//dieser kleine umweg
     	// String strLager = new String(component.getSelectedItem().toString());
     	// component.setSelectedIndex(0);
 		// return strLager;
-		
+
 		// die bisherige Auswahl soll bestehen bleiben
 		return component.getSelectedItem().toString();
-		
+
     }
 	private void fill_component() {
 		DBTools getter = new DBTools(cn);
-		  
+
 		getter.select("SELECT ereigniss_id, ereigniss_krzbez FROM kontenereignisse WHERE gueltig = 'TRUE' order by 2;",2);
 
 		Object[][] cmbComponentValues = getter.getData();
-		  
+
 		for(Object[] cmbComponentValue : cmbComponentValues)
 			component.addItem(cmbComponentValue[1] + " (" + cmbComponentValue[0]+")");
 	}

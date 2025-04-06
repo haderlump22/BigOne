@@ -18,11 +18,11 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 import com.toedter.calendar.JDateChooser;
 
-import de.rachel.bigone.Editors.ComboTableCellEditor;
-import de.rachel.bigone.Editors.LiquiDateTableCellEditor;
-import de.rachel.bigone.Listeners.RACMouseListener;
-import de.rachel.bigone.Models.RACTableModel;
-import de.rachel.bigone.Renderer.RACTableCellRenderer;
+import de.rachel.bigone.editors.ComboTableCellEditor;
+import de.rachel.bigone.editors.LiquiDateTableCellEditor;
+import de.rachel.bigone.listeners.RACMouseListener;
+import de.rachel.bigone.models.RACTableModel;
+import de.rachel.bigone.renderer.RACTableCellRenderer;
 
 public class Rac {
 	private Connection cn = null;

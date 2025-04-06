@@ -1,4 +1,4 @@
-package de.rachel.bigone.Editors;
+package de.rachel.bigone.editors;
 
 import java.awt.Component;
 import java.text.ParseException;
@@ -13,7 +13,7 @@ import de.rachel.bigone.BigOneTools;
 
 public class LiquiDateTableCellEditor extends AbstractCellEditor implements TableCellEditor {
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = 4917922491523056278L;
 	private JFormattedTextField component = new JFormattedTextField();
@@ -30,7 +30,7 @@ public class LiquiDateTableCellEditor extends AbstractCellEditor implements Tabl
 		if(value != null)
 			component.setText(BigOneTools.datum_wandeln(value.toString(),1));
 		return component;
-	} 
+	}
 	public Object getCellEditorValue() {
 		if (component.getText().length() > 0)
 			return BigOneTools.datum_wandeln(component.getText(), 0);

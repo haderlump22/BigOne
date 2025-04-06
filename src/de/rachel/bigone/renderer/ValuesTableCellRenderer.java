@@ -1,4 +1,4 @@
-package de.rachel.bigone.Renderer;
+package de.rachel.bigone.renderer;
 
 import java.awt.Component;
 import javax.swing.JLabel;
@@ -14,7 +14,7 @@ public class ValuesTableCellRenderer implements TableCellRenderer {
       JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
 
       JLabel label = null;
-      
+
       // only react when value is not null
       if (value != null) {
           if(!(value instanceof JLabel)) {

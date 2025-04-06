@@ -1,4 +1,4 @@
-package de.rachel.bigone.Renderer;
+package de.rachel.bigone.renderer;
 
 import java.awt.Component;
 
@@ -17,7 +17,7 @@ import java.util.GregorianCalendar;
 public class RACTableCellRenderer implements TableCellRenderer {
 	private Connection cn = null;
 	private String sAccountId = "";
-	
+
 	public RACTableCellRenderer(Connection LoginCN, String sIbanValue) {
 		this.cn = LoginCN;
 		DBTools AccountIdGetter = new DBTools(cn);

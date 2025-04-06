@@ -1,4 +1,4 @@
-package de.rachel.bigone.Models;
+package de.rachel.bigone.models;
 
 import java.sql.Connection;
 import javax.swing.table.AbstractTableModel;
@@ -49,7 +49,7 @@ public class ValuesTableModel extends AbstractTableModel {
 			daten[row][col] = null;
 
 		fireTableCellUpdated(row, col);
-		
+
 		if (value != null)
 			schreibe_neue_daten(row, col, value.toString(), strTransID);
 		else
