@@ -1,6 +1,7 @@
 package de.rachel.bigone.dialogs;
 
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -8,8 +9,11 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.sql.Connection;
+import java.sql.ResultSet;
 import java.text.DecimalFormat;
 
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
@@ -20,14 +24,21 @@ import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 import javax.swing.text.NumberFormatter;
 
+import de.rachel.bigone.DBTools;
+import de.rachel.bigone.models.TransferAmountDetailTableModel;
+
 public class TransferAmountDetailTableCreateSuccessorDialog extends JFrame {
     private JLabel lblPersonOfTransferAmount, lblTransferAmountValue, lblHeadline;
     private JComboBox<String> cmbPersonOfTransferAmount;
+    private DefaultComboBoxModel<String> cmbPersonOfTransferAmountModel;
     private JFormattedTextField txtTransferAmountValue;
     private JButton btnSaveNewTransferAmount;
     private final JDialog newTransferAmountDialog;
+    private Connection cn = null;
 
-    public TransferAmountDetailTableCreateSuccessorDialog(JFrame dialogOwner) {
+    public TransferAmountDetailTableCreateSuccessorDialog(JFrame dialogOwner, Connection LoginCN) {
+        cn = LoginCN;
+
         newTransferAmountDialog = new JDialog(dialogOwner, "Ausgabennachfolger", true);
         newTransferAmountDialog.setSize(320, 180);
         newTransferAmountDialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
@@ -38,13 +49,17 @@ public class TransferAmountDetailTableCreateSuccessorDialog extends JFrame {
         lblPersonOfTransferAmount = new JLabel("Person für Ausgabe");
         lblPersonOfTransferAmount.setPreferredSize(new Dimension(150, 25));
 
-        cmbPersonOfTransferAmount = new JComboBox<String>();
+        cmbPersonOfTransferAmountModel = new DefaultComboBoxModel<String>();
+        this.fillcmbPersonOfTransferAmount();
+        cmbPersonOfTransferAmount = new JComboBox<String>(cmbPersonOfTransferAmountModel);
+        cmbPersonOfTransferAmount.setFont(new Font("Arial", Font.PLAIN,16));
         cmbPersonOfTransferAmount.setPreferredSize(new Dimension(150, 25));
 
         lblTransferAmountValue = new JLabel("Ausgaben Betrag");
         lblTransferAmountValue.setPreferredSize(new Dimension(150, 25));
 
         txtTransferAmountValue = new JFormattedTextField(new NumberFormatter(new DecimalFormat("#,##0.00")));
+        txtTransferAmountValue.setFont(new Font("Arial", Font.PLAIN,16));
         txtTransferAmountValue.setText("0,00");
         txtTransferAmountValue.setHorizontalAlignment(JFormattedTextField.RIGHT);
         txtTransferAmountValue.setPreferredSize(new Dimension(75, 25));
@@ -68,7 +83,6 @@ public class TransferAmountDetailTableCreateSuccessorDialog extends JFrame {
             public void actionPerformed(ActionEvent ae) {
                 newTransferAmountDialog.setVisible(false);
                 newTransferAmountDialog.dispose();
-
             }
 
         });
@@ -130,7 +144,31 @@ public class TransferAmountDetailTableCreateSuccessorDialog extends JFrame {
         return cmbPersonOfTransferAmount.getSelectedItem().toString();
     }
 
-    public void createSuccessor() {
+    private void fillcmbPersonOfTransferAmount() {
+		//put all persons to the cmbmodel cmbModelPerson
+		DBTools getter = new DBTools(cn);
+        ResultSet rs;
+
+		//set First Value (select invitation) to cmbPerson
+		cmbPersonOfTransferAmountModel.addElement("---bitte wählen---");
+
+		getter.select("SELECT name, vorname, personen_id FROM personen " +
+				"WHERE gueltig = TRUE",3);
+
+        rs = getter.getResultSet();
+
+        try {
+            rs.beforeFirst();
+
+            while (rs.next()) {
+                cmbPersonOfTransferAmountModel.addElement(rs.getString("name") + " " + rs.getString("vorname") + "(" + rs.getString("personen_id") + ")");
+            }
+        } catch (Exception e) {
+            System.out.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + ": " + e.toString());
+        }
+	}
+
+    public void createSuccessor(TransferAmountDetailTableModel modelOfSourceTable, int NumOfSelectedRow) {
 
     }
 }
