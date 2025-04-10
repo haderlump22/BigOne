@@ -1,6 +1,7 @@
 package de.rachel.bigone;
 
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -61,6 +62,30 @@ public final class DBTools {
 		} catch (SQLException ex) {
 			ex.printStackTrace();
 		}
+	}
+
+	public void beforeFirst() throws SQLException {
+		rs.beforeFirst();
+	}
+
+	public int getInt (String columnLabel) throws SQLException {
+		return rs.getInt(columnLabel);
+	}
+
+	public String getString (String columnLabel) throws SQLException {
+		return rs.getString(columnLabel);
+	}
+
+	public Date getDate (String columnLabel) throws SQLException {
+		return rs.getDate(columnLabel);
+	}
+
+	public Double getDouble (String columnLabel) throws SQLException {
+		return rs.getDouble(columnLabel);
+	}
+
+	public Boolean next () throws SQLException {
+		return rs.next();
 	}
 
 	public Object[][] getData() {

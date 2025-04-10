@@ -1,7 +1,6 @@
 package de.rachel.bigone.models;
 
 import java.sql.Connection;
-import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -64,7 +63,6 @@ public class TransferAmountDetailTableModel extends AbstractTableModel {
 		 * get the current Income of everey Party
 		 */
 		DBTools getter = new DBTools(cn);
-		ResultSet rs;
 
 		getter.select(
 				"SELECT ueberweisungsbetrag_id, p.name || ', ' || SUBSTRING(p.vorname, 1, 1) || '.' as party,\n" +
@@ -72,18 +70,18 @@ public class TransferAmountDetailTableModel extends AbstractTableModel {
 				"order by gilt_bis DESC, party, betrag DESC;",
 				4);
 
-		rs = getter.getResultSet();
 		try {
-			rs.beforeFirst();
+			getter.beforeFirst();
 
-			while (rs.next()) {
-				TableData.add(new TransferAmountDetailTableRow(rs.getInt("ueberweisungsbetrag_id"), rs.getString("party"),
-						rs.getDouble("betrag"), rs.getDate("gilt_bis")));
+			while (getter.next()) {
+				TableData.add(new TransferAmountDetailTableRow(getter.getInt("ueberweisungsbetrag_id"), getter.getString("party"),
+						getter.getDouble("betrag"), getter.getDate("gilt_bis")));
 			}
 		} catch (Exception e) {
-			System.out.println("TransferAmountDetailTableModel - lese_werte(): " + e.toString());
+			System.out.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + ": " + e.toString());
 		}
 	}
+
 	public boolean isDateFilled(int RowNumber) {
 		TransferAmountDetailTableRow Zeile = TableData.get(RowNumber);
 
