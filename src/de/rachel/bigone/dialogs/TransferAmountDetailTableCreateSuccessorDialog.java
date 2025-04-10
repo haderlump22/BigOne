@@ -36,7 +36,7 @@ public class TransferAmountDetailTableCreateSuccessorDialog extends JFrame {
     private final JDialog newTransferAmountDialog;
     private Connection cn = null;
 
-    public TransferAmountDetailTableCreateSuccessorDialog(JFrame dialogOwner, Connection LoginCN) {
+    public TransferAmountDetailTableCreateSuccessorDialog(TransferAmountDetailTableModel modelOfSourceTable, int selectedRow, JFrame dialogOwner, Connection LoginCN) {
         cn = LoginCN;
 
         newTransferAmountDialog = new JDialog(dialogOwner, "Ausgabennachfolger", true);
@@ -50,7 +50,7 @@ public class TransferAmountDetailTableCreateSuccessorDialog extends JFrame {
         lblPersonOfTransferAmount.setPreferredSize(new Dimension(150, 25));
 
         cmbPersonOfTransferAmountModel = new DefaultComboBoxModel<String>();
-        this.fillcmbPersonOfTransferAmount();
+        this.fillcmbPersonOfTransferAmount(modelOfSourceTable, selectedRow);
         cmbPersonOfTransferAmount = new JComboBox<String>(cmbPersonOfTransferAmountModel);
         cmbPersonOfTransferAmount.setFont(new Font("Arial", Font.PLAIN,16));
         cmbPersonOfTransferAmount.setPreferredSize(new Dimension(150, 25));
@@ -84,7 +84,6 @@ public class TransferAmountDetailTableCreateSuccessorDialog extends JFrame {
                 newTransferAmountDialog.setVisible(false);
                 newTransferAmountDialog.dispose();
             }
-
         });
 
         // Layouting
@@ -144,10 +143,16 @@ public class TransferAmountDetailTableCreateSuccessorDialog extends JFrame {
         return cmbPersonOfTransferAmount.getSelectedItem().toString();
     }
 
-    private void fillcmbPersonOfTransferAmount() {
+    private void fillcmbPersonOfTransferAmount(TransferAmountDetailTableModel modelOfSourceTable, int selectedRow) {
+        int PersonIdFromSelectedRow;
+        String ComboboxElementToAdd;
+
 		//put all persons to the cmbmodel cmbModelPerson
 		DBTools getter = new DBTools(cn);
         ResultSet rs;
+
+        // if given the selectedRow, then get the Person that stands behind them
+        PersonIdFromSelectedRow = this.getPersonIdFromSelectedRow(modelOfSourceTable, selectedRow);
 
 		//set First Value (select invitation) to cmbPerson
 		cmbPersonOfTransferAmountModel.addElement("---bitte wählen---");
@@ -161,14 +166,40 @@ public class TransferAmountDetailTableCreateSuccessorDialog extends JFrame {
             rs.beforeFirst();
 
             while (rs.next()) {
-                cmbPersonOfTransferAmountModel.addElement(rs.getString("name") + " " + rs.getString("vorname") + "(" + rs.getString("personen_id") + ")");
+                ComboboxElementToAdd = rs.getString("name") + " " + rs.getString("vorname") + "(" + rs.getString("personen_id") + ")";
+                cmbPersonOfTransferAmountModel.addElement(ComboboxElementToAdd);
+
+                // decide if this Element has to be preselected
+                if (PersonIdFromSelectedRow == rs.getInt("personen_id")) {
+                    cmbPersonOfTransferAmountModel.setSelectedItem(ComboboxElementToAdd);
+                }
             }
         } catch (Exception e) {
             System.out.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + ": " + e.toString());
         }
 	}
 
-    public void createSuccessor(TransferAmountDetailTableModel modelOfSourceTable, int NumOfSelectedRow) {
+    public void createSuccessor(TransferAmountDetailTableModel modelOfSourceTable, int selectedRow) {
 
+    }
+
+    private int getPersonIdFromSelectedRow(TransferAmountDetailTableModel modelOfSourceTable, int selectedRow) {
+        //put all persons to the cmbmodel cmbModelPerson
+		DBTools getter = new DBTools(cn);
+        ResultSet rs;
+
+		getter.select("SELECT partei_id from ha_ueberweisungsbetraege " +
+				"WHERE ueberweisungsbetrag_id = " + modelOfSourceTable.getValueAt(selectedRow, -1) + ";",1);
+
+        rs = getter.getResultSet();
+
+        try {
+            rs.first();
+
+            return rs.getInt("partei_id");
+        } catch (Exception e) {
+            System.out.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + ": " + e.toString());
+            return -1;
+        }
     }
 }

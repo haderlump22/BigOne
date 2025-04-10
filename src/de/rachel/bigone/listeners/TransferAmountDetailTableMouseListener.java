@@ -42,6 +42,7 @@ public class TransferAmountDetailTableMouseListener extends MouseAdapter {
                             "Nachfolger nicht möglich", JOptionPane.WARNING_MESSAGE);
                 } else {
                     TransferAmountDetailTableCreateSuccessorDialog dialog = new TransferAmountDetailTableCreateSuccessorDialog(
+                            modelOfSourceTable, TransferAmountDetailTable.getSelectedRow(),
                             TransferAmountWindow, cn);
                     dialog.createSuccessor(modelOfSourceTable, TransferAmountDetailTable.getSelectedRow());
                 }
