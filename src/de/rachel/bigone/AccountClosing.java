@@ -35,7 +35,7 @@ import javax.swing.border.TitledBorder;
 import javax.swing.text.MaskFormatter;
 import javax.swing.text.NumberFormatter;
 
-public class Abschluss {
+public class AccountClosing {
 	private JFrame liquiwindow;
 	private JPanel pnlAbrMonat, pnlRestwert, pnlEinahmenAufteilung;
 	private JFormattedTextField txtAbrMonat, txtNutzBetr;
@@ -54,7 +54,7 @@ public class Abschluss {
 	private String KontenID = "12";
 
 
-	Abschluss(Connection LoginCN){
+	AccountClosing(Connection LoginCN){
 		cn = LoginCN;
 		liquiwindow = new JFrame("Monatsabschluss");
 		liquiwindow.setSize(800,580);

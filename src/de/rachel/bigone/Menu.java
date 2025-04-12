@@ -45,7 +45,7 @@ public class Menu {
 	JMenuItem Abschluss = new JMenuItem("Abschluss");
 	Abschluss.addActionListener(new ActionListener(){
         public void actionPerformed(ActionEvent ae){
-            new Abschluss(cn);
+            new AccountClosing(cn);
         }
     });
 	Accounts.add(Abschluss);
@@ -122,7 +122,7 @@ public class Menu {
 
 	Haushaltsabschluss.addActionListener(new ActionListener(){
         public void actionPerformed(ActionEvent ae){
-            // new TransferAmount(cn);
+            new JointAccountClosing(cn);
         }
     });
 
