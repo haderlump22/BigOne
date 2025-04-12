@@ -2,5 +2,6 @@ package de.rachel.bigone.records;
 
 import java.sql.Date;
 
-public record ExpenditureDetailTableRow(Integer ExpenditureId, String Description, Double Amount, String DivideType, Date ValidUntil, String ExpenditureHint) {
+public record ExpenditureDetailTableRow(Integer ExpenditureId, String Description, Double Amount, String DivideType,
+        Date ValidUntil, String ExpenditureHint) {
 };
