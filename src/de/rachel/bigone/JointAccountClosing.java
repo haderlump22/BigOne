@@ -2,19 +2,20 @@ package de.rachel.bigone;
 
 import java.sql.Connection;
 import java.text.ParseException;
-import java.util.regex.Pattern;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.Insets;
-import java.beans.PropertyChangeListener;
 
 import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.JTable;
 import javax.swing.border.TitledBorder;
 import javax.swing.text.MaskFormatter;
+
+import de.rachel.bigone.models.JointAccountClosingDetailTableModel;
+import de.rachel.bigone.renderer.JointAccountClosingDetailTableCellRenderer;
 
 public class JointAccountClosing {
 	private Connection cn = null;
@@ -22,6 +23,7 @@ public class JointAccountClosing {
     private Font fontTxtFields, fontCmbBoxes, fontLists;
     private JPanel pnlAbrMonat;
     private JFormattedTextField txtAbrMonat;
+	private JTable JointAccountClosingDetailTable;
 
     JointAccountClosing (Connection LoginCN) {
 		cn = LoginCN;
@@ -69,6 +71,14 @@ public class JointAccountClosing {
 		// put the textfield to the Panal
 		pnlAbrMonat.add(txtAbrMonat);
 		// ====END Month of AccountClosing====
+
+		// ====START JointAccountClosingDetailTable====
+		JointAccountClosingDetailTable = new JTable(new JointAccountClosingDetailTableModel(cn));
+		JointAccountClosingDetailTable.setDefaultRenderer(Object.class, new JointAccountClosingDetailTableCellRenderer());
+
+		// setting width for some columns
+		// has to do
+		// ====END JointAccountClosingDetailTable====
     }
 
 	private void createListeners() {
