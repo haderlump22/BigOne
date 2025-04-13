@@ -71,16 +71,16 @@ public class JointAccountClosingDetailTableModel extends AbstractTableModel {
 		// 		"order by gilt_bis DESC, party, betrag DESC;",
 		// 		4);
 
-		try {
-			getter.beforeFirst();
+		// try {
+		// 	getter.beforeFirst();
 
-			while (getter.next()) {
-				// has to be corrected
-				// TableData.add(new TransferAmountDetailTableRow(getter.getInt("ueberweisungsbetrag_id"), getter.getString("party"),
-				// 		getter.getDouble("betrag"), getter.getDate("gilt_bis")));
-			}
-		} catch (Exception e) {
-			System.out.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + ": " + e.toString());
-		}
+		// 	while (getter.next()) {
+		// 		// has to be corrected
+		// 		// TableData.add(new TransferAmountDetailTableRow(getter.getInt("ueberweisungsbetrag_id"), getter.getString("party"),
+		// 		// 		getter.getDouble("betrag"), getter.getDate("gilt_bis")));
+		// 	}
+		// } catch (Exception e) {
+		// 	System.out.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + ": " + e.toString());
+		// }
 	}
 }

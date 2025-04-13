@@ -10,6 +10,7 @@ import java.awt.GridBagLayout;
 import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.border.TitledBorder;
 import javax.swing.text.MaskFormatter;
@@ -21,9 +22,10 @@ public class JointAccountClosing {
 	private Connection cn = null;
     private JFrame JointAccountClosingWindow;
     private Font fontTxtFields, fontCmbBoxes, fontLists;
-    private JPanel pnlAbrMonat;
+    private JPanel pnlAbrMonat, JointAccountClosingDetailPanel;
     private JFormattedTextField txtAbrMonat;
 	private JTable JointAccountClosingDetailTable;
+	private JScrollPane JointAccountClosingDetailScrollPane;
 
     JointAccountClosing (Connection LoginCN) {
 		cn = LoginCN;
@@ -72,12 +74,20 @@ public class JointAccountClosing {
 		pnlAbrMonat.add(txtAbrMonat);
 		// ====END Month of AccountClosing====
 
-		// ====START JointAccountClosingDetailTable====
+		// ====START JointAccountClosingDetailTable and related Components====
 		JointAccountClosingDetailTable = new JTable(new JointAccountClosingDetailTableModel(cn));
 		JointAccountClosingDetailTable.setDefaultRenderer(Object.class, new JointAccountClosingDetailTableCellRenderer());
 
 		// setting width for some columns
 		// has to do
+
+		JointAccountClosingDetailScrollPane = new JScrollPane(JointAccountClosingDetailTable);
+
+		JointAccountClosingDetailPanel = new JPanel();
+		JointAccountClosingDetailPanel.setLayout(null);
+		JointAccountClosingDetailPanel.setPreferredSize(new Dimension(300, 200));
+		JointAccountClosingDetailPanel.setBorder(new TitledBorder("Ausgabensummen"));
+		JointAccountClosingDetailPanel.add(JointAccountClosingDetailScrollPane);
 		// ====END JointAccountClosingDetailTable====
     }
 
@@ -125,8 +135,13 @@ public class JointAccountClosing {
         gbc.gridx = 0;
         gbc.gridy = 0;
         // gbc.gridwidth = 2;
-        // gbc.anchor = GridBagConstraints.WEST;
+        gbc.anchor = GridBagConstraints.WEST;
         // gbc.insets = new Insets(10, 10, 0, 0);
         JointAccountClosingWindow.add(pnlAbrMonat, gbc);
+
+		// place JointAccountClosingDetailPanel
+		gbc.gridx = 0;
+		gbc.gridy = 1;
+		JointAccountClosingWindow.add(JointAccountClosingDetailPanel, gbc);
     }
 }
