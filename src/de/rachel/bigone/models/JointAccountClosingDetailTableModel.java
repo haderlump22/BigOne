@@ -3,6 +3,7 @@ package de.rachel.bigone.models;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import javax.swing.table.AbstractTableModel;
 import de.rachel.bigone.DBTools;
@@ -10,8 +11,9 @@ import de.rachel.bigone.records.JointAccountClosingDetailTableRow;
 
 public class JointAccountClosingDetailTableModel extends AbstractTableModel {
 	private Connection cn = null;
-	private String[] columnName = new String[] { "Ausgabenart", "Betrag IST", "Plan", "Differenz" };
+	private String[] columnName = new String[] { "Ausgabenart", "Betrag IST", "Betrag PLAN", "Differenz" };
 	private List<JointAccountClosingDetailTableRow> TableData = new ArrayList<>();
+	private String billingMonth = null;
 
 	public JointAccountClosingDetailTableModel(Connection LoginCN) {
 		cn = LoginCN;
@@ -60,27 +62,42 @@ public class JointAccountClosingDetailTableModel extends AbstractTableModel {
 
 	private void lese_werte() {
 		/*
-		 * get the current Income of everey Party
+		 * get the current Amount Sum of each type of money
 		 */
-		DBTools getter = new DBTools(cn);
+		if (billingMonth != null && Pattern.matches("\\d{2}.\\d{2}.[1-9]{1}\\d{3}",billingMonth)) {
+			// if TableData contain Values => flush them before fill it with new data
+			if (TableData.size() > 0) {
+				TableData.clear();
+			}
 
-		// has to be corrected
-		// getter.select(
-		// 		"SELECT ueberweisungsbetrag_id, p.name || ', ' || SUBSTRING(p.vorname, 1, 1) || '.' as party,\n" +
-		// 		"betrag, gilt_bis from personen p, ha_ueberweisungsbetraege ueb where p.personen_id = ueb.partei_id\n" +
-		// 		"order by gilt_bis DESC, party, betrag DESC;",
-		// 		4);
+			DBTools getter = new DBTools(cn);
 
-		// try {
-		// 	getter.beforeFirst();
+			getter.select(
+					"select ha_kategorie.kategoriebezeichnung, \"get_actualAmount\"(ereigniss_id, 13, '" + billingMonth + "') betragist\n" +
+					"from transaktionen, ha_kategorie\n" +
+					"where konten_id = 13\n" +
+					"and liqui_monat = '" + billingMonth + "'\n" +
+					"and ha_kategorie.ha_kategorie_id = transaktionen.ereigniss_id\n" +
+					"group by ha_kategorie.kategoriebezeichnung, ereigniss_id\n" +
+					"order by ha_kategorie.kategoriebezeichnung;",
+					2);
 
-		// 	while (getter.next()) {
-		// 		// has to be corrected
-		// 		// TableData.add(new TransferAmountDetailTableRow(getter.getInt("ueberweisungsbetrag_id"), getter.getString("party"),
-		// 		// 		getter.getDouble("betrag"), getter.getDate("gilt_bis")));
-		// 	}
-		// } catch (Exception e) {
-		// 	System.out.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + ": " + e.toString());
-		// }
+			try {
+				getter.beforeFirst();
+
+				while (getter.next()) {
+					TableData.add(new JointAccountClosingDetailTableRow(getter.getString("kategoriebezeichnung"),
+							getter.getDouble("betragist"), 0.0, 0.0));
+				}
+			} catch (Exception e) {
+				System.out.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + ": " + e.toString());
+			}
+		}
+	}
+
+	public void aktualisiere(String billingMonth) {
+		this.billingMonth = billingMonth;
+		this.lese_werte();
+		fireTableDataChanged();
 	}
 }
