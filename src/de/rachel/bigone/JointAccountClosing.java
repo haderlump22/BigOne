@@ -24,7 +24,7 @@ import de.rachel.bigone.renderer.JointAccountClosingDetailTableCellRenderer;
 public class JointAccountClosing {
 	private Connection cn = null;
     private JFrame JointAccountClosingWindow;
-    private Font fontTxtFields, fontCmbBoxes, fontLists;
+    private Font fontTxtFields;//, fontCmbBoxes, fontLists;
     private JPanel pnlAbrMonat, JointAccountClosingDetailPanel;
     private JFormattedTextField txtAbrMonat;
 	private JTable JointAccountClosingDetailTable;
@@ -55,8 +55,8 @@ public class JointAccountClosing {
 
 		// Font settings
 		fontTxtFields = new Font("Arial", Font.PLAIN, 16);
-		fontCmbBoxes = new Font("Arial", Font.PLAIN, 16);
-		fontLists = new Font("Arial", Font.PLAIN, 10);
+		// fontCmbBoxes = new Font("Arial", Font.PLAIN, 16);
+		// fontLists = new Font("Arial", Font.PLAIN, 10);
 
 		// ====START Month of AccountClosing====
 		pnlAbrMonat = new JPanel();
