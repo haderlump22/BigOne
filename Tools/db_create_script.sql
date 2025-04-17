@@ -2,8 +2,8 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 14.13 (Ubuntu 14.13-0ubuntu0.22.04.1)
--- Dumped by pg_dump version 14.13 (Ubuntu 14.13-0ubuntu0.22.04.1)
+-- Dumped from database version 16.8 (Ubuntu 16.8-0ubuntu0.24.04.1)
+-- Dumped by pg_dump version 16.8 (Ubuntu 16.8-0ubuntu0.24.04.1)
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -15,6 +15,95 @@ SET check_function_bodies = false;
 SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
+
+--
+-- Name: get_actualAmount(integer[], integer, date); Type: FUNCTION; Schema: public; Owner: domm
+--
+
+CREATE FUNCTION public."get_actualAmount"("HaKategorieId" integer[], "KontoId" integer, "LiquiMonat" date) RETURNS numeric
+    LANGUAGE plpgsql
+    AS $$Declare
+	SummeHaben DECIMAL;
+	SummeSoll DECIMAL;
+BEGIN
+	SELECT SUM(betrag)
+	INTO SummeHaben
+	FROM transaktionen
+	WHERE soll_haben = 'h' 
+	AND konten_id = "KontoId"
+	AND ereigniss_id = "HaKategorieId"
+	AND liqui_monat = "LiquiMonat";
+
+	SELECT SUM(betrag)
+	INTO SummeSoll
+	FROM transaktionen
+	WHERE soll_haben = 's' 
+	AND konten_id = "KontoId"
+	AND ereigniss_id = "HaKategorieId"
+	AND liqui_monat = "LiquiMonat";
+
+   	-- eventuell gibt es keine Datensätze, dann der Summe 0 zuweisen
+	IF SummeHaben IS NULL THEN
+	  SummeHaben := 0;
+	END IF;
+	
+	IF SummeSoll IS NULL THEN
+	  SummeSoll := 0;
+	END IF;
+
+	RETURN SummeHaben - SummeSoll;
+END;$$;
+
+
+ALTER FUNCTION public."get_actualAmount"("HaKategorieId" integer[], "KontoId" integer, "LiquiMonat" date) OWNER TO domm;
+
+--
+-- Name: get_actualAmount(integer, integer, date); Type: FUNCTION; Schema: public; Owner: domm
+--
+
+CREATE FUNCTION public."get_actualAmount"("HaKategorieId" integer, "KontoId" integer, "LiquiMonat" date) RETURNS numeric
+    LANGUAGE plpgsql
+    AS $$Declare
+	SummeHaben DECIMAL;
+	SummeSoll DECIMAL;
+BEGIN
+	SELECT SUM(betrag)
+	INTO SummeHaben
+	FROM transaktionen
+	WHERE soll_haben = 'h' 
+	AND konten_id = "KontoId"
+	AND ereigniss_id = "HaKategorieId"
+	AND liqui_monat = "LiquiMonat";
+
+	SELECT SUM(betrag)
+	INTO SummeSoll
+	FROM transaktionen
+	WHERE soll_haben = 's' 
+	AND konten_id = "KontoId"
+	AND ereigniss_id = "HaKategorieId"
+	AND liqui_monat = "LiquiMonat";
+
+   	-- eventuell gibt es keine Datensätze, dann der Summe 0 zuweisen
+	IF SummeHaben IS NULL THEN
+	  SummeHaben := 0;
+	END IF;
+	
+	IF SummeSoll IS NULL THEN
+	  SummeSoll := 0;
+	END IF;
+
+	RETURN SummeHaben - SummeSoll;
+END;$$;
+
+
+ALTER FUNCTION public."get_actualAmount"("HaKategorieId" integer, "KontoId" integer, "LiquiMonat" date) OWNER TO domm;
+
+--
+-- Name: FUNCTION "get_actualAmount"("HaKategorieId" integer, "KontoId" integer, "LiquiMonat" date); Type: COMMENT; Schema: public; Owner: domm
+--
+
+COMMENT ON FUNCTION public."get_actualAmount"("HaKategorieId" integer, "KontoId" integer, "LiquiMonat" date) IS 'liefert den IST Wert einer Haushaltskontokategorie für einen bestimmten Liquimonat zurück';
+
 
 --
 -- Name: get_rest(integer, integer); Type: FUNCTION; Schema: public; Owner: domm
@@ -164,7 +253,7 @@ CREATE VIEW public."Kontouebersicht" WITH (security_barrier='true') AS
   ORDER BY personen.name, personen.vorname, kreditinstitut.kreditinstitut;
 
 
-ALTER TABLE public."Kontouebersicht" OWNER TO domm;
+ALTER VIEW public."Kontouebersicht" OWNER TO domm;
 
 --
 -- Name: VIEW "Kontouebersicht"; Type: COMMENT; Schema: public; Owner: domm
@@ -212,7 +301,7 @@ CREATE SEQUENCE public.abschluss_abschluss_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.abschluss_abschluss_id_seq OWNER TO domm;
+ALTER SEQUENCE public.abschluss_abschluss_id_seq OWNER TO domm;
 
 --
 -- Name: abschluss_abschluss_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: domm
@@ -255,7 +344,7 @@ CREATE SEQUENCE public.aufteilung_aufteilungs_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.aufteilung_aufteilungs_id_seq OWNER TO domm;
+ALTER SEQUENCE public.aufteilung_aufteilungs_id_seq OWNER TO domm;
 
 --
 -- Name: aufteilung_aufteilungs_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: domm
@@ -288,7 +377,7 @@ CREATE SEQUENCE public.buch_autor_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.buch_autor_id_seq OWNER TO domm;
+ALTER SEQUENCE public.buch_autor_id_seq OWNER TO domm;
 
 --
 -- Name: buch_autor_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: domm
@@ -322,7 +411,7 @@ CREATE SEQUENCE public.buch_titel_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.buch_titel_id_seq OWNER TO domm;
+ALTER SEQUENCE public.buch_titel_id_seq OWNER TO domm;
 
 --
 -- Name: buch_titel_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: domm
@@ -367,7 +456,7 @@ CREATE SEQUENCE public.freistellungsauftraege_freistellung_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.freistellungsauftraege_freistellung_id_seq OWNER TO domm;
+ALTER SEQUENCE public.freistellungsauftraege_freistellung_id_seq OWNER TO domm;
 
 --
 -- Name: freistellungsauftraege_freistellung_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: domm
@@ -377,14 +466,120 @@ ALTER SEQUENCE public.freistellungsauftraege_freistellung_id_seq OWNED BY public
 
 
 --
+-- Name: ha_ausgaben_ausgabenId_seq; Type: SEQUENCE; Schema: public; Owner: domm
+--
+
+CREATE SEQUENCE public."ha_ausgaben_ausgabenId_seq"
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    MAXVALUE 2147483647
+    CACHE 1;
+
+
+ALTER SEQUENCE public."ha_ausgaben_ausgabenId_seq" OWNER TO domm;
+
+--
+-- Name: ha_ausgaben; Type: TABLE; Schema: public; Owner: domm
+--
+
+CREATE TABLE public.ha_ausgaben (
+    "ausgabenId" integer DEFAULT nextval('public."ha_ausgaben_ausgabenId_seq"'::regclass) NOT NULL,
+    bezeichnung character varying(100) NOT NULL,
+    betrag numeric NOT NULL,
+    aufteilungsart character varying(20),
+    gilt_bis date,
+    bemerkung character varying(250)
+);
+
+
+ALTER TABLE public.ha_ausgaben OWNER TO domm;
+
+--
+-- Name: TABLE ha_ausgaben; Type: COMMENT; Schema: public; Owner: domm
+--
+
+COMMENT ON TABLE public.ha_ausgaben IS 'Listet die Ausgaben und Ihre Gueltigkeit auf';
+
+
+--
+-- Name: COLUMN ha_ausgaben.gilt_bis; Type: COMMENT; Schema: public; Owner: domm
+--
+
+COMMENT ON COLUMN public.ha_ausgaben.gilt_bis IS 'Monat bis zu dem der Wert für die Ausgabe gilt
+Der Montat wird als 01.MM.YYYY angegeben, aber es gilt bis Einschliesslich
+Ende dieses Monats
+Noch gültige Einträge haben hier NULL stehen';
+
+
+--
+-- Name: ha_ausgaben_aufteilung; Type: TABLE; Schema: public; Owner: domm
+--
+
+CREATE TABLE public.ha_ausgaben_aufteilung (
+    "ausgabenAufteilungId" integer NOT NULL,
+    "parteiId" smallint NOT NULL,
+    betrag numeric NOT NULL,
+    bemerkung character varying,
+    "ausgabenId" integer NOT NULL
+);
+
+
+ALTER TABLE public.ha_ausgaben_aufteilung OWNER TO domm;
+
+--
+-- Name: TABLE ha_ausgaben_aufteilung; Type: COMMENT; Schema: public; Owner: domm
+--
+
+COMMENT ON TABLE public.ha_ausgaben_aufteilung IS 'Listet die Aufteilung der Ausgaben pro Person auf';
+
+
+--
+-- Name: COLUMN ha_ausgaben_aufteilung."parteiId"; Type: COMMENT; Schema: public; Owner: domm
+--
+
+COMMENT ON COLUMN public.ha_ausgaben_aufteilung."parteiId" IS 'Schlüssel zur Tabelle personen';
+
+
+--
+-- Name: COLUMN ha_ausgaben_aufteilung."ausgabenId"; Type: COMMENT; Schema: public; Owner: domm
+--
+
+COMMENT ON COLUMN public.ha_ausgaben_aufteilung."ausgabenId" IS 'Schlüssel zur tabelle ha_ausgaben';
+
+
+--
+-- Name: ha_ausgaben_aufteilung_ausgabenAufteilungId_seq; Type: SEQUENCE; Schema: public; Owner: domm
+--
+
+CREATE SEQUENCE public."ha_ausgaben_aufteilung_ausgabenAufteilungId_seq"
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public."ha_ausgaben_aufteilung_ausgabenAufteilungId_seq" OWNER TO domm;
+
+--
+-- Name: ha_ausgaben_aufteilung_ausgabenAufteilungId_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: domm
+--
+
+ALTER SEQUENCE public."ha_ausgaben_aufteilung_ausgabenAufteilungId_seq" OWNED BY public.ha_ausgaben_aufteilung."ausgabenAufteilungId";
+
+
+--
 -- Name: ha_gehaltsgrundlagen; Type: TABLE; Schema: public; Owner: domm
 --
 
 CREATE TABLE public.ha_gehaltsgrundlagen (
-    id integer NOT NULL,
+    "gehaltsgrundlagenId" integer NOT NULL,
     partei_id smallint NOT NULL,
     betrag numeric NOT NULL,
     gilt_bis date,
+    art character varying(20),
     bemerkung character varying(500)
 );
 
@@ -407,10 +602,10 @@ Dabei wird der Monat nur durch den 01. definiert gilt aber in gänze';
 
 
 --
--- Name: ha_gehaltsgrundlagen_id_seq; Type: SEQUENCE; Schema: public; Owner: domm
+-- Name: ha_gehaltsgrundlagen_gehaltsgrundlagenId_seq; Type: SEQUENCE; Schema: public; Owner: domm
 --
 
-CREATE SEQUENCE public.ha_gehaltsgrundlagen_id_seq
+CREATE SEQUENCE public."ha_gehaltsgrundlagen_gehaltsgrundlagenId_seq"
     AS integer
     START WITH 1
     INCREMENT BY 1
@@ -419,13 +614,112 @@ CREATE SEQUENCE public.ha_gehaltsgrundlagen_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.ha_gehaltsgrundlagen_id_seq OWNER TO domm;
+ALTER SEQUENCE public."ha_gehaltsgrundlagen_gehaltsgrundlagenId_seq" OWNER TO domm;
 
 --
--- Name: ha_gehaltsgrundlagen_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: domm
+-- Name: ha_gehaltsgrundlagen_gehaltsgrundlagenId_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: domm
 --
 
-ALTER SEQUENCE public.ha_gehaltsgrundlagen_id_seq OWNED BY public.ha_gehaltsgrundlagen.id;
+ALTER SEQUENCE public."ha_gehaltsgrundlagen_gehaltsgrundlagenId_seq" OWNED BY public.ha_gehaltsgrundlagen."gehaltsgrundlagenId";
+
+
+--
+-- Name: ha_kategorie; Type: TABLE; Schema: public; Owner: domm
+--
+
+CREATE TABLE public.ha_kategorie (
+    ha_kategorie_id integer NOT NULL,
+    kategoriebezeichnung character varying(100) NOT NULL
+);
+
+
+ALTER TABLE public.ha_kategorie OWNER TO domm;
+
+--
+-- Name: TABLE ha_kategorie; Type: COMMENT; Schema: public; Owner: domm
+--
+
+COMMENT ON TABLE public.ha_kategorie IS 'enthält die Buchungskategorien des Haushaltskontos';
+
+
+--
+-- Name: ha_kategorie_ha_kategorie_id_seq; Type: SEQUENCE; Schema: public; Owner: domm
+--
+
+CREATE SEQUENCE public.ha_kategorie_ha_kategorie_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.ha_kategorie_ha_kategorie_id_seq OWNER TO domm;
+
+--
+-- Name: ha_kategorie_ha_kategorie_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: domm
+--
+
+ALTER SEQUENCE public.ha_kategorie_ha_kategorie_id_seq OWNED BY public.ha_kategorie.ha_kategorie_id;
+
+
+--
+-- Name: ha_ueberweisungsbetraege; Type: TABLE; Schema: public; Owner: domm
+--
+
+CREATE TABLE public.ha_ueberweisungsbetraege (
+    ueberweisungsbetrag_id integer NOT NULL,
+    partei_id integer NOT NULL,
+    betrag numeric NOT NULL,
+    gilt_bis date
+);
+
+
+ALTER TABLE public.ha_ueberweisungsbetraege OWNER TO domm;
+
+--
+-- Name: TABLE ha_ueberweisungsbetraege; Type: COMMENT; Schema: public; Owner: domm
+--
+
+COMMENT ON TABLE public.ha_ueberweisungsbetraege IS 'enthält die eigentlichen monatlichen Überweisungsbeträge der Parteien';
+
+
+--
+-- Name: COLUMN ha_ueberweisungsbetraege.partei_id; Type: COMMENT; Schema: public; Owner: domm
+--
+
+COMMENT ON COLUMN public.ha_ueberweisungsbetraege.partei_id IS 'Schlüssel zur Tabelle personen';
+
+
+--
+-- Name: COLUMN ha_ueberweisungsbetraege.gilt_bis; Type: COMMENT; Schema: public; Owner: domm
+--
+
+COMMENT ON COLUMN public.ha_ueberweisungsbetraege.gilt_bis IS 'Datum des Monats bis zu dem einschliesslich der Wert gilt.
+Dabei wird der Monat nur durch den 01. definiert gilt aber in gänze';
+
+
+--
+-- Name: ha_ueberweisungsbetraege_ueberweisungsbetragId_seq; Type: SEQUENCE; Schema: public; Owner: domm
+--
+
+CREATE SEQUENCE public."ha_ueberweisungsbetraege_ueberweisungsbetragId_seq"
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public."ha_ueberweisungsbetraege_ueberweisungsbetragId_seq" OWNER TO domm;
+
+--
+-- Name: ha_ueberweisungsbetraege_ueberweisungsbetragId_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: domm
+--
+
+ALTER SEQUENCE public."ha_ueberweisungsbetraege_ueberweisungsbetragId_seq" OWNED BY public.ha_ueberweisungsbetraege.ueberweisungsbetrag_id;
 
 
 --
@@ -484,7 +778,7 @@ CREATE SEQUENCE public.ipp_ipp_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.ipp_ipp_id_seq OWNER TO domm;
+ALTER SEQUENCE public.ipp_ipp_id_seq OWNER TO domm;
 
 --
 -- Name: ipp_ipp_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: domm
@@ -527,7 +821,7 @@ CREATE SEQUENCE public.jahresausgaben_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.jahresausgaben_id_seq OWNER TO domm;
+ALTER SEQUENCE public.jahresausgaben_id_seq OWNER TO domm;
 
 --
 -- Name: jahresausgaben_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: domm
@@ -569,7 +863,7 @@ CREATE SEQUENCE public.kfz_kfz_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.kfz_kfz_id_seq OWNER TO domm;
+ALTER SEQUENCE public.kfz_kfz_id_seq OWNER TO domm;
 
 --
 -- Name: kfz_kfz_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: domm
@@ -590,7 +884,7 @@ CREATE SEQUENCE public.konten_konten_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.konten_konten_id_seq OWNER TO domm;
+ALTER SEQUENCE public.konten_konten_id_seq OWNER TO domm;
 
 --
 -- Name: konten_konten_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: domm
@@ -632,7 +926,7 @@ CREATE SEQUENCE public.kontenereignisse_ereigniss_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.kontenereignisse_ereigniss_id_seq OWNER TO domm;
+ALTER SEQUENCE public.kontenereignisse_ereigniss_id_seq OWNER TO domm;
 
 --
 -- Name: kontenereignisse_ereigniss_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: domm
@@ -672,7 +966,7 @@ CREATE SEQUENCE public.kraftstoffe_kraftstoff_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.kraftstoffe_kraftstoff_id_seq OWNER TO domm;
+ALTER SEQUENCE public.kraftstoffe_kraftstoff_id_seq OWNER TO domm;
 
 --
 -- Name: kraftstoffe_kraftstoff_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: domm
@@ -693,7 +987,7 @@ CREATE SEQUENCE public.kreditinstitut_kreditinstitut_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.kreditinstitut_kreditinstitut_id_seq OWNER TO domm;
+ALTER SEQUENCE public.kreditinstitut_kreditinstitut_id_seq OWNER TO domm;
 
 --
 -- Name: kreditinstitut_kreditinstitut_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: domm
@@ -737,7 +1031,7 @@ CREATE SEQUENCE public.mtlausgaben_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.mtlausgaben_id_seq OWNER TO domm;
+ALTER SEQUENCE public.mtlausgaben_id_seq OWNER TO domm;
 
 --
 -- Name: mtlausgaben_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: domm
@@ -758,7 +1052,7 @@ CREATE SEQUENCE public.personen_personen_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.personen_personen_id_seq OWNER TO domm;
+ALTER SEQUENCE public.personen_personen_id_seq OWNER TO domm;
 
 --
 -- Name: personen_personen_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: domm
@@ -825,7 +1119,7 @@ CREATE SEQUENCE public.tankdaten_tankdaten_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.tankdaten_tankdaten_id_seq OWNER TO domm;
+ALTER SEQUENCE public.tankdaten_tankdaten_id_seq OWNER TO domm;
 
 --
 -- Name: tankdaten_tankdaten_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: domm
@@ -920,7 +1214,7 @@ CREATE SEQUENCE public.transaktionen_transaktions_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.transaktionen_transaktions_id_seq OWNER TO domm;
+ALTER SEQUENCE public.transaktionen_transaktions_id_seq OWNER TO domm;
 
 --
 -- Name: transaktionen_transaktions_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: domm
@@ -965,10 +1259,31 @@ ALTER TABLE ONLY public.freistellungsauftraege ALTER COLUMN freistellung_id SET 
 
 
 --
--- Name: ha_gehaltsgrundlagen id; Type: DEFAULT; Schema: public; Owner: domm
+-- Name: ha_ausgaben_aufteilung ausgabenAufteilungId; Type: DEFAULT; Schema: public; Owner: domm
 --
 
-ALTER TABLE ONLY public.ha_gehaltsgrundlagen ALTER COLUMN id SET DEFAULT nextval('public.ha_gehaltsgrundlagen_id_seq'::regclass);
+ALTER TABLE ONLY public.ha_ausgaben_aufteilung ALTER COLUMN "ausgabenAufteilungId" SET DEFAULT nextval('public."ha_ausgaben_aufteilung_ausgabenAufteilungId_seq"'::regclass);
+
+
+--
+-- Name: ha_gehaltsgrundlagen gehaltsgrundlagenId; Type: DEFAULT; Schema: public; Owner: domm
+--
+
+ALTER TABLE ONLY public.ha_gehaltsgrundlagen ALTER COLUMN "gehaltsgrundlagenId" SET DEFAULT nextval('public."ha_gehaltsgrundlagen_gehaltsgrundlagenId_seq"'::regclass);
+
+
+--
+-- Name: ha_kategorie ha_kategorie_id; Type: DEFAULT; Schema: public; Owner: domm
+--
+
+ALTER TABLE ONLY public.ha_kategorie ALTER COLUMN ha_kategorie_id SET DEFAULT nextval('public.ha_kategorie_ha_kategorie_id_seq'::regclass);
+
+
+--
+-- Name: ha_ueberweisungsbetraege ueberweisungsbetrag_id; Type: DEFAULT; Schema: public; Owner: domm
+--
+
+ALTER TABLE ONLY public.ha_ueberweisungsbetraege ALTER COLUMN ueberweisungsbetrag_id SET DEFAULT nextval('public."ha_ueberweisungsbetraege_ueberweisungsbetragId_seq"'::regclass);
 
 
 --
@@ -1073,6 +1388,30 @@ ALTER TABLE ONLY public.freistellungsauftraege
 
 
 --
+-- Name: ha_ausgaben_aufteilung ha_ausgaben_aufteilung_pkey; Type: CONSTRAINT; Schema: public; Owner: domm
+--
+
+ALTER TABLE ONLY public.ha_ausgaben_aufteilung
+    ADD CONSTRAINT ha_ausgaben_aufteilung_pkey PRIMARY KEY ("ausgabenAufteilungId");
+
+
+--
+-- Name: ha_ausgaben ha_ausgaben_pkey; Type: CONSTRAINT; Schema: public; Owner: domm
+--
+
+ALTER TABLE ONLY public.ha_ausgaben
+    ADD CONSTRAINT ha_ausgaben_pkey PRIMARY KEY ("ausgabenId");
+
+
+--
+-- Name: ha_ueberweisungsbetraege ha_ueberweisungsbetraege_pkey; Type: CONSTRAINT; Schema: public; Owner: domm
+--
+
+ALTER TABLE ONLY public.ha_ueberweisungsbetraege
+    ADD CONSTRAINT ha_ueberweisungsbetraege_pkey PRIMARY KEY (ueberweisungsbetrag_id);
+
+
+--
 -- Name: buch_autor id; Type: CONSTRAINT; Schema: public; Owner: domm
 --
 
@@ -1109,7 +1448,7 @@ ALTER TABLE ONLY public.abschluss
 --
 
 ALTER TABLE ONLY public.ha_gehaltsgrundlagen
-    ADD CONSTRAINT key_gehaltsgrundlagen PRIMARY KEY (id);
+    ADD CONSTRAINT key_gehaltsgrundlagen PRIMARY KEY ("gehaltsgrundlagenId");
 
 
 --
