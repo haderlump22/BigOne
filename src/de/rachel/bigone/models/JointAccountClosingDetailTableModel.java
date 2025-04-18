@@ -67,6 +67,11 @@ public class JointAccountClosingDetailTableModel extends AbstractTableModel {
 		/*
 		 * get the current Amount Sum of each type of money
 		 */
+		int ExpenditureEventId = 0;
+		String ExpenditureEventName = "";
+		Double ExpenditureAmount = 0.0;
+		Double ExpenditureAmountPlan = 0.0;
+
 		if (billingMonth != null && Pattern.matches("\\d{2}.\\d{2}.[1-9]{1}\\d{3}",billingMonth)) {
 			// if TableData contain Values => flush them before fill it with new data
 			if (TableData.size() > 0) {
@@ -89,8 +94,15 @@ public class JointAccountClosingDetailTableModel extends AbstractTableModel {
 				getter.beforeFirst();
 
 				while (getter.next()) {
-					TableData.add(new JointAccountClosingDetailTableRow(getter.getInt("ha_kategorie_id"), getter.getString("kategoriebezeichnung"),
-							getter.getDouble("betragist"), 0.0, 0.0));
+					ExpenditureEventId = getter.getInt("ha_kategorie_id");
+					ExpenditureEventName = getter.getString("kategoriebezeichnung");
+					ExpenditureAmount = getter.getDouble("betragist");
+
+					// try to handle the "Einzahlung" separate!!!
+					ExpenditureAmountPlan = this.getAmountPlan(getter.getInt("ha_kategorie_id"));
+
+					TableData.add(new JointAccountClosingDetailTableRow(ExpenditureEventId, ExpenditureEventName,
+							ExpenditureAmount, ExpenditureAmountPlan, (ExpenditureAmount + ExpenditureAmountPlan)));
 				}
 			} catch (Exception e) {
 				System.out.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + ": " + e.toString());
@@ -102,5 +114,34 @@ public class JointAccountClosingDetailTableModel extends AbstractTableModel {
 		this.billingMonth = billingMonth;
 		this.lese_werte();
 		fireTableDataChanged();
+	}
+
+	private double getAmountPlan(int ExpenditureEventId) {
+		double AmountValueForReturn = 0;
+
+		// get the planed Amount of the trough ExpenditureEventId given Event, if it exist, otherwise return 0
+		DBTools getter = new DBTools(cn);
+
+		getter.select("select ha_ausgaben.betrag\n" +
+						"from ha_ausgaben, ha_kategorie\n" +
+						"where ha_ausgaben.bezeichnung = ha_kategorie.kategoriebezeichnung\n" +
+						"and ha_kategorie.ha_kategorie_id = " + ExpenditureEventId + "\n" +
+						"and ha_ausgaben.gilt_bis >= '" + this.billingMonth + "'\n" +
+						"order by ha_ausgaben.gilt_bis asc", 1);
+		try {
+			if (getter.getRowCount() > 0) {
+				// As a result of the sorting, the desired value is at the first position of the result
+				getter.beforeFirst();
+				// we need only the first Row
+				getter.next();
+				AmountValueForReturn = getter.getDouble("betrag");
+			} else {
+				AmountValueForReturn = 0.0;
+			}
+		} catch (Exception e) {
+			System.out.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + ": " + e.toString());
+		}
+
+		return AmountValueForReturn;
 	}
 }
