@@ -37,6 +37,9 @@ public class JointAccountClosingDetailTableModel extends AbstractTableModel {
 		Object ReturnValue = null;
 
 		switch (col) {
+			case -1:
+				ReturnValue = Zeile.EventId();
+				break;
 			case 0:
 				ReturnValue = Zeile.NameOfExpenditure();
 				break;
@@ -73,12 +76,12 @@ public class JointAccountClosingDetailTableModel extends AbstractTableModel {
 			DBTools getter = new DBTools(cn);
 
 			getter.select(
-					"select ha_kategorie.kategoriebezeichnung, \"get_actualAmount\"(ereigniss_id, 13, '" + billingMonth + "') betragist\n" +
+					"select ha_kategorie.ha_kategorie_id, ha_kategorie.kategoriebezeichnung, \"get_actualAmount\"(ereigniss_id, 13, '" + billingMonth + "') betragist\n" +
 					"from transaktionen, ha_kategorie\n" +
 					"where konten_id = 13\n" +
 					"and liqui_monat = '" + billingMonth + "'\n" +
 					"and ha_kategorie.ha_kategorie_id = transaktionen.ereigniss_id\n" +
-					"group by ha_kategorie.kategoriebezeichnung, ereigniss_id\n" +
+					"group by ha_kategorie.ha_kategorie_id, ha_kategorie.kategoriebezeichnung, ereigniss_id\n" +
 					"order by ha_kategorie.kategoriebezeichnung;",
 					2);
 
@@ -86,7 +89,7 @@ public class JointAccountClosingDetailTableModel extends AbstractTableModel {
 				getter.beforeFirst();
 
 				while (getter.next()) {
-					TableData.add(new JointAccountClosingDetailTableRow(getter.getString("kategoriebezeichnung"),
+					TableData.add(new JointAccountClosingDetailTableRow(getter.getInt("ha_kategorie_id"), getter.getString("kategoriebezeichnung"),
 							getter.getDouble("betragist"), 0.0, 0.0));
 				}
 			} catch (Exception e) {
