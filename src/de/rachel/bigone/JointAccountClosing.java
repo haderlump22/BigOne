@@ -15,9 +15,11 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.JTextArea;
 import javax.swing.border.TitledBorder;
 import javax.swing.text.MaskFormatter;
 
+import de.rachel.bigone.listeners.JointAccountClosingDetailTableSelectionListener;
 import de.rachel.bigone.models.JointAccountClosingDetailTableModel;
 import de.rachel.bigone.renderer.JointAccountClosingDetailTableCellRenderer;
 
@@ -25,10 +27,11 @@ public class JointAccountClosing {
 	private Connection cn = null;
     private JFrame JointAccountClosingWindow;
     private Font fontTxtFields;//, fontCmbBoxes, fontLists;
-    private JPanel pnlAbrMonat, JointAccountClosingDetailPanel;
+    private JPanel pnlAbrMonat, JointAccountClosingDetailPanel, EventExpenditureAmountPlanInfoAreaPanel;
     private JFormattedTextField txtAbrMonat;
 	private JTable JointAccountClosingDetailTable;
-	private JScrollPane JointAccountClosingDetailScrollPane;
+	private JScrollPane JointAccountClosingDetailScrollPane, EventExpenditureAmountPlanInfoAreaScrollPane;
+	private JTextArea EventExpenditureAmountPlanInfoArea;
 
     JointAccountClosing (Connection LoginCN) {
 		cn = LoginCN;
@@ -91,9 +94,24 @@ public class JointAccountClosing {
 		JointAccountClosingDetailPanel.setBorder(new TitledBorder("Ausgabensummen"));
 		JointAccountClosingDetailPanel.add(JointAccountClosingDetailScrollPane);
 		// ====END JointAccountClosingDetailTable====
+
+		// ===START EventExpenditureAmountPlanInfoArea
+		EventExpenditureAmountPlanInfoArea = new JTextArea();
+		EventExpenditureAmountPlanInfoArea.setLineWrap(true);
+        EventExpenditureAmountPlanInfoArea.setWrapStyleWord(true);
+        EventExpenditureAmountPlanInfoArea.setEditable(false);
+
+        EventExpenditureAmountPlanInfoAreaScrollPane = new JScrollPane(EventExpenditureAmountPlanInfoArea);
+        EventExpenditureAmountPlanInfoAreaScrollPane.setPreferredSize(new Dimension(200, 70));
+
+		EventExpenditureAmountPlanInfoAreaPanel = new JPanel();
+        EventExpenditureAmountPlanInfoAreaPanel.setBorder(new TitledBorder("Ausgabenplanungsinfo"));
+		EventExpenditureAmountPlanInfoAreaPanel.add(EventExpenditureAmountPlanInfoAreaScrollPane);
+		// ===END EventExpenditureAmountPlanInfoArea
     }
 
 	private void createListeners() {
+		// Listener for the textfield
 		txtAbrMonat.addKeyListener(new KeyListener() {
 			@Override
 			public void keyTyped(KeyEvent ke) {
@@ -108,6 +126,11 @@ public class JointAccountClosing {
 			public void keyPressed(KeyEvent ke) {
 			}
 		});
+
+		// Listeners for the JointAccountClosingDetailTable
+		JointAccountClosingDetailTable.getSelectionModel().addListSelectionListener(new JointAccountClosingDetailTableSelectionListener(
+			JointAccountClosingDetailTable, EventExpenditureAmountPlanInfoArea, cn));
+
 	}
 
     private void createLayout() {
@@ -128,5 +151,11 @@ public class JointAccountClosing {
 		gbc.gridx = 0;
 		gbc.gridy = 1;
 		JointAccountClosingWindow.add(JointAccountClosingDetailPanel, gbc);
+
+		// place EventExpenditureAmountPlanInfoAreaPanel
+		gbc.gridx = 0;
+		gbc.gridy = 2;
+		JointAccountClosingWindow.add(EventExpenditureAmountPlanInfoAreaPanel, gbc);
+
     }
 }
