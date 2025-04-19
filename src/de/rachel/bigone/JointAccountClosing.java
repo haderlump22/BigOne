@@ -27,11 +27,11 @@ public class JointAccountClosing {
 	private Connection cn = null;
     private JFrame JointAccountClosingWindow;
     private Font fontTxtFields;//, fontCmbBoxes, fontLists;
-    private JPanel pnlAbrMonat, JointAccountClosingDetailPanel, EventExpenditureAmountPlanInfoAreaPanel;
+    private JPanel pnlAbrMonat, JointAccountClosingDetailPanel, EventExpenditureAmountPlanInfoAreaPanel, EventInfoAreaAccountClosingPanel;
     private JFormattedTextField txtAbrMonat;
 	private JTable JointAccountClosingDetailTable;
-	private JScrollPane JointAccountClosingDetailScrollPane, EventExpenditureAmountPlanInfoAreaScrollPane;
-	private JTextArea EventExpenditureAmountPlanInfoArea;
+	private JScrollPane JointAccountClosingDetailScrollPane, EventExpenditureAmountPlanInfoAreaScrollPane, EventInfoAreaAccountClosingScrollPane;
+	private JTextArea EventExpenditureAmountPlanInfoArea, EventInfoAreaAccountClosing;
 
     JointAccountClosing (Connection LoginCN) {
 		cn = LoginCN;
@@ -108,6 +108,20 @@ public class JointAccountClosing {
         EventExpenditureAmountPlanInfoAreaPanel.setBorder(new TitledBorder("Ausgabenplanungsinfo"));
 		EventExpenditureAmountPlanInfoAreaPanel.add(EventExpenditureAmountPlanInfoAreaScrollPane);
 		// ===END EventExpenditureAmountPlanInfoArea
+
+		// ===START EventExpenditureAmountPlanInfoArea
+		EventInfoAreaAccountClosing = new JTextArea();
+		EventInfoAreaAccountClosing.setLineWrap(true);
+        EventInfoAreaAccountClosing.setWrapStyleWord(true);
+        EventInfoAreaAccountClosing.setEditable(true);
+
+        EventInfoAreaAccountClosingScrollPane = new JScrollPane(EventInfoAreaAccountClosing);
+        EventInfoAreaAccountClosingScrollPane.setPreferredSize(new Dimension(200, 70));
+
+		EventInfoAreaAccountClosingPanel = new JPanel();
+        EventInfoAreaAccountClosingPanel.setBorder(new TitledBorder("Kategorie Abschlussinfo"));
+		EventInfoAreaAccountClosingPanel.add(EventInfoAreaAccountClosingScrollPane);
+		// ===END EventExpenditureAmountPlanInfoArea
     }
 
 	private void createListeners() {
@@ -150,12 +164,19 @@ public class JointAccountClosing {
 		// place JointAccountClosingDetailPanel
 		gbc.gridx = 0;
 		gbc.gridy = 1;
+		gbc.gridwidth = 2;
 		JointAccountClosingWindow.add(JointAccountClosingDetailPanel, gbc);
 
 		// place EventExpenditureAmountPlanInfoAreaPanel
 		gbc.gridx = 0;
 		gbc.gridy = 2;
+		gbc.gridwidth = 1;
 		JointAccountClosingWindow.add(EventExpenditureAmountPlanInfoAreaPanel, gbc);
 
+		// place EventExpenditureAmountPlanInfoAreaPanel
+		gbc.gridx = 1;
+		gbc.gridy = 2;
+		gbc.anchor = GridBagConstraints.EAST;
+		JointAccountClosingWindow.add(EventInfoAreaAccountClosingPanel, gbc);
     }
 }
