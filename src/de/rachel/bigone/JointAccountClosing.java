@@ -27,8 +27,8 @@ public class JointAccountClosing {
 	private Connection cn = null;
     private JFrame JointAccountClosingWindow;
     private Font fontTxtFields;//, fontCmbBoxes, fontLists;
-    private JPanel pnlAbrMonat, JointAccountClosingDetailPanel, EventExpenditureAmountPlanInfoAreaPanel, EventInfoAreaAccountClosingPanel;
-    private JFormattedTextField txtAbrMonat;
+    private JPanel pnlBillingMonth, JointAccountClosingDetailPanel, EventExpenditureAmountPlanInfoAreaPanel, EventInfoAreaAccountClosingPanel;
+    private JFormattedTextField txtBillingMonth;
 	private JTable JointAccountClosingDetailTable;
 	private JScrollPane JointAccountClosingDetailScrollPane, EventExpenditureAmountPlanInfoAreaScrollPane, EventInfoAreaAccountClosingScrollPane;
 	private JTextArea EventExpenditureAmountPlanInfoArea, EventInfoAreaAccountClosing;
@@ -62,22 +62,22 @@ public class JointAccountClosing {
 		// fontLists = new Font("Arial", Font.PLAIN, 10);
 
 		// ====START Month of AccountClosing====
-		pnlAbrMonat = new JPanel();
-		pnlAbrMonat.setPreferredSize(new Dimension(150, 60));
-		pnlAbrMonat.setBorder(new TitledBorder("Abrechnungsmonat"));
+		pnlBillingMonth = new JPanel();
+		pnlBillingMonth.setPreferredSize(new Dimension(150, 60));
+		pnlBillingMonth.setBorder(new TitledBorder("Abrechnungsmonat"));
 
 		// create Content for the Panel in shape of a txtField
 		try {
-			txtAbrMonat = new JFormattedTextField(new MaskFormatter("01-##-20##"));
+			txtBillingMonth = new JFormattedTextField(new MaskFormatter("01-##-20##"));
 		} catch (ParseException e1) {
 			e1.printStackTrace();
 		}
-		txtAbrMonat.setPreferredSize(new Dimension(110, 25));
-		txtAbrMonat.setHorizontalAlignment(JFormattedTextField.RIGHT);
-		txtAbrMonat.setFont(fontTxtFields);
+		txtBillingMonth.setPreferredSize(new Dimension(110, 25));
+		txtBillingMonth.setHorizontalAlignment(JFormattedTextField.RIGHT);
+		txtBillingMonth.setFont(fontTxtFields);
 
 		// put the textfield to the Panal
-		pnlAbrMonat.add(txtAbrMonat);
+		pnlBillingMonth.add(txtBillingMonth);
 		// ====END Month of AccountClosing====
 
 		// ====START JointAccountClosingDetailTable and related Components====
@@ -126,14 +126,14 @@ public class JointAccountClosing {
 
 	private void createListeners() {
 		// Listener for the textfield
-		txtAbrMonat.addKeyListener(new KeyListener() {
+		txtBillingMonth.addKeyListener(new KeyListener() {
 			@Override
 			public void keyTyped(KeyEvent ke) {
 			}
 			@Override
 			public void keyReleased(KeyEvent ke) {
-				if( ke.getKeyCode() == KeyEvent.VK_ENTER && Pattern.matches("\\d{2}.\\d{2}.[1-9]{1}\\d{3}",txtAbrMonat.getText())) {
-					((JointAccountClosingDetailTableModel) JointAccountClosingDetailTable.getModel()).aktualisiere(txtAbrMonat.getText());
+				if( ke.getKeyCode() == KeyEvent.VK_ENTER && Pattern.matches("\\d{2}.\\d{2}.[1-9]{1}\\d{3}",txtBillingMonth.getText())) {
+					((JointAccountClosingDetailTableModel) JointAccountClosingDetailTable.getModel()).aktualisiere(txtBillingMonth.getText());
 				}
 			}
 			@Override
@@ -143,7 +143,7 @@ public class JointAccountClosing {
 
 		// Listeners for the JointAccountClosingDetailTable
 		JointAccountClosingDetailTable.getSelectionModel().addListSelectionListener(new JointAccountClosingDetailTableSelectionListener(
-			JointAccountClosingDetailTable, EventExpenditureAmountPlanInfoArea, cn));
+			JointAccountClosingDetailTable, EventExpenditureAmountPlanInfoArea, cn, txtBillingMonth.getText()));
 
 	}
 
@@ -153,13 +153,13 @@ public class JointAccountClosing {
         GridBagConstraints gbc = new GridBagConstraints();
         JointAccountClosingWindow.setLayout(gbl);
 
-        // place pnlAbrMonat
+        // place pnlBillingMonth
         gbc.gridx = 0;
         gbc.gridy = 0;
         // gbc.gridwidth = 2;
         gbc.anchor = GridBagConstraints.WEST;
         // gbc.insets = new Insets(10, 10, 0, 0);
-        JointAccountClosingWindow.add(pnlAbrMonat, gbc);
+        JointAccountClosingWindow.add(pnlBillingMonth, gbc);
 
 		// place JointAccountClosingDetailPanel
 		gbc.gridx = 0;
