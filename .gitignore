@@ -7,3 +7,6 @@
 /bakgit.tar
 info.txt
 TODO.TXT
+Tools/*
+!Tools/create_db_create_script.sh
+!Tools/db_create_script.sql
