@@ -769,7 +769,7 @@ public class Liqui {
 			txtHinweis.append(dblErgSql + " / " + Double.valueOf(daten[iZaehler][0].toString()).doubleValue() + ":"
 					+ daten[iZaehler][2] + "\n");
 			if (dblErgSql > 0 && dblErgSql <= Double.valueOf(daten[iZaehler][0].toString()).doubleValue()) {
-				if (daten[iZaehler][2].toString().equals("true"))
+				if (daten[iZaehler][2].toString().equals("1"))
 					dblSumFixKosten = dblSumFixKosten + Double.valueOf(daten[iZaehler][0].toString()).doubleValue();
 				else
 					dblSumFixKosten = dblSumFixKosten + roundScale2(dblErgSql);
