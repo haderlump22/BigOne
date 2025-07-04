@@ -2,6 +2,8 @@ package de.rachel.bigone;
 
 import java.sql.Connection;
 import java.text.ParseException;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.regex.Pattern;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -130,12 +132,16 @@ public class JointAccountClosing {
 			@Override
 			public void keyTyped(KeyEvent ke) {
 			}
+
 			@Override
 			public void keyReleased(KeyEvent ke) {
-				if( ke.getKeyCode() == KeyEvent.VK_ENTER && Pattern.matches("\\d{2}.\\d{2}.[1-9]{1}\\d{3}",txtBillingMonth.getText())) {
-					((JointAccountClosingDetailTableModel) JointAccountClosingDetailTable.getModel()).aktualisiere(txtBillingMonth.getText());
+				if (ke.getKeyCode() == KeyEvent.VK_ENTER
+						&& Pattern.matches("\\d{2}.\\d{2}.[1-9]{1}\\d{3}", txtBillingMonth.getText())) {
+					((JointAccountClosingDetailTableModel) JointAccountClosingDetailTable.getModel())
+							.aktualisiere(txtBillingMonth.getText());
 				}
 			}
+
 			@Override
 			public void keyPressed(KeyEvent ke) {
 			}
@@ -144,6 +150,44 @@ public class JointAccountClosing {
 		// Listeners for the JointAccountClosingDetailTable
 		JointAccountClosingDetailTable.getSelectionModel().addListSelectionListener(new JointAccountClosingDetailTableSelectionListener(
 			JointAccountClosingDetailTable, EventExpenditureAmountPlanInfoArea, cn, txtBillingMonth.getText()));
+
+		// Listener for the EventInfoAreaAccountClosingPanel
+		EventInfoAreaAccountClosing.addKeyListener(new KeyListener() {
+			Boolean statusTimer = false;
+			Timer timer = new Timer();
+			TimerTask task = new TimerTask() {
+				@Override
+				public void run() {
+					System.out.println("3sek lange keine Taste gedrückt....");
+				}
+			};
+
+			@Override
+			public void keyTyped(KeyEvent ke) {
+
+			}
+
+			@Override
+			public void keyReleased(KeyEvent ke) {
+
+				if (statusTimer.equals(Boolean.TRUE)) {
+					task.cancel();
+					task = new TimerTask() {
+						@Override
+						public void run() {
+							System.out.println("3sek lange keine Taste gedrückt....");
+						}
+					};
+				}
+
+				timer.schedule(task, 3000);
+				statusTimer = Boolean.TRUE;
+			}
+
+			@Override
+			public void keyPressed(KeyEvent ke) {
+			}
+		});
 
 	}
 
