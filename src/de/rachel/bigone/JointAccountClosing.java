@@ -19,7 +19,7 @@ import javax.swing.JTextArea;
 import javax.swing.border.TitledBorder;
 import javax.swing.text.MaskFormatter;
 
-import de.rachel.bigone.listeners.EventInfoAreaAccountClosingKeyListener;
+import de.rachel.bigone.listeners.JointAccountClosingEventInfoAreaKeyListener;
 import de.rachel.bigone.listeners.JointAccountClosingDetailTableSelectionListener;
 import de.rachel.bigone.models.JointAccountClosingDetailTableModel;
 import de.rachel.bigone.renderer.JointAccountClosingDetailTableCellRenderer;
@@ -29,7 +29,7 @@ public class JointAccountClosing {
     private JFrame JointAccountClosingWindow;
     private Font fontTxtFields;//, fontCmbBoxes, fontLists;
     private JPanel pnlBillingMonth, JointAccountClosingDetailPanel, EventExpenditureAmountPlanInfoAreaPanel, EventInfoAreaAccountClosingPanel;
-    private JFormattedTextField txtBillingMonth;
+    private JFormattedTextField BillingMonth;
 	private JTable JointAccountClosingDetailTable;
 	private JScrollPane JointAccountClosingDetailScrollPane, EventExpenditureAmountPlanInfoAreaScrollPane, EventInfoAreaAccountClosingScrollPane;
 	private JTextArea EventExpenditureAmountPlanInfoArea, EventInfoAreaAccountClosing;
@@ -69,16 +69,16 @@ public class JointAccountClosing {
 
 		// create Content for the Panel in shape of a txtField
 		try {
-			txtBillingMonth = new JFormattedTextField(new MaskFormatter("01-##-20##"));
+			BillingMonth = new JFormattedTextField(new MaskFormatter("01-##-20##"));
 		} catch (ParseException e1) {
 			e1.printStackTrace();
 		}
-		txtBillingMonth.setPreferredSize(new Dimension(110, 25));
-		txtBillingMonth.setHorizontalAlignment(JFormattedTextField.RIGHT);
-		txtBillingMonth.setFont(fontTxtFields);
+		BillingMonth.setPreferredSize(new Dimension(110, 25));
+		BillingMonth.setHorizontalAlignment(JFormattedTextField.RIGHT);
+		BillingMonth.setFont(fontTxtFields);
 
 		// put the textfield to the Panal
-		pnlBillingMonth.add(txtBillingMonth);
+		pnlBillingMonth.add(BillingMonth);
 		// ====END Month of AccountClosing====
 
 		// ====START JointAccountClosingDetailTable and related Components====
@@ -128,7 +128,7 @@ public class JointAccountClosing {
 
 	private void createListeners() {
 		// Listener for the textfield
-		txtBillingMonth.addKeyListener(new KeyListener() {
+		BillingMonth.addKeyListener(new KeyListener() {
 			@Override
 			public void keyTyped(KeyEvent ke) {
 			}
@@ -136,9 +136,9 @@ public class JointAccountClosing {
 			@Override
 			public void keyReleased(KeyEvent ke) {
 				if (ke.getKeyCode() == KeyEvent.VK_ENTER
-						&& Pattern.matches("\\d{2}.\\d{2}.[1-9]{1}\\d{3}", txtBillingMonth.getText())) {
+						&& Pattern.matches("\\d{2}.\\d{2}.[1-9]{1}\\d{3}", BillingMonth.getText())) {
 					((JointAccountClosingDetailTableModel) JointAccountClosingDetailTable.getModel())
-							.aktualisiere(txtBillingMonth.getText());
+							.aktualisiere(BillingMonth.getText());
 				}
 			}
 
@@ -149,10 +149,10 @@ public class JointAccountClosing {
 
 		// Listeners for the JointAccountClosingDetailTable
 		JointAccountClosingDetailTable.getSelectionModel().addListSelectionListener(new JointAccountClosingDetailTableSelectionListener(
-			JointAccountClosingDetailTable, EventExpenditureAmountPlanInfoArea, cn, txtBillingMonth, EventInfoAreaAccountClosing));
+			JointAccountClosingDetailTable, EventExpenditureAmountPlanInfoArea, cn, BillingMonth, EventInfoAreaAccountClosing));
 
 		// Listener for the EventInfoAreaAccountClosingPanel
-		EventInfoAreaAccountClosing.addKeyListener(new EventInfoAreaAccountClosingKeyListener(cn));
+		EventInfoAreaAccountClosing.addKeyListener(new JointAccountClosingEventInfoAreaKeyListener(cn, BillingMonth, JointAccountClosingDetailTable));
 	}
 
     private void createLayout() {

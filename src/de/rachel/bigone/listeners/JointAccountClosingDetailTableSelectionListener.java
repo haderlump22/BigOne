@@ -46,43 +46,39 @@ public class JointAccountClosingDetailTableSelectionListener implements ListSele
     }
 
     private void fillEventExpenditureAmountPlanInfoArea() {
-        String ContentForTextArea;
         // get the EventId from the selected event form the JointAccountClosingDetailTable
         ExpenditureEventId = (Integer) JointAccountClosingDetailTable.getValueAt(JointAccountClosingDetailTable.getSelectedRow(), -1);
 
         // get Info from the expenditure table for the selected Event
-        getter.select(
-                "select ha_ausgaben.bemerkung from ha_ausgaben, ha_kategorie\n" +
-                "where ha_kategorie.kategoriebezeichnung = ha_ausgaben.bezeichnung\n" +
-                "and ha_ausgaben.gilt_bis is null\n" +
-                "and ha_kategorie.ha_kategorie_id = " + ExpenditureEventId,
-                1);
+        getter.select("""
+                select ha_ausgaben.bemerkung from ha_ausgaben, ha_kategorie
+                where ha_kategorie.kategoriebezeichnung = ha_ausgaben.bezeichnung
+                and ha_ausgaben.gilt_bis is null
+                and ha_kategorie.ha_kategorie_id = %d
+                """.formatted(ExpenditureEventId),1);
 
         // define the text depending on the data obtained
         try {
             if (getter.getRowCount() > 1) {
-                ContentForTextArea = "--Fehler - mehr als Einen Datensatz für das Ereignis im Ausgabenplan gefunden--";
+                EventExpenditureAmountPlanInfoArea.setToolTipText("--Fehler - mehr als Einen Datensatz für das Ereignis im Ausgabenplan gefunden--");
             } else if (getter.getRowCount() == 0) {
-                ContentForTextArea = "--kein Datensatz im AusgabenPlan für dieses Ereignis gefunden---";
+                EventExpenditureAmountPlanInfoArea.setToolTipText("--kein Datensatz im AusgabenPlan für dieses Ereignis gefunden---");
             } else {
                 getter.beforeFirst();
                 getter.next();
-                ContentForTextArea = getter.getString("bemerkung");
 
-                if (ContentForTextArea.length() == 0) {
-                    ContentForTextArea = "--kein Infos im AusgabenPlan für dieses Ereignis festgelegt---";
+                if (getter.getString("bemerkung").length() == 0) {
+                    EventExpenditureAmountPlanInfoArea.setToolTipText("--kein Infos im AusgabenPlan für dieses Ereignis festgelegt---");
+                } else {
+                    EventExpenditureAmountPlanInfoArea.setText(getter.getString("bemerkung"));
                 }
             }
-
-            EventExpenditureAmountPlanInfoArea.setText(ContentForTextArea);
         } catch (Exception e) {
             System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + ": " + e.toString());
         }
     }
 
     private void fillEventInfoAreaAccountClosing() {
-        // get even saved Info for the selected Evend and his Amount for AccountClosing of the Month in the Textfield BillingMonth
-        String ContentForEventInfoTextArea;
         // get the EventId from the selected event form the JointAccountClosingDetailTable
         ExpenditureEventId = (Integer) JointAccountClosingDetailTable.getValueAt(JointAccountClosingDetailTable.getSelectedRow(), -1);
 
@@ -95,20 +91,19 @@ public class JointAccountClosingDetailTableSelectionListener implements ListSele
 
         try {
             if (getter.getRowCount() > 1) {
-                ContentForEventInfoTextArea = "--Fehler - mehr als Einen Datensatz für Infos dieses Ereignisses im Abschlussmonat gefunden--";
+                EventInfoAreaAccountClosing.setToolTipText("--Fehler - mehr als Einen Datensatz für Infos dieses Ereignisses im Abschlussmonat gefunden--");
             } else if (getter.getRowCount() == 0) {
-                ContentForEventInfoTextArea = "--keine Infos für dieses Ereignis im Abschlussmonat gefunden---";
+                EventInfoAreaAccountClosing.setToolTipText("--keine Infos für dieses Ereignis im Abschlussmonat gefunden---");
             } else {
                 getter.beforeFirst();
                 getter.next();
-                ContentForEventInfoTextArea = getter.getString("bemerkung");
 
-                if (ContentForEventInfoTextArea.length() == 0) {
-                    ContentForEventInfoTextArea = "--Info für dieses Ereignis im Abschlussmonat ist leer---";
+                if (getter.getString("bemerkung").length() == 0) {
+                    EventInfoAreaAccountClosing.setToolTipText("--Info für dieses Ereignis im Abschlussmonat ist leer---");
+                } else {
+                    EventInfoAreaAccountClosing.setText(getter.getString("bemerkung"));
                 }
             }
-
-            EventInfoAreaAccountClosing.setText(ContentForEventInfoTextArea);
         } catch (Exception e) {
             System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + ": " + e.toString());
         }
