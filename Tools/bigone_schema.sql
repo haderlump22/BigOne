@@ -2,8 +2,8 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 16.8 (Ubuntu 16.8-0ubuntu0.24.04.1)
--- Dumped by pg_dump version 16.8 (Ubuntu 16.8-0ubuntu0.24.04.1)
+-- Dumped from database version 16.9 (Ubuntu 16.9-0ubuntu0.24.04.1)
+-- Dumped by pg_dump version 16.9 (Ubuntu 16.9-0ubuntu0.24.04.1)
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -422,6 +422,92 @@ ALTER SEQUENCE public.freistellungsauftraege_freistellung_id_seq OWNER TO domm;
 --
 
 ALTER SEQUENCE public.freistellungsauftraege_freistellung_id_seq OWNED BY public.freistellungsauftraege.freistellung_id;
+
+
+--
+-- Name: ha_kategorie_infos_abschluss; Type: TABLE; Schema: public; Owner: domm
+--
+
+CREATE TABLE public.ha_kategorie_infos_abschluss (
+    ha_abschluss_kategorie_infos_id integer NOT NULL,
+    ha_kategorie_id integer NOT NULL,
+    bemerkung character varying(500),
+    abschluss_monat date NOT NULL
+);
+
+
+ALTER TABLE public.ha_kategorie_infos_abschluss OWNER TO domm;
+
+--
+-- Name: TABLE ha_kategorie_infos_abschluss; Type: COMMENT; Schema: public; Owner: domm
+--
+
+COMMENT ON TABLE public.ha_kategorie_infos_abschluss IS 'Enthält Bemerkungen zu den Ausgabesummen eines Abschlussmonats und deren eventuellen Einfluss auf den Abschluss';
+
+
+--
+-- Name: ha_abschluss_kategorie_infos_ha_abschluss_kategorie_infos_i_seq; Type: SEQUENCE; Schema: public; Owner: domm
+--
+
+CREATE SEQUENCE public.ha_abschluss_kategorie_infos_ha_abschluss_kategorie_infos_i_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.ha_abschluss_kategorie_infos_ha_abschluss_kategorie_infos_i_seq OWNER TO domm;
+
+--
+-- Name: ha_abschluss_kategorie_infos_ha_abschluss_kategorie_infos_i_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: domm
+--
+
+ALTER SEQUENCE public.ha_abschluss_kategorie_infos_ha_abschluss_kategorie_infos_i_seq OWNED BY public.ha_kategorie_infos_abschluss.ha_abschluss_kategorie_infos_id;
+
+
+--
+-- Name: ha_abschlusssummen; Type: TABLE; Schema: public; Owner: domm
+--
+
+CREATE TABLE public.ha_abschlusssummen (
+    "abschlussSummenId" integer NOT NULL,
+    "abschlussMonat" date NOT NULL,
+    "summenArt" character varying(25) NOT NULL,
+    betrag numeric NOT NULL
+);
+
+
+ALTER TABLE public.ha_abschlusssummen OWNER TO domm;
+
+--
+-- Name: TABLE ha_abschlusssummen; Type: COMMENT; Schema: public; Owner: domm
+--
+
+COMMENT ON TABLE public.ha_abschlusssummen IS 'enthält die Summen der Abschlussbetrachtung eines Monats, aufgeteilt nach negativ/positiv für geplante und zusätzliche Ausgaben';
+
+
+--
+-- Name: ha_abschlusssummen_abschlussSummenId_seq; Type: SEQUENCE; Schema: public; Owner: domm
+--
+
+CREATE SEQUENCE public."ha_abschlusssummen_abschlussSummenId_seq"
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public."ha_abschlusssummen_abschlussSummenId_seq" OWNER TO domm;
+
+--
+-- Name: ha_abschlusssummen_abschlussSummenId_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: domm
+--
+
+ALTER SEQUENCE public."ha_abschlusssummen_abschlussSummenId_seq" OWNED BY public.ha_abschlusssummen."abschlussSummenId";
 
 
 --
@@ -1218,6 +1304,13 @@ ALTER TABLE ONLY public.freistellungsauftraege ALTER COLUMN freistellung_id SET 
 
 
 --
+-- Name: ha_abschlusssummen abschlussSummenId; Type: DEFAULT; Schema: public; Owner: domm
+--
+
+ALTER TABLE ONLY public.ha_abschlusssummen ALTER COLUMN "abschlussSummenId" SET DEFAULT nextval('public."ha_abschlusssummen_abschlussSummenId_seq"'::regclass);
+
+
+--
 -- Name: ha_ausgaben_aufteilung ausgabenAufteilungId; Type: DEFAULT; Schema: public; Owner: domm
 --
 
@@ -1236,6 +1329,13 @@ ALTER TABLE ONLY public.ha_gehaltsgrundlagen ALTER COLUMN "gehaltsgrundlagenId" 
 --
 
 ALTER TABLE ONLY public.ha_kategorie ALTER COLUMN ha_kategorie_id SET DEFAULT nextval('public.ha_kategorie_ha_kategorie_id_seq'::regclass);
+
+
+--
+-- Name: ha_kategorie_infos_abschluss ha_abschluss_kategorie_infos_id; Type: DEFAULT; Schema: public; Owner: domm
+--
+
+ALTER TABLE ONLY public.ha_kategorie_infos_abschluss ALTER COLUMN ha_abschluss_kategorie_infos_id SET DEFAULT nextval('public.ha_abschluss_kategorie_infos_ha_abschluss_kategorie_infos_i_seq'::regclass);
 
 
 --
@@ -1344,6 +1444,22 @@ ALTER TABLE ONLY public.kontenereignisse
 
 ALTER TABLE ONLY public.freistellungsauftraege
     ADD CONSTRAINT freistellung_id PRIMARY KEY (freistellung_id);
+
+
+--
+-- Name: ha_kategorie_infos_abschluss ha_abschluss_kategorie_infos_pkey; Type: CONSTRAINT; Schema: public; Owner: domm
+--
+
+ALTER TABLE ONLY public.ha_kategorie_infos_abschluss
+    ADD CONSTRAINT ha_abschluss_kategorie_infos_pkey PRIMARY KEY (ha_abschluss_kategorie_infos_id);
+
+
+--
+-- Name: ha_abschlusssummen ha_abschlusssummen_pkey; Type: CONSTRAINT; Schema: public; Owner: domm
+--
+
+ALTER TABLE ONLY public.ha_abschlusssummen
+    ADD CONSTRAINT ha_abschlusssummen_pkey PRIMARY KEY ("abschlussSummenId");
 
 
 --
