@@ -2,6 +2,7 @@ package de.rachel.bigone.listeners;
 
 import java.sql.Connection;
 
+import javax.swing.JFormattedTextField;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.ListSelectionModel;
@@ -13,18 +14,19 @@ import de.rachel.bigone.DBTools;
 public class JointAccountClosingDetailTableSelectionListener implements ListSelectionListener {
 
     private JTable JointAccountClosingDetailTable;
-    private JTextArea EventExpenditureAmountPlanInfoArea;
+    private JTextArea EventExpenditureAmountPlanInfoArea, EventInfoAreaAccountClosing;
     private Integer ExpenditureEventId;
     private Connection cn;
     private DBTools getter;
-    private String strBillingMonth;
+    private JFormattedTextField BillingMonth;
 
     public JointAccountClosingDetailTableSelectionListener(JTable JointAccountClosingDetailTable,
-            JTextArea EventExpenditureAmountPlanInfoArea, Connection LoginCN, String strBillingMonth) {
+            JTextArea EventExpenditureAmountPlanInfoArea, Connection LoginCN, JFormattedTextField BillingMonth, JTextArea EventInfoAreaAccountClosing) {
         this.JointAccountClosingDetailTable = JointAccountClosingDetailTable;
         this.EventExpenditureAmountPlanInfoArea = EventExpenditureAmountPlanInfoArea;
+        this.EventInfoAreaAccountClosing = EventInfoAreaAccountClosing;
         this.cn = LoginCN;
-        this.strBillingMonth = strBillingMonth;
+        this.BillingMonth = BillingMonth;
         getter = new DBTools(cn);
     }
 
@@ -37,6 +39,9 @@ public class JointAccountClosingDetailTableSelectionListener implements ListSele
         if (!lsm.getValueIsAdjusting() && !lsm.isSelectionEmpty()) {
             this.fillEventExpenditureAmountPlanInfoArea();
             this.fillEventInfoAreaAccountClosing();
+            this.EventInfoAreaAccountClosing.setEnabled(true);
+        } else {
+            this.EventInfoAreaAccountClosing.setEnabled(false);
         }
     }
 
@@ -45,7 +50,7 @@ public class JointAccountClosingDetailTableSelectionListener implements ListSele
         // get the EventId from the selected event form the JointAccountClosingDetailTable
         ExpenditureEventId = (Integer) JointAccountClosingDetailTable.getValueAt(JointAccountClosingDetailTable.getSelectedRow(), -1);
 
-        // get Info from the expenditure table for the specified Event
+        // get Info from the expenditure table for the selected Event
         getter.select(
                 "select ha_ausgaben.bemerkung from ha_ausgaben, ha_kategorie\n" +
                 "where ha_kategorie.kategoriebezeichnung = ha_ausgaben.bezeichnung\n" +
@@ -71,11 +76,41 @@ public class JointAccountClosingDetailTableSelectionListener implements ListSele
 
             EventExpenditureAmountPlanInfoArea.setText(ContentForTextArea);
         } catch (Exception e) {
-            System.out.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + ": " + e.toString());
+            System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + ": " + e.toString());
         }
     }
 
     private void fillEventInfoAreaAccountClosing() {
         // get even saved Info for the selected Evend and his Amount for AccountClosing of the Month in the Textfield BillingMonth
+        String ContentForEventInfoTextArea;
+        // get the EventId from the selected event form the JointAccountClosingDetailTable
+        ExpenditureEventId = (Integer) JointAccountClosingDetailTable.getValueAt(JointAccountClosingDetailTable.getSelectedRow(), -1);
+
+        // get even saved Info for the selected Event
+        getter.select("""
+                SELECT bemerkung from ha_kategorie_infos_abschluss
+                WHERE abschluss_monat = '%s'
+                AND ha_kategorie_id = %d
+                """.formatted(BillingMonth.getText(), ExpenditureEventId),1);
+
+        try {
+            if (getter.getRowCount() > 1) {
+                ContentForEventInfoTextArea = "--Fehler - mehr als Einen Datensatz für Infos dieses Ereignisses im Abschlussmonat gefunden--";
+            } else if (getter.getRowCount() == 0) {
+                ContentForEventInfoTextArea = "--keine Infos für dieses Ereignis im Abschlussmonat gefunden---";
+            } else {
+                getter.beforeFirst();
+                getter.next();
+                ContentForEventInfoTextArea = getter.getString("bemerkung");
+
+                if (ContentForEventInfoTextArea.length() == 0) {
+                    ContentForEventInfoTextArea = "--Info für dieses Ereignis im Abschlussmonat ist leer---";
+                }
+            }
+
+            EventInfoAreaAccountClosing.setText(ContentForEventInfoTextArea);
+        } catch (Exception e) {
+            System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + ": " + e.toString());
+        }
     }
 }

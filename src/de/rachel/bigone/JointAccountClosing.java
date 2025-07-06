@@ -2,8 +2,6 @@ package de.rachel.bigone;
 
 import java.sql.Connection;
 import java.text.ParseException;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.regex.Pattern;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -21,6 +19,7 @@ import javax.swing.JTextArea;
 import javax.swing.border.TitledBorder;
 import javax.swing.text.MaskFormatter;
 
+import de.rachel.bigone.listeners.EventInfoAreaAccountClosingKeyListener;
 import de.rachel.bigone.listeners.JointAccountClosingDetailTableSelectionListener;
 import de.rachel.bigone.models.JointAccountClosingDetailTableModel;
 import de.rachel.bigone.renderer.JointAccountClosingDetailTableCellRenderer;
@@ -116,6 +115,7 @@ public class JointAccountClosing {
 		EventInfoAreaAccountClosing.setLineWrap(true);
         EventInfoAreaAccountClosing.setWrapStyleWord(true);
         EventInfoAreaAccountClosing.setEditable(true);
+		EventInfoAreaAccountClosing.setEnabled(false);
 
         EventInfoAreaAccountClosingScrollPane = new JScrollPane(EventInfoAreaAccountClosing);
         EventInfoAreaAccountClosingScrollPane.setPreferredSize(new Dimension(200, 70));
@@ -149,46 +149,10 @@ public class JointAccountClosing {
 
 		// Listeners for the JointAccountClosingDetailTable
 		JointAccountClosingDetailTable.getSelectionModel().addListSelectionListener(new JointAccountClosingDetailTableSelectionListener(
-			JointAccountClosingDetailTable, EventExpenditureAmountPlanInfoArea, cn, txtBillingMonth.getText()));
+			JointAccountClosingDetailTable, EventExpenditureAmountPlanInfoArea, cn, txtBillingMonth, EventInfoAreaAccountClosing));
 
 		// Listener for the EventInfoAreaAccountClosingPanel
-		EventInfoAreaAccountClosing.addKeyListener(new KeyListener() {
-			Boolean statusTimer = false;
-			Timer timer = new Timer();
-			TimerTask task = new TimerTask() {
-				@Override
-				public void run() {
-					System.out.println("3sek lange keine Taste gedrückt....");
-				}
-			};
-
-			@Override
-			public void keyTyped(KeyEvent ke) {
-
-			}
-
-			@Override
-			public void keyReleased(KeyEvent ke) {
-
-				if (statusTimer.equals(Boolean.TRUE)) {
-					task.cancel();
-					task = new TimerTask() {
-						@Override
-						public void run() {
-							System.out.println("3sek lange keine Taste gedrückt....");
-						}
-					};
-				}
-
-				timer.schedule(task, 3000);
-				statusTimer = Boolean.TRUE;
-			}
-
-			@Override
-			public void keyPressed(KeyEvent ke) {
-			}
-		});
-
+		EventInfoAreaAccountClosing.addKeyListener(new EventInfoAreaAccountClosingKeyListener(cn));
 	}
 
     private void createLayout() {
