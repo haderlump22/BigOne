@@ -59,6 +59,9 @@ public final class DBTools {
 					daten[rs.getRow() - 1][i] = rs.getObject(i + 1);
 				}
 			}
+
+			rs.beforeFirst();
+			rs.next();
 		} catch (SQLException e) {
 			System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + ": " + e.toString());
 		}
