@@ -17,8 +17,8 @@ public final class DBTools {
 		try {
 			cn = LoginCN;
 			st = cn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-		} catch (Exception ex) {
-			System.out.println(ex.toString());
+		} catch (Exception e) {
+			System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + ": " + e.toString());
 		}
 	}
 
@@ -26,8 +26,8 @@ public final class DBTools {
 		try {
 			st.executeUpdate(sql);
 			return true;
-		} catch (SQLException ex) {
-			ex.printStackTrace();
+		} catch (SQLException e) {
+			System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + ": " + e.toString());
 			return false;
 		}
 	}
@@ -36,8 +36,8 @@ public final class DBTools {
 		try {
 			st.executeUpdate(sql);
 			return true;
-		} catch (SQLException ex) {
-			ex.printStackTrace();
+		} catch (SQLException e) {
+			System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + ": " + e.toString());
 			return false;
 		}
 	}
@@ -59,8 +59,8 @@ public final class DBTools {
 					daten[rs.getRow() - 1][i] = rs.getObject(i + 1);
 				}
 			}
-		} catch (SQLException ex) {
-			ex.printStackTrace();
+		} catch (SQLException e) {
+			System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + ": " + e.toString());
 		}
 	}
 
