@@ -14,7 +14,7 @@ import de.rachel.bigone.DBTools;
 
 public class JointAccountClosingEventInfoAreaKeyListener extends KeyAdapter {
     private Connection cn = null;
-    private DBTools getter = null;
+    private DBTools theDB = null;
     private Boolean statusTimer = false;
     private JFormattedTextField BillingMonth = null;
     private JTable JointAccountClosingDetailTable = null;
@@ -30,7 +30,7 @@ public class JointAccountClosingEventInfoAreaKeyListener extends KeyAdapter {
         cn = LoginCN;
         this.BillingMonth = BillingMonth;
         this.JointAccountClosingDetailTable = JointAccountClosingDetailTable;
-        getter = new DBTools(this.cn);
+        theDB = new DBTools(this.cn);
     }
 
     @Override
@@ -60,28 +60,35 @@ public class JointAccountClosingEventInfoAreaKeyListener extends KeyAdapter {
     }
 
     public void saveEventInfoAreaValue(KeyEvent ke) {
-        System.out.println("\"" + ((JTextArea)(ke.getSource())).getText() +  "\" .. wurde gespeichert....");
-
         // get the EventId from the selected event form the JointAccountClosingDetailTable
         Integer ExpenditureEventId = (Integer) JointAccountClosingDetailTable.getValueAt(JointAccountClosingDetailTable.getSelectedRow(), -1);
 
         // check if Record for the selected AccountClosingEvent exist
-        getter.select("""
+        theDB.select("""
                     SELECT count(*) FROM ha_kategorie_infos_abschluss
                     WHERE abschluss_monat = '%s'
                     AND ha_kategorie_id = %d
                     """.formatted(BillingMonth.getText(), ExpenditureEventId),1);
 
-        /*
         try {
-            if (getter.getInt("count") == 1) {
-                // if it so, update it
+            if (theDB.getInt("count") == 1) {
+                theDB.update("""
+                            UPDATE ha_kategorie_infos_abschluss
+                            SET bemerkung = '%s'
+                            WHERE abschluss_monat = '%s'
+                            AND ha_kategorie_id = %d
+                            """.formatted(((JTextArea)(ke.getSource())).getText(), BillingMonth.getText(), ExpenditureEventId));
             } else {
-                // if not insert a new one for this Event and BillingMonth Comination
+                theDB.insert("""
+                            INSERT INTO ha_kategorie_infos_abschluss
+                            (ha_kategorie_id, bemerkung, abschluss_monat)
+                            VALUES
+                            (%d, '%s', '%s')
+                            """.formatted(ExpenditureEventId, ((JTextArea)(ke.getSource())).getText(), BillingMonth.getText()));
             }
         } catch (SQLException e) {
             System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + ": " + e.toString());
-        }*/
+        }
 
 
 

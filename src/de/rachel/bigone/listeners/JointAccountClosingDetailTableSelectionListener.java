@@ -79,6 +79,9 @@ public class JointAccountClosingDetailTableSelectionListener implements ListSele
     }
 
     private void fillEventInfoAreaAccountClosing() {
+        // we clear first the Content from a previous Call
+        EventInfoAreaAccountClosing.setText("");
+
         // get the EventId from the selected event form the JointAccountClosingDetailTable
         ExpenditureEventId = (Integer) JointAccountClosingDetailTable.getValueAt(JointAccountClosingDetailTable.getSelectedRow(), -1);
 
