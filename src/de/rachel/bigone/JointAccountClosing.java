@@ -18,7 +18,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
-import javax.swing.JTextField;
 import javax.swing.border.TitledBorder;
 import javax.swing.text.MaskFormatter;
 
@@ -29,15 +28,15 @@ import de.rachel.bigone.renderer.JointAccountClosingDetailTableCellRenderer;
 
 public class JointAccountClosing {
 	private Connection cn = null;
-	private JFrame JointAccountClosingWindow;
+	private JFrame jointAccountClosingWindow;
 	private Font fontTxtFields;// , fontCmbBoxes, fontLists;
-	private JPanel billingMonthPanel, JointAccountClosingDetailPanel, EventExpenditureAmountPlanInfoAreaPanel,
-			EventInfoAreaAccountClosingPanel, sumOverviewPanel, excessDeficitOverviewPanel, container;
+	private JPanel billingMonthPanel, jointAccountClosingDetailPanel, eventExpenditureAmountPlanInfoAreaPanel,
+			eventInfoAreaAccountClosingPanel, sumOverviewPanel, balanceAllocationOverviewPanel;
 	private JFormattedTextField billingMonth, sumOverviewPositivePlanedValue, sumOverviewPositiveUnplanedValue, sumOverviewNegativePlanedValue, sumOverviewNegativeUnplanedValue;
-	private JTable JointAccountClosingDetailTable;
-	private JScrollPane JointAccountClosingDetailScrollPane, EventExpenditureAmountPlanInfoAreaScrollPane,
-			EventInfoAreaAccountClosingScrollPane;
-	private JTextArea EventExpenditureAmountPlanInfoArea, EventInfoAreaAccountClosing;
+	private JTable jointAccountClosingDetailTable;
+	private JScrollPane jointAccountClosingDetailScrollPane, eventExpenditureAmountPlanInfoAreaScrollPane,
+			eventInfoAreaAccountClosingScrollPane;
+	private JTextArea eventExpenditureAmountPlanInfoArea, eventInfoAreaAccountClosing;
 	private JLabel sumOverviewNegativeLabel, sumOverviewPositiveLabel, sumOverviewPlanedLabel, sumOverviewUnplanedLabel;
 
     JointAccountClosing (Connection LoginCN) {
@@ -53,15 +52,15 @@ public class JointAccountClosing {
         this.createLayout();
 
         // showing
-        JointAccountClosingWindow.setVisible(true);
+        jointAccountClosingWindow.setVisible(true);
     }
 
     private void createComponents() {
-		JointAccountClosingWindow = new JFrame("Haushaltskontoabschluss");
-		JointAccountClosingWindow.setSize(900, 680);
-		JointAccountClosingWindow.setLocation(200, 200);
-		JointAccountClosingWindow.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		JointAccountClosingWindow.setResizable(true);
+		jointAccountClosingWindow = new JFrame("Haushaltskontoabschluss");
+		jointAccountClosingWindow.setSize(900, 680);
+		jointAccountClosingWindow.setLocation(200, 200);
+		jointAccountClosingWindow.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		jointAccountClosingWindow.setResizable(true);
 
 		fontTxtFields = new Font("Arial", Font.PLAIN, 16);
 		// fontCmbBoxes = new Font("Arial", Font.PLAIN, 16);
@@ -82,43 +81,42 @@ public class JointAccountClosing {
 
 		billingMonthPanel.add(billingMonth);
 
-		JointAccountClosingDetailTable = new JTable(new JointAccountClosingDetailTableModel(cn));
-		JointAccountClosingDetailTable.setDefaultRenderer(Object.class, new JointAccountClosingDetailTableCellRenderer());
+		jointAccountClosingDetailTable = new JTable(new JointAccountClosingDetailTableModel(cn));
+		jointAccountClosingDetailTable.setDefaultRenderer(Object.class, new JointAccountClosingDetailTableCellRenderer());
 
 		// setting width for some columns
 		// has to do
 
-		JointAccountClosingDetailScrollPane = new JScrollPane(JointAccountClosingDetailTable);
-		JointAccountClosingDetailScrollPane.setPreferredSize(new Dimension(480, 150));
+		jointAccountClosingDetailScrollPane = new JScrollPane(jointAccountClosingDetailTable);
+		jointAccountClosingDetailScrollPane.setPreferredSize(new Dimension(420, 170));
 
-		JointAccountClosingDetailPanel = new JPanel();
-		JointAccountClosingDetailPanel.setBorder(new TitledBorder("Ausgabensummen"));
-		JointAccountClosingDetailPanel.add(JointAccountClosingDetailScrollPane);
+		jointAccountClosingDetailPanel = new JPanel();
+		jointAccountClosingDetailPanel.setBorder(new TitledBorder("Ausgabensummen"));
 
-		EventExpenditureAmountPlanInfoArea = new JTextArea();
-		EventExpenditureAmountPlanInfoArea.setLineWrap(true);
-        EventExpenditureAmountPlanInfoArea.setWrapStyleWord(true);
-        EventExpenditureAmountPlanInfoArea.setEditable(false);
+		eventExpenditureAmountPlanInfoArea = new JTextArea();
+		eventExpenditureAmountPlanInfoArea.setLineWrap(true);
+        eventExpenditureAmountPlanInfoArea.setWrapStyleWord(true);
+        eventExpenditureAmountPlanInfoArea.setEditable(false);
 
-        EventExpenditureAmountPlanInfoAreaScrollPane = new JScrollPane(EventExpenditureAmountPlanInfoArea);
-        EventExpenditureAmountPlanInfoAreaScrollPane.setPreferredSize(new Dimension(200, 70));
+        eventExpenditureAmountPlanInfoAreaScrollPane = new JScrollPane(eventExpenditureAmountPlanInfoArea);
+        eventExpenditureAmountPlanInfoAreaScrollPane.setPreferredSize(new Dimension(200, 70));
 
-		EventExpenditureAmountPlanInfoAreaPanel = new JPanel();
-        EventExpenditureAmountPlanInfoAreaPanel.setBorder(new TitledBorder("Ausgabenplanungsinfo"));
-		EventExpenditureAmountPlanInfoAreaPanel.add(EventExpenditureAmountPlanInfoAreaScrollPane);
+		eventExpenditureAmountPlanInfoAreaPanel = new JPanel();
+        eventExpenditureAmountPlanInfoAreaPanel.setBorder(new TitledBorder("Ausgabenplanungsinfo"));
+		eventExpenditureAmountPlanInfoAreaPanel.add(eventExpenditureAmountPlanInfoAreaScrollPane);
 
-		EventInfoAreaAccountClosing = new JTextArea();
-		EventInfoAreaAccountClosing.setLineWrap(true);
-        EventInfoAreaAccountClosing.setWrapStyleWord(true);
-        EventInfoAreaAccountClosing.setEditable(true);
-		EventInfoAreaAccountClosing.setEnabled(false);
+		eventInfoAreaAccountClosing = new JTextArea();
+		eventInfoAreaAccountClosing.setLineWrap(true);
+        eventInfoAreaAccountClosing.setWrapStyleWord(true);
+        eventInfoAreaAccountClosing.setEditable(true);
+		eventInfoAreaAccountClosing.setEnabled(false);
 
-        EventInfoAreaAccountClosingScrollPane = new JScrollPane(EventInfoAreaAccountClosing);
-        EventInfoAreaAccountClosingScrollPane.setPreferredSize(new Dimension(200, 70));
+        eventInfoAreaAccountClosingScrollPane = new JScrollPane(eventInfoAreaAccountClosing);
+        eventInfoAreaAccountClosingScrollPane.setPreferredSize(new Dimension(200, 70));
 
-		EventInfoAreaAccountClosingPanel = new JPanel();
-        EventInfoAreaAccountClosingPanel.setBorder(new TitledBorder("Kategorie Abschlussinfo"));
-		EventInfoAreaAccountClosingPanel.add(EventInfoAreaAccountClosingScrollPane);
+		eventInfoAreaAccountClosingPanel = new JPanel();
+        eventInfoAreaAccountClosingPanel.setBorder(new TitledBorder("Kategorie Abschlussinfo"));
+		eventInfoAreaAccountClosingPanel.add(eventInfoAreaAccountClosingScrollPane);
 
 		sumOverviewPanel = new JPanel();
 		sumOverviewPanel.setBorder(new TitledBorder("Saldo"));
@@ -149,14 +147,14 @@ public class JointAccountClosing {
 		sumOverviewPositiveUnplanedValue.setPreferredSize(new Dimension(70, 25));
 		sumOverviewPositiveUnplanedValue.setFont(fontTxtFields);
 
-		excessDeficitOverviewPanel = new JPanel();
-		excessDeficitOverviewPanel.setBorder(new TitledBorder("Aufteilung Überschuss/Fehlbetrag"));
-		excessDeficitOverviewPanel.setPreferredSize(new Dimension(300, 100));
+		balanceAllocationOverviewPanel = new JPanel();
+		balanceAllocationOverviewPanel.setBorder(new TitledBorder("Aufteilung"));
+		balanceAllocationOverviewPanel.setPreferredSize(new Dimension(240, 100));
 
-		container = new JPanel();
-		container.setPreferredSize(new Dimension(300, 200));
-		container.add(sumOverviewPanel);
-		container.add(excessDeficitOverviewPanel);
+		// balanceAllocationOverviewNegativeLabel = new JLabel("Summe -");
+		// balanceAllocationOverviewPositiveLabel = new JLabel("Summe +");
+		// balanceAllocationOverviewPlanedLabel = new JLabel("geplant");
+		// balanceAllocationOverviewUnplanedLabel = new JLabel("ungeplant");
     }
 
 	private void createListeners() {
@@ -170,7 +168,7 @@ public class JointAccountClosing {
 			public void keyReleased(KeyEvent ke) {
 				if (ke.getKeyCode() == KeyEvent.VK_ENTER
 						&& Pattern.matches("\\d{2}.\\d{2}.[1-9]{1}\\d{3}", billingMonth.getText())) {
-					((JointAccountClosingDetailTableModel) JointAccountClosingDetailTable.getModel())
+					((JointAccountClosingDetailTableModel) jointAccountClosingDetailTable.getModel())
 							.aktualisiere(billingMonth.getText());
 				}
 			}
@@ -181,15 +179,26 @@ public class JointAccountClosing {
 		});
 
 		// Listeners for the JointAccountClosingDetailTable
-		JointAccountClosingDetailTable.getSelectionModel().addListSelectionListener(new JointAccountClosingDetailTableSelectionListener(
-			JointAccountClosingDetailTable, EventExpenditureAmountPlanInfoArea, cn, billingMonth, EventInfoAreaAccountClosing));
+		jointAccountClosingDetailTable.getSelectionModel().addListSelectionListener(new JointAccountClosingDetailTableSelectionListener(
+			jointAccountClosingDetailTable, eventExpenditureAmountPlanInfoArea, cn, billingMonth, eventInfoAreaAccountClosing));
 
 		// Listener for the EventInfoAreaAccountClosingPanel
-		EventInfoAreaAccountClosing.addKeyListener(new JointAccountClosingEventInfoAreaKeyListener(cn, billingMonth, JointAccountClosingDetailTable));
+		eventInfoAreaAccountClosing.addKeyListener(new JointAccountClosingEventInfoAreaKeyListener(cn, billingMonth, jointAccountClosingDetailTable));
 	}
 
     private void createLayout() {
-		// layout sumOverview START
+		// ---
+		GridBagLayout jointAccountClosingDetailPanelLayout = new GridBagLayout();
+		GridBagConstraints jointAccountClosingDetailPanelLayoutConstraints = new GridBagConstraints();
+		jointAccountClosingDetailPanel.setLayout(jointAccountClosingDetailPanelLayout);
+
+		jointAccountClosingDetailPanelLayoutConstraints.gridx = 0;
+		jointAccountClosingDetailPanelLayoutConstraints.gridy = 0;
+		jointAccountClosingDetailPanelLayoutConstraints.fill = GridBagConstraints.BOTH;
+		jointAccountClosingDetailPanel.add(jointAccountClosingDetailScrollPane, jointAccountClosingDetailPanelLayoutConstraints);
+		// ---
+
+		// ---
 		GridBagLayout sumOverviewLayout = new GridBagLayout();
 		GridBagConstraints sumOverviewLayoutConstraints = new GridBagConstraints();
 		sumOverviewPanel.setLayout(sumOverviewLayout);
@@ -233,47 +242,50 @@ public class JointAccountClosing {
 		sumOverviewLayoutConstraints.gridy = 2;
 		sumOverviewLayoutConstraints.insets = new Insets(0, 0, 0, 0);
 		sumOverviewPanel.add(sumOverviewPositiveUnplanedValue, sumOverviewLayoutConstraints);
-		// layout sumOverview END
+		// ---
 
 
-		// layout rootdefinitions
+		// ---
         GridBagLayout gbl = new GridBagLayout();
         GridBagConstraints gbc = new GridBagConstraints();
-        JointAccountClosingWindow.setLayout(gbl);
+        jointAccountClosingWindow.setLayout(gbl);
 
-        // place billingMonthPanel
         gbc.gridx = 0;
         gbc.gridy = 0;
         // gbc.gridwidth = 2;
         gbc.anchor = GridBagConstraints.WEST;
         // gbc.insets = new Insets(10, 10, 0, 0);
-        JointAccountClosingWindow.add(billingMonthPanel, gbc);
+        jointAccountClosingWindow.add(billingMonthPanel, gbc);
 
-		// place JointAccountClosingDetailPanel
 		gbc.gridx = 0;
 		gbc.gridy = 1;
 		gbc.gridwidth = 2;
-		JointAccountClosingWindow.add(JointAccountClosingDetailPanel, gbc);
+		gbc.gridheight = 2;
+		gbc.fill = GridBagConstraints.BOTH;
+		jointAccountClosingWindow.add(jointAccountClosingDetailPanel, gbc);
 
-		// place EventExpenditureAmountPlanInfoAreaPanel
 		gbc.gridx = 0;
-		gbc.gridy = 2;
+		gbc.gridy = 3;
 		gbc.gridwidth = 1;
-		JointAccountClosingWindow.add(EventExpenditureAmountPlanInfoAreaPanel, gbc);
+		gbc.gridheight = 1;
+		jointAccountClosingWindow.add(eventExpenditureAmountPlanInfoAreaPanel, gbc);
 
-		// place EventExpenditureAmountPlanInfoAreaPanel
 		gbc.gridx = 1;
-		gbc.gridy = 2;
+		gbc.gridy = 3;
 		gbc.anchor = GridBagConstraints.EAST;
-		JointAccountClosingWindow.add(EventInfoAreaAccountClosingPanel, gbc);
+		jointAccountClosingWindow.add(eventInfoAreaAccountClosingPanel, gbc);
 
-		// place sumOverviewPanel
-		gbc.gridx = 3;
+		gbc.gridx = 2;
 		gbc.gridy = 1;
-		gbc.anchor = GridBagConstraints.NORTH;
-		JointAccountClosingWindow.add(container, gbc);
+		//gbc.anchor = GridBagConstraints.NORTH;
+		jointAccountClosingWindow.add(sumOverviewPanel, gbc);
 
+		gbc.gridx = 2;
+		gbc.gridy = 2;
+		//gbc.anchor = GridBagConstraints.NORTH;
+		jointAccountClosingWindow.add(balanceAllocationOverviewPanel, gbc);
 
+		// ---
 
     }
 }
