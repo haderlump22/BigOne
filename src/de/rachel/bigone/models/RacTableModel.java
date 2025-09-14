@@ -8,7 +8,7 @@ import javax.swing.table.AbstractTableModel;
 
 import de.rachel.bigone.ReadCamt;
 
-public class RACTableModel extends AbstractTableModel{
+public class RacTableModel extends AbstractTableModel{
 	private static final long serialVersionUID = -2431676313753205738L;
 	private String[] columnName = new String[]{"Wertstellung","s/h","Betrag","Buchungshinweis","DBIT/CRDT","LiquiMon","Ereignis"};
 	private String[][] daten;
@@ -22,7 +22,7 @@ public class RACTableModel extends AbstractTableModel{
 	private static int AccountBookingEvent = 6;
 	SimpleDateFormat SQLDATE = new SimpleDateFormat("yyyy-MM-dd");
 
-	public RACTableModel(ReadCamt Auszug){
+	public RacTableModel(ReadCamt Auszug){
 		daten = lese_werte(Auszug);
 	}
 	public int getColumnCount() {

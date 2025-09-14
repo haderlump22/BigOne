@@ -22,6 +22,8 @@ import javax.swing.border.TitledBorder;
 import javax.swing.text.MaskFormatter;
 
 import de.rachel.bigone.listeners.JointAccountClosingEventInfoAreaKeyListener;
+import de.rachel.bigone.listeners.JointAccountClosingMouseListener;
+import de.rachel.bigone.listeners.RacMouseListener;
 import de.rachel.bigone.listeners.JointAccountClosingDetailTableSelectionListener;
 import de.rachel.bigone.models.JointAccountClosingDetailTableModel;
 import de.rachel.bigone.renderer.JointAccountClosingDetailTableCellRenderer;
@@ -47,6 +49,9 @@ public class JointAccountClosing {
 
 		// create Component Listeners
 		this.createListeners();
+
+		// register Component Listeners
+		this.registerListeners();
 
         // Layouting
         this.createLayout();
@@ -186,7 +191,12 @@ public class JointAccountClosing {
 		eventInfoAreaAccountClosing.addKeyListener(new JointAccountClosingEventInfoAreaKeyListener(cn, billingMonth, jointAccountClosingDetailTable));
 	}
 
-    private void createLayout() {
+	private void registerListeners() {
+		// selbst definierten Mouselistener der RAC Tabelle hinzufügen
+		jointAccountClosingDetailTable.addMouseListener(new JointAccountClosingMouseListener(jointAccountClosingDetailTable));
+	}
+
+    private void  createLayout() {
 		// ---
 		GridBagLayout jointAccountClosingDetailPanelLayout = new GridBagLayout();
 		GridBagConstraints jointAccountClosingDetailPanelLayoutConstraints = new GridBagConstraints();

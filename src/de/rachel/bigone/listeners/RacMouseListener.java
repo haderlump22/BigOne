@@ -7,21 +7,21 @@ import java.awt.event.MouseEvent;
 import javax.swing.JPopupMenu;
 import javax.swing.JTable;
 
-import de.rachel.bigone.models.RACTableModel;
+import de.rachel.bigone.models.RacTableModel;
 
 import javax.swing.JMenuItem;
 
-public class RACMouseListener extends MouseAdapter {
+public class RacMouseListener extends MouseAdapter {
     private JPopupMenu popmen;
-    private RACTableModel model;
+    private RacTableModel model;
 
-    public RACMouseListener(JTable table) {
+    public RacMouseListener(JTable table) {
         popmen = new JPopupMenu();
 		// Menüeintrag für das Löschen einer Zeile
         JMenuItem delrow = new JMenuItem("Zeile löschen");
 		delrow.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
-				model = (RACTableModel) table.getModel();
+				model = (RacTableModel) table.getModel();
 				model.removeRow(table.getSelectedRow(), true);
 			}
 		});
@@ -29,7 +29,7 @@ public class RACMouseListener extends MouseAdapter {
         JMenuItem NullLiqui = new JMenuItem("aktuellen Liqui=>NULL");
 		NullLiqui.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
-				model = (RACTableModel) table.getModel();
+				model = (RacTableModel) table.getModel();
 				model.setLiquiToNull(table.getSelectedRow());
 			}
 		});
@@ -37,7 +37,7 @@ public class RACMouseListener extends MouseAdapter {
         JMenuItem NullAllLiqui = new JMenuItem("alle Liqui=>NULL");
 		NullAllLiqui.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
-				model = (RACTableModel) table.getModel();
+				model = (RacTableModel) table.getModel();
 				model.setAllLiquiToNull();
 			}
 		});

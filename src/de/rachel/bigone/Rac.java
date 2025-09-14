@@ -20,8 +20,8 @@ import com.toedter.calendar.JDateChooser;
 
 import de.rachel.bigone.editors.ComboTableCellEditor;
 import de.rachel.bigone.editors.LiquiDateTableCellEditor;
-import de.rachel.bigone.listeners.RACMouseListener;
-import de.rachel.bigone.models.RACTableModel;
+import de.rachel.bigone.listeners.RacMouseListener;
+import de.rachel.bigone.models.RacTableModel;
 import de.rachel.bigone.renderer.RACTableCellRenderer;
 
 public class Rac {
@@ -30,7 +30,7 @@ public class Rac {
 	private static final int AUFTEILUNG = 52;
 	private JFrame RACWindow;
 	private JTable table;
-	private RACTableModel model;
+	private RacTableModel model;
 	private JButton btnOpen;
 	private JButton btnImp;
 	private JFileChooser open;
@@ -76,7 +76,7 @@ public class Rac {
 						} else {
 							RACTableCellRenderer ren = new RACTableCellRenderer(cn, lblIbanValue.getText());
 							table.setDefaultRenderer(Object.class, ren);
-							model = (RACTableModel) table.getModel();
+							model = (RacTableModel) table.getModel();
 							model.aktualisiere(Auszug);
 						}
 
@@ -109,7 +109,7 @@ public class Rac {
 				DBTools pusher = new DBTools(cn);
 				DBTools getter = new DBTools(cn);
 				DBTools AccountIdGetter = new DBTools(cn);
-				model = (RACTableModel) table.getModel();
+				model = (RacTableModel) table.getModel();
 
 				// insert each Row in the DB
 				// if exist a Account ID to the IBAN that comes from the Bank Statement
@@ -221,7 +221,7 @@ public class Rac {
 				ReadCamt Auszug = new ReadCamt(BankStatementFile);
 				RACTableCellRenderer ren = new RACTableCellRenderer(cn, lblIbanValue.getText());
 				table.setDefaultRenderer(Object.class, ren);
-				model = (RACTableModel) table.getModel();
+				model = (RacTableModel) table.getModel();
 				model.aktualisiere(Auszug);
 			}
 		});
@@ -247,7 +247,7 @@ public class Rac {
 					if (dateTo.getDate() != null) {
 						if (dateFrom.getDate().before(dateTo.getDate())) {
 							// Arraycleaning can start
-							model = (RACTableModel) table.getModel();
+							model = (RacTableModel) table.getModel();
 							model.removeUnusedRows(dateFrom.getDate(), dateTo.getDate());
 
 							// after choose Timerange enabled Import Button
@@ -273,7 +273,7 @@ public class Rac {
 					if (dateFrom.getDate() != null) {
 						if (dateFrom.getDate().before(dateTo.getDate())) {
 							// Arraycleaning can start
-							model = (RACTableModel) table.getModel();
+							model = (RacTableModel) table.getModel();
 							model.removeUnusedRows(dateFrom.getDate(), dateTo.getDate());
 
 							// after choose Timerange enabled Import Button
@@ -331,7 +331,7 @@ public class Rac {
 
 	private void zeichne_tabelle(ReadCamt Auszug) {
 
-		table = new JTable(new RACTableModel(Auszug));
+		table = new JTable(new RacTableModel(Auszug));
 
 		// festlegen von diversen Verhaltensweisen der Tabelle
 		RACTableCellRenderer ren = new RACTableCellRenderer(cn, lblIbanValue.getText());
@@ -355,7 +355,7 @@ public class Rac {
 		table.getColumnModel().getColumn(6).setMaxWidth(120);
 
 		// selbst definierten Mouselistener der RAC Tabelle hinzufügen
-		table.addMouseListener(new RACMouseListener(table));
+		table.addMouseListener(new RacMouseListener(table));
 
 		sp = new JScrollPane(table);
 		sp.setBounds(30,120,725,355);
