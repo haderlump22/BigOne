@@ -23,7 +23,6 @@ import javax.swing.text.MaskFormatter;
 
 import de.rachel.bigone.listeners.JointAccountClosingEventInfoAreaKeyListener;
 import de.rachel.bigone.listeners.JointAccountClosingMouseListener;
-import de.rachel.bigone.listeners.RacMouseListener;
 import de.rachel.bigone.listeners.JointAccountClosingDetailTableSelectionListener;
 import de.rachel.bigone.models.JointAccountClosingDetailTableModel;
 import de.rachel.bigone.renderer.JointAccountClosingDetailTableCellRenderer;
@@ -175,6 +174,16 @@ public class JointAccountClosing {
 						&& Pattern.matches("\\d{2}.\\d{2}.[1-9]{1}\\d{3}", billingMonth.getText())) {
 					((JointAccountClosingDetailTableModel) jointAccountClosingDetailTable.getModel())
 							.aktualisiere(billingMonth.getText());
+
+							/* to fill the accountclosingdetail Table
+							 * "select ha_kategorie.ha_kategorie_id, ha_kategorie.kategoriebezeichnung, \"get_actualAmount\"(ereigniss_id, 13, '" + billingMonth + "') betragist\n" +
+					"from transaktionen, ha_kategorie\n" +
+					"where konten_id = 13\n" +
+					"and liqui_monat = '" + billingMonth + "'\n" +
+					"and ha_kategorie.ha_kategorie_id = transaktionen.ereigniss_id\n" +
+					"group by ha_kategorie.ha_kategorie_id, ha_kategorie.kategoriebezeichnung, ereigniss_id\n" +
+					"order by ha_kategorie.kategoriebezeichnung;"
+							 */
 				}
 			}
 
@@ -185,10 +194,10 @@ public class JointAccountClosing {
 
 		// Listeners for the JointAccountClosingDetailTable
 		jointAccountClosingDetailTable.getSelectionModel().addListSelectionListener(new JointAccountClosingDetailTableSelectionListener(
-			jointAccountClosingDetailTable, eventExpenditureAmountPlanInfoArea, cn, billingMonth, eventInfoAreaAccountClosing));
+			jointAccountClosingDetailTable, eventExpenditureAmountPlanInfoArea, cn, eventInfoAreaAccountClosing));
 
 		// Listener for the EventInfoAreaAccountClosingPanel
-		eventInfoAreaAccountClosing.addKeyListener(new JointAccountClosingEventInfoAreaKeyListener(cn, billingMonth, jointAccountClosingDetailTable));
+		eventInfoAreaAccountClosing.addKeyListener(new JointAccountClosingEventInfoAreaKeyListener(cn, jointAccountClosingDetailTable));
 	}
 
 	private void registerListeners() {

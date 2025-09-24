@@ -15,18 +15,16 @@ public class JointAccountClosingDetailTableSelectionListener implements ListSele
 
     private JTable JointAccountClosingDetailTable;
     private JTextArea EventExpenditureAmountPlanInfoArea, EventInfoAreaAccountClosing;
-    private Integer ExpenditureEventId;
+    private Integer closingDetailId;
     private Connection cn;
     private DBTools getter;
-    private JFormattedTextField BillingMonth;
 
     public JointAccountClosingDetailTableSelectionListener(JTable JointAccountClosingDetailTable,
-            JTextArea EventExpenditureAmountPlanInfoArea, Connection LoginCN, JFormattedTextField BillingMonth, JTextArea EventInfoAreaAccountClosing) {
+            JTextArea EventExpenditureAmountPlanInfoArea, Connection LoginCN, JTextArea EventInfoAreaAccountClosing) {
         this.JointAccountClosingDetailTable = JointAccountClosingDetailTable;
         this.EventExpenditureAmountPlanInfoArea = EventExpenditureAmountPlanInfoArea;
         this.EventInfoAreaAccountClosing = EventInfoAreaAccountClosing;
         this.cn = LoginCN;
-        this.BillingMonth = BillingMonth;
         getter = new DBTools(cn);
     }
 
@@ -46,16 +44,20 @@ public class JointAccountClosingDetailTableSelectionListener implements ListSele
     }
 
     private void fillEventExpenditureAmountPlanInfoArea() {
+        // we clear first the Content from a previous Call
+        EventExpenditureAmountPlanInfoArea.setText("");
+
         // get the EventId from the selected event form the JointAccountClosingDetailTable
-        ExpenditureEventId = (Integer) JointAccountClosingDetailTable.getValueAt(JointAccountClosingDetailTable.getSelectedRow(), -1);
+        closingDetailId = (Integer) JointAccountClosingDetailTable.getValueAt(JointAccountClosingDetailTable.getSelectedRow(), -1);
 
         // get Info from the expenditure table for the selected Event
         getter.select("""
-                select ha_ausgaben.bemerkung from ha_ausgaben, ha_kategorie
-                where ha_kategorie.kategoriebezeichnung = ha_ausgaben.bezeichnung
-                and ha_ausgaben.gilt_bis is null
-                and ha_kategorie.ha_kategorie_id = %d
-                """.formatted(ExpenditureEventId),1);
+                SELECT ha_ausgaben.bemerkung, ha_ausgaben.gilt_ab, ha_ausgaben.gilt_bis FROM ha_ausgaben, ha_abschlussdetails
+                WHERE ha_abschlussdetails."abschlussDetailId" = %d
+                AND ha_ausgaben.bezeichnung = ha_abschlussdetails."kategorieBezeichnung"
+                AND ha_ausgaben.gilt_bis >= ha_abschlussdetails."abschlussMonat"
+                AND ha_ausgaben.gilt_ab <= ha_abschlussdetails."abschlussMonat"
+                """.formatted(closingDetailId),1);
 
         // define the text depending on the data obtained
         try {
@@ -83,14 +85,13 @@ public class JointAccountClosingDetailTableSelectionListener implements ListSele
         EventInfoAreaAccountClosing.setText("");
 
         // get the EventId from the selected event form the JointAccountClosingDetailTable
-        ExpenditureEventId = (Integer) JointAccountClosingDetailTable.getValueAt(JointAccountClosingDetailTable.getSelectedRow(), -1);
+        closingDetailId = (Integer) JointAccountClosingDetailTable.getValueAt(JointAccountClosingDetailTable.getSelectedRow(), -1);
 
         // get even saved Info for the selected Event
         getter.select("""
-                SELECT bemerkung from ha_kategorie_infos_abschluss
-                WHERE abschluss_monat = '%s'
-                AND ha_kategorie_id = %d
-                """.formatted(BillingMonth.getText(), ExpenditureEventId),1);
+                SELECT bemerkung from ha_abschlussdetails
+                WHERE "abschlussDetailId" = %d
+                """.formatted(closingDetailId),1);
 
         try {
             if (getter.getRowCount() > 1) {
@@ -101,7 +102,7 @@ public class JointAccountClosingDetailTableSelectionListener implements ListSele
                 getter.beforeFirst();
                 getter.next();
 
-                if (getter.getString("bemerkung").length() == 0) {
+                if (getter.getString("bemerkung") == null) {
                     EventInfoAreaAccountClosing.setToolTipText("--Info für dieses Ereignis im Abschlussmonat ist leer---");
                 } else {
                     EventInfoAreaAccountClosing.setText(getter.getString("bemerkung"));

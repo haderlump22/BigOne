@@ -12,7 +12,7 @@ import de.rachel.bigone.records.JointAccountClosingDetailTableRow;
 public class JointAccountClosingDetailTableModel extends AbstractTableModel {
 	private Connection cn = null;
 	private String[] columnName = new String[] { "Ausgabenart", "Betrag IST", "Betrag PLAN", "Differenz" };
-	private List<JointAccountClosingDetailTableRow> TableData = new ArrayList<>();
+	private List<JointAccountClosingDetailTableRow> tableData = new ArrayList<>();
 	private String billingMonth = null;
 
 	public JointAccountClosingDetailTableModel(Connection LoginCN) {
@@ -25,7 +25,7 @@ public class JointAccountClosingDetailTableModel extends AbstractTableModel {
 	}
 
 	public int getRowCount() {
-		return TableData.size();
+		return tableData.size();
 	}
 
 	public String getColumnName(int col) {
@@ -33,24 +33,24 @@ public class JointAccountClosingDetailTableModel extends AbstractTableModel {
 	}
 
 	public Object getValueAt(int row, int col) {
-		JointAccountClosingDetailTableRow Zeile = TableData.get(row);
+		JointAccountClosingDetailTableRow accountClosingDetailTableModelRow = tableData.get(row);
 		Object ReturnValue = null;
 
 		switch (col) {
 			case -1:
-				ReturnValue = Zeile.EventId();
+				ReturnValue = accountClosingDetailTableModelRow.closingDetailId();
 				break;
 			case 0:
-				ReturnValue = Zeile.NameOfExpenditure();
+				ReturnValue = accountClosingDetailTableModelRow.nameOfExpenditure();
 				break;
 			case 1:
-				ReturnValue = Zeile.ActualAmount();
+				ReturnValue = accountClosingDetailTableModelRow.actualAmount();
 				break;
 			case 2:
-				ReturnValue = Zeile.PlanAmount();
+				ReturnValue = accountClosingDetailTableModelRow.planAmount();
 				break;
 			case 3:
-				ReturnValue = Zeile.Difference();
+				ReturnValue = accountClosingDetailTableModelRow.difference();
 				break;
 			default:
 				break;
@@ -60,6 +60,7 @@ public class JointAccountClosingDetailTableModel extends AbstractTableModel {
 	}
 
 	public boolean isCellEditable(int row, int col) {
+		// this has to change, because for AccountClosing we must edit this Values sometimes
 		return false;
 	}
 
@@ -67,42 +68,39 @@ public class JointAccountClosingDetailTableModel extends AbstractTableModel {
 		/*
 		 * get the current Amount Sum of each type of money
 		 */
-		int ExpenditureEventId = 0;
-		String ExpenditureEventName = "";
-		Double ExpenditureAmount = 0.0;
-		Double ExpenditureAmountPlan = 0.0;
+		int closingDetailId = 0;
+		String expenditureEventName = "";
+		Double expenditureAmount = 0.0;
+		Double expenditureAmountPlan = 0.0;
+		Double expenditureDifference = 0.0;
 
 		if (billingMonth != null && Pattern.matches("\\d{2}.\\d{2}.[1-9]{1}\\d{3}",billingMonth)) {
 			// if TableData contain Values => flush them before fill it with new data
-			if (TableData.size() > 0) {
-				TableData.clear();
+			if (tableData.size() > 0) {
+				tableData.clear();
 			}
 
 			DBTools getter = new DBTools(cn);
 
-			getter.select(
-					"select ha_kategorie.ha_kategorie_id, ha_kategorie.kategoriebezeichnung, \"get_actualAmount\"(ereigniss_id, 13, '" + billingMonth + "') betragist\n" +
-					"from transaktionen, ha_kategorie\n" +
-					"where konten_id = 13\n" +
-					"and liqui_monat = '" + billingMonth + "'\n" +
-					"and ha_kategorie.ha_kategorie_id = transaktionen.ereigniss_id\n" +
-					"group by ha_kategorie.ha_kategorie_id, ha_kategorie.kategoriebezeichnung, ereigniss_id\n" +
-					"order by ha_kategorie.kategoriebezeichnung;",
-					2);
+			getter.select("""
+					SELECT "abschlussDetailId", "kategorieBezeichnung", "summeBetraege", "planBetrag", differenz
+					FROM ha_abschlussdetails
+					WHERE "abschlussMonat" = '%s'
+					ORDER BY "kategorieBezeichnung"
+					""".formatted(billingMonth),5);
 
 			try {
 				getter.beforeFirst();
 
 				while (getter.next()) {
-					ExpenditureEventId = getter.getInt("ha_kategorie_id");
-					ExpenditureEventName = getter.getString("kategoriebezeichnung");
-					ExpenditureAmount = getter.getDouble("betragist");
+					closingDetailId = getter.getInt("abschlussDetailId");
+					expenditureEventName = getter.getString("kategorieBezeichnung");
+					expenditureAmount = getter.getDouble("summeBetraege");
+					expenditureAmountPlan = getter.getDouble("planBetrag");
+					expenditureDifference = getter.getDouble("differenz");
 
-					// try to handle the "Einzahlung" separate!!!
-					ExpenditureAmountPlan = this.getAmountPlan(getter.getInt("ha_kategorie_id"));
-
-					TableData.add(new JointAccountClosingDetailTableRow(ExpenditureEventId, ExpenditureEventName,
-							ExpenditureAmount, ExpenditureAmountPlan, (ExpenditureAmount + ExpenditureAmountPlan)));
+					tableData.add(new JointAccountClosingDetailTableRow(closingDetailId, expenditureEventName,
+							expenditureAmount, expenditureAmountPlan, expenditureDifference));
 				}
 			} catch (Exception e) {
 				System.out.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + ": " + e.toString());
@@ -117,9 +115,14 @@ public class JointAccountClosingDetailTableModel extends AbstractTableModel {
 	}
 
 	private double getAmountPlan(int ExpenditureEventId) {
+		// try to handle the "Einzahlung" separate!!!
+		// because the planed amount of this Type is a sum of all active planed Amounts
+		// all other planed amounts are selected normal over the ExpenditureEventId an
+		// the validUntil Value
+
 		double AmountValueForReturn = 0;
 
-		// get the planed Amount of the trough ExpenditureEventId given Event, if it exist, otherwise return 0
+		// get the planed Amount of Event given by the ExpenditureEventId, if it exist, otherwise return 0
 		DBTools getter = new DBTools(cn);
 
 		getter.select("select ha_ausgaben.betrag\n" +
