@@ -1,6 +1,7 @@
 package de.rachel.bigone;
 
 import java.sql.Connection;
+import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.util.regex.Pattern;
 import java.awt.Dimension;
@@ -20,6 +21,7 @@ import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.border.TitledBorder;
 import javax.swing.text.MaskFormatter;
+import javax.swing.text.NumberFormatter;
 
 import de.rachel.bigone.listeners.JointAccountClosingEventInfoAreaKeyListener;
 import de.rachel.bigone.listeners.JointAccountClosingMouseListener;
@@ -43,19 +45,14 @@ public class JointAccountClosing {
     JointAccountClosing (Connection LoginCN) {
 		cn = LoginCN;
 
-        // create Components
         this.createComponents();
 
-		// create Component Listeners
 		this.createListeners();
 
-		// register Component Listeners
-		this.registerListeners();
+		this.registerExistingListeners();
 
-        // Layouting
         this.createLayout();
 
-        // showing
         jointAccountClosingWindow.setVisible(true);
     }
 
@@ -131,38 +128,40 @@ public class JointAccountClosing {
 		sumOverviewPlanedLabel = new JLabel("geplant");
 		sumOverviewUnplanedLabel = new JLabel("ungeplant");
 
-		sumOverviewNegativePlanedValue = new JFormattedTextField();
+		sumOverviewNegativePlanedValue = new JFormattedTextField(new NumberFormatter(new DecimalFormat("#,##0.00")));
+		sumOverviewNegativePlanedValue.setHorizontalAlignment(JFormattedTextField.RIGHT);
 		sumOverviewNegativePlanedValue.setEditable(false);
 		sumOverviewNegativePlanedValue.setPreferredSize(new Dimension(70, 25));
 		sumOverviewNegativePlanedValue.setFont(fontTxtFields);
+		sumOverviewNegativePlanedValue.setText("0,00");
 
-		sumOverviewNegativeUnplanedValue = new JFormattedTextField();
+		sumOverviewNegativeUnplanedValue = new JFormattedTextField(new NumberFormatter(new DecimalFormat("#,##0.00")));
+		sumOverviewNegativeUnplanedValue.setHorizontalAlignment(JFormattedTextField.RIGHT);
 		sumOverviewNegativeUnplanedValue.setEditable(false);
 		sumOverviewNegativeUnplanedValue.setPreferredSize(new Dimension(70, 25));
 		sumOverviewNegativeUnplanedValue.setFont(fontTxtFields);
+		sumOverviewNegativeUnplanedValue.setText("0,00");
 
-		sumOverviewPositivePlanedValue = new JFormattedTextField();
+		sumOverviewPositivePlanedValue = new JFormattedTextField(new NumberFormatter(new DecimalFormat("#,##0.00")));
+		sumOverviewPositivePlanedValue.setHorizontalAlignment(JFormattedTextField.RIGHT);
 		sumOverviewPositivePlanedValue.setEditable(false);
 		sumOverviewPositivePlanedValue.setPreferredSize(new Dimension(70, 25));
 		sumOverviewPositivePlanedValue.setFont(fontTxtFields);
+		sumOverviewPositivePlanedValue.setText("0,00");
 
-		sumOverviewPositiveUnplanedValue = new JFormattedTextField();
+		sumOverviewPositiveUnplanedValue = new JFormattedTextField(new NumberFormatter(new DecimalFormat("#,##0.00")));
+		sumOverviewPositiveUnplanedValue.setHorizontalAlignment(JFormattedTextField.RIGHT);
 		sumOverviewPositiveUnplanedValue.setEditable(false);
 		sumOverviewPositiveUnplanedValue.setPreferredSize(new Dimension(70, 25));
 		sumOverviewPositiveUnplanedValue.setFont(fontTxtFields);
+		sumOverviewPositiveUnplanedValue.setText("0,00");
 
 		balanceAllocationOverviewPanel = new JPanel();
 		balanceAllocationOverviewPanel.setBorder(new TitledBorder("Aufteilung"));
 		balanceAllocationOverviewPanel.setPreferredSize(new Dimension(240, 100));
-
-		// balanceAllocationOverviewNegativeLabel = new JLabel("Summe -");
-		// balanceAllocationOverviewPositiveLabel = new JLabel("Summe +");
-		// balanceAllocationOverviewPlanedLabel = new JLabel("geplant");
-		// balanceAllocationOverviewUnplanedLabel = new JLabel("ungeplant");
     }
 
 	private void createListeners() {
-		// Listener for the textfield
 		billingMonth.addKeyListener(new KeyListener() {
 			@Override
 			public void keyTyped(KeyEvent ke) {
@@ -175,15 +174,21 @@ public class JointAccountClosing {
 					((JointAccountClosingDetailTableModel) jointAccountClosingDetailTable.getModel())
 							.aktualisiere(billingMonth.getText());
 
-							/* to fill the accountclosingdetail Table
-							 * "select ha_kategorie.ha_kategorie_id, ha_kategorie.kategoriebezeichnung, \"get_actualAmount\"(ereigniss_id, 13, '" + billingMonth + "') betragist\n" +
-					"from transaktionen, ha_kategorie\n" +
-					"where konten_id = 13\n" +
-					"and liqui_monat = '" + billingMonth + "'\n" +
-					"and ha_kategorie.ha_kategorie_id = transaktionen.ereigniss_id\n" +
-					"group by ha_kategorie.ha_kategorie_id, ha_kategorie.kategoriebezeichnung, ereigniss_id\n" +
-					"order by ha_kategorie.kategoriebezeichnung;"
-							 */
+					// now we can fill the sumOverview if there was stored Values before
+					fillSumOverview();
+
+					/*
+					 * to fill the accountclosingdetail Table
+					 * "select ha_kategorie.ha_kategorie_id, ha_kategorie.kategoriebezeichnung, \"get_actualAmount\"(ereigniss_id, 13, '"
+					 * + billingMonth + "') betragist\n" +
+					 * "from transaktionen, ha_kategorie\n" +
+					 * "where konten_id = 13\n" +
+					 * "and liqui_monat = '" + billingMonth + "'\n" +
+					 * "and ha_kategorie.ha_kategorie_id = transaktionen.ereigniss_id\n" +
+					 * "group by ha_kategorie.ha_kategorie_id, ha_kategorie.kategoriebezeichnung, ereigniss_id\n"
+					 * +
+					 * "order by ha_kategorie.kategoriebezeichnung;"
+					 */
 				}
 			}
 
@@ -191,16 +196,16 @@ public class JointAccountClosing {
 			public void keyPressed(KeyEvent ke) {
 			}
 		});
+	}
 
+	private void registerExistingListeners() {
 		// Listeners for the JointAccountClosingDetailTable
 		jointAccountClosingDetailTable.getSelectionModel().addListSelectionListener(new JointAccountClosingDetailTableSelectionListener(
 			jointAccountClosingDetailTable, eventExpenditureAmountPlanInfoArea, cn, eventInfoAreaAccountClosing));
 
 		// Listener for the EventInfoAreaAccountClosingPanel
 		eventInfoAreaAccountClosing.addKeyListener(new JointAccountClosingEventInfoAreaKeyListener(cn, jointAccountClosingDetailTable));
-	}
 
-	private void registerListeners() {
 		// selbst definierten Mouselistener der RAC Tabelle hinzufügen
 		jointAccountClosingDetailTable.addMouseListener(new JointAccountClosingMouseListener(jointAccountClosingDetailTable));
 	}
@@ -307,4 +312,49 @@ public class JointAccountClosing {
 		// ---
 
     }
+
+	private void fillSumOverview() {
+		// first we set the values to 0
+		sumOverviewNegativePlanedValue.setText("0,00");
+		sumOverviewNegativeUnplanedValue.setText("0,00");
+		sumOverviewPositivePlanedValue.setText("0,00");
+		sumOverviewPositiveUnplanedValue.setText("0,00");
+
+		DBTools getter = new DBTools(cn);
+
+		getter.select("""
+				SELECT "summenArt", betrag
+				FROM ha_abschlusssummen
+				WHERE "abschlussMonat" = '%s'
+				""".formatted(billingMonth.getText()), 2);
+
+		try {
+			getter.beforeFirst();
+
+			while (getter.next()) {
+				switch (getter.getString("summenArt")) {
+					case "geplant":
+						if (getter.getDouble("betrag") > 0) {
+							sumOverviewPositivePlanedValue.setText("%.02f".formatted(getter.getDouble("betrag")));
+						}
+						if (getter.getDouble("betrag") < 0) {
+							sumOverviewNegativePlanedValue.setText("%.02f".formatted(getter.getDouble("betrag")));
+						}
+
+						break;
+					case "ungeplant":
+						if (getter.getDouble("betrag") > 0) {
+							sumOverviewPositiveUnplanedValue.setText("%.02f".formatted(getter.getDouble("betrag")));
+						}
+						if (getter.getDouble("betrag") < 0) {
+							sumOverviewNegativeUnplanedValue.setText("%.02f".formatted(getter.getDouble("betrag")));
+						}
+					default:
+						break;
+				}
+			}
+		} catch (Exception e) {
+			System.out.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + ": " + e.toString());
+		}
+	}
 }

@@ -87,7 +87,7 @@ public class JointAccountClosingDetailTableModel extends AbstractTableModel {
 					FROM ha_abschlussdetails
 					WHERE "abschlussMonat" = '%s'
 					ORDER BY "kategorieBezeichnung"
-					""".formatted(billingMonth),5);
+					""".formatted(billingMonth), 5);
 
 			try {
 				getter.beforeFirst();
