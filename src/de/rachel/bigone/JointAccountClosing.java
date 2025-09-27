@@ -24,7 +24,7 @@ import javax.swing.text.MaskFormatter;
 import javax.swing.text.NumberFormatter;
 
 import de.rachel.bigone.listeners.JointAccountClosingEventInfoAreaKeyListener;
-import de.rachel.bigone.listeners.JointAccountClosingMouseListener;
+import de.rachel.bigone.listeners.JointAccountClosingDetailTableMouseListener;
 import de.rachel.bigone.listeners.JointAccountClosingDetailTableSelectionListener;
 import de.rachel.bigone.models.JointAccountClosingDetailTableModel;
 import de.rachel.bigone.renderer.JointAccountClosingDetailTableCellRenderer;
@@ -63,7 +63,7 @@ public class JointAccountClosing {
 		jointAccountClosingWindow.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		jointAccountClosingWindow.setResizable(true);
 
-		fontTxtFields = new Font("Arial", Font.PLAIN, 16);
+		fontTxtFields = new Font("Arial", Font.PLAIN, 14);
 		// fontCmbBoxes = new Font("Arial", Font.PLAIN, 16);
 		// fontLists = new Font("Arial", Font.PLAIN, 10);
 
@@ -207,7 +207,7 @@ public class JointAccountClosing {
 		eventInfoAreaAccountClosing.addKeyListener(new JointAccountClosingEventInfoAreaKeyListener(cn, jointAccountClosingDetailTable));
 
 		// selbst definierten Mouselistener der RAC Tabelle hinzufügen
-		jointAccountClosingDetailTable.addMouseListener(new JointAccountClosingMouseListener(jointAccountClosingDetailTable));
+		jointAccountClosingDetailTable.addMouseListener(new JointAccountClosingDetailTableMouseListener(jointAccountClosingDetailTable));
 	}
 
     private void  createLayout() {

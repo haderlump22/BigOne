@@ -10,11 +10,11 @@ import javax.swing.JMenuItem;
 
 import de.rachel.bigone.models.JointAccountClosingDetailTableModel;
 
-public class JointAccountClosingMouseListener extends MouseAdapter {
+public class JointAccountClosingDetailTableMouseListener extends MouseAdapter {
     private JPopupMenu popmen;
     private JointAccountClosingDetailTableModel model;
 
-    public JointAccountClosingMouseListener(JTable table) {
+    public JointAccountClosingDetailTableMouseListener(JTable table) {
         popmen = new JPopupMenu();
 
         JMenuItem addToPositiveSumPlaned = new JMenuItem("zu SUM+ geplant hinzufügen");
