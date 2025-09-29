@@ -14,6 +14,7 @@ public class JointAccountClosingDetailTableModel extends AbstractTableModel {
 	private String[] columnName = new String[] { "Ausgabenart", "Betrag IST", "Betrag PLAN", "Differenz" };
 	private List<JointAccountClosingDetailTableRow> tableData = new ArrayList<>();
 	private String billingMonth = null;
+	private String[] detailIdsForMarkingDifferenceValue = new String[0];
 
 	public JointAccountClosingDetailTableModel(Connection LoginCN) {
 		cn = LoginCN;
@@ -114,37 +115,17 @@ public class JointAccountClosingDetailTableModel extends AbstractTableModel {
 		fireTableDataChanged();
 	}
 
-	private double getAmountPlan(int ExpenditureEventId) {
-		// try to handle the "Einzahlung" separate!!!
-		// because the planed amount of this Type is a sum of all active planed Amounts
-		// all other planed amounts are selected normal over the ExpenditureEventId an
-		// the validUntil Value
+	public void setMarkableRows(String[] detailIdsForMarkingDifferenceValue) {
+		this.detailIdsForMarkingDifferenceValue = detailIdsForMarkingDifferenceValue;
+		fireTableDataChanged();
+	}
 
-		double AmountValueForReturn = 0;
-
-		// get the planed Amount of Event given by the ExpenditureEventId, if it exist, otherwise return 0
-		DBTools getter = new DBTools(cn);
-
-		getter.select("select ha_ausgaben.betrag\n" +
-						"from ha_ausgaben, ha_kategorie\n" +
-						"where ha_ausgaben.bezeichnung = ha_kategorie.kategoriebezeichnung\n" +
-						"and ha_kategorie.ha_kategorie_id = " + ExpenditureEventId + "\n" +
-						"and ha_ausgaben.gilt_bis >= '" + this.billingMonth + "'\n" +
-						"order by ha_ausgaben.gilt_bis asc", 1);
-		try {
-			if (getter.getRowCount() > 0) {
-				// As a result of the sorting, the desired value is at the first position of the result
-				getter.beforeFirst();
-				// we need only the first Row
-				getter.next();
-				AmountValueForReturn = getter.getDouble("betrag");
-			} else {
-				AmountValueForReturn = 0.0;
+	public boolean rowHasToMark(int row) {
+		for (String detailId : detailIdsForMarkingDifferenceValue) {
+			if ((Integer)this.getValueAt(row, -1) == Integer.parseInt(detailId)) {
+				return true;
 			}
-		} catch (Exception e) {
-			System.out.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + ": " + e.toString());
 		}
-
-		return AmountValueForReturn;
+		return false;
 	}
 }

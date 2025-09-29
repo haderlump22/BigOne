@@ -1,10 +1,14 @@
 package de.rachel.bigone.renderer;
 
+import java.awt.Color;
 import java.awt.Component;
+import java.awt.Font;
 
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
+
+import de.rachel.bigone.models.JointAccountClosingDetailTableModel;
 
 // import de.rachel.bigone.BigOneTools;
 
@@ -14,6 +18,9 @@ public class JointAccountClosingDetailTableCellRenderer implements TableCellRend
          JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
 
       JLabel label = null;
+      JointAccountClosingDetailTableModel jointAccountClosingDetailTableModel;
+
+      jointAccountClosingDetailTableModel = (JointAccountClosingDetailTableModel)table.getModel();
 
       // only react when value is not null
       if (value != null) {
@@ -47,6 +54,10 @@ public class JointAccountClosingDetailTableCellRenderer implements TableCellRend
          }
 
          if (column == 3) {
+            if (jointAccountClosingDetailTableModel.rowHasToMark(row)) {
+               label.setFont(new Font(null, Font.BOLD, 13));
+               label.setForeground(Color.RED);
+            }
             label.setHorizontalAlignment(JLabel.RIGHT);
             label.setText("%.02f".formatted((Double) value));
          }

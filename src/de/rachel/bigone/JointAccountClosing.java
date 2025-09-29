@@ -26,6 +26,7 @@ import javax.swing.text.NumberFormatter;
 import de.rachel.bigone.listeners.JointAccountClosingEventInfoAreaKeyListener;
 import de.rachel.bigone.listeners.JointAccountClosingDetailTableMouseListener;
 import de.rachel.bigone.listeners.JointAccountClosingDetailTableSelectionListener;
+import de.rachel.bigone.listeners.JointAccountClosingSumOverviewMouseListener;
 import de.rachel.bigone.models.JointAccountClosingDetailTableModel;
 import de.rachel.bigone.renderer.JointAccountClosingDetailTableCellRenderer;
 
@@ -41,6 +42,7 @@ public class JointAccountClosing {
 			eventInfoAreaAccountClosingScrollPane;
 	private JTextArea eventExpenditureAmountPlanInfoArea, eventInfoAreaAccountClosing;
 	private JLabel sumOverviewNegativeLabel, sumOverviewPositiveLabel, sumOverviewPlanedLabel, sumOverviewUnplanedLabel;
+	private JointAccountClosingSumOverviewMouseListener sumOverviewMouseListener;
 
     JointAccountClosing (Connection LoginCN) {
 		cn = LoginCN;
@@ -128,12 +130,17 @@ public class JointAccountClosing {
 		sumOverviewPlanedLabel = new JLabel("geplant");
 		sumOverviewUnplanedLabel = new JLabel("ungeplant");
 
+		/*
+		 * in the Member Field Name of the JFormattedTextfield we save, in the Moment that the Value will placed,
+		 * the Array of the IDs from the Detail Table whose difference Values build the Sum
+		 */
 		sumOverviewNegativePlanedValue = new JFormattedTextField(new NumberFormatter(new DecimalFormat("#,##0.00")));
 		sumOverviewNegativePlanedValue.setHorizontalAlignment(JFormattedTextField.RIGHT);
 		sumOverviewNegativePlanedValue.setEditable(false);
 		sumOverviewNegativePlanedValue.setPreferredSize(new Dimension(70, 25));
 		sumOverviewNegativePlanedValue.setFont(fontTxtFields);
 		sumOverviewNegativePlanedValue.setText("0,00");
+		sumOverviewNegativePlanedValue.setName("{}");
 
 		sumOverviewNegativeUnplanedValue = new JFormattedTextField(new NumberFormatter(new DecimalFormat("#,##0.00")));
 		sumOverviewNegativeUnplanedValue.setHorizontalAlignment(JFormattedTextField.RIGHT);
@@ -141,6 +148,7 @@ public class JointAccountClosing {
 		sumOverviewNegativeUnplanedValue.setPreferredSize(new Dimension(70, 25));
 		sumOverviewNegativeUnplanedValue.setFont(fontTxtFields);
 		sumOverviewNegativeUnplanedValue.setText("0,00");
+		sumOverviewNegativeUnplanedValue.setName("{}");
 
 		sumOverviewPositivePlanedValue = new JFormattedTextField(new NumberFormatter(new DecimalFormat("#,##0.00")));
 		sumOverviewPositivePlanedValue.setHorizontalAlignment(JFormattedTextField.RIGHT);
@@ -148,6 +156,7 @@ public class JointAccountClosing {
 		sumOverviewPositivePlanedValue.setPreferredSize(new Dimension(70, 25));
 		sumOverviewPositivePlanedValue.setFont(fontTxtFields);
 		sumOverviewPositivePlanedValue.setText("0,00");
+		sumOverviewPositivePlanedValue.setName("{}");
 
 		sumOverviewPositiveUnplanedValue = new JFormattedTextField(new NumberFormatter(new DecimalFormat("#,##0.00")));
 		sumOverviewPositiveUnplanedValue.setHorizontalAlignment(JFormattedTextField.RIGHT);
@@ -155,6 +164,7 @@ public class JointAccountClosing {
 		sumOverviewPositiveUnplanedValue.setPreferredSize(new Dimension(70, 25));
 		sumOverviewPositiveUnplanedValue.setFont(fontTxtFields);
 		sumOverviewPositiveUnplanedValue.setText("0,00");
+		sumOverviewPositiveUnplanedValue.setName("{}");
 
 		balanceAllocationOverviewPanel = new JPanel();
 		balanceAllocationOverviewPanel.setBorder(new TitledBorder("Aufteilung"));
@@ -199,15 +209,18 @@ public class JointAccountClosing {
 	}
 
 	private void registerExistingListeners() {
-		// Listeners for the JointAccountClosingDetailTable
 		jointAccountClosingDetailTable.getSelectionModel().addListSelectionListener(new JointAccountClosingDetailTableSelectionListener(
 			jointAccountClosingDetailTable, eventExpenditureAmountPlanInfoArea, cn, eventInfoAreaAccountClosing));
 
-		// Listener for the EventInfoAreaAccountClosingPanel
 		eventInfoAreaAccountClosing.addKeyListener(new JointAccountClosingEventInfoAreaKeyListener(cn, jointAccountClosingDetailTable));
 
-		// selbst definierten Mouselistener der RAC Tabelle hinzufügen
 		jointAccountClosingDetailTable.addMouseListener(new JointAccountClosingDetailTableMouseListener(jointAccountClosingDetailTable));
+
+		sumOverviewMouseListener = new JointAccountClosingSumOverviewMouseListener(billingMonth, jointAccountClosingDetailTable);
+		sumOverviewNegativePlanedValue.addMouseListener(sumOverviewMouseListener);
+		sumOverviewNegativeUnplanedValue.addMouseListener(sumOverviewMouseListener);
+		sumOverviewPositivePlanedValue.addMouseListener(sumOverviewMouseListener);
+		sumOverviewPositiveUnplanedValue.addMouseListener(sumOverviewMouseListener);
 	}
 
     private void  createLayout() {
@@ -319,11 +332,15 @@ public class JointAccountClosing {
 		sumOverviewNegativeUnplanedValue.setText("0,00");
 		sumOverviewPositivePlanedValue.setText("0,00");
 		sumOverviewPositiveUnplanedValue.setText("0,00");
+		sumOverviewNegativePlanedValue.setName("{}");
+		sumOverviewNegativeUnplanedValue.setName("{}");
+		sumOverviewPositivePlanedValue.setName("{}");
+		sumOverviewPositiveUnplanedValue.setName("{}");
 
 		DBTools getter = new DBTools(cn);
 
 		getter.select("""
-				SELECT "summenArt", betrag
+				SELECT "summenArt", betrag, "detailQuelle"
 				FROM ha_abschlusssummen
 				WHERE "abschlussMonat" = '%s'
 				""".formatted(billingMonth.getText()), 2);
@@ -336,18 +353,22 @@ public class JointAccountClosing {
 					case "geplant":
 						if (getter.getDouble("betrag") > 0) {
 							sumOverviewPositivePlanedValue.setText("%.02f".formatted(getter.getDouble("betrag")));
+							sumOverviewPositivePlanedValue.setName(getter.getString("detailQuelle"));
 						}
 						if (getter.getDouble("betrag") < 0) {
 							sumOverviewNegativePlanedValue.setText("%.02f".formatted(getter.getDouble("betrag")));
+							sumOverviewNegativePlanedValue.setName(getter.getString("detailQuelle"));
 						}
 
 						break;
 					case "ungeplant":
 						if (getter.getDouble("betrag") > 0) {
 							sumOverviewPositiveUnplanedValue.setText("%.02f".formatted(getter.getDouble("betrag")));
+							sumOverviewPositiveUnplanedValue.setName(getter.getString("detailQuelle"));
 						}
 						if (getter.getDouble("betrag") < 0) {
 							sumOverviewNegativeUnplanedValue.setText("%.02f".formatted(getter.getDouble("betrag")));
+							sumOverviewNegativeUnplanedValue.setName(getter.getString("detailQuelle"));
 						}
 					default:
 						break;
