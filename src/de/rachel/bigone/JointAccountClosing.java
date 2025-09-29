@@ -186,19 +186,6 @@ public class JointAccountClosing {
 
 					// now we can fill the sumOverview if there was stored Values before
 					fillSumOverview();
-
-					/*
-					 * to fill the accountclosingdetail Table
-					 * "select ha_kategorie.ha_kategorie_id, ha_kategorie.kategoriebezeichnung, \"get_actualAmount\"(ereigniss_id, 13, '"
-					 * + billingMonth + "') betragist\n" +
-					 * "from transaktionen, ha_kategorie\n" +
-					 * "where konten_id = 13\n" +
-					 * "and liqui_monat = '" + billingMonth + "'\n" +
-					 * "and ha_kategorie.ha_kategorie_id = transaktionen.ereigniss_id\n" +
-					 * "group by ha_kategorie.ha_kategorie_id, ha_kategorie.kategoriebezeichnung, ereigniss_id\n"
-					 * +
-					 * "order by ha_kategorie.kategoriebezeichnung;"
-					 */
 				}
 			}
 
@@ -216,7 +203,9 @@ public class JointAccountClosing {
 
 		jointAccountClosingDetailTable.addMouseListener(new JointAccountClosingDetailTableMouseListener(jointAccountClosingDetailTable));
 
-		sumOverviewMouseListener = new JointAccountClosingSumOverviewMouseListener(billingMonth, jointAccountClosingDetailTable);
+		sumOverviewMouseListener = new JointAccountClosingSumOverviewMouseListener(billingMonth,
+				jointAccountClosingDetailTable, sumOverviewNegativePlanedValue, sumOverviewNegativeUnplanedValue,
+				sumOverviewPositivePlanedValue, sumOverviewPositiveUnplanedValue);
 		sumOverviewNegativePlanedValue.addMouseListener(sumOverviewMouseListener);
 		sumOverviewNegativeUnplanedValue.addMouseListener(sumOverviewMouseListener);
 		sumOverviewPositivePlanedValue.addMouseListener(sumOverviewMouseListener);

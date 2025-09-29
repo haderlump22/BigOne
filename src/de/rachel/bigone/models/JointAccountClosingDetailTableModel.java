@@ -115,7 +115,7 @@ public class JointAccountClosingDetailTableModel extends AbstractTableModel {
 		fireTableDataChanged();
 	}
 
-	public void setMarkableRows(String[] detailIdsForMarkingDifferenceValue) {
+	public void setDetailIdsForMarkingDifferenceValue(String[] detailIdsForMarkingDifferenceValue) {
 		this.detailIdsForMarkingDifferenceValue = detailIdsForMarkingDifferenceValue;
 		fireTableDataChanged();
 	}
