@@ -13,17 +13,17 @@ import de.rachel.bigone.DBTools;
 
 public class JointAccountClosingDetailTableSelectionListener implements ListSelectionListener {
 
-    private JTable JointAccountClosingDetailTable;
-    private JTextArea EventExpenditureAmountPlanInfoArea, EventInfoAreaAccountClosing;
+    private JTable jointAccountClosingDetailTable;
+    private JTextArea eventExpenditureAmountPlanInfoArea, eventInfoAreaAccountClosing;
     private Integer closingDetailId;
     private Connection cn;
     private DBTools getter;
 
-    public JointAccountClosingDetailTableSelectionListener(JTable JointAccountClosingDetailTable,
-            JTextArea EventExpenditureAmountPlanInfoArea, Connection LoginCN, JTextArea EventInfoAreaAccountClosing) {
-        this.JointAccountClosingDetailTable = JointAccountClosingDetailTable;
-        this.EventExpenditureAmountPlanInfoArea = EventExpenditureAmountPlanInfoArea;
-        this.EventInfoAreaAccountClosing = EventInfoAreaAccountClosing;
+    public JointAccountClosingDetailTableSelectionListener(JTable jointAccountClosingDetailTable,
+            JTextArea eventExpenditureAmountPlanInfoArea, Connection LoginCN, JTextArea eventInfoAreaAccountClosing) {
+        this.jointAccountClosingDetailTable = jointAccountClosingDetailTable;
+        this.eventExpenditureAmountPlanInfoArea = eventExpenditureAmountPlanInfoArea;
+        this.eventInfoAreaAccountClosing = eventInfoAreaAccountClosing;
         this.cn = LoginCN;
         getter = new DBTools(cn);
     }
@@ -37,18 +37,18 @@ public class JointAccountClosingDetailTableSelectionListener implements ListSele
         if (!lsm.getValueIsAdjusting() && !lsm.isSelectionEmpty()) {
             this.fillEventExpenditureAmountPlanInfoArea();
             this.fillEventInfoAreaAccountClosing();
-            this.EventInfoAreaAccountClosing.setEnabled(true);
+            this.eventInfoAreaAccountClosing.setEnabled(true);
         } else {
-            this.EventInfoAreaAccountClosing.setEnabled(false);
+            this.eventInfoAreaAccountClosing.setEnabled(false);
         }
     }
 
     private void fillEventExpenditureAmountPlanInfoArea() {
         // we clear first the Content from a previous Call
-        EventExpenditureAmountPlanInfoArea.setText("");
+        eventExpenditureAmountPlanInfoArea.setText("");
 
         // get the EventId from the selected event form the JointAccountClosingDetailTable
-        closingDetailId = (Integer) JointAccountClosingDetailTable.getValueAt(JointAccountClosingDetailTable.getSelectedRow(), -1);
+        closingDetailId = (Integer) this.jointAccountClosingDetailTable.getValueAt(this.jointAccountClosingDetailTable.getSelectedRow(), -1);
 
         // get Info from the expenditure table for the selected Event
         getter.select("""
@@ -62,17 +62,17 @@ public class JointAccountClosingDetailTableSelectionListener implements ListSele
         // define the text depending on the data obtained
         try {
             if (getter.getRowCount() > 1) {
-                EventExpenditureAmountPlanInfoArea.setToolTipText("--Fehler - mehr als Einen Datensatz für das Ereignis im Ausgabenplan gefunden--");
+                eventExpenditureAmountPlanInfoArea.setToolTipText("--Fehler - mehr als Einen Datensatz für das Ereignis im Ausgabenplan gefunden--");
             } else if (getter.getRowCount() == 0) {
-                EventExpenditureAmountPlanInfoArea.setToolTipText("--kein Datensatz im AusgabenPlan für dieses Ereignis gefunden---");
+                eventExpenditureAmountPlanInfoArea.setToolTipText("--kein Datensatz im AusgabenPlan für dieses Ereignis gefunden---");
             } else {
                 getter.beforeFirst();
                 getter.next();
 
                 if (getter.getString("bemerkung").length() == 0) {
-                    EventExpenditureAmountPlanInfoArea.setToolTipText("--kein Infos im AusgabenPlan für dieses Ereignis festgelegt---");
+                    eventExpenditureAmountPlanInfoArea.setToolTipText("--kein Infos im AusgabenPlan für dieses Ereignis festgelegt---");
                 } else {
-                    EventExpenditureAmountPlanInfoArea.setText(getter.getString("bemerkung"));
+                    eventExpenditureAmountPlanInfoArea.setText(getter.getString("bemerkung"));
                 }
             }
         } catch (Exception e) {
@@ -82,10 +82,10 @@ public class JointAccountClosingDetailTableSelectionListener implements ListSele
 
     private void fillEventInfoAreaAccountClosing() {
         // we clear first the Content from a previous Call
-        EventInfoAreaAccountClosing.setText("");
+        eventInfoAreaAccountClosing.setText("");
 
         // get the EventId from the selected event form the JointAccountClosingDetailTable
-        closingDetailId = (Integer) JointAccountClosingDetailTable.getValueAt(JointAccountClosingDetailTable.getSelectedRow(), -1);
+        closingDetailId = (Integer) this.jointAccountClosingDetailTable.getValueAt(this.jointAccountClosingDetailTable.getSelectedRow(), -1);
 
         // get even saved Info for the selected Event
         getter.select("""
@@ -95,17 +95,17 @@ public class JointAccountClosingDetailTableSelectionListener implements ListSele
 
         try {
             if (getter.getRowCount() > 1) {
-                EventInfoAreaAccountClosing.setToolTipText("--Fehler - mehr als Einen Datensatz für Infos dieses Ereignisses im Abschlussmonat gefunden--");
+                eventInfoAreaAccountClosing.setToolTipText("--Fehler - mehr als Einen Datensatz für Infos dieses Ereignisses im Abschlussmonat gefunden--");
             } else if (getter.getRowCount() == 0) {
-                EventInfoAreaAccountClosing.setToolTipText("--keine Infos für dieses Ereignis im Abschlussmonat gefunden---");
+                eventInfoAreaAccountClosing.setToolTipText("--keine Infos für dieses Ereignis im Abschlussmonat gefunden---");
             } else {
                 getter.beforeFirst();
                 getter.next();
 
                 if (getter.getString("bemerkung") == null) {
-                    EventInfoAreaAccountClosing.setToolTipText("--Info für dieses Ereignis im Abschlussmonat ist leer---");
+                    eventInfoAreaAccountClosing.setToolTipText("--Info für dieses Ereignis im Abschlussmonat ist leer---");
                 } else {
-                    EventInfoAreaAccountClosing.setText(getter.getString("bemerkung"));
+                    eventInfoAreaAccountClosing.setText(getter.getString("bemerkung"));
                 }
             }
         } catch (Exception e) {
