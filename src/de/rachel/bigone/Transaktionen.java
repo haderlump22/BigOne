@@ -48,7 +48,7 @@ public class Transaktionen {
 	private JComboBox<String> Iban, cmbEreigniss;
 	private JButton btnSave, btnClean;
 	private String[][] datenAuft;
-		
+
 	Transaktionen(Connection LoginCN){
 		cn = LoginCN;
 		mainwindow = new JFrame("Transaktionen");
@@ -63,13 +63,13 @@ public class Transaktionen {
 		fontTxtFields = new Font("Arial",Font.PLAIN,16);
 		fontCmbBoxes = new Font("Arial",Font.PLAIN,16);
 		fontIban = new Font("Arial",Font.PLAIN,14);
-		
+
 		//Kopf des Fensters layouten
 		transaktion = new JLabel("Transaktionen",JLabel.CENTER);
 		transaktion.setFont(fontTop);
 		transaktion.setBounds(230,35,320,38);
 		//transaktion.setBorder(new EtchedBorder());
-		
+
 		ImageIcon imgEuro = new ImageIcon(getClass().getResource("images/Euro.png"));
 		eurol = new JLabel(imgEuro, JLabel.CENTER);
 		eurol.setBounds(90,20,81,84);
@@ -77,7 +77,7 @@ public class Transaktionen {
 		euror = new JLabel(imgEuro, JLabel.CENTER);
 		euror.setBounds(629,20,81,84);
 		//euror.setBorder(new EtchedBorder());
-		
+
 		//Panel fuer S/H layouten
 		sh = new JPanel(new GridLayout(2,1));
 		sh.setBounds(100,120,200,90);
@@ -92,7 +92,7 @@ public class Transaktionen {
 		//widgets auf das S/Hpanel legen
 		sh.add(soll);
 		sh.add(haben);
-		
+
 		// add Account choose and fill it with valid Account IDs (IBAN)
 		Iban = new JComboBox<String>();
 		Iban.setBounds(270,77,250,25);
@@ -105,7 +105,7 @@ public class Transaktionen {
 		liqui.setLayout(null);
 		liqui.setBounds(100,230,200,90);
 		liqui.setBorder(new TitledBorder("Liquirelevant"));
-		//Checkbox und Textfeld definieren und in das LiquiPanel setzen 
+		//Checkbox und Textfeld definieren und in das LiquiPanel setzen
 		chkLiqui = new JCheckBox("Einrechenbar",true);
 		chkLiqui.setBounds(10,20,180,30);
 		try {
@@ -119,7 +119,7 @@ public class Transaktionen {
 		//widgets auf das liquipanel legen
 		liqui.add(chkLiqui);
 		liqui.add(txtLiquiDate);
-		
+
 		//Panel fuer die Details definieren
 		details = new JPanel();
 		details.setLayout(null);
@@ -163,9 +163,9 @@ public class Transaktionen {
 				public void keyTyped(KeyEvent arg0) {
 				}
 			});
-			
+
 			txtBetrag = new JFormattedTextField(new NumberFormatter(new DecimalFormat("#,##0.00")));
-			txtBetrag.setBounds(110,55,110,25);		
+			txtBetrag.setBounds(110,55,110,25);
 			txtBetrag.setHorizontalAlignment(JFormattedTextField.RIGHT);
 			txtBetrag.setFont(fontTxtFields);
 			txtBetrag.setText("0,00");
@@ -187,7 +187,7 @@ public class Transaktionen {
 				public void keyTyped(KeyEvent ke) {
 				}
 			});
-			
+
 			txtBeschreibung = new JTextArea(3,20);
 			txtBeschreibung.setLineWrap(true); //automatischer Zeilenumbruch am Zeilenende
 			txtBeschreibung.setBounds(110,90,200,75);
@@ -203,9 +203,9 @@ public class Transaktionen {
 						txtBeschreibung.setText(txtBeschreibung.getText().trim());
 						cmbEreigniss.requestFocus();
 					}
-				}			
+				}
 			});
-			
+
 			cmbEreigniss = new JComboBox<String>();
 			cmbEreigniss.setBounds(110,180,200,25);
 			cmbEreigniss.setFont(fontCmbBoxes);
@@ -219,34 +219,34 @@ public class Transaktionen {
 		details.add(txtBetrag);
 		details.add(txtBeschreibung);
 		details.add(cmbEreigniss);
-		
+
 		//inhalte fuer das buttonpanel definieren/formatieren und zuweisen
 		//dabei gleich den beiden buttons die ereignisse zuweisen
 		btnSave = new JButton("Speichern");
 		btnSave.setBounds(370,360,110,55);
-		btnSave.addActionListener(new ActionListener(){ 
-            public void actionPerformed(ActionEvent ae){ 
+		btnSave.addActionListener(new ActionListener(){
+            public void actionPerformed(ActionEvent ae){
                 SaveData();
             }
         });
-		
+
 		btnClean = new JButton(new ImageIcon(getClass().getResource("images/DevNull.png")));
 		btnClean.setBounds(550,360,110,55);
-		btnClean.addActionListener(new ActionListener(){ 
-            public void actionPerformed(ActionEvent ae){ 
+		btnClean.addActionListener(new ActionListener(){
+            public void actionPerformed(ActionEvent ae){
                 setSomeDefaultValues();
             }
         });
-		
+
 		lblInfoFeld = new JLabel("",JLabel.CENTER);
 		lblInfoFeld.setBounds(100,470,600,25);
 		//lblInfoFeld.setBorder(new EtchedBorder());
 		lblInfoFeld.setFont(fontTxtFields);
-		
-		
+
+
 		//alle auf das hauptfenster setzen
 		mainwindow.add(eurol);
-	    mainwindow.add(transaktion); 
+	    mainwindow.add(transaktion);
 	    mainwindow.add(euror);
 	    mainwindow.add(sh);
 	    mainwindow.add(Iban);
@@ -255,44 +255,44 @@ public class Transaktionen {
 	    mainwindow.add(btnSave);
 	    mainwindow.add(btnClean);
 	    mainwindow.add(lblInfoFeld);
-	    
-	    
+
+
 		mainwindow.setVisible(true);
-		
+
 		txtDatum.requestFocus();
-		
+
 	}
 	private void SaveData() {
 		if(fuellung_pruefen()) {
 			//objekt zum zwischenspeichern der Werte anlegen
 			DataToSave BankStatementLine = new DataToSave();
-			
+
 			BankStatementLine.sh = soll_oder_haben();
 			BankStatementLine.KontoId = getKontoId(Iban.getSelectedItem().toString().replace(" ", ""));
-						 
-			if (BankStatementLine.KontoId == -1) 
+
+			if (BankStatementLine.KontoId == -1)
 			{
 			    lblInfoFeld.setText("Fehler bei Konten!");
 				return;    //-programm wird abgebrochen!
-			}        
-			
+			}
+
 			BankStatementLine.Datum = BigOneTools.datum_wandeln(txtDatum.getText(),0);
-			 
+
 			//die wiederholung der ersetzung ist bedingt durch die formatierung
-			//des textfeldes erst muss der punkt als tausendertrenner entfernt 
+			//des textfeldes erst muss der punkt als tausendertrenner entfernt
 			//werden dann das komma als dezimaltrenner in einen punkt umgewandelt
 			//werden damit es dem amerikanischen zahlenformat entspricht und in die
 			//mysql db passt
 			BankStatementLine.Betrag = txtBetrag.getText().replace(".","").replace(',','.');
-						
+
 			BankStatementLine.Buchungstext = txtBeschreibung.getText();
 			if (chkLiqui.isSelected())
 				BankStatementLine.LiquiDate = BigOneTools.datum_wandeln(txtLiquiDate.getText(),0);
 			else
 				BankStatementLine.LiquiDate = "NULL";
-						
+
 			BankStatementLine.EreignisId = BigOneTools.extractEreigId(cmbEreigniss.getSelectedItem().toString());
-			
+
 			//hier werden diverse unterformulare aufgerufen um
 			//detailierte informatioenen zu einer Transaktionen aufzunehmen
 			switch( BankStatementLine.EreignisId) {
@@ -301,37 +301,37 @@ public class Transaktionen {
 				//das Programm arbeitet weiter wenn
 				//dialog geschlossen wird
 				TankDialog td = new TankDialog(mainwindow, txtBetrag.getText(),cn);
-				
+
 				BankStatementLine.KfzId = td.get_kfz_id();
 				BankStatementLine.TreibstoffId = td.get_treibstoff_id();
 				BankStatementLine.KilometerZahl = td.get_km();
 				BankStatementLine.LiterZahl = td.get_liter();
-				
+
 				//nun die Daten einfuegen
 				transaktionsdaten_einfuegen(BankStatementLine);
 				//der funktion wird die ebend durch einfuegen des
 				//transaktionsdatensatzes erzeugte transaktionsid uebergeben
 				//plus dem BankStatementLine objekt
 				tankdaten_einfuegen(get_max_transaktions_id(), BankStatementLine);
-				
+
 				break;
 			case AUFTEILUNG:
 				//aufteilungsdaten aufnehmen
 				//das Programm arbeitet weiter wenn
 				//dialog geschlossen wird
 				Aufteilung auft = new Aufteilung(mainwindow, Double.valueOf(BankStatementLine.Betrag).doubleValue(), BankStatementLine.Buchungstext, cn);
-				
+
 				datenAuft = auft.getDaten();
-				
+
 				//nun die Daten einfuegen
 				transaktionsdaten_einfuegen(BankStatementLine);
 				//der funktion wird die ebend durch einfuegen des
 				//transaktionsdatensatzes erzeugte transaktionsid uebergeben
 				//plus dem BankStatementLine objekt
 				aufteilungsdaten_einfuegen(get_max_transaktions_id(),datenAuft);
-				
+
 				break;
-			default: 
+			default:
 				transaktionsdaten_einfuegen(BankStatementLine);
 			}
 		}
@@ -341,7 +341,7 @@ public class Transaktionen {
 		//fuegt die Tanktaden in die entsprechende Tabelle anhand der im
 		//BankStatementLine hinterlegten werte ein
 		DBTools pusher = new DBTools(cn);
-		
+
 		pusher.insert("INSERT INTO tankdaten " +
 	      			   "( transaktions_id, liter, km, kraftstoff_id, datum_bar, betrag_bar, kfz_id) " +
 	      			   "VALUES " +
@@ -352,16 +352,16 @@ public class Transaktionen {
 	      			   "NULL, " +
 	      			   "NULL, " +
 	      			   BankStatementLine.KfzId + ");");
-	      
+
 	}
 	private int get_max_transaktions_id() {
 		//findet die aktuell groesste Transaktonsid
 		Number max_transaktons_id;
 
 		DBTools getter = new DBTools(cn);
-		
+
 	    getter.select("SELECT max(transaktions_id) from transaktionen;",1);
-	    
+
 	    if(getter.getRowCount() == 1)
 	    	max_transaktons_id = (Number) getter.getValueAt(0, 0);
 	    else
@@ -386,16 +386,16 @@ public class Transaktionen {
 	}
 	private void fill_cmbEreigniss() {
 		DBTools getter = new DBTools(cn);
-		
+
 		getter.select("SELECT ereigniss_id, ereigniss_krzbez FROM kontenereignisse WHERE gueltig = 'TRUE' order by 2;",2);
-		
+
 		Object[][] cmbEreinissValues = getter.getData();
-		
+
 	    for(Object[] cmbEreignissValue : cmbEreinissValues)
 	    	cmbEreigniss.addItem(cmbEreignissValue[1] + " (" + cmbEreignissValue[0]+")");
 	}
 	private boolean fuellung_pruefen() {
-		
+
 		return true;
 	}
 	private String soll_oder_haben() {
@@ -408,11 +408,11 @@ public class Transaktionen {
 		Number KontoId;
 
 		DBTools getter = new DBTools(cn);
-		
+
 	    getter.select("SELECT ko.konten_id FROM konten ko " +
 	    		  "where ko.gueltig = true " +
 	    		  "and ko.iban = '" + Iban + "' ", 1);
-	    
+
 	    if(getter.getRowCount() == 1)
 	    	KontoId = (Number) getter.getValueAt(0, 0);
 	    else
@@ -422,7 +422,7 @@ public class Transaktionen {
 	}
 	private void transaktionsdaten_einfuegen(DataToSave BankStatementLine) {
 		DBTools pusher = new DBTools(cn);
-		
+
 	    String sql = "INSERT INTO transaktionen " +
 	      			   "( soll_haben, konten_id, datum, betrag, buchtext, ereigniss_id, liqui_monat) " +
 	      			   "VALUES " +
@@ -432,15 +432,15 @@ public class Transaktionen {
 	      			   BankStatementLine.Betrag + ", '" +
 	      			   BankStatementLine.Buchungstext + "', " +
 	      			   BankStatementLine.EreignisId + ", ";
-	      			   
+
 	      			   //falls das feld fuer das Liquidatum NULL sein
-	      			   //soll darf kein hochkomma an dieser stelle 
+	      			   //soll darf kein hochkomma an dieser stelle
 	      			   //im sqlstatement vorkommen
 	      			   if(BankStatementLine.LiquiDate == "NULL")
 	      				   sql = sql + BankStatementLine.LiquiDate + ");";
 	      			   else
 	      				   sql = sql + "'" + BankStatementLine.LiquiDate + "');";
-	      
+
 		pusher.insert(sql);
 	}
 	private void aufteilungsdaten_einfuegen(int transaktions_id, String[][] datenAuft) {
@@ -462,13 +462,13 @@ public class Transaktionen {
 	}
 	private void fill_Iban() {
 		DBTools getter = new DBTools(cn);
-		
+
 		getter.select("SELECT konten.iban, konten.bemerkung " +
 	      		"FROM konten " +
 	      		"where konten.gueltig = TRUE;",2);
-		
+
 		Object[][] cmbKtoValues = getter.getData();
-		
+
 		for(Object[] cmbKtoValue : cmbKtoValues)
 	        Iban.addItem(BigOneTools.getIbanFormatted(cmbKtoValue[0].toString()));
 	}
