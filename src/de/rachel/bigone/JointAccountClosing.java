@@ -205,7 +205,7 @@ public class JointAccountClosing {
 
 		sumOverviewMouseListener = new JointAccountClosingSumOverviewMouseListener(billingMonth,
 				jointAccountClosingDetailTable, sumOverviewNegativePlanedValue, sumOverviewNegativeUnplanedValue,
-				sumOverviewPositivePlanedValue, sumOverviewPositiveUnplanedValue);
+				sumOverviewPositivePlanedValue, sumOverviewPositiveUnplanedValue, cn);
 		sumOverviewNegativePlanedValue.addMouseListener(sumOverviewMouseListener);
 		sumOverviewNegativeUnplanedValue.addMouseListener(sumOverviewMouseListener);
 		sumOverviewPositivePlanedValue.addMouseListener(sumOverviewMouseListener);
@@ -329,9 +329,11 @@ public class JointAccountClosing {
 		DBTools getter = new DBTools(cn);
 
 		getter.select("""
-				SELECT "summenArt", betrag, "detailQuelle"
-				FROM ha_abschlusssummen
-				WHERE "abschlussMonat" = '%s'
+				SELECT "summenArt", sum(ha_abschlussdetails.differenz) betrag
+				FROM ha_abschlusssummen, ha_abschlussdetails
+				WHERE ha_abschlussdetails."abschlussMonat" = '%s'
+				AND ha_abschlussdetails."abschlussDetailId" = ha_abschlusssummen."abschlussDetailId"
+				GROUP BY "summenArt"
 				""".formatted(billingMonth.getText()), 2);
 
 		try {
@@ -339,26 +341,22 @@ public class JointAccountClosing {
 
 			while (getter.next()) {
 				switch (getter.getString("summenArt")) {
-					case "geplant":
-						if (getter.getDouble("betrag") > 0) {
-							sumOverviewPositivePlanedValue.setText("%.02f".formatted(getter.getDouble("betrag")));
-							sumOverviewPositivePlanedValue.setName(getter.getString("detailQuelle"));
-						}
-						if (getter.getDouble("betrag") < 0) {
-							sumOverviewNegativePlanedValue.setText("%.02f".formatted(getter.getDouble("betrag")));
-							sumOverviewNegativePlanedValue.setName(getter.getString("detailQuelle"));
-						}
-
+					case "planned+":
+						sumOverviewPositivePlanedValue.setText("%.02f".formatted(getter.getDouble("betrag")));
+						sumOverviewPositivePlanedValue.setName(getter.getString("summenArt"));
 						break;
-					case "ungeplant":
-						if (getter.getDouble("betrag") > 0) {
-							sumOverviewPositiveUnplanedValue.setText("%.02f".formatted(getter.getDouble("betrag")));
-							sumOverviewPositiveUnplanedValue.setName(getter.getString("detailQuelle"));
-						}
-						if (getter.getDouble("betrag") < 0) {
-							sumOverviewNegativeUnplanedValue.setText("%.02f".formatted(getter.getDouble("betrag")));
-							sumOverviewNegativeUnplanedValue.setName(getter.getString("detailQuelle"));
-						}
+					case "planned-":
+						sumOverviewNegativePlanedValue.setText("%.02f".formatted(getter.getDouble("betrag")));
+						sumOverviewNegativePlanedValue.setName(getter.getString("summenArt"));
+						break;
+					case "unplanned+":
+						sumOverviewPositiveUnplanedValue.setText("%.02f".formatted(getter.getDouble("betrag")));
+						sumOverviewPositiveUnplanedValue.setName(getter.getString("summenArt"));
+						break;
+					case "unplanned-":
+						sumOverviewNegativeUnplanedValue.setText("%.02f".formatted(getter.getDouble("betrag")));
+						sumOverviewNegativeUnplanedValue.setName(getter.getString("summenArt"));
+						break;
 					default:
 						break;
 				}
