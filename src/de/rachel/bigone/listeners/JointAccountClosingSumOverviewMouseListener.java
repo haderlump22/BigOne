@@ -3,6 +3,7 @@ package de.rachel.bigone.listeners;
 import java.awt.Font;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.sql.Array;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.regex.Pattern;
@@ -44,15 +45,14 @@ public class JointAccountClosingSumOverviewMouseListener extends MouseAdapter {
                 JFormattedTextField sourceTextField = (JFormattedTextField) mouseEvent.getSource();
                 sourceTextField.setFont(new Font(null, Font.BOLD, 14));
 
-                //String[] ids = sourceTextField.getName().replaceAll("[{}]", "").split(",");
-                getIdsOfSumSources(sourceTextField.getName(), billingMonth.getText());
-                //((JointAccountClosingDetailTableModel) jointAccountClosingDetailTable.getModel())
-                //        .setDetailIdsForMarkingDifferenceValue(ids);
+                Integer[] ids = getIdsOfSumSources(sourceTextField.getName(), billingMonth.getText());
+                ((JointAccountClosingDetailTableModel) jointAccountClosingDetailTable.getModel())
+                       .setDetailIdsForMarkingDifferenceValue(ids);
             }
         }
     }
 
-    private void getIdsOfSumSources(String sumType, String billingMonth) {
+    private Integer[] getIdsOfSumSources(String sumType, String billingMonth) {
         DBTools getter = new DBTools(LoginCN);
 
 		getter.select("""
@@ -61,19 +61,20 @@ public class JointAccountClosingSumOverviewMouseListener extends MouseAdapter {
                 WHERE ha_abschlusssummen."summenArt" = '%s'
                 AND ha_abschlussdetails."abschlussDetailId" = ha_abschlusssummen."abschlussDetailId"
                 AND ha_abschlussdetails."abschlussMonat" = '%s'
-                """.formatted("fff", billingMonth), 1);
+                """.formatted(sumType, billingMonth), 1);
         try {
             getter.first();
             if (getter.getArray("idsOfSumSources") != null) {
+                Array z = getter.getArray("idsOfSumSources");
+                return (Integer[])z.getArray();
 
-                System.out.println(getter.getArray("idsOfSumSources"));
             } else {
                 System.out.println("keine Einträge zu dieser SummenArt gefunden!");
+
             }
         } catch (SQLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "+e.getStackTrace()[0].getLineNumber()+"): " + e.toString());
         }
-
+        return new Integer[0];
     }
 }

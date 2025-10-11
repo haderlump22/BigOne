@@ -14,7 +14,7 @@ public class JointAccountClosingDetailTableModel extends AbstractTableModel {
 	private String[] columnName = new String[] { "Ausgabenart", "Betrag IST", "Betrag PLAN", "Differenz" };
 	private List<JointAccountClosingDetailTableRow> tableData = new ArrayList<>();
 	private String billingMonth = null;
-	private String[] detailIdsForMarkingDifferenceValue = new String[0];
+	private Integer[] detailIdsForMarkingDifferenceValue = new Integer[0];
 
 	public JointAccountClosingDetailTableModel(Connection LoginCN) {
 		cn = LoginCN;
@@ -104,25 +104,25 @@ public class JointAccountClosingDetailTableModel extends AbstractTableModel {
 							expenditureAmount, expenditureAmountPlan, expenditureDifference));
 				}
 			} catch (Exception e) {
-				System.out.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + ": " + e.toString());
+				System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + ": " + e.toString());
 			}
 		}
 	}
 
 	public void aktualisiere(String billingMonth) {
 		this.billingMonth = billingMonth;
-		this.lese_werte();
+		lese_werte();
 		fireTableDataChanged();
 	}
 
-	public void setDetailIdsForMarkingDifferenceValue(String[] detailIdsForMarkingDifferenceValue) {
+	public void setDetailIdsForMarkingDifferenceValue(Integer[] detailIdsForMarkingDifferenceValue) {
 		this.detailIdsForMarkingDifferenceValue = detailIdsForMarkingDifferenceValue;
 		fireTableDataChanged();
 	}
 
 	public boolean rowHasToMark(int row) {
-		for (String detailId : detailIdsForMarkingDifferenceValue) {
-			if ((Integer)this.getValueAt(row, -1) == Integer.parseInt(detailId)) {
+		for (Integer detailId : detailIdsForMarkingDifferenceValue) {
+			if ((Integer)getValueAt(row, -1) == detailId) {
 				return true;
 			}
 		}
