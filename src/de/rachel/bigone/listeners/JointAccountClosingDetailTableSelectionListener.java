@@ -2,7 +2,6 @@ package de.rachel.bigone.listeners;
 
 import java.sql.Connection;
 
-import javax.swing.JFormattedTextField;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.ListSelectionModel;

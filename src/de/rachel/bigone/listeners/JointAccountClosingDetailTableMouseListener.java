@@ -24,60 +24,65 @@ public class JointAccountClosingDetailTableMouseListener extends MouseAdapter {
     private JointAccountClosingDetailTableModel jointAccountClosingDetailTableModel;
     private JTable jointAccountClosingDetailTable;
     private int detailId;
-    private double differenceValue;
     private JFormattedTextField billingMonth;
-    private Connection sqlConnection;
+    private Connection LoginCN;
+    private DBTools query;
     private List<ClosingSumValueRecord> closingSumValueRecord = new ArrayList<>();
+    private JMenuItem addToPositiveSumPlaned, addToNegativeSumPlaned, addToPositiveSumUnplaned,
+            addToNegativeSumUnplaned, removeDifferenceValueFromSum;
 
     public JointAccountClosingDetailTableMouseListener(JTable jointAccountClosingDetailTable,
-            JFormattedTextField billingMonth, Connection sqlConnection) {
+            JFormattedTextField billingMonth, Connection LoginCN) {
         popmen = new JPopupMenu();
-        this.sqlConnection = sqlConnection;
+        this.LoginCN = LoginCN;
+        query = new DBTools(LoginCN);
         this.jointAccountClosingDetailTable = jointAccountClosingDetailTable;
         this.jointAccountClosingDetailTableModel = (JointAccountClosingDetailTableModel) this.jointAccountClosingDetailTable
                 .getModel();
         this.billingMonth = billingMonth;
 
-        JMenuItem addToPositiveSumPlaned = new JMenuItem("zu SUM+ geplant hinzufügen");
+        addToPositiveSumPlaned = new JMenuItem("zu SUM+ geplant hinzufügen");
         addToPositiveSumPlaned.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ae) {
-                differenceValue = (double) jointAccountClosingDetailTableModel
-                        .getValueAt(jointAccountClosingDetailTable.getSelectedRow(), 3);
-                ;
-                detailId = (int) jointAccountClosingDetailTableModel
-                        .getValueAt(jointAccountClosingDetailTable.getSelectedRow(), -1);
-
-                modifyClosingSumValue("planned", differenceValue, billingMonth.getText(), detailId);
+                addDetailIdToSumType("planned+");
             }
         });
 
-        JMenuItem addToNegativeSumPlaned = new JMenuItem("zu SUM- geplant hinzufügen");
+        addToNegativeSumPlaned = new JMenuItem("zu SUM- geplant hinzufügen");
         addToNegativeSumPlaned.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ae) {
-                // model = (RACTableModel) table.getModel();
-                // model.setLiquiToNull(table.getSelectedRow());
+                addDetailIdToSumType("planned-");
             }
         });
 
-        JMenuItem addToPositiveSumUnplaned = new JMenuItem("zu SUM+ ungeplant hinzufügen");
+        addToPositiveSumUnplaned = new JMenuItem("zu SUM+ ungeplant hinzufügen");
         addToPositiveSumUnplaned.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ae) {
-                // model = (RACTableModel) table.getModel();
-                // model.setAllLiquiToNull();
+                addDetailIdToSumType("unplanned+");
             }
         });
 
-        JMenuItem addToNegativeSumUnplaned = new JMenuItem("zu SUM+ ungeplant hinzufügen");
+        addToNegativeSumUnplaned = new JMenuItem("zu SUM+ ungeplant hinzufügen");
         addToNegativeSumUnplaned.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent ae) {
+                addDetailIdToSumType("unplanned-");
+            }
+        });
+
+        removeDifferenceValueFromSum = new JMenuItem("Betrag aus Summe entfernen");
+        removeDifferenceValueFromSum.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ae) {
                 // model = (RACTableModel) table.getModel();
                 // model.setAllLiquiToNull();
             }
         });
+
         popmen.add(addToPositiveSumPlaned);
         popmen.add(addToNegativeSumPlaned);
         popmen.add(addToPositiveSumUnplaned);
         popmen.add(addToNegativeSumUnplaned);
+        popmen.addSeparator();
+        popmen.add(removeDifferenceValueFromSum);
     }
 
     public void mouseReleased(MouseEvent mouseEvent) {
@@ -93,83 +98,112 @@ public class JointAccountClosingDetailTableMouseListener extends MouseAdapter {
             // diese eine Zeile selectieren
             jointAccountClosingDetailTable.addRowSelectionInterval(rowAtMousePoint, rowAtMousePoint);
 
-            // popup zum Löschen der selectierten Zeile anzeigen
+            // get the detailId of the, now, selected row of the
+            // jointAccountClosingDetailTable
+            detailId = (int) jointAccountClosingDetailTableModel
+                    .getValueAt(jointAccountClosingDetailTable.getSelectedRow(), -1);
+
+            // disable addTo... entries if the ID from the row where the mouse was clicked
+            // is already added to a sum type
+            if (isRowDifferenceValueAlreadyAddedToAnySumType()) {
+                setAddMenuEntrysDisabled();
+            } else {
+                if (isRowDifferenceValueZero) {
+                    setAddMenuEntrysDisabled();
+                } else {
+                    setAddMenuEntrysEnabled();
+                }
+            }
+
             popmen.show(mouseEvent.getComponent(), mouseEvent.getX(), mouseEvent.getY());
         }
     }
 
-    private void modifyClosingSumValue(String type, double difference, String billingMonth, int detailId) {
-        if (existTypeOfClosingSumValue(type, difference, billingMonth)) {
-            closingSumValueRecord.add(getClosingSumValueRow(type, difference, billingMonth));
-
-            double newValueOfThisType = oldValueOfThisType + difference;
-
-            updateExistTypeOfClosingSumValue(type, newValueOfThisType, billingMonth, detailId);
-        } else {
-            createNewTypeOfClosingSumValue(type, difference, billingMonth);
-        }
+    private void setAddMenuEntrysDisabled() {
+        addToNegativeSumPlaned.setEnabled(false);
+        addToNegativeSumUnplaned.setEnabled(false);
+        addToPositiveSumPlaned.setEnabled(false);
+        addToPositiveSumUnplaned.setEnabled(false);
+        removeDifferenceValueFromSum.setEnabled(true);
     }
 
-    private boolean existTypeOfClosingSumValue(String type, double difference, String billingMonth) {
-        // the record that we looking for may only occur once or not at all
-        DBTools getter = new DBTools(sqlConnection);
-        int anzahl = 0;
+    private void setAddMenuEntrysEnabled() {
+        addToNegativeSumPlaned.setEnabled(true);
+        addToNegativeSumUnplaned.setEnabled(true);
+        addToPositiveSumPlaned.setEnabled(true);
+        addToPositiveSumUnplaned.setEnabled(true);
+        removeDifferenceValueFromSum.setEnabled(false);
+    }
 
-        getter.select("""
+    private void addDetailIdToSumType(String sumType) {
+        query.insert("""
+                INSERT INTO ha_abschlusssummen
+                ("summenArt", "abschlussDetailId")
+                VALUES
+                ('%s', %d)
+                """.formatted(sumType, detailId));
+    }
+
+    private boolean isRowDifferenceValueAlreadyAddedToAnySumType() {
+        int number = 0;
+
+        query.select("""
                 SELECT count(*)
                 FROM ha_abschlusssummen
-                WHERE "abschlussMonat" = '%s'
-                AND "summenArt" = '%s'
-                AND betrag %s
-                """.formatted(billingMonth, type, difference < 0 ? "< 0" : (difference > 0 ? "> 0" : "= 0")), 1);
+                WHERE "abschlussDetailId" = %d
+                """.formatted(detailId), 1);
 
         try {
-            getter.next();
-
-            anzahl = getter.getInt("count");
-
+            query.first();
+            number = query.getInt("count");
         } catch (SQLException e) {
-            System.out.println(
-                    this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + ": " + e.toString());
-            System.exit(1);
+            System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "
+                    + e.getStackTrace()[0].getLineNumber() + "): " + e.toString());
         }
 
-        return anzahl == 1 ? true : false;
-    }
-
-    private ClosingSumValueRecord getClosingSumValueRow(String type, double difference, String billingMonth) {
-        DBTools getter = new DBTools(sqlConnection);
-        double typeClosingSumValue = 0;
-
-        getter.select("""
-                SELECT "abschlussSummenId", "abschlussMonat", "summenArt", betrag, "detailQuelle"
-                FROM ha_abschlusssummen
-                WHERE "abschlussMonat" = '%s'
-                AND "summenArt" = '%s'
-                AND betrag %s
-                """.formatted(billingMonth, type, difference < 0 ? "< 0" : "> 0"), 1);
-
-        try {
-            getter.next();
-
-            typeClosingSumValue = getter.getDouble("betrag");
-
-        } catch (SQLException e) {
-            System.out.println(
-                    this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + ": " + e.toString());
-            System.exit(1);
+        if (number != 0) {
+            return true;
+        } else {
+            return false;
         }
-
-        return typeClosingSumValue;
     }
+
+    // private ClosingSumValueRecord getClosingSumValueRow(String type, double
+    // difference, String billingMonth) {
+    // DBTools getter = new DBTools(LoginCN);
+    // double typeClosingSumValue = 0;
+
+    // getter.select("""
+    // SELECT "abschlussSummenId", "abschlussMonat", "summenArt", betrag,
+    // "detailQuelle"
+    // FROM ha_abschlusssummen
+    // WHERE "abschlussMonat" = '%s'
+    // AND "summenArt" = '%s'
+    // AND betrag %s
+    // """.formatted(billingMonth, type, difference < 0 ? "< 0" : "> 0"), 1);
+
+    // try {
+    // getter.next();
+
+    // typeClosingSumValue = getter.getDouble("betrag");
+
+    // } catch (SQLException e) {
+    // System.out.println(
+    // this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + ": "
+    // + e.toString());
+    // System.exit(1);
+    // }
+
+    // return typeClosingSumValue;
+    // }
 
     private void updateExistTypeOfClosingSumValue(String type, double newValueOfThisType, String billingMonth) {
-        DBTools setter = new DBTools(sqlConnection);
+        // DBTools setter = new DBTools(LoginCN);
 
-        setter.update("""
-                UPDATE ha_abschlusssummen
-                SET betrag = %d
-                WHERE "abschlussMonat" = '%s'
-                """.formatted(newValueOfThisType, billingMonth))
+        // setter.update("""
+        // UPDATE ha_abschlusssummen
+        // SET betrag = %d
+        // WHERE "abschlussMonat" = '%s'
+        // """.formatted(newValueOfThisType, billingMonth))
     }
 }
