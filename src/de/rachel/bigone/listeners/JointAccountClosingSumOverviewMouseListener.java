@@ -61,11 +61,15 @@ public class JointAccountClosingSumOverviewMouseListener extends MouseAdapter {
                 WHERE ha_abschlusssummen."summenArt" = '%s'
                 AND ha_abschlussdetails."abschlussDetailId" = ha_abschlusssummen."abschlussDetailId"
                 AND ha_abschlussdetails."abschlussMonat" = '%s'
-                """.formatted(sumType, billingMonth), 1);
+                """.formatted("fff", billingMonth), 1);
         try {
             getter.first();
-            System.out.println(getter.getArray("idsOfSumSources"));
+            if (getter.getArray("idsOfSumSources") != null) {
 
+                System.out.println(getter.getArray("idsOfSumSources"));
+            } else {
+                System.out.println("keine Einträge zu dieser SummenArt gefunden!");
+            }
         } catch (SQLException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
