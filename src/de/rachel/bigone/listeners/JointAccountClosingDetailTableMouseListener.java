@@ -15,36 +15,32 @@ import javax.swing.JFormattedTextField;
 import javax.swing.JMenuItem;
 
 import de.rachel.bigone.DBTools;
+import de.rachel.bigone.JointAccountClosing;
 import de.rachel.bigone.models.JointAccountClosingDetailTableModel;
-import de.rachel.bigone.records.ClosingSumValueRecord;
-import de.rachel.bigone.records.JointAccountClosingDetailTableRow;
 
 public class JointAccountClosingDetailTableMouseListener extends MouseAdapter {
     private JPopupMenu popmen;
     private JointAccountClosingDetailTableModel jointAccountClosingDetailTableModel;
+    private JointAccountClosing jointAccountClosingUi;
     private JTable jointAccountClosingDetailTable;
     private int detailId;
-    private JFormattedTextField billingMonth;
-    private Connection LoginCN;
     private DBTools query;
-    private List<ClosingSumValueRecord> closingSumValueRecord = new ArrayList<>();
     private JMenuItem addToPositiveSumPlaned, addToNegativeSumPlaned, addToPositiveSumUnplaned,
             addToNegativeSumUnplaned, removeDifferenceValueFromSum;
 
     public JointAccountClosingDetailTableMouseListener(JTable jointAccountClosingDetailTable,
-            JFormattedTextField billingMonth, Connection LoginCN) {
+            JFormattedTextField billingMonth, Connection LoginCN, JointAccountClosing jointAccountClosingUi) {
         popmen = new JPopupMenu();
-        this.LoginCN = LoginCN;
         query = new DBTools(LoginCN);
         this.jointAccountClosingDetailTable = jointAccountClosingDetailTable;
         this.jointAccountClosingDetailTableModel = (JointAccountClosingDetailTableModel) this.jointAccountClosingDetailTable
                 .getModel();
-        this.billingMonth = billingMonth;
 
         addToPositiveSumPlaned = new JMenuItem("zu SUM+ geplant hinzufügen");
         addToPositiveSumPlaned.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ae) {
                 addDetailIdToSumType("planned+");
+                jointAccountClosingUi.fillSumOverview();
             }
         });
 
@@ -52,6 +48,7 @@ public class JointAccountClosingDetailTableMouseListener extends MouseAdapter {
         addToNegativeSumPlaned.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ae) {
                 addDetailIdToSumType("planned-");
+                jointAccountClosingUi.fillSumOverview();
             }
         });
 
@@ -59,21 +56,23 @@ public class JointAccountClosingDetailTableMouseListener extends MouseAdapter {
         addToPositiveSumUnplaned.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ae) {
                 addDetailIdToSumType("unplanned+");
+                jointAccountClosingUi.fillSumOverview();
             }
         });
 
-        addToNegativeSumUnplaned = new JMenuItem("zu SUM+ ungeplant hinzufügen");
+        addToNegativeSumUnplaned = new JMenuItem("zu SUM- ungeplant hinzufügen");
         addToNegativeSumUnplaned.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ae) {
                 addDetailIdToSumType("unplanned-");
+                jointAccountClosingUi.fillSumOverview();
             }
         });
 
         removeDifferenceValueFromSum = new JMenuItem("Betrag aus Summe entfernen");
         removeDifferenceValueFromSum.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ae) {
-                // model = (RACTableModel) table.getModel();
-                // model.setAllLiquiToNull();
+                removeDetailIdFromSumType();
+                jointAccountClosingUi.fillSumOverview();
             }
         });
 
@@ -106,10 +105,10 @@ public class JointAccountClosingDetailTableMouseListener extends MouseAdapter {
             // disable addTo... entries if the ID from the row where the mouse was clicked
             // is already added to a sum type
             if (isRowDifferenceValueAlreadyAddedToAnySumType()) {
-                setAddMenuEntrysDisabled();
+                setAddMenuEntrysDisabled(false);
             } else {
-                if (isRowDifferenceValueZero) {
-                    setAddMenuEntrysDisabled();
+                if (isRowDifferenceValueZero()) {
+                    setAddMenuEntrysDisabled(true);
                 } else {
                     setAddMenuEntrysEnabled();
                 }
@@ -119,19 +118,30 @@ public class JointAccountClosingDetailTableMouseListener extends MouseAdapter {
         }
     }
 
-    private void setAddMenuEntrysDisabled() {
+    private void setAddMenuEntrysDisabled(boolean allEntrys) {
         addToNegativeSumPlaned.setEnabled(false);
         addToNegativeSumUnplaned.setEnabled(false);
         addToPositiveSumPlaned.setEnabled(false);
         addToPositiveSumUnplaned.setEnabled(false);
-        removeDifferenceValueFromSum.setEnabled(true);
+        if (allEntrys) {
+            removeDifferenceValueFromSum.setEnabled(false);
+        } else {
+            removeDifferenceValueFromSum.setEnabled(true);
+        }
     }
 
     private void setAddMenuEntrysEnabled() {
-        addToNegativeSumPlaned.setEnabled(true);
-        addToNegativeSumUnplaned.setEnabled(true);
-        addToPositiveSumPlaned.setEnabled(true);
-        addToPositiveSumUnplaned.setEnabled(true);
+        if (isRowDifferenceValuePositive()) {
+            addToNegativeSumPlaned.setEnabled(false);
+            addToNegativeSumUnplaned.setEnabled(false);
+            addToPositiveSumPlaned.setEnabled(true);
+            addToPositiveSumUnplaned.setEnabled(true);
+        } else {
+            addToNegativeSumPlaned.setEnabled(true);
+            addToNegativeSumUnplaned.setEnabled(true);
+            addToPositiveSumPlaned.setEnabled(false);
+            addToPositiveSumUnplaned.setEnabled(false);
+        }
         removeDifferenceValueFromSum.setEnabled(false);
     }
 
@@ -168,42 +178,30 @@ public class JointAccountClosingDetailTableMouseListener extends MouseAdapter {
         }
     }
 
-    // private ClosingSumValueRecord getClosingSumValueRow(String type, double
-    // difference, String billingMonth) {
-    // DBTools getter = new DBTools(LoginCN);
-    // double typeClosingSumValue = 0;
+    private boolean isRowDifferenceValueZero() {
+        double differenceValueOfSelectedRow = (double) jointAccountClosingDetailTableModel
+                .getValueAt(jointAccountClosingDetailTable.getSelectedRow(), 3);
+        if (differenceValueOfSelectedRow == 0) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 
-    // getter.select("""
-    // SELECT "abschlussSummenId", "abschlussMonat", "summenArt", betrag,
-    // "detailQuelle"
-    // FROM ha_abschlusssummen
-    // WHERE "abschlussMonat" = '%s'
-    // AND "summenArt" = '%s'
-    // AND betrag %s
-    // """.formatted(billingMonth, type, difference < 0 ? "< 0" : "> 0"), 1);
+    private boolean isRowDifferenceValuePositive() {
+        double differenceValueOfSelectedRow = (double) jointAccountClosingDetailTableModel
+                .getValueAt(jointAccountClosingDetailTable.getSelectedRow(), 3);
+        if (differenceValueOfSelectedRow > 0) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 
-    // try {
-    // getter.next();
-
-    // typeClosingSumValue = getter.getDouble("betrag");
-
-    // } catch (SQLException e) {
-    // System.out.println(
-    // this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + ": "
-    // + e.toString());
-    // System.exit(1);
-    // }
-
-    // return typeClosingSumValue;
-    // }
-
-    private void updateExistTypeOfClosingSumValue(String type, double newValueOfThisType, String billingMonth) {
-        // DBTools setter = new DBTools(LoginCN);
-
-        // setter.update("""
-        // UPDATE ha_abschlusssummen
-        // SET betrag = %d
-        // WHERE "abschlussMonat" = '%s'
-        // """.formatted(newValueOfThisType, billingMonth))
+    private void removeDetailIdFromSumType() {
+        query.insert("""
+                DELETE FROM ha_abschlusssummen
+                WHERE "abschlussDetailId" = %d
+                """.formatted(detailId));
     }
 }

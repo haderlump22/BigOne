@@ -201,7 +201,7 @@ public class JointAccountClosing {
 
 		eventInfoAreaAccountClosing.addKeyListener(new JointAccountClosingEventInfoAreaKeyListener(cn, jointAccountClosingDetailTable));
 
-		jointAccountClosingDetailTable.addMouseListener(new JointAccountClosingDetailTableMouseListener(jointAccountClosingDetailTable, billingMonth, cn));
+		jointAccountClosingDetailTable.addMouseListener(new JointAccountClosingDetailTableMouseListener(jointAccountClosingDetailTable, billingMonth, cn, this));
 
 		sumOverviewMouseListener = new JointAccountClosingSumOverviewMouseListener(billingMonth,
 				jointAccountClosingDetailTable, sumOverviewNegativePlanedValue, sumOverviewNegativeUnplanedValue,
@@ -315,7 +315,7 @@ public class JointAccountClosing {
 
     }
 
-	private void fillSumOverview() {
+	public void fillSumOverview() {
 		// first we set the values to 0
 		sumOverviewNegativePlanedValue.setText("0,00");
 		sumOverviewNegativeUnplanedValue.setText("0,00");
