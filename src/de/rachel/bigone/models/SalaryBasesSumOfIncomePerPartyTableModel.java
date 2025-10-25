@@ -83,7 +83,7 @@ public class SalaryBasesSumOfIncomePerPartyTableModel extends AbstractTableModel
 
 		// first get the sum of all Values in Column 2
 		for (SalaryBasesSumOfIncomePerPartyTableRow Zeile : TableData) {
-			SumOfAllIncome = SumOfAllIncome+ Zeile.Sum();
+			SumOfAllIncome = SumOfAllIncome + Zeile.Sum();
 		}
 	}
 }

@@ -27,7 +27,9 @@ import de.rachel.bigone.listeners.JointAccountClosingEventInfoAreaKeyListener;
 import de.rachel.bigone.listeners.JointAccountClosingDetailTableMouseListener;
 import de.rachel.bigone.listeners.JointAccountClosingDetailTableSelectionListener;
 import de.rachel.bigone.listeners.JointAccountClosingSumOverviewMouseListener;
+import de.rachel.bigone.models.JointAccountClosingBalanceAllocationOverviewDetailTableModel;
 import de.rachel.bigone.models.JointAccountClosingDetailTableModel;
+import de.rachel.bigone.renderer.JointAccountClosingBalanceAllocationOverviewDetailTableCellRenderer;
 import de.rachel.bigone.renderer.JointAccountClosingDetailTableCellRenderer;
 
 public class JointAccountClosing {
@@ -37,9 +39,9 @@ public class JointAccountClosing {
 	private JPanel billingMonthPanel, jointAccountClosingDetailPanel, eventExpenditureAmountPlanInfoAreaPanel,
 			eventInfoAreaAccountClosingPanel, sumOverviewPanel, balanceAllocationOverviewPanel;
 	private JFormattedTextField billingMonth, sumOverviewPositivePlanedValue, sumOverviewPositiveUnplanedValue, sumOverviewNegativePlanedValue, sumOverviewNegativeUnplanedValue;
-	private JTable jointAccountClosingDetailTable;
+	private JTable jointAccountClosingDetailTable, jointAccountClosingBalanceAllocationOverviewDetailTable;
 	private JScrollPane jointAccountClosingDetailScrollPane, eventExpenditureAmountPlanInfoAreaScrollPane,
-			eventInfoAreaAccountClosingScrollPane;
+			eventInfoAreaAccountClosingScrollPane, jointAccountClosingBalanceAllocationOverviewScrollPane;
 	private JTextArea eventExpenditureAmountPlanInfoArea, eventInfoAreaAccountClosing;
 	private JLabel sumOverviewNegativeLabel, sumOverviewPositiveLabel, sumOverviewPlanedLabel, sumOverviewUnplanedLabel;
 	private JointAccountClosingSumOverviewMouseListener sumOverviewMouseListener;
@@ -167,8 +169,14 @@ public class JointAccountClosing {
 		sumOverviewPositiveUnplanedValue.setName("{}");
 
 		balanceAllocationOverviewPanel = new JPanel();
-		balanceAllocationOverviewPanel.setBorder(new TitledBorder("Aufteilung"));
+		balanceAllocationOverviewPanel.setBorder(new TitledBorder("Aufteilung Saldo"));
 		balanceAllocationOverviewPanel.setPreferredSize(new Dimension(240, 100));
+
+		jointAccountClosingBalanceAllocationOverviewDetailTable = new JTable(new JointAccountClosingBalanceAllocationOverviewDetailTableModel(cn));
+		jointAccountClosingBalanceAllocationOverviewDetailTable.setDefaultRenderer(Object.class, new JointAccountClosingBalanceAllocationOverviewDetailTableCellRenderer());
+
+		jointAccountClosingBalanceAllocationOverviewScrollPane = new JScrollPane(jointAccountClosingBalanceAllocationOverviewDetailTable);
+
     }
 
 	private void createListeners() {
