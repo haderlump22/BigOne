@@ -445,25 +445,38 @@ public class AccountClosing {
 		Integer transaktions_id = Integer.valueOf(selectedPersonAmountWithKey.substring(selectedPersonAmountWithKey.indexOf("(") + 1, selectedPersonAmountWithKey.indexOf(")")));
 
 		//delete Amount in the Table IPP for the Person how is identified over the personen_id
-		setter.update("DELETE FROM income_per_person WHERE personen_id = "+ personen_id +
-			" AND transaktions_id = " + transaktions_id);
+		setter.update("""
+				DELETE FROM income_per_person
+				WHERE personen_id = %d
+				AND transaktions_id = %d
+				""".formatted(personen_id, transaktions_id));
 
 	}
-	protected void pushAmountToTableIPP(String Amount, Integer transaktions_id, Integer personen_id, String Splitt) {
-		//IPP = IncomePerPerson
+	protected void pushAmountToTableIPP(String Amount, Integer transaktions_id, Integer personen_id, String split) {
+		// IPP = IncomePerPerson
 		DBTools setter = new DBTools(cn);
 
-		//push Amount in the Table IPP for the Person how is identified over the personen_id
-		setter.insert("INSERT INTO income_per_person (personen_id, transaktions_id, betrag, split) " +
-					"VALUES ("+ personen_id +", " + transaktions_id +", " + Amount +", '"+Splitt+"')");
+		// push Amount in the Table IPP for the Person how is identified over the personen_id
+		setter.insert("""
+				INSERT INTO income_per_person
+				(personen_id, transaktions_id, betrag, split)
+				VALUES
+				(%d, %d, %s, '%s')
+				""".formatted(personen_id, transaktions_id, Amount, split));
 	}
+
 	protected void getIncomeForSelectedPerson(Integer personen_id, String sAbrMonat) {
 		//get all Income for the Person that is identified by the Personen_id
 		DBTools getter = new DBTools(cn);
 
-		getter.select("SELECT income_per_person.betrag, income_per_person.transaktions_id FROM income_per_person, transaktionen t WHERE personen_id = " + personen_id +
-				" AND income_per_person.transaktions_id = t.transaktions_id "+
-				"AND t.liqui_monat = '" + sAbrMonat + "'",2);
+		getter.select("""
+				SELECT income_per_person.betrag, income_per_person.transaktions_id
+				FROM income_per_person, transaktionen t
+				WHERE personen_id = %d
+				AND income_per_person.transaktions_id = t.transaktions_id
+				AND t.liqui_monat = '%s'
+				""".formatted(personen_id, sAbrMonat),2);
+
 		if(getter.getRowCount() > 0) {
 			Object[][] lstModelIncomePerPersonValues = getter.getData();
 
@@ -478,8 +491,11 @@ public class AccountClosing {
 		//set First Value (select invitation) to cmbPerson
 		cmbModelPerson.addElement("---bitte wählen---");
 
-		getter.select("SELECT p.name, p.vorname, p.personen_id FROM personen p " +
-				"WHERE p.gueltig = TRUE",3);
+		getter.select("""
+				SELECT name, vorname, personen_id
+				FROM personen
+				WHERE gueltig = TRUE
+				""",3);
 
 		if(getter.getRowCount() > 0) {
 			Object[][] cmbModelPersonValues = getter.getData();
@@ -488,60 +504,89 @@ public class AccountClosing {
 		    	cmbModelPerson.addElement(cmbModelPersonValue[1] + " " + cmbModelPersonValue[0] + " (" + cmbModelPersonValue[2] + ")");
 		}
 	}
+
 	private void putIncomeToListAllIncome(String sAbrMonat) {
-		//put all incomes that not put to a person to the listmodel lstModelAllIncome
-		//incomes that partially split, are not determined here
+		// put all incomes that not put to a person to the listmodel lstModelAllIncome
+		// incomes that partially split, are not determined here
 		DBTools getter = new DBTools(cn);
 
-		getter.select("SELECT t.betrag, t.transaktions_id FROM transaktionen t LEFT JOIN income_per_person ON t.transaktions_id = income_per_person.transaktions_id " +
-				"WHERE income_per_person.transaktions_id IS NULL " +
-				"AND t.soll_haben= 'h' AND t.konten_id= " + KontenID + " AND t.liqui_monat='" +
-				sAbrMonat + "'",2);
+		getter.select("""
+				SELECT t.betrag, t.transaktions_id
+				FROM transaktionen t
+				LEFT JOIN income_per_person ON t.transaktions_id = income_per_person.transaktions_id
+				WHERE income_per_person.transaktions_id IS NULL
+				AND t.soll_haben = 'h'
+				AND t.konten_id = %s
+				AND t.liqui_monat = '%s'
+				""".formatted(KontenID, sAbrMonat), 2);
 
-		if(getter.getRowCount() > 0) {
+		if (getter.getRowCount() > 0) {
 			Object[][] lstModelAllIncomeValues = getter.getData();
 
-		    for(Object[] lstModelAllIncomeValue : lstModelAllIncomeValues)
-		    	lstModelAllIncome.addElement(lstModelAllIncomeValue[0].toString()+" ("+lstModelAllIncomeValue[1].toString()+")");
+			for (Object[] lstModelAllIncomeValue : lstModelAllIncomeValues)
+				lstModelAllIncome.addElement(
+						lstModelAllIncomeValue[0].toString() + " (" + lstModelAllIncomeValue[1].toString() + ")");
 		}
 
-		//now find Balance from incomes that partially split
+		// now find Balance from incomes that partially split
 
-		//first get transaktion_id's in actual liqui_monat that have asisngned splited value in ipp
+		// first get transaktion_id's in actual liqui_monat that have asisngned splited
+		// value in ipp
 		DBTools ids_getter = new DBTools(cn);
-		ids_getter.select("select income_per_person.transaktions_id from transaktionen t, income_per_person "+
-				"where t.soll_haben = 'h' and t.liqui_monat = '" + sAbrMonat + "' "+
-				"AND t.konten_id = " + KontenID + " and income_per_person.transaktions_id = t.transaktions_id "+
-				"and income_per_person.split = TRUE GROUP BY income_per_person.transaktions_id", 1);
+		ids_getter.select("""
+				SELECT income_per_person.transaktions_id
+				FROM transaktionen t, income_per_person
+				WHERE t.soll_haben = 'h'
+				AND t.liqui_monat = '%s'
+				AND t.konten_id = %s
+				AND income_per_person.transaktions_id = t.transaktions_id
+				AND income_per_person.split = TRUE
+				GROUP BY income_per_person.transaktions_id
+				""".formatted(sAbrMonat, KontenID), 1);
 
-		//get the the sum of partially assigned ammount for each received transaktion_id
-		if(ids_getter.getRowCount() > 0) {
+		// get the the sum of partially assigned ammount for each received
+		// transaktion_id
+		if (ids_getter.getRowCount() > 0) {
 			DBTools sum_getter = new DBTools(cn);
 
 			Object[][] transaktion_ids = ids_getter.getData();
-			for(Object[] ids : transaktion_ids) {
-				sum_getter.select("select sum(income_per_person.betrag) from income_per_person where split = TRUE and transaktions_id = "+ids[0].toString(), 1);
+			for (Object[] ids : transaktion_ids) {
+				sum_getter.select("""
+						SELECT SUM(income_per_person.betrag)
+						FROM income_per_person
+						WHERE split = TRUE
+						AND transaktions_id = %s
+						""".formatted(ids[0].toString()), 1);
 
-				//now get the difference of the just received sum and the total amount in transtaktionen
+				// now get the difference of the just received sum and the total amount in
+				// transtaktionen
 				DBTools diff_getter = new DBTools(cn);
 
-				diff_getter.select("select (t.betrag - "+ sum_getter.getValueAt(0, 0).toString()+") diff, t.transaktions_id "+
-							"from transaktionen t where t.transaktions_id = "+ ids[0].toString(), 1);
+				diff_getter.select("""
+						SELECT (t.betrag - %s) diff, t.transaktions_id
+						FROM transaktionen t
+						WHERE t.transaktions_id = %s
+						""".formatted(sum_getter.getValueAt(0, 0).toString(), ids[0].toString()), 1);
 
-				//if the diff is greater than zero than add the value and the transaktion_id to
-				//the lstModelAllIncome
-				if(Double.valueOf(diff_getter.getValueAt(0, 0).toString()).doubleValue() > 0)
-					lstModelAllIncome.addElement(Double.valueOf(diff_getter.getValueAt(0, 0).toString()).doubleValue()+" ("+ids[0].toString()+")");
+				// if the diff is greater than zero than add the value and the transaktion_id to
+				// the lstModelAllIncome
+				if (Double.valueOf(diff_getter.getValueAt(0, 0).toString()).doubleValue() > 0)
+					lstModelAllIncome.addElement(Double.valueOf(diff_getter.getValueAt(0, 0).toString()).doubleValue()
+							+ " (" + ids[0].toString() + ")");
 			}
 		}
 	}
+
 	private double getPersonAcountSumPerLiqui(Integer personen_id, String liquiDatum) {
 		DBTools getter = new DBTools(cn);
 
-		String sql = "SELECT sum(ipp.betrag) FROM income_per_person ipp, transaktionen t WHERE personen_id = " + personen_id + " " +
-					"AND t.transaktions_id = ipp.transaktions_id AND t.liqui_monat = '"+ liquiDatum +"'";
-
-		getter.select(sql, 1);
+		getter.select("""
+				SELECT SUM(ipp.betrag)
+				FROM income_per_person ipp, transaktionen t
+				WHERE personen_id = %d
+				AND t.transaktions_id = ipp.transaktions_id
+				AND t.liqui_monat = '%s'
+				""".formatted(personen_id, liquiDatum), 1);
 
 		// check whether income was set per person at all, if not, give back zero
 		if (getter.getValueAt(0, 0) == null) {
@@ -553,30 +598,30 @@ public class AccountClosing {
 	private void calculate_profit(String sAbrMonat) {
 		double dblMtlJahrKosten, dblEin, dblAus, dblSummeFixkosten, dblNutzBetrag;
 
-		//jahressparbetrag ermitteln
+		// jahressparbetrag ermitteln
 		dblMtlJahrKosten = monatliche_jahreskosten(sAbrMonat);
 		//System.out.println("Jahrsparwert: " + dblMtlJahrKosten);
 		txtHinweis.append("Jahrsparwert: " + dblMtlJahrKosten+"\n");
 
- 		//die monatliche fixkosten in ein array schreiben
+ 		// die monatliche fixkosten in ein array schreiben
 		monats_fixkosten(sAbrMonat);
 
-		//einnahmen des abrechnungsmonats ermitteln
+		// einnahmen des abrechnungsmonats ermitteln
 		dblEin = summiere_einnahmen(sAbrMonat);
 		//System.out.println("Einnahmen: " + dblEin);
 		txtHinweis.append("Einnahmen: " + dblEin+"\n");
 
-		//ausgaben des abrechnungsmonats ermitteln (dabei sind die saetze mit
-		//den ereignissid's der monatlichen fixausgaben ausgenommen, und auch die mit
-		//der eieignissid 47 Jahresausgaben)
+		// ausgaben des abrechnungsmonats ermitteln (dabei sind die saetze mit
+		// den ereignissid's der monatlichen fixausgaben ausgenommen, und auch die mit
+		// der eieignissid 47 Jahresausgaben)
 		dblAus = summiere_ausgaben(sAbrMonat);
 		//System.out.println("Ausgaben: " + dblAus);
 		txtHinweis.append("Ausgaben (ohne Fixkosten): " + dblAus+"\n");
 
-		//die liquiditaetsfahigen teile von aufteilungsdatensaetzen zusammenaddieren
-		//dabei werden einzeln haben und soll anteile zusammengerechnet
-		//die ergebnisse werden dann jeweils den summen der einnahmen bzw der ausgaben
-		//hinzugerechnet
+		// die liquiditaetsfahigen teile von aufteilungsdatensaetzen zusammenaddieren
+		// dabei werden einzeln haben und soll anteile zusammengerechnet
+		// die ergebnisse werden dann jeweils den summen der einnahmen bzw der ausgaben
+		// hinzugerechnet
 		dblEin = dblEin + summiere_liqui_aus_aufteilung("h",sAbrMonat);
 		dblAus = dblAus + summiere_liqui_aus_aufteilung("s",sAbrMonat);
 		//System.out.println("Einnahmen(incl Aufteilung): " + dblEin);
@@ -584,13 +629,13 @@ public class AccountClosing {
 		txtHinweis.append("Einnahmen(incl Aufteilung): " + dblEin+"\n");
 		txtHinweis.append("Ausgaben(incl Aufteilung): " + dblAus+"\n");
 
-		//nun wird von der differenz zwischen einnahmen und ausgaben
-		//das jahressparen und alle gueltigen Monatlichen fixausgaben abgezogen
+		// nun wird von der differenz zwischen einnahmen und ausgaben
+		// das jahressparen und alle gueltigen Monatlichen fixausgaben abgezogen
 		dblSummeFixkosten = berechne_summe_fixkosten_aus_transaktionen(sAbrMonat);
-		//System.out.println("Monatliche FixKost: " + dblSummeFixkosten);
-		txtHinweis.append("Monatliche FixKost: " + roundScale2(dblSummeFixkosten)+"\n");
+		// System.out.println("Monatliche FixKost: " + dblSummeFixkosten);
+		txtHinweis.append("Monatliche FixKost: " + roundScale2(dblSummeFixkosten) + "\n");
 
-		//nun noch die endsumme berechnen und der textbox zuweisen
+		// nun noch die endsumme berechnen und der textbox zuweisen
 		dblNutzBetrag = roundScale2(dblEin - dblAus - dblSummeFixkosten - dblMtlJahrKosten);
 		txtNutzBetr.setText(String.valueOf(dblNutzBetrag).replace(".", ","));
 	}
@@ -606,13 +651,25 @@ public class AccountClosing {
 		for(iZaehler = 0; iZaehler < daten.length; iZaehler++)
 		{
 			// die Sollsumme des Betrags errechenen
-			getterSoll.select("select sum(betrag) from transaktionen where ereigniss_id = " + daten[iZaehler][1].toString() +
-					" and konten_id = " + KontenID + " and soll_haben = 's' and liqui_monat = '" + sAbrMonat + "';", 1);
+			getterSoll.select("""
+					SELECT SUM(betrag)
+					FROM transaktionen
+					WHERE ereigniss_id = %s
+					AND konten_id = %s
+					AND soll_haben = 's'
+					AND liqui_monat = '%s'
+					""".formatted(daten[iZaehler][1].toString(), KontenID, sAbrMonat), 1);
 
 			// eventuelle Habenbuchungen für Monatsfixkostenermitteln
 			// z.B. ein Rücküberweisung von zuviel überwiesenen HaushaltHolle Beträgen
-			getterHaben.select("select sum(betrag) from transaktionen where ereigniss_id = " + daten[iZaehler][1].toString() +
-					" and konten_id = " + KontenID + " and soll_haben = 'h' and liqui_monat = '" + sAbrMonat + "';", 1);
+			getterHaben.select("""
+					select SUM(betrag)
+					FROM transaktionen
+					WHERE ereigniss_id = %s
+					AND konten_id = %s
+					AND soll_haben = 'h'
+					AND liqui_monat = '%s'
+					""".formatted(daten[iZaehler][1].toString(), KontenID, sAbrMonat), 1);
 
 			// sowohl in getterHaben als auch in getter Soll kommt nur ein Datensatz raus der kann aber NULL enthalten
 			if(getterSoll.getValueAt(0, 0) != null)
@@ -628,11 +685,12 @@ public class AccountClosing {
 		    //==========================================================================
 		    //==========================================================================
 
-		    //wenn von dieser geplanten fixausgabe nicht der ganze geplante
-		    //Betrag ausgegeben wurde wird trozdem der ganze geplante Betrag zur berechnung
-		    //herrangezogen es sei denn der geplante Betrag ist nicht "hart" dann
-		    //nur die bisherigen ausgaben
-			//System.out.println(dblErgSql + " / " + Double.valueOf(daten[iZaehler][0].toString()).doubleValue()+":"+daten[iZaehler][2]);
+			// wenn von dieser geplanten fixausgabe nicht der ganze geplante
+			// Betrag ausgegeben wurde wird trozdem der ganze geplante Betrag zur berechnung
+			// herrangezogen es sei denn der geplante Betrag ist nicht "hart" dann
+			// nur die bisherigen ausgaben
+			// System.out.println(dblErgSql + " / " +
+			// Double.valueOf(daten[iZaehler][0].toString()).doubleValue()+":"+daten[iZaehler][2]);
 			txtHinweis.append(dblErgSql + " / " + Double.valueOf(daten[iZaehler][0].toString()).doubleValue()+":"+daten[iZaehler][2]+"\n");
 		    if(dblErgSql > 0 && dblErgSql <= Double.valueOf(daten[iZaehler][0].toString()).doubleValue())
 		    {
@@ -641,16 +699,17 @@ public class AccountClosing {
 		    	else
 		    		dblSumFixKosten = dblSumFixKosten + roundScale2(dblErgSql);
 		    }
-		    //sollte die summe der zu diesem ereigniss eingetragenen ausgaben groesser sein
-		    //als der geplante Betrag dann dann wird dieser groessere wert zur berechnung
-		    //herangezogen
+			// sollte die summe der zu diesem ereigniss eingetragenen ausgaben groesser sein
+			// als der geplante Betrag dann dann wird dieser groessere wert zur berechnung
+			// herangezogen
 		    if(dblErgSql > Double.valueOf(daten[iZaehler][0].toString()).doubleValue())
 		    {
 		    	dblSumFixKosten = dblSumFixKosten + roundScale2(dblErgSql);
 		    }
-		    //falls fuer den eigentlich budgetierten Wert gilt "nur das was wirklich
-		    //ausgegeben wurde" (sprich NICHT hart) dann auch nur das zu der Summe der Fixkosten hinzurechen
-		    //ansonsten, im fall "hart" den Budgetierten Wert
+			// falls fuer den eigentlich budgetierten Wert gilt "nur das was wirklich
+			// ausgegeben wurde" (sprich NICHT hart) dann auch nur das zu der Summe der
+			// Fixkosten hinzurechen
+			// ansonsten, im fall "hart" den Budgetierten Wert
 		    if(dblErgSql == 0)
 		    {
 		    	if(daten[iZaehler][2].toString().equals("1"))
@@ -661,130 +720,168 @@ public class AccountClosing {
 		}
 
 		return dblSumFixKosten;
-
 	}
+
 	private double summiere_liqui_aus_aufteilung(String sh, String sAbrMonat) {
 		double dblWert;
 		DBTools getter = new DBTools(cn);
 
-		getter.select("select sum(aufteilung.betrag) from transaktionen, " +
-    		  	"aufteilung where soll_haben = '" + sh + "' and liqui_monat = '" +
-    		  	sAbrMonat + "'" +
-    		  	"and transaktionen.ereigniss_id in (52) and transaktionen.konten_id = " + KontenID + " " +
-    		  	"and transaktionen.transaktions_id = aufteilung.transaktions_id " +
-      			"and aufteilung.liqui = TRUE;", 1);
+		getter.select("""
+				SELECT SUM(aufteilung.betrag)
+				FROM transaktionen, aufteilung
+				WHERE soll_haben = '%s'
+				AND liqui_monat = '%s'
+				AND transaktionen.ereigniss_id in (52)
+				AND transaktionen.konten_id = %s
+				AND transaktionen.transaktions_id = aufteilung.transaktions_id
+				AND aufteilung.liqui = TRUE
+				""".formatted(sh, sAbrMonat, KontenID), 1);
 
-		if(getter.getRowCount() > 0 && getter.getValueAt(0, 0) != null)
-			dblWert = roundScale2(Double.valueOf(""+getter.getValueAt(0, 0)).doubleValue());
-	    else
-	    	dblWert = 0;
+		if (getter.getRowCount() > 0 && getter.getValueAt(0, 0) != null)
+			dblWert = roundScale2(Double.valueOf("" + getter.getValueAt(0, 0)).doubleValue());
+		else
+			dblWert = 0;
 
-		//System.out.println("Aufteilung("+sh+"): "+ dblWert);
+		// System.out.println("Aufteilung("+sh+"): "+ dblWert);
 		return dblWert;
-
 	}
+
 	private double summiere_ausgaben(String sAbrMonat) {
 		DBTools getter = new DBTools(cn);
 
-		getter.select("select sum(betrag) from transaktionen where soll_haben " +
-	    		  "= 's' and konten_id = " + KontenID + " and liqui_monat = '" + sAbrMonat + "' " +
-	    		  "and ereigniss_id not in (select ereigniss_id from mtlausgaben where gilt_ab <= '" +
-	    		  sAbrMonat + "' and gilt_bis >= '" +
-	    		  sAbrMonat + "') and ereigniss_id not in(47,52);",1);
+		getter.select("""
+				SELECT SUM(betrag)
+				FROM transaktionen
+				WHERE soll_haben = 's'
+				AND konten_id = %S
+				AND liqui_monat = '%s'
+				AND ereigniss_id NOT IN (
+					SELECT ereigniss_id
+					FROM mtlausgaben
+					WHERE gilt_ab <= '%s'
+					AND gilt_bis >= '%s'
+					)
+				AND ereigniss_id NOT IN (47,52)
+				""".formatted(KontenID, sAbrMonat, sAbrMonat, sAbrMonat), 1);
 
-		//wenn keine Ausgaben (erkennbar an null im Objekt) dann 0.00 zurueckgeben
-		if(getter.getValueAt(0, 0) == null)
+		// wenn keine Ausgaben (erkennbar an null im Objekt) dann 0.00 zurueckgeben
+		if (getter.getValueAt(0, 0) == null)
 			return 0.00;
 		else
 			return roundScale2(Double.valueOf(getter.getValueAt(0, 0).toString()));
 	}
+
 	private double summiere_einnahmen(String sAbrMonat) {
 		DBTools getter = new DBTools(cn);
 
-		getter.select("select sum(betrag) from transaktionen " +
-	    		"where soll_haben = 'h' and konten_id = " + KontenID + " and liqui_monat = '" +
-	    		sAbrMonat + "' and ereigniss_id not in (52);",1);
+		getter.select("""
+				SELECT SUM(betrag)
+				FROM transaktionen
+				WHERE soll_haben = 'h'
+				AND konten_id = %s
+				AND liqui_monat = '%s'
+				AND ereigniss_id NOT IN (52);
+				""".formatted(KontenID, sAbrMonat), 1);
 
-		//wenn keine Einnahmen (erkennbar an null im Objekt) dann 0.00 zurueckgeben
-		if(getter.getValueAt(0, 0) == null)
+		// wenn keine Einnahmen (erkennbar an null im Objekt) dann 0.00 zurueckgeben
+		if (getter.getValueAt(0, 0) == null)
 			return 0.00;
 		else
 			return roundScale2(Double.valueOf(getter.getValueAt(0, 0).toString()));
 
 	}
+
 	private void monats_fixkosten(String sAbrMonat) {
 		DBTools getter = new DBTools(cn);
 
-		getter.select("select betrag, ereigniss_id, hart from mtlausgaben where gilt_ab <= '" +
-		  		BigOneTools.datum_wandeln(txtAbrMonat.getText(),0) + "' " +
-		  		"and gilt_bis >= '" + sAbrMonat + "';",3);
+		getter.select("""
+				SELECT betrag, ereigniss_id, hart
+				FROM mtlausgaben
+				WHERE gilt_ab <= '%s'
+				AND gilt_bis >= '%s'
+				""".formatted(BigOneTools.datum_wandeln(txtAbrMonat.getText(), 0), sAbrMonat), 3);
 
-		//datenarray der liquiDBC instanz in das lokale datenarray kopieren
-	    daten = new Object[getter.getRowCount()][3];
+		// datenarray der liquiDBC instanz in das lokale datenarray kopieren
+		daten = new Object[getter.getRowCount()][3];
 
-	    for(int i = 0; i < getter.getRowCount(); i++) {
-	    	daten[i][0] = getter.getValueAt(i, 0);
-	    	//System.out.print(daten[i][0]+"/");
-	    	daten[i][1] = getter.getValueAt(i, 1);
-	    	//System.out.print(daten[i][1]+"/");
-	    	daten[i][2] = getter.getValueAt(i, 2);
-	    	//System.out.println(daten[i][2]+"/");
-	    }
+		for (int i = 0; i < getter.getRowCount(); i++) {
+			daten[i][0] = getter.getValueAt(i, 0);
+			// System.out.print(daten[i][0]+"/");
+			daten[i][1] = getter.getValueAt(i, 1);
+			// System.out.print(daten[i][1]+"/");
+			daten[i][2] = getter.getValueAt(i, 2);
+			// System.out.println(daten[i][2]+"/");
+		}
 	}
+
 	private double monatliche_jahreskosten(String sAbrMonat) {
 		DBTools getter = new DBTools(cn);
 
-		getter.select("select sum(betrag) from jahresausgaben where gilt_ab <= '" +
-		  		BigOneTools.datum_wandeln(txtAbrMonat.getText(),0) + "' " +
-		  		"and gilt_bis >= '" + sAbrMonat + "';",1);
+		getter.select("""
+				SELECT SUM(betrag)
+				FROM jahresausgaben
+				WHERE gilt_ab <= '%s'
+				AND gilt_bis >= '%s'
+				""".formatted(BigOneTools.datum_wandeln(txtAbrMonat.getText(), 0), sAbrMonat), 1);
 
-	    return roundScale2(Double.valueOf(getter.getValueAt(0, 0).toString()) / 12);
+		return roundScale2(Double.valueOf(getter.getValueAt(0, 0).toString()) / 12);
 
 	}
-	private double roundScale2( double d )
-	  {
-	    return Math.round( d * 100 ) / 100.;
-	  }
+
+	private double roundScale2(double d) {
+		return Math.round(d * 100) / 100.;
+	}
+
 	private String getBuchText(String transaktions_id) {
-		//get the transaction wording to the transaktions_id
+		// get the transaction wording to the transaktions_id
 		DBTools getter = new DBTools(cn);
 
-		getter.select("SELECT t.buchtext, ke.ereigniss_krzbez FROM transaktionen t, kontenereignisse ke " +
-				"WHERE t.transaktions_id = " + transaktions_id + " AND ke.ereigniss_id = t.ereigniss_id", 2);
+		getter.select("""
+				SELECT t.buchtext, ke.ereigniss_krzbez
+				FROM transaktionen t, kontenereignisse ke
+				WHERE t.transaktions_id = " + transaktions_id
+				AND ke.ereigniss_id = t.ereigniss_id
+				""", 2);
 
-		if(getter.getRowCount() > 0) {
-			return getter.getValueAt(0, 0).toString() +"//"+ getter.getValueAt(0, 1).toString();
-		}else {
+		if (getter.getRowCount() > 0) {
+			return getter.getValueAt(0, 0).toString() + "//" + getter.getValueAt(0, 1).toString();
+		} else {
 			return "not found";
 		}
 	}
+
 	private boolean existSplittedPartInIpp(String transaktions_id) {
 		DBTools getter = new DBTools(cn);
 
-		getter.select("SELECT count(*) FROM income_per_person ipp " +
-				"WHERE ipp.transaktions_id = " + transaktions_id, 1);
+		getter.select("""
+				SELECT COUNT(*)
+				FROM income_per_person ipp
+				WHERE ipp.transaktions_id = %s
+				""".formatted(transaktions_id), 1);
 
-		if(getter.getValueAt(0, 0).toString().equals("0")) {
+		if (getter.getValueAt(0, 0).toString().equals("0")) {
 			return false;
-		}else {
+		} else {
 			return true;
 		}
 	}
+
 	private boolean is_liqui_fix(String txtAbrMonat) {
-		//check if a row in the table abschluss with the same value in the argument txtAbrMonat
-		//exist and if the field abgeschlossen is true
+		// check if a row in the table abschluss with the same value in the argument
+		// txtAbrMonat
+		// exist and if the field abgeschlossen is true
 
 		DBTools getter = new DBTools(cn);
 
-		getter.select("SELECT abgeschlossen FROM abschluss WHERE liqui_monat = '" + txtAbrMonat + "'", 1);
+		getter.select("SELECT abgeschlossen FROM abschluss WHERE liqui_monat = '%s'".formatted(txtAbrMonat), 1);
 
-		if(getter.getRowCount() > 0) {
-			if(getter.getValueAt(0, 0).toString().equals("true")) {
+		if (getter.getRowCount() > 0) {
+			if (getter.getValueAt(0, 0).toString().equals("true")) {
 				return true;
-			}else {
+			} else {
 				return false;
 			}
-		}else {
+		} else {
 			return false;
 		}
 	}

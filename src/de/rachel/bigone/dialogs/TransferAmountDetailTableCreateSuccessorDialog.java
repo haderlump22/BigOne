@@ -157,8 +157,11 @@ public class TransferAmountDetailTableCreateSuccessorDialog extends JFrame {
 		//set First Value (select invitation) to cmbPerson
 		cmbPersonOfTransferAmountModel.addElement("---bitte wählen---");
 
-		getter.select("SELECT name, vorname, personen_id FROM personen " +
-				"WHERE gueltig = TRUE",3);
+		getter.select("""
+                SELECT name, vorname, personen_id
+                FROM personen
+				WHERE gueltig = TRUE
+                """,3);
 
         rs = getter.getResultSet();
 
@@ -184,12 +187,15 @@ public class TransferAmountDetailTableCreateSuccessorDialog extends JFrame {
     }
 
     private int getPersonIdFromSelectedRow(TransferAmountDetailTableModel modelOfSourceTable, int selectedRow) {
-        //put all persons to the cmbmodel cmbModelPerson
-		DBTools getter = new DBTools(cn);
+        // put all persons to the cmbmodel cmbModelPerson
+        DBTools getter = new DBTools(cn);
         ResultSet rs;
 
-		getter.select("SELECT partei_id from ha_ueberweisungsbetraege " +
-				"WHERE ueberweisungsbetrag_id = " + modelOfSourceTable.getValueAt(selectedRow, -1) + ";",1);
+        getter.select("""
+                SELECT partei_id
+                FROM ha_ueberweisungsbetraege
+                WHERE ueberweisungsbetrag_id = %d;
+                """.formatted(modelOfSourceTable.getValueAt(selectedRow, -1)), 1);
 
         rs = getter.getResultSet();
 
@@ -198,7 +204,8 @@ public class TransferAmountDetailTableCreateSuccessorDialog extends JFrame {
 
             return rs.getInt("partei_id");
         } catch (Exception e) {
-            System.out.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + ": " + e.toString());
+            System.out.println(
+                    this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + ": " + e.toString());
             return -1;
         }
     }

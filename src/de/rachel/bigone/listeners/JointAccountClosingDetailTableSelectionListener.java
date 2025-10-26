@@ -51,7 +51,8 @@ public class JointAccountClosingDetailTableSelectionListener implements ListSele
 
         // get Info from the expenditure table for the selected Event
         getter.select("""
-                SELECT ha_ausgaben.bemerkung, ha_ausgaben.gilt_ab, ha_ausgaben.gilt_bis FROM ha_ausgaben, ha_abschlussdetails
+                SELECT ha_ausgaben.bemerkung, ha_ausgaben.gilt_ab, ha_ausgaben.gilt_bis
+                FROM ha_ausgaben, ha_abschlussdetails
                 WHERE ha_abschlussdetails."abschlussDetailId" = %d
                 AND ha_ausgaben.bezeichnung = ha_abschlussdetails."kategorieBezeichnung"
                 AND ha_ausgaben.gilt_bis >= ha_abschlussdetails."abschlussMonat"
@@ -88,7 +89,8 @@ public class JointAccountClosingDetailTableSelectionListener implements ListSele
 
         // get even saved Info for the selected Event
         getter.select("""
-                SELECT bemerkung from ha_abschlussdetails
+                SELECT bemerkung
+                FROM ha_abschlussdetails
                 WHERE "abschlussDetailId" = %d
                 """.formatted(closingDetailId),1);
 
