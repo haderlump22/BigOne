@@ -60,13 +60,13 @@ public class ExpenditureDistributionTableModel extends AbstractTableModel {
         DBTools getter = new DBTools(cn);
         ResultSet rs;
 
-        getter.select(
-                "SELECT haaa.\"ausgabenAufteilungId\", p.name || ', ' || SUBSTRING(p.vorname, 1, 1) || '.' AS party, betrag\n" +
-                    "FROM ha_ausgaben_aufteilung haaa, personen p\n" +
-                    "WHERE haaa.\"parteiId\" = p.personen_id\n" +
-                    "AND haaa.\"ausgabenId\" = " + ExpenditureId.toString() + "\n" +
-                    "ORDER BY party",
-                2);
+        getter.select("""
+                SELECT haaa."ausgabenAufteilungId", p.name || ', ' || SUBSTRING(p.vorname, 1, 1) || '.' AS party, betrag
+                FROM ha_ausgaben_aufteilung haaa, personen p
+                WHERE haaa."parteiId" = p.personen_id
+                AND haaa."ausgabenId" = %s
+                ORDER BY party",
+                """.formatted(ExpenditureId.toString()),2);
 
         rs = getter.getResultSet();
         try {

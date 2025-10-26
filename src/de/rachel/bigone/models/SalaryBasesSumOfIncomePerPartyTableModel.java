@@ -63,11 +63,17 @@ public class SalaryBasesSumOfIncomePerPartyTableModel extends AbstractTableModel
 		/*
 		 * get the current Income of everey Party
 		 */
-   		DBTools getter = new DBTools(cn);
+		DBTools getter = new DBTools(cn);
 		ResultSet rs;
 
-		getter.select(
-				"SELECT p.name || ', ' || SUBSTRING(p.vorname, 1, 1) || '.' as party, sum(gg.betrag) as betrag from personen p, ha_gehaltsgrundlagen gg where gilt_bis is NULL and p.personen_id = gg.partei_id group by p.name, p.vorname order by p.name;",
+		getter.select("""
+				SELECT p.name || ', ' || SUBSTRING(p.vorname, 1, 1) || '.' as party, sum(gg.betrag) as betrag
+				FROM personen p, ha_gehaltsgrundlagen gg
+				WHERE gilt_bis IS NULL
+				AND p.personen_id = gg.partei_id
+				GROUP BY p.name, p.vorname
+				ORDER BY p.name;
+				""",
 				2);
 
 		rs = getter.getResultSet();
@@ -75,7 +81,8 @@ public class SalaryBasesSumOfIncomePerPartyTableModel extends AbstractTableModel
 			rs.beforeFirst();
 
 			while (rs.next()) {
-				TableData.add(new SalaryBasesSumOfIncomePerPartyTableRow(rs.getString("party"), rs.getDouble("betrag")));
+				TableData
+						.add(new SalaryBasesSumOfIncomePerPartyTableRow(rs.getString("party"), rs.getDouble("betrag")));
 			}
 		} catch (Exception e) {
 			System.out.println("SumOfIncomPerPartyTableModel - lese_werte(): " + e.toString());

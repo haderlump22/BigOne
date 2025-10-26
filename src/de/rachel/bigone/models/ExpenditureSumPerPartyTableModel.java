@@ -61,12 +61,14 @@ public class ExpenditureSumPerPartyTableModel extends AbstractTableModel {
         DBTools getter = new DBTools(cn);
         ResultSet rs;
 
-        getter.select("SELECT p.name || ', ' || SUBSTRING(p.vorname, 1, 1) || '.' as party, sum(haaa.betrag) betrag\n" +
-                "from ha_ausgaben haa, ha_ausgaben_aufteilung haaa, personen p\n" +
-                "where haa.gilt_bis is NULL\n" +
-                "and haaa.\"ausgabenId\" = haa.\"ausgabenId\"\n" +
-                "and haaa.\"parteiId\" = p.personen_id\n" +
-                "group by party", 2);
+        getter.select("""
+                SELECT p.name || ', ' || SUBSTRING(p.vorname, 1, 1) || '.' AS party, SUM(haaa.betrag) betrag
+                FROM ha_ausgaben haa, ha_ausgaben_aufteilung haaa, personen p
+                WHERE haa.gilt_bis IS NULL
+                AND haaa."ausgabenId" = haa."ausgabenId"
+                AND haaa."parteiId" = p.personen_id
+                GROUP BY party;
+                """, 2);
 
         rs = getter.getResultSet();
         try {

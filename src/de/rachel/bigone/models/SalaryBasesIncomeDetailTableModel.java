@@ -66,8 +66,12 @@ public class SalaryBasesIncomeDetailTableModel extends AbstractTableModel{
 		DBTools getter = new DBTools(cn);
 		ResultSet rs;
 
-		getter.select(
-				"SELECT p.name || ', ' || SUBSTRING(p.vorname, 1, 1) || '.' as party, betrag, gilt_bis, art from personen p, ha_gehaltsgrundlagen gg where p.personen_id = gg.partei_id order by gilt_bis DESC, party, betrag DESC;",
+		getter.select("""
+				SELECT p.name || ', ' || SUBSTRING(p.vorname, 1, 1) || '.' AS party, betrag, gilt_bis, art
+				FROM personen p, ha_gehaltsgrundlagen gg
+				WHERE p.personen_id = gg.partei_id
+				ORDER BY gilt_bis DESC, party, betrag DESC;
+				""",
 				4);
 
 		rs = getter.getResultSet();

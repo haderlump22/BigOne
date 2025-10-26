@@ -64,10 +64,12 @@ public class TransferAmountDetailTableModel extends AbstractTableModel {
 		 */
 		DBTools getter = new DBTools(cn);
 
-		getter.select(
-				"SELECT ueberweisungsbetrag_id, p.name || ', ' || SUBSTRING(p.vorname, 1, 1) || '.' as party,\n" +
-				"betrag, gilt_bis from personen p, ha_ueberweisungsbetraege ueb where p.personen_id = ueb.partei_id\n" +
-				"order by gilt_bis DESC, party, betrag DESC;",
+		getter.select("""
+				SELECT ueberweisungsbetrag_id, p.name || ', ' || SUBSTRING(p.vorname, 1, 1) || '.' AS party, betrag, gilt_bis
+				FROM personen p, ha_ueberweisungsbetraege ueb
+				WHERE p.personen_id = ueb.partei_id
+				ORDER BY gilt_bis DESC, party, betrag DESC;
+				""",
 				4);
 
 		try {

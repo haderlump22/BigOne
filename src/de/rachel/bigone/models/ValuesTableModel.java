@@ -53,22 +53,24 @@ public class ValuesTableModel extends AbstractTableModel{
 		 */
    		DBTools getter = new DBTools(cn);
 
- 		getter.select("select t.transaktions_id, t.soll_haben, t.datum, t.betrag, " +
-				"t.buchtext, t.liqui_monat, k.ereigniss_krzbez " +
-				"from transaktionen t, kontenereignisse k, konten kto " +
-				"where t.betrag = "+ strValue +
-				" and k.ereigniss_id = t.ereigniss_id " +
-				" and t.liqui_monat = '" + strLiquiDate + "'" +
-				" and t.konten_id = kto.konten_id " +
-				" and kto.iban = '" + sIban + "'" +
-				" order by t.datum;",7);
+ 		getter.select("""
+				SELECT t.transaktions_id, t.soll_haben, t.datum, t.betrag,
+				t.buchtext, t.liqui_monat, k.ereigniss_krzbez
+				FROM transaktionen t, kontenereignisse k, konten kto
+				WHERE t.betrag = %s
+				AND k.ereigniss_id = t.ereigniss_id
+				AND t.liqui_monat = '%s'
+				AND t.konten_id = kto.konten_id
+				AND kto.iban = '%s'" +
+				ORDER BY t.datum;
+				""".formatted(strValue, strLiquiDate, sIban),7);
 
 		return getter.getData();
 	}
 	private void schreibe_neue_daten(int row, int col, String strNewValue, String strTransID) {
-		//hier werden anhand des alten Wertes und der neuen
-		//werte in der Tabelle die sql stings erzeugt und
-		//abgesetzt um die daten auch in der db zu aendern
+		// hier werden anhand des alten Wertes und der neuen
+		// werte in der Tabelle die sql stings erzeugt und
+		// abgesetzt um die daten auch in der db zu aendern
 
 		String strSqlUpdate = null;
 		DBTools updater = new DBTools(cn);
@@ -77,27 +79,33 @@ public class ValuesTableModel extends AbstractTableModel{
 		{
 		//fuer den betrag
 		case 3:
-			strSqlUpdate = "UPDATE transaktionen SET betrag = " + strNewValue +
-							" WHERE transaktions_id = " + strTransID + " ;";
+			strSqlUpdate = """
+					UPDATE transaktionen SET betrag = %s
+					WHERE transaktions_id = %s;
+					""".formatted(strNewValue, strTransID);
 			break;
-		//fuer das wertstellungsdatum
+		// fuer das wertstellungsdatum
 		case 2:
-			strNewValue = "'"+strNewValue+"'";
-			strSqlUpdate = "UPDATE transaktionen SET datum = " + strNewValue +
-							" WHERE transaktions_id = " + strTransID + " ;";
+			strSqlUpdate = """
+					UPDATE transaktionen SET datum = '%s'
+					WHERE transaktions_id = %s;
+					""".formatted(strNewValue, strTransID);
 			break;
 		//fuer den Buchtext
 		case 4:
-			strNewValue = "'"+strNewValue+"'";
-			strSqlUpdate = "UPDATE transaktionen SET buchtext = " + strNewValue +
-							" WHERE transaktions_id = " + strTransID + " ;";
+			strSqlUpdate = """
+					UPDATE transaktionen SET buchtext = '%s'
+					WHERE transaktions_id = %s;
+					""".formatted(strNewValue, strTransID);
 			break;
 		//fuer das liquidatum
 		case 5:
-			if(strNewValue != "NULL")
-				strNewValue = "'"+strNewValue+"'";
-			strSqlUpdate = "UPDATE transaktionen SET liqui_monat = " + strNewValue +
-							" WHERE transaktions_id = " + strTransID + " ;";
+			if (strNewValue != "NULL")
+				strNewValue = "'" + strNewValue + "'";
+			strSqlUpdate = """
+					UPDATE transaktionen SET liqui_monat = %s
+					WHERE transaktions_id = %s;
+					""".formatted(strNewValue, strTransID);
 			break;
 		}
 

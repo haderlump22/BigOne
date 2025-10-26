@@ -73,11 +73,11 @@ public class ExpenditureDetailTableModel extends AbstractTableModel {
         DBTools getter = new DBTools(cn);
         ResultSet rs;
 
-        getter.select(
-                "SELECT \"ausgabenId\", bezeichnung, betrag, aufteilungsart, gilt_bis, bemerkung\n" + //
-                        "from ha_ausgaben\n" +
-                        "order by gilt_bis DESC, betrag DESC",
-                2);
+        getter.select("""
+                SELECT "ausgabenId", bezeichnung, betrag, aufteilungsart, gilt_bis, bemerkung
+                FROM ha_ausgaben
+                ORDER BY gilt_bis DESC, betrag DESC
+                """,2);
 
         rs = getter.getResultSet();
         try {
