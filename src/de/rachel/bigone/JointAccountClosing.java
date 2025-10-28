@@ -168,15 +168,14 @@ public class JointAccountClosing {
 		sumOverviewPositiveUnplanedValue.setText("0,00");
 		sumOverviewPositiveUnplanedValue.setName("{}");
 
-		balanceAllocationOverviewPanel = new JPanel();
-		balanceAllocationOverviewPanel.setBorder(new TitledBorder("Aufteilung Saldo"));
-		balanceAllocationOverviewPanel.setPreferredSize(new Dimension(240, 100));
-
 		jointAccountClosingBalanceAllocationOverviewDetailTable = new JTable(new JointAccountClosingBalanceAllocationOverviewDetailTableModel(cn));
 		jointAccountClosingBalanceAllocationOverviewDetailTable.setDefaultRenderer(Object.class, new JointAccountClosingBalanceAllocationOverviewDetailTableCellRenderer());
 
 		jointAccountClosingBalanceAllocationOverviewScrollPane = new JScrollPane(jointAccountClosingBalanceAllocationOverviewDetailTable);
+		jointAccountClosingBalanceAllocationOverviewScrollPane.setPreferredSize(new Dimension(220, 90));
 
+		balanceAllocationOverviewPanel = new JPanel();
+		balanceAllocationOverviewPanel.setBorder(new TitledBorder("Aufteilung Saldo"));
     }
 
 	private void createListeners() {
@@ -278,6 +277,15 @@ public class JointAccountClosing {
 		sumOverviewPanel.add(sumOverviewPositiveUnplanedValue, sumOverviewLayoutConstraints);
 		// ---
 
+		// ---
+		GridBagLayout balanceAllocationOverviewLayout = new GridBagLayout();
+		GridBagConstraints balanceAllocationOverviewLayoutConstraints = new GridBagConstraints();
+		balanceAllocationOverviewPanel.setLayout(balanceAllocationOverviewLayout);
+
+		balanceAllocationOverviewLayoutConstraints.gridx = 0;
+		balanceAllocationOverviewLayoutConstraints.gridy = 0;
+		balanceAllocationOverviewPanel.add(jointAccountClosingBalanceAllocationOverviewScrollPane, sumOverviewLayoutConstraints);
+		// ---
 
 		// ---
         GridBagLayout gbl = new GridBagLayout();
