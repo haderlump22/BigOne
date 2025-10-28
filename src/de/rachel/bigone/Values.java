@@ -36,49 +36,52 @@ public class Values {
 	private ValuesTableModel model;
 	private JComboBox<String> cmbKto;
 
-	Values(Connection LoginCN){
+	Values(Connection LoginCN) {
 		cn = LoginCN;
 		valuewindow = new JFrame("Beträge finden");
-		valuewindow.setSize(785,480);
-		valuewindow.setLocation(200,200);
+		valuewindow.setSize(785, 480);
+		valuewindow.setLocation(200, 200);
 		valuewindow.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		valuewindow.setLayout(null);
 		valuewindow.setResizable(false);
 
-		//schriftenfestlegungen
-		fontTxtFields = new Font("Arial",Font.PLAIN,16);
-		fontCmbBoxes = new Font("Arial",Font.PLAIN,14);
+		// schriftenfestlegungen
+		fontTxtFields = new Font("Arial", Font.PLAIN, 16);
+		fontCmbBoxes = new Font("Arial", Font.PLAIN, 14);
 
-		//textfeld fuer den zu suchenden Betrag definieren
+		// textfeld fuer den zu suchenden Betrag definieren
 		txtValue = new JFormattedTextField(new NumberFormatter(new DecimalFormat("#,##0.00")));
-		txtValue.setBounds(30,25,100,25);
+		txtValue.setBounds(30, 25, 100, 25);
 		txtValue.setHorizontalAlignment(JFormattedTextField.RIGHT);
 		txtValue.setFont(fontTxtFields);
 		txtValue.setText("0,00");
-		txtValue.addFocusListener( new FocusListener() {
-			public void focusLost( FocusEvent fe ) {
+		txtValue.addFocusListener(new FocusListener() {
+			public void focusLost(FocusEvent fe) {
 
 			}
+
 			public void focusGained(FocusEvent fe) {
 				SwingUtilities.invokeLater(new Runnable() {
-		            @Override
-		            public void run() {
+					@Override
+					public void run() {
 						txtValue.selectAll();
-		            }
-		        });
+					}
+				});
 			}
 		});
 		txtValue.addKeyListener(new KeyListener() {
 
 			public void keyPressed(KeyEvent ke) {
-				if(ke.getKeyCode() == KeyEvent.VK_ENTER) {
-					model = (ValuesTableModel)table.getModel();
-					model.aktualisiere(txtValue.getText().replace(".", "").replace(',', '.'),BigOneTools.datum_wandeln(txtLiquiDate.getText(), 0), cmbKto.getSelectedItem().toString().replace(" ", ""));
+				if (ke.getKeyCode() == KeyEvent.VK_ENTER) {
+					model = (ValuesTableModel) table.getModel();
+					model.aktualisiere(txtValue.getText().replace(".", "").replace(',', '.'),
+							BigOneTools.datum_wandeln(txtLiquiDate.getText(), 0),
+							cmbKto.getSelectedItem().toString().replace(" ", ""));
 				}
 			}
 
 			public void keyReleased(KeyEvent ke) {
-				if(ke.getKeyCode() == KeyEvent.VK_ENTER) {
+				if (ke.getKeyCode() == KeyEvent.VK_ENTER) {
 					txtValue.requestFocus();
 				}
 			}
@@ -89,23 +92,22 @@ public class Values {
 
 		});
 
-
 		String now = new SimpleDateFormat("dd.MM.yyyy").format(new Date());
-		//String now = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss").format(new Date());
+		// String now = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss").format(new Date());
 		try {
 			txtLiquiDate = new JFormattedTextField(new MaskFormatter("##-##-20##"));
 		} catch (ParseException e1) {
 			e1.printStackTrace();
 		}
-		txtLiquiDate.setBounds(140,25,110,25);
+		txtLiquiDate.setBounds(140, 25, 110, 25);
 		txtLiquiDate.setHorizontalAlignment(JTextField.RIGHT);
 		txtLiquiDate.setFont(fontTxtFields);
-		//aktuellen Monat als Liquimonat setzten
+		// aktuellen Monat als Liquimonat setzten
 		txtLiquiDate.setText("01-" + now.substring(3, 5) + "-20" + now.substring(8));
 
 		// add Account choose and fill it with valid Account IDs (IBAN)
 		cmbKto = new JComboBox<String>();
-		cmbKto.setBounds(260,25,250,25);
+		cmbKto.setBounds(260, 25, 250, 25);
 		cmbKto.setFont(fontCmbBoxes);
 		// fill it with Values
 		fill_cmbKto();
@@ -119,15 +121,18 @@ public class Values {
 		valuewindow.setVisible(true);
 
 	}
-   	private void zeichne_tabelle() {
 
-		table = new JTable(new ValuesTableModel(txtValue.getText().replace(".", "").replace(',', '.'), BigOneTools.datum_wandeln(txtLiquiDate.getText(), 0), cmbKto.getSelectedItem().toString().replace(" ", ""), cn));
-		table.setDefaultRenderer( Object.class, new ValuesTableCellRenderer() );
+	private void zeichne_tabelle() {
+
+		table = new JTable(new ValuesTableModel(txtValue.getText().replace(".", "").replace(',', '.'),
+				BigOneTools.datum_wandeln(txtLiquiDate.getText(), 0),
+				cmbKto.getSelectedItem().toString().replace(" ", ""), cn));
+		table.setDefaultRenderer(Object.class, new ValuesTableCellRenderer());
 		table.getColumnModel().getColumn(2).setCellEditor(new DateTableCellEditor());
 		table.getColumnModel().getColumn(3).setCellEditor(new DecimalTableCellEditor());
 		table.getColumnModel().getColumn(5).setCellEditor(new DateTableCellEditor());
 
-		//fuer einige spalten feste breiten einrichten
+		// fuer einige spalten feste breiten einrichten
 		table.getColumnModel().getColumn(0).setMinWidth(55);
 		table.getColumnModel().getColumn(0).setMaxWidth(55);
 		table.getColumnModel().getColumn(1).setMinWidth(25);
@@ -142,22 +147,25 @@ public class Values {
 		table.getColumnModel().getColumn(6).setMaxWidth(120);
 
 		JScrollPane sp = new JScrollPane(table);
-		sp.setBounds(30,70,725,355);
+		sp.setBounds(30, 70, 725, 355);
 
 		valuewindow.add(sp);
 		valuewindow.validate();
 		valuewindow.repaint();
 	}
+
 	private void fill_cmbKto() {
 		DBTools getter = new DBTools(cn);
 
-		getter.select("SELECT konten.iban, konten.bemerkung " +
-	      		"FROM konten " +
-	      		"where konten.gueltig = TRUE;",1);
+		getter.select("""
+				SELECT iban, bemerkung
+				FROM konten
+				WHERE gueltig = TRUE
+				""", 1);
 
 		Object[][] cmbKtoValues = getter.getData();
 
-		for(Object[] cmbKtoValue : cmbKtoValues)
-	        cmbKto.addItem(BigOneTools.getIbanFormatted(cmbKtoValue[0].toString()));
+		for (Object[] cmbKtoValue : cmbKtoValues)
+			cmbKto.addItem(BigOneTools.getIbanFormatted(cmbKtoValue[0].toString()));
 	}
 }

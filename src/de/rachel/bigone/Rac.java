@@ -116,8 +116,12 @@ public class Rac {
 				if (lblIbanValue.getText() != "") {
 					// because the IBAN in the Lable contains Spaces for easy to read, they must
 					// delete before get some Data from the DB
-					AccountIdGetter.select("SELECT konten_id FROM konten WHERE iban = '"
-							+ lblIbanValue.getText().replaceAll(" ", "") + "'", 1);
+					AccountIdGetter.select("""
+							SELECT konten_id
+							FROM konten
+							WHERE iban = '%s'
+							""".formatted(lblIbanValue.getText().replaceAll(" ", "")), 1);
+
 					AccountId = AccountIdGetter.getValueAt(0, 0).toString();
 
 					// tabellendaten von der letzten Zeile zur ersten hin importieren
@@ -132,13 +136,14 @@ public class Rac {
 						} else {
 							sLiquiMonat = "'" + model.getValueAt(i, 5) + "'";
 						}
-						sql = "INSERT into transaktionen "
-								+ "(soll_haben, konten_id, datum, betrag, buchtext, ereigniss_id, liqui_monat) "
-								+ "VALUES " + "('" + model.getValueAt(i, 1) + "', " + "'" + AccountId + "', '"
-								+ model.getValueAt(i, 0) + "'," + model.getValueAt(i, 2) + ",'"
-								+ model.getValueAt(i, 3).toString().replace("'", "''") + "',"
-								+ BigOneTools.extractEreigId(model.getValueAt(i, 6).toString()) + "," + sLiquiMonat
-								+ ");";
+						sql = """
+								INSERT INTO transaktionen
+								(soll_haben, konten_id, datum, betrag, buchtext, ereigniss_id, liqui_monat)
+								VALUES
+								('%s', %s, '%s', %s, '%s', %s, %s)
+								""".formatted(model.getValueAt(i, 1), AccountId, model.getValueAt(i, 0),
+								model.getValueAt(i, 2), model.getValueAt(i, 3).toString().replace("'", "''"),
+								BigOneTools.extractEreigId(model.getValueAt(i, 6).toString()), sLiquiMonat);
 
 						// neuen datensatz einfuegen und den erfolg pruefen
 						// falls Datensatz nicht eingefuegt werden konnt
@@ -155,20 +160,28 @@ public class Rac {
 								// das Programm arbeitet weiter wenn
 								// dialog geschlossen wird
 								Aufteilung aufteil = new Aufteilung(RACWindow,
-										Double.valueOf(model.getValueAt(i, 2).toString()).doubleValue(), model.getValueAt(i, 3).toString(), cn);
+										Double.valueOf(model.getValueAt(i, 2).toString()).doubleValue(),
+										model.getValueAt(i, 3).toString(), cn);
 
 								// da gerade der letzte Datensatz in die tabelle transaktionen eingetragen
 								// wurde kann man auch schon dessen ID feststellen
-								getter.select("SELECT max(transaktions_id) from transaktionen;", 1);
+								getter.select("""
+										SELECT MAX(transaktions_id)
+										FROM transaktionen
+										""", 1);
 
 								String[][] datenAuft = aufteil.getDaten();
 
 								for (String[] arg : datenAuft) {
-									String sql_auft = "INSERT INTO aufteilung "
-											+ "( transaktions_id, betrag, ereigniss_id, liqui) " + "VALUES " + "("
-											+ getter.getValueAt(0, 0) + ", " + arg[1] + ", " + arg[0] + ", " + arg[2]
-											+ ");";
+									String sql_auft = """
+											INSERT INTO aufteilung
+											(transaktions_id, betrag, ereigniss_id, liqui)
+											VALUES
+											(%s, %s, %s, %s)
+											""".formatted(getter.getValueAt(0, 0), arg[1], arg[0], arg[2]);
+
 									// System.out.println(sql_auft);
+
 									if (pusher.insert(sql_auft) == false) {
 										System.out.println(
 												"Fehler beim Einfuegen der Detaildatensaetze zu Datensatz Nr: " + i);
@@ -182,13 +195,18 @@ public class Rac {
 								// das Programm arbeitet weiter wenn
 								// dialog geschlossen wird
 								TankDialog td = new TankDialog(RACWindow, model.getValueAt(i, 2).toString(), cn);
-								getter.select("SELECT max(transaktions_id) from transaktionen;", 1);
+								getter.select("""
+										SELECT MAX(transaktions_id)
+										FROM transaktionen
+										""", 1);
 
-								String sql_tanken = "INSERT INTO tankdaten "
-										+ "( transaktions_id, liter, km, kraftstoff_id, datum_bar, betrag_bar, kfz_id) "
-										+ "VALUES " + "(" + getter.getValueAt(0, 0) + ", " + td.get_liter() + ", "
-										+ td.get_km() + ", " + td.get_treibstoff_id() + ", " + "NULL, " + "NULL, "
-										+ td.get_kfz_id() + ");";
+								String sql_tanken = """
+										INSERT INTO tankdaten "
+										(transaktions_id, liter, km, kraftstoff_id, datum_bar, betrag_bar, kfz_id)
+										VALUES
+										(%s, %s, %s, %s, NULL, NULL, %s)
+										""".formatted(getter.getValueAt(0, 0), td.get_liter(), td.get_km(),
+										td.get_treibstoff_id(), td.get_kfz_id());
 
 								// neuen datensatz einfuegen und den erfolg pruefen
 								if (pusher.insert(sql_tanken) == false) {
