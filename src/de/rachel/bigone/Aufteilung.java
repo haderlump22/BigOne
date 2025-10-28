@@ -21,9 +21,6 @@ import javax.swing.WindowConstants;
 import javax.swing.text.NumberFormatter;
 
 public class Aufteilung extends JFrame{
-	/**
-	 * TODO Ereignisse anzeigen wenn sie gültig sind
-	 */
 	private static final long serialVersionUID = -2262653597062890751L;
 	private JLabel lblBetrag, lblEreigniss, lblRestInfo, lblBuchText;
 	private JCheckBox chkLiquiFaehig;
