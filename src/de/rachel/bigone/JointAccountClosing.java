@@ -193,6 +193,9 @@ public class JointAccountClosing {
 
 					// now we can fill the sumOverview if there was stored Values before
 					fillSumOverview();
+
+					// if the Sum Overview ist filled we can calculate the Data for the ballance allocation overview and display it
+					fillBallaceAllocationOverview();
 				}
 			}
 
@@ -380,5 +383,13 @@ public class JointAccountClosing {
 		} catch (Exception e) {
 			System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "+e.getStackTrace()[0].getLineNumber()+"): " + e.toString());
 		}
+	}
+
+	private void fillBallaceAllocationOverview() {
+		/**
+		 * ToDo
+		 * get for the defines Liquimonth the part of income in Percent
+		 * then calculate with theese and the sumOverview Values the correct Values per Person
+		 */
 	}
 }
