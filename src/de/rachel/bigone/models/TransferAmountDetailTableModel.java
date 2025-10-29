@@ -80,7 +80,7 @@ public class TransferAmountDetailTableModel extends AbstractTableModel {
 						getter.getDouble("betrag"), getter.getDate("gilt_bis")));
 			}
 		} catch (Exception e) {
-			System.out.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + ": " + e.toString());
+			System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "+e.getStackTrace()[0].getLineNumber()+"): " + e.toString());
 		}
 	}
 

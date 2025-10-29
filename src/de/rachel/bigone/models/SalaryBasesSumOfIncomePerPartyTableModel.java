@@ -85,7 +85,7 @@ public class SalaryBasesSumOfIncomePerPartyTableModel extends AbstractTableModel
 						.add(new SalaryBasesSumOfIncomePerPartyTableRow(rs.getString("party"), rs.getDouble("betrag")));
 			}
 		} catch (Exception e) {
-			System.out.println("SumOfIncomPerPartyTableModel - lese_werte(): " + e.toString());
+			System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "+e.getStackTrace()[0].getLineNumber()+"): " + e.toString());
 		}
 
 		// first get the sum of all Values in Column 2

@@ -378,7 +378,7 @@ public class JointAccountClosing {
 				}
 			}
 		} catch (Exception e) {
-			System.out.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + ": " + e.toString());
+			System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "+e.getStackTrace()[0].getLineNumber()+"): " + e.toString());
 		}
 	}
 }

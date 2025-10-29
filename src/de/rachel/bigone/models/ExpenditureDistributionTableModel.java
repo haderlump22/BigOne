@@ -65,18 +65,20 @@ public class ExpenditureDistributionTableModel extends AbstractTableModel {
                 FROM ha_ausgaben_aufteilung haaa, personen p
                 WHERE haaa."parteiId" = p.personen_id
                 AND haaa."ausgabenId" = %s
-                ORDER BY party",
-                """.formatted(ExpenditureId.toString()),2);
+                ORDER BY party
+                """.formatted(ExpenditureId.toString()), 2);
 
         rs = getter.getResultSet();
         try {
             rs.beforeFirst();
 
             while (rs.next()) {
-                TableData.add(new ExpenditureDistributionTableRow(rs.getInt("ausgabenAufteilungId"), rs.getString("party"), rs.getDouble("betrag")));
+                TableData.add(new ExpenditureDistributionTableRow(rs.getInt("ausgabenAufteilungId"),
+                        rs.getString("party"), rs.getDouble("betrag")));
             }
         } catch (Exception e) {
-            System.out.println("ExpenditureDetailTableModel - lese_werte(): " + e.toString());
+            System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "
+                    + e.getStackTrace()[0].getLineNumber() + "): " + e.toString());
         }
     }
 

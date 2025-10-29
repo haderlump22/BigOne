@@ -104,7 +104,7 @@ public class JointAccountClosingDetailTableModel extends AbstractTableModel {
 							expenditureAmount, expenditureAmountPlan, expenditureDifference));
 				}
 			} catch (Exception e) {
-				System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + ": " + e.toString());
+				System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "+e.getStackTrace()[0].getLineNumber()+"): " + e.toString());
 			}
 		}
 	}

@@ -76,7 +76,7 @@ public class JointAccountClosingDetailTableSelectionListener implements ListSele
                 }
             }
         } catch (Exception e) {
-            System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + ": " + e.toString());
+            System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "+e.getStackTrace()[0].getLineNumber()+"): " + e.toString());
         }
     }
 
@@ -110,7 +110,7 @@ public class JointAccountClosingDetailTableSelectionListener implements ListSele
                 }
             }
         } catch (Exception e) {
-            System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + ": " + e.toString());
+            System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "+e.getStackTrace()[0].getLineNumber()+"): " + e.toString());
         }
     }
 }

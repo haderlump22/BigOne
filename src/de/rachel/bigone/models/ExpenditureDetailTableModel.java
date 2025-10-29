@@ -88,7 +88,7 @@ public class ExpenditureDetailTableModel extends AbstractTableModel {
                         rs.getString("aufteilungsart"), rs.getDate("gilt_bis"), rs.getString("bemerkung")));
             }
         } catch (Exception e) {
-            System.out.println("ExpenditureDetailTableModel - lese_werte(): " + e.toString());
+            System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "+e.getStackTrace()[0].getLineNumber()+"): " + e.toString());
         }
     }
 }

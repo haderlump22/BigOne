@@ -158,7 +158,7 @@ public class JointAccountClosingDetailTableMouseListener extends MouseAdapter {
         int number = 0;
 
         query.select("""
-                SELECT count(*)
+                SELECT COUNT(*)
                 FROM ha_abschlusssummen
                 WHERE "abschlussDetailId" = %d
                 """.formatted(detailId), 1);

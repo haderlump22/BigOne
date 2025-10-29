@@ -178,7 +178,7 @@ public class TransferAmountDetailTableCreateSuccessorDialog extends JFrame {
                 }
             }
         } catch (Exception e) {
-            System.out.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + ": " + e.toString());
+            System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "+e.getStackTrace()[0].getLineNumber()+"): " + e.toString());
         }
 	}
 
@@ -204,8 +204,7 @@ public class TransferAmountDetailTableCreateSuccessorDialog extends JFrame {
 
             return rs.getInt("partei_id");
         } catch (Exception e) {
-            System.out.println(
-                    this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + ": " + e.toString());
+            System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "+e.getStackTrace()[0].getLineNumber()+"): " + e.toString());
             return -1;
         }
     }

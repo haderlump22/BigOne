@@ -82,7 +82,7 @@ public class SalaryBasesIncomeDetailTableModel extends AbstractTableModel{
 				TableData.add(new SalaryBasesIncomeDetailTableRow(rs.getString("party"), rs.getDouble("betrag"), rs.getDate("gilt_bis"), rs.getString("art")));
 			}
 		} catch (Exception e) {
-			System.out.println("SalaryBasesIncomeDetailTableModel - lese_werte(): " + e.toString());
+			System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "+e.getStackTrace()[0].getLineNumber()+"): " + e.toString());
 		}
 	}
 }

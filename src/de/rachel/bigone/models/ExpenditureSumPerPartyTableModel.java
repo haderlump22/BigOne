@@ -78,7 +78,7 @@ public class ExpenditureSumPerPartyTableModel extends AbstractTableModel {
                 TableData.add(new ExpenditureSumPerPartyTableRow(rs.getString("party"), rs.getDouble("betrag")));
             }
         } catch (Exception e) {
-            System.out.println("ExpenditureSumPerPartyTableModel - lese_werte(): " + e.toString());
+            System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "+e.getStackTrace()[0].getLineNumber()+"): " + e.toString());
         }
     }
 }
