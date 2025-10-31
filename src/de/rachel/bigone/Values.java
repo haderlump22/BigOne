@@ -2,12 +2,8 @@
 package de.rachel.bigone;
 
 import java.awt.Font;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.sql.Connection;
@@ -16,7 +12,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
@@ -32,10 +27,6 @@ import de.rachel.bigone.editors.DecimalTableCellEditor;
 import de.rachel.bigone.models.ValuesTableModel;
 import de.rachel.bigone.renderer.ValuesTableCellRenderer;
 
-/**
- * @author Normen Rachel
- */
-
 public class Values {
 	private Connection cn = null;
 	private JFrame valuewindow;
@@ -44,7 +35,6 @@ public class Values {
 	private JTable table;
 	private ValuesTableModel model;
 	private JComboBox<String> cmbKto;
-	private JCheckBox withLiquiDate;
 
 	Values(Connection LoginCN) {
 		cn = LoginCN;
@@ -74,28 +64,18 @@ public class Values {
 				SwingUtilities.invokeLater(new Runnable() {
 					@Override
 					public void run() {
-						if (table.isEditing()) {
-							table.getCellEditor().stopCellEditing();
-							table.clearSelection();
-						}
-
 						txtValue.selectAll();
 					}
 				});
 			}
 		});
 		txtValue.addKeyListener(new KeyListener() {
-			private String LiquiDate;
 
 			public void keyPressed(KeyEvent ke) {
 				if (ke.getKeyCode() == KeyEvent.VK_ENTER) {
-					if (withLiquiDate.isSelected()) {
-						LiquiDate = BigOneTools.datum_wandeln(txtLiquiDate.getText(), 0);
-					} else {
-						LiquiDate = "";
-					}
 					model = (ValuesTableModel) table.getModel();
-					model.aktualisiere(txtValue.getText().replace(".", "").replace(',', '.'), LiquiDate,
+					model.aktualisiere(txtValue.getText().replace(".", "").replace(',', '.'),
+							BigOneTools.datum_wandeln(txtLiquiDate.getText(), 0),
 							cmbKto.getSelectedItem().toString().replace(" ", ""));
 				}
 			}
@@ -129,49 +109,13 @@ public class Values {
 		cmbKto = new JComboBox<String>();
 		cmbKto.setBounds(260, 25, 250, 25);
 		cmbKto.setFont(fontCmbBoxes);
-
-		// and fill it with Values
+		// fill it with Values
 		fill_cmbKto();
 
-		// setting the Tooltip for the shown Value after first filling
-		cmbKto.setToolTipText(getAccountDescription(cmbKto.getSelectedItem().toString().replace(" ", "")));
-
-		// add an ActionListener to set the Tooltip with the Accountdescription of the selected IBAN
-		cmbKto.addItemListener(new ItemListener() {
-
-			@Override
-			public void itemStateChanged(ItemEvent e) {
-				if (e.getStateChange() == ItemEvent.SELECTED) {
-					// set Tooltip of the Account Combobox with the Hint of the Account
-					cmbKto.setToolTipText(getAccountDescription(e.getItem().toString().replace(" ", "")));
-				}
-			}
-		});
-
-		// Create the check box to specify whether liquidatum is in Query or not
-		withLiquiDate = new JCheckBox("mit Liquidatum suchen", true);
-		withLiquiDate.setBounds(520, 25, 180, 25);
-
-		// ad an Valuechange Listener for aktivate/deaktivate the LiquiDate Textfield
-		withLiquiDate.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				if (withLiquiDate.isSelected()) {
-					txtLiquiDate.setEnabled(true);
-					withLiquiDate.setText("mit Liquidatum suchen");
-				} else {
-					txtLiquiDate.setEnabled(false);
-					withLiquiDate.setText("ohne Liquidatum suchen");
-				}
-			}
-		});
-
-		// put all Elements on the Window
 		valuewindow.add(txtValue);
 		valuewindow.add(txtLiquiDate);
 		valuewindow.add(cmbKto);
-		valuewindow.add(withLiquiDate);
+
 		zeichne_tabelle();
 
 		valuewindow.setVisible(true);
@@ -183,12 +127,10 @@ public class Values {
 		table = new JTable(new ValuesTableModel(txtValue.getText().replace(".", "").replace(',', '.'),
 				BigOneTools.datum_wandeln(txtLiquiDate.getText(), 0),
 				cmbKto.getSelectedItem().toString().replace(" ", ""), cn));
-		ValuesTableCellRenderer ren = new ValuesTableCellRenderer();
-		table.setDefaultRenderer(Object.class, ren);
+		table.setDefaultRenderer(Object.class, new ValuesTableCellRenderer());
 		table.getColumnModel().getColumn(2).setCellEditor(new DateTableCellEditor());
 		table.getColumnModel().getColumn(3).setCellEditor(new DecimalTableCellEditor());
 		table.getColumnModel().getColumn(5).setCellEditor(new DateTableCellEditor());
-		// table.setDefaultEditor(Object.class, new ValuesTableCellEditor());
 
 		// fuer einige spalten feste breiten einrichten
 		table.getColumnModel().getColumn(0).setMinWidth(55);
@@ -215,27 +157,15 @@ public class Values {
 	private void fill_cmbKto() {
 		DBTools getter = new DBTools(cn);
 
-		getter.select("SELECT konten.iban, konten.bemerkung " +
-				"FROM konten " +
-				"where konten.gueltig = TRUE;", 1);
+		getter.select("""
+				SELECT iban, bemerkung
+				FROM konten
+				WHERE gueltig = TRUE
+				""", 1);
 
 		Object[][] cmbKtoValues = getter.getData();
 
 		for (Object[] cmbKtoValue : cmbKtoValues)
 			cmbKto.addItem(BigOneTools.getIbanFormatted(cmbKtoValue[0].toString()));
-	}
-
-	private String getAccountDescription(String IBAN) {
-		//get the transaction wording to the transaktions_id
-		DBTools getter = new DBTools(cn);
-
-		getter.select("SELECT bemerkung FROM konten " +
-				"WHERE iban = '" + IBAN + "'", 1);
-
-		if(getter.getRowCount() > 0) {
-			return getter.getValueAt(0, 0).toString();
-		}else {
-			return "not found";
-		}
 	}
 }

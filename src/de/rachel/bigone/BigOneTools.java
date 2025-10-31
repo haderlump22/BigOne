@@ -28,6 +28,7 @@ public class BigOneTools {
 		return iZeilen;
 	}
 	public double roundScale2( double d ){
+		// "%.02f".formatted(zahl)
 	    return Math.round( d * 100 ) / 100.;
 	  }
 	static public int extractEreigId(String strEreigAusCmbBox) {

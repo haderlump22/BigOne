@@ -20,9 +20,9 @@ import com.toedter.calendar.JDateChooser;
 
 import de.rachel.bigone.editors.ComboTableCellEditor;
 import de.rachel.bigone.editors.LiquiDateTableCellEditor;
-import de.rachel.bigone.listeners.RACMouseListener;
-import de.rachel.bigone.models.RACTableModel;
-import de.rachel.bigone.renderer.RACTableCellRenderer;
+import de.rachel.bigone.listeners.RacMouseListener;
+import de.rachel.bigone.models.RacTableModel;
+import de.rachel.bigone.renderer.RacTableCellRenderer;
 
 public class Rac {
 	private Connection cn = null;
@@ -30,7 +30,7 @@ public class Rac {
 	private static final int AUFTEILUNG = 52;
 	private JFrame RACWindow;
 	private JTable table;
-	private RACTableModel model;
+	private RacTableModel model;
 	private JButton btnOpen;
 	private JButton btnImp;
 	private JFileChooser open;
@@ -74,9 +74,9 @@ public class Rac {
 						if (table == null) {
 							zeichne_tabelle(Auszug);
 						} else {
-							RACTableCellRenderer ren = new RACTableCellRenderer(cn, lblIbanValue.getText());
+							RacTableCellRenderer ren = new RacTableCellRenderer(cn, lblIbanValue.getText());
 							table.setDefaultRenderer(Object.class, ren);
-							model = (RACTableModel) table.getModel();
+							model = (RacTableModel) table.getModel();
 							model.aktualisiere(Auszug);
 						}
 
@@ -86,7 +86,6 @@ public class Rac {
 					} else {
 						System.out
 								.println("Keine Buchungen in Datei " + open.getSelectedFile().toString() + "gefunden!");
-						btnImp.setEnabled(false);
 						RACWindow.remove(sp);
 						RACWindow.validate();
 						RACWindow.repaint();
@@ -110,15 +109,19 @@ public class Rac {
 				DBTools pusher = new DBTools(cn);
 				DBTools getter = new DBTools(cn);
 				DBTools AccountIdGetter = new DBTools(cn);
-				model = (RACTableModel) table.getModel();
+				model = (RacTableModel) table.getModel();
 
 				// insert each Row in the DB
 				// if exist a Account ID to the IBAN that comes from the Bank Statement
 				if (lblIbanValue.getText() != "") {
 					// because the IBAN in the Lable contains Spaces for easy to read, they must
 					// delete before get some Data from the DB
-					AccountIdGetter.select("SELECT konten_id FROM konten WHERE iban = '"
-							+ lblIbanValue.getText().replaceAll(" ", "") + "'", 1);
+					AccountIdGetter.select("""
+							SELECT konten_id
+							FROM konten
+							WHERE iban = '%s'
+							""".formatted(lblIbanValue.getText().replaceAll(" ", "")), 1);
+
 					AccountId = AccountIdGetter.getValueAt(0, 0).toString();
 
 					// tabellendaten von der letzten Zeile zur ersten hin importieren
@@ -133,13 +136,14 @@ public class Rac {
 						} else {
 							sLiquiMonat = "'" + model.getValueAt(i, 5) + "'";
 						}
-						sql = "INSERT into transaktionen "
-								+ "(soll_haben, konten_id, datum, betrag, buchtext, ereigniss_id, liqui_monat) "
-								+ "VALUES " + "('" + model.getValueAt(i, 1) + "', " + "'" + AccountId + "', '"
-								+ model.getValueAt(i, 0) + "'," + model.getValueAt(i, 2) + ",'"
-								+ model.getValueAt(i, 3).toString().replace("'", "''") + "',"
-								+ BigOneTools.extractEreigId(model.getValueAt(i, 6).toString()) + "," + sLiquiMonat
-								+ ");";
+						sql = """
+								INSERT INTO transaktionen
+								(soll_haben, konten_id, datum, betrag, buchtext, ereigniss_id, liqui_monat)
+								VALUES
+								('%s', %s, '%s', %s, '%s', %s, %s)
+								""".formatted(model.getValueAt(i, 1), AccountId, model.getValueAt(i, 0),
+								model.getValueAt(i, 2), model.getValueAt(i, 3).toString().replace("'", "''"),
+								BigOneTools.extractEreigId(model.getValueAt(i, 6).toString()), sLiquiMonat);
 
 						// neuen datensatz einfuegen und den erfolg pruefen
 						// falls Datensatz nicht eingefuegt werden konnt
@@ -156,20 +160,28 @@ public class Rac {
 								// das Programm arbeitet weiter wenn
 								// dialog geschlossen wird
 								Aufteilung aufteil = new Aufteilung(RACWindow,
-										Double.valueOf(model.getValueAt(i, 2).toString()).doubleValue(), model.getValueAt(i, 3).toString(), cn);
+										Double.valueOf(model.getValueAt(i, 2).toString()).doubleValue(),
+										model.getValueAt(i, 3).toString(), cn);
 
 								// da gerade der letzte Datensatz in die tabelle transaktionen eingetragen
 								// wurde kann man auch schon dessen ID feststellen
-								getter.select("SELECT max(transaktions_id) from transaktionen;", 1);
+								getter.select("""
+										SELECT MAX(transaktions_id)
+										FROM transaktionen
+										""", 1);
 
 								String[][] datenAuft = aufteil.getDaten();
 
 								for (String[] arg : datenAuft) {
-									String sql_auft = "INSERT INTO aufteilung "
-											+ "( transaktions_id, betrag, ereigniss_id, liqui) " + "VALUES " + "("
-											+ getter.getValueAt(0, 0) + ", " + arg[1] + ", " + arg[0] + ", " + arg[2]
-											+ ");";
+									String sql_auft = """
+											INSERT INTO aufteilung
+											(transaktions_id, betrag, ereigniss_id, liqui)
+											VALUES
+											(%s, %s, %s, %s)
+											""".formatted(getter.getValueAt(0, 0), arg[1], arg[0], arg[2]);
+
 									// System.out.println(sql_auft);
+
 									if (pusher.insert(sql_auft) == false) {
 										System.out.println(
 												"Fehler beim Einfuegen der Detaildatensaetze zu Datensatz Nr: " + i);
@@ -183,13 +195,18 @@ public class Rac {
 								// das Programm arbeitet weiter wenn
 								// dialog geschlossen wird
 								TankDialog td = new TankDialog(RACWindow, model.getValueAt(i, 2).toString(), cn);
-								getter.select("SELECT max(transaktions_id) from transaktionen;", 1);
+								getter.select("""
+										SELECT MAX(transaktions_id)
+										FROM transaktionen
+										""", 1);
 
-								String sql_tanken = "INSERT INTO tankdaten "
-										+ "( transaktions_id, liter, km, kraftstoff_id, datum_bar, betrag_bar, kfz_id) "
-										+ "VALUES " + "(" + getter.getValueAt(0, 0) + ", " + td.get_liter() + ", "
-										+ td.get_km() + ", " + td.get_treibstoff_id() + ", " + "NULL, " + "NULL, "
-										+ td.get_kfz_id() + ");";
+								String sql_tanken = """
+										INSERT INTO tankdaten
+										(transaktions_id, liter, km, kraftstoff_id, datum_bar, betrag_bar, kfz_id)
+										VALUES
+										(%s, %s, %s, %s, NULL, NULL, %s)
+										""".formatted(getter.getValueAt(0, 0), td.get_liter(), td.get_km(),
+										td.get_treibstoff_id(), td.get_kfz_id());
 
 								// neuen datensatz einfuegen und den erfolg pruefen
 								if (pusher.insert(sql_tanken) == false) {
@@ -220,9 +237,9 @@ public class Rac {
 
 				// show all Rows from the originally opened Bankfile to choose an new Timerange
 				ReadCamt Auszug = new ReadCamt(BankStatementFile);
-				RACTableCellRenderer ren = new RACTableCellRenderer(cn, lblIbanValue.getText());
+				RacTableCellRenderer ren = new RacTableCellRenderer(cn, lblIbanValue.getText());
 				table.setDefaultRenderer(Object.class, ren);
-				model = (RACTableModel) table.getModel();
+				model = (RacTableModel) table.getModel();
 				model.aktualisiere(Auszug);
 			}
 		});
@@ -248,7 +265,7 @@ public class Rac {
 					if (dateTo.getDate() != null) {
 						if (dateFrom.getDate().before(dateTo.getDate())) {
 							// Arraycleaning can start
-							model = (RACTableModel) table.getModel();
+							model = (RacTableModel) table.getModel();
 							model.removeUnusedRows(dateFrom.getDate(), dateTo.getDate());
 
 							// after choose Timerange enabled Import Button
@@ -274,7 +291,7 @@ public class Rac {
 					if (dateFrom.getDate() != null) {
 						if (dateFrom.getDate().before(dateTo.getDate())) {
 							// Arraycleaning can start
-							model = (RACTableModel) table.getModel();
+							model = (RacTableModel) table.getModel();
 							model.removeUnusedRows(dateFrom.getDate(), dateTo.getDate());
 
 							// after choose Timerange enabled Import Button
@@ -322,7 +339,6 @@ public class Rac {
 				btnImp.setEnabled(true);
 			} else {
 				System.out.println("Keine Buchungen in Datei " + open.getSelectedFile().toString() + " gefunden!");
-				btnImp.setEnabled(false);
 			}
 		} else {
 			btnImp.setEnabled(false);
@@ -333,10 +349,10 @@ public class Rac {
 
 	private void zeichne_tabelle(ReadCamt Auszug) {
 
-		table = new JTable(new RACTableModel(Auszug));
+		table = new JTable(new RacTableModel(Auszug));
 
 		// festlegen von diversen Verhaltensweisen der Tabelle
-		RACTableCellRenderer ren = new RACTableCellRenderer(cn, lblIbanValue.getText());
+		RacTableCellRenderer ren = new RacTableCellRenderer(cn, lblIbanValue.getText());
 		table.setDefaultRenderer(Object.class, ren); //vieleicht auch direkt als new in klammern???
 		// table.getSelectionModel().addListSelectionListener(new RACSelectionListener(table));
 		table.getColumnModel().getColumn(5).setCellEditor(new LiquiDateTableCellEditor());
@@ -357,7 +373,7 @@ public class Rac {
 		table.getColumnModel().getColumn(6).setMaxWidth(120);
 
 		// selbst definierten Mouselistener der RAC Tabelle hinzufügen
-		table.addMouseListener(new RACMouseListener(table));
+		table.addMouseListener(new RacMouseListener(table));
 
 		sp = new JScrollPane(table);
 		sp.setBounds(30,120,725,355);

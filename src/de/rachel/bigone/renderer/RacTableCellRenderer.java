@@ -14,11 +14,11 @@ import java.sql.Connection;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
-public class RACTableCellRenderer implements TableCellRenderer {
+public class RacTableCellRenderer implements TableCellRenderer {
 	private Connection cn = null;
 	private String sAccountId = "";
 
-	public RACTableCellRenderer(Connection LoginCN, String sIbanValue) {
+	public RacTableCellRenderer(Connection LoginCN, String sIbanValue) {
 		this.cn = LoginCN;
 		DBTools AccountIdGetter = new DBTools(cn);
 
@@ -94,14 +94,15 @@ public class RACTableCellRenderer implements TableCellRenderer {
 
 		GregorianCalendar calendar = new GregorianCalendar(iYear, iMonth, iDay);
 
-		// Sql string vorbereiten
-		String sql = "select count(*) from transaktionen " + "where betrag = "
-				+ table.getModel().getValueAt(row, 2).toString() + " and " + "konten_id = " + sAccountId + " and "
-				+ "datum >= '" + iYear + "-" + (iMonth + 1) + "-1' and " + "datum <= '" + iYear + "-" + (iMonth + 1)
-				+ "-" + calendar.getActualMaximum(Calendar.DAY_OF_MONTH) + "';";
-		// System.out.println(sql);
 		DBTools marker = new DBTools(cn);
-		marker.select(sql, 1);
+		marker.select("""
+				SELECT COUNT(*)
+				FROM transaktionen
+				WHERE betrag = %s
+				AND konten_id = %s
+				AND datum >= '%s'
+				AND datum <= '%s'
+				""".formatted(table.getModel().getValueAt(row, 2).toString(), sAccountId, iYear + "-" + (iMonth + 1) + "-1", iYear + "-" + (iMonth + 1) + "-" + calendar.getActualMaximum(Calendar.DAY_OF_MONTH)), 1);
 
 		if (Integer.valueOf(marker.getValueAt(0, 0).toString()) > 0) {
 			return true;

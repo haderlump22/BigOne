@@ -1,0 +1,55 @@
+package de.rachel.bigone.renderer;
+
+import java.awt.Component;
+import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+import javax.swing.JLabel;
+import javax.swing.JTable;
+import javax.swing.table.TableCellRenderer;
+
+public class SalaryBasesIncomeDetailTableCellRenderer implements TableCellRenderer {
+
+   public Component getTableCellRendererComponent(
+         JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+
+      JLabel label = null;
+
+      // only react when value is not null
+      if (value != null) {
+         if (!(value instanceof JLabel)) {
+            label = new JLabel(value.toString());
+         } else {
+            label = (JLabel) value;
+         }
+         label.setOpaque(true);
+         label.setFont(table.getFont());
+         label.setForeground(table.getForeground());
+         label.setBackground(table.getBackground());
+
+         if (isSelected) {
+            label.setBackground(table.getSelectionBackground());
+            label.setForeground(table.getSelectionForeground());
+         }
+
+         if (column == 0) {
+            label.setHorizontalAlignment(JLabel.LEFT);
+         }
+
+         if (column == 1) {
+            label.setHorizontalAlignment(JLabel.RIGHT);
+            DecimalFormat formatter = new DecimalFormat("#.00");
+            label.setText(formatter.format((Number) value));
+         }
+
+         if (column == 2) {
+            label.setHorizontalAlignment(JLabel.LEFT);
+            label.setText(new SimpleDateFormat("MMM yyyy").format((Date) value));
+         }
+         return label;
+      } else {
+         return label;
+      }
+   }
+}

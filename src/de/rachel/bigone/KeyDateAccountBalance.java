@@ -29,7 +29,7 @@ public class KeyDateAccountBalance {
 	private JFormattedTextField txtDate, txtAmount, txtTaxEx;
 	private String sDate;
 	private Font fontTxtFields, fontCmbBoxes, fontAmount;
-	
+
 	KeyDateAccountBalance(Connection LoginCN){
 		cn = LoginCN;
 		kdab = new JFrame("Kontostand");
@@ -43,13 +43,13 @@ public class KeyDateAccountBalance {
 		fontTxtFields = new Font("Arial",Font.PLAIN,16);
 		fontCmbBoxes = new  Font("Arial",Font.PLAIN,16);
 		fontAmount = new  Font("Arial",Font.BOLD,16);
-		
+
 		//Panels fuer die Bankverbindung layouten
 		bank = new JPanel();
 		bank.setLayout(null);
 		bank.setBounds(20,30,200,90);
 		bank.setBorder(new TitledBorder("Bankverbingung"));
-		//die Comboboxen und Bezeichnungen fuer die Bankverbindungen definieren und 
+		//die Comboboxen und Bezeichnungen fuer die Bankverbindungen definieren und
 		//mitels 2 hilfspanels in ein unterpanel namens bank setzen
 		lblBLZ = new JLabel("BLZ");
 		lblBLZ.setBounds(10,20,30,25);
@@ -60,8 +60,8 @@ public class KeyDateAccountBalance {
 		cmbBLZ.setFont(fontCmbBoxes);
 		fill_cmbBank();
 		cmbBLZ.setSelectedIndex(3);
-				
-		//ereigniss fuer die fuellung der Kontocombobox in 
+
+		//ereigniss fuer die fuellung der Kontocombobox in
 		//abhaengigkeit der BLZ combobox festlegen
 		cmbBLZ.addItemListener( new ItemListener() {
 		      public void itemStateChanged( ItemEvent e ) {
@@ -71,7 +71,7 @@ public class KeyDateAccountBalance {
 		    	  }
 		        }
 		 } );
-		
+
 		cmbKto = new JComboBox<String>();
 		cmbKto.setBounds(40,55,150,25);
 		cmbKto.setFont(fontCmbBoxes);
@@ -83,13 +83,13 @@ public class KeyDateAccountBalance {
 		//damit die Konten auch schon beim ersten aufruf des Formulars gefuellt werden
 		//und nicht erst wenn man das erste mal die BLZ combobox betaetigt
 		fill_cmbKto(cmbBLZ.getSelectedItem().toString().substring(0,cmbBLZ.getSelectedItem().toString().indexOf(' ')));
-		
+
 		//Panel fuer das Datumsfeld
 		date = new JPanel();
 		date.setLayout(null);
 		date.setBounds(230,30,140,50);
 		date.setBorder(new TitledBorder("Datum/Stichtag"));
-		
+
 			//das Datumsfeld fuer das Panel date
 			try {
 				txtDate = new JFormattedTextField(new MaskFormatter("##-##-20##"));
@@ -113,9 +113,9 @@ public class KeyDateAccountBalance {
 				public void keyTyped(KeyEvent arg0) {
 				}
 			});
-		
+
 		date.add(txtDate);
-		
+
 		//Panels fuer den Kontostand layouten
 		amount = new JPanel();
 		amount.setLayout(null);
@@ -123,12 +123,12 @@ public class KeyDateAccountBalance {
 		amount.setBorder(new TitledBorder("Kontostand"));
 			//ergebnisstextfeld festlegen
 			txtAmount = new JFormattedTextField(new NumberFormatter(new DecimalFormat("#,##0.00")));
-			txtAmount.setBounds(20,18,160,25);		
+			txtAmount.setBounds(20,18,160,25);
 			txtAmount.setHorizontalAlignment(JFormattedTextField.RIGHT);
 			txtAmount.setFont(fontAmount);
 			txtAmount.setText("0,00");
 		amount.add(txtAmount);
-		
+
 		//Panel fuer den Freistellungsauftrag
 		taxex = new JPanel();
 		taxex.setLayout(null);
@@ -136,91 +136,114 @@ public class KeyDateAccountBalance {
 		taxex.setBorder(new TitledBorder("akt. Freistellungsauftrag"));
 			//ergebnisstextfeld festlegen
 			txtTaxEx = new JFormattedTextField(new NumberFormatter(new DecimalFormat("#,##0.00")));
-			txtTaxEx.setBounds(20,18,120,25);		
+			txtTaxEx.setBounds(20,18,120,25);
 			txtTaxEx.setHorizontalAlignment(JFormattedTextField.RIGHT);
 			txtTaxEx.setFont(fontAmount);
 			txtTaxEx.setText("0,00");
 		taxex.add(txtTaxEx);
-		
+
 		kdab.add(bank);
 		kdab.add(date);
 		kdab.add(amount);
 		kdab.add(taxex);
-		
+
 		kdab.setVisible(true);
 		txtDate.requestFocus();
 	}
+
 	private void fill_cmbBank() {
 		DBTools getter = new DBTools(cn);
-	    getter.select("SELECT blz, kreditinstitut FROM kreditinstitut where gilt_bis IS NULL order by 1;",2);
-	    
+	    getter.select("""
+				SELECT blz, kreditinstitut
+				FROM kreditinstitut
+				WHERE gilt_bis IS NULL ORDER BY 1
+				""",2);
+
 	    Object[][] cmbBankValues = getter.getData();
-	    
+
 	    for(Object[] cmbBankValue : cmbBankValues)
 	    	cmbBLZ.addItem(cmbBankValue[0] + " (" + cmbBankValue[1] + ")");
-	      
+
 	      //Standartauswahl auf die Postbank legen
-	      
+
 
 	}
+
 	private void fill_cmbKto(String strAuswahl) {
 		DBTools getter = new DBTools(cn);
-		
 
-	    getter.select("SELECT konten.kontonummer, personen.vorname " +
-	      		"FROM konten, kreditinstitut, personen " +
-	      		"where konten.kreditinstitut_id = kreditinstitut.kreditinstitut_id " +
-	      		"and kreditinstitut.blz = '"+ strAuswahl +"' " +
-	      		"and konten.personen_id = personen.personen_id;",2);
-	    
+
+	    getter.select("""
+				SELECT konten.kontonummer, personen.vorname
+	      		FROM konten, kreditinstitut, personen
+	      		WHERE konten.kreditinstitut_id = kreditinstitut.kreditinstitut_id
+	      		AND kreditinstitut.blz = '%s'
+	      		AND konten.personen_id = personen.personen_id
+				""".formatted(strAuswahl),2);
+
 	    Object[][] cmbKtoValues = getter.getData();
-	    
+
 	    for(Object[] cmbKtoValue : cmbKtoValues)
 	        cmbKto.addItem(cmbKtoValue[0]+ " (" +cmbKtoValue[1]+ ")");
 	}
+
 	private void calculate_ab(int QueryiKontoId, String QuerysDate) {
 		Number fHaben, fSoll, fErg;
-		
+
 		DBTools getter = new DBTools(cn);
-		
-		getter.select("SELECT sum(betrag) FROM transaktionen where konten_id = " + 
-	    		  QueryiKontoId + " and soll_haben = 'h' and datum <= '" + QuerysDate + "'"+
-	    		  " and ereigniss_id not in (94);", 1);
+
+		getter.select("""
+				SELECT SUM(betrag)
+				FROM transaktionen
+				WHERE konten_id = %d
+				AND soll_haben = 'h'
+				AND datum <= '%s'
+				AND ereigniss_id NOT IN (94)
+				""".formatted(QueryiKontoId, QuerysDate), 1);
 
 		fHaben = (Number) getter.getValueAt(0, 0);
-	      
-		getter.select("SELECT sum(betrag) FROM transaktionen where konten_id = " + 
-	    		  QueryiKontoId + " and soll_haben = 's' and datum <= '" + QuerysDate + "'" +
-	    		  " and ereigniss_id not in (94);",1);
+
+		getter.select("""
+				SELECT SUM(betrag)
+				FROM transaktionen
+				WHERE konten_id = %d
+				AND soll_haben = 's'
+				AND datum <= '%s'
+				AND ereigniss_id NOT IN (94)
+				""".formatted(QueryiKontoId, QuerysDate),1);
 
 	    fSoll = (Number) getter.getValueAt(0, 0);
 
-	      
+
 		//ergebniss berechnen und in das Textfeld einfuegen
 		fErg = fHaben.floatValue() - fSoll.floatValue();
 		txtAmount.setText(fErg.toString().replace('.',','));
-		
+
 		//dieses focusieren und wegnehmen des Focus ist dafuer das
 		//das oben festgelgte Format des Textfeldes wirksam wird
 		txtAmount.requestFocus();
 		txtDate.requestFocus();
 	}
+
 	private int konto_id_finden(String strBLZ, String strKto) {
 		Integer intKontoId;
-		
+
 		DBTools getter = new DBTools(cn);
 
-	    getter.select("SELECT ko.konten_id FROM kreditinstitut kr, konten ko " +
-	    		  "where kr.blz = '" + strBLZ + "' " +
-	    		  "and kr.gilt_bis is NULL " +
-	    		  "and ko.kreditinstitut_id = kr.kreditinstitut_id " +
-	    		  "and ko.kontonummer = '" + strKto + "' ;",1);
+	    getter.select("""
+				SELECT ko.konten_id
+				FROM kreditinstitut kr, konten ko
+				WHERE kr.blz = '%s'
+				AND kr.gilt_bis IS NULL
+				AND ko.kreditinstitut_id = kr.kreditinstitut_id
+				AND ko.kontonummer = '%s'
+				""".formatted(strBLZ, strKto),1);
 
 	    if(getter.getRowCount() == 1)
 	    	intKontoId = (Integer) getter.getValueAt(0, 0);
 	    else
 	    	intKontoId = -1;
-	
+
 	    return intKontoId;
 	}
 	private String getBLZ(String strBLZroh) {
@@ -231,23 +254,36 @@ public class KeyDateAccountBalance {
 	}
 	private double get_taxex(int QueryiKontoId) {
 		/*
-		 * ermittelt aktuell gueltigen Freistellungsauftrag des mittels der 
+		 * ermittelt aktuell gueltigen Freistellungsauftrag des mittels der
 		 * KontenID uebergebenen Kontenkennung
 		 */
 		Number dblWert=0;
-		
+
 		DBTools getter = new DBTools(cn);
-		
-		getter.select("SELECT f.betrag FROM freistellungsauftraege f " +
-					"WHERE f.gilt_bis is null " +
-					"AND f.kreditinstitut_id=(select  k.kreditinstitut_id from konten k where k.konten_id = "+QueryiKontoId+") " +
-					"AND f.personen_id =(select k.personen_id from konten k where k.konten_id = "+QueryiKontoId+");",1);
-	      
+
+		getter.select("""
+				SELECT f.betrag
+				FROM freistellungsauftraege f
+				WHERE f.gilt_bis IS NULL
+				AND f.kreditinstitut_id =
+					(
+					SELECT  k.kreditinstitut_id
+					FROM konten k
+					WHERE k.konten_id = %d
+					)
+				AND f.personen_id =
+					(
+					SELECT k.personen_id
+					FROM konten k
+					WHERE k.konten_id = %d
+					)
+				""".formatted(QueryiKontoId, QueryiKontoId),1);
+
 	    if(getter.getRowCount() == 1)
 	    	dblWert = (Number) getter.getValueAt(0, 0);
 	    else
 	    	dblWert = 0;
-	    
+
 	    return dblWert.doubleValue();
 	}
 }

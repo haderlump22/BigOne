@@ -273,7 +273,6 @@ public class ReadCamt {
 	}
 	private void readDibaData(String[] csvContent) {
 		int iHeaderRow;
-		String HeaderRowStartsWith;
 
 		// search IBAN in the csvContent
 		this.sIBAN = searchIban().replaceAll(" ", "");
@@ -281,11 +280,10 @@ public class ReadCamt {
 
 		// check how many usable Datarows are in the csv
 		// the length of the csvContent Array minus the not usable Rows one to that line that
-		// begins with defined Regexstring
-		HeaderRowStartsWith = "^Buchung;Wertstellungsdatum.*";
-		iHeaderRow = findHeaderRow(HeaderRowStartsWith);
+		// begins with "Buchung;Valuta"
+		iHeaderRow = findHeaderRow();
 
-		// only if the Line where we start to Read Data, was found, we go on
+		// only if the Line was found we go on
 		if (iHeaderRow > 0) {
 			// reinitial the Array buchunge new
 			this.buchungen = new String[csvContent.length - iHeaderRow - 1][6];
@@ -311,8 +309,6 @@ public class ReadCamt {
 																						// deshalb wird der selbe wert
 																						// gelesen
 			}
-		} else {
-			System.out.println("FEHLER!!! In CSV Datei keine Zeile gefunden die dem Regex \"" + HeaderRowStartsWith + "\" entspricht!");
 		}
 	}
 	private void readPostbankData(String[] csvContent) {
@@ -373,12 +369,12 @@ public class ReadCamt {
 			buchungen[i - (iHeaderRow + 1)][Debitor] = csvContent[i].split(";")[3]; // wird nicht extra aufgeführt deshalb wird der selbe wert gelesen
 		}
 	}
-	private int findHeaderRow(String HeaderRowStartsWith) {
+	private int findHeaderRow() {
 		// find the Row that contians the Headers like "Buchung" or "Valuta"
 		for (int i = 0; i < csvContent.length; i++) {
 			// only if the String isn't empty
 			if (!csvContent[i].equals("")) {
-				if (csvContent[i].matches(HeaderRowStartsWith)) {
+				if (csvContent[i].matches("^Buchung;Wertstellungsdatum.*")) {
 					return i;
 				}
 			}

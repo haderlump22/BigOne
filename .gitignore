@@ -5,8 +5,8 @@
 /lib
 /.vscode
 /bakgit.tar
+Tools/*
+!Tools/bigone_schema.sql
+!Tools/createDbSchemaFile.sh
 info.txt
 TODO.TXT
-Tools/*
-!Tools/create_db_create_script.sh
-!Tools/db_create_script.sql

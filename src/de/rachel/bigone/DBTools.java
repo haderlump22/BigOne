@@ -1,6 +1,8 @@
 package de.rachel.bigone;
 
+import java.sql.Array;
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -9,14 +11,15 @@ public final class DBTools {
 	private Statement st = null;
 	private ResultSet rs = null;
 	private Connection cn = null;
+	private int RowCount;
 	private Object[][] daten;
 
 	public DBTools(Connection LoginCN) {
 		try {
 			cn = LoginCN;
 			st = cn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-		} catch (Exception ex) {
-			System.out.println(ex.toString());
+		} catch (Exception e) {
+			System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + ": " + e.toString());
 		}
 	}
 
@@ -24,8 +27,8 @@ public final class DBTools {
 		try {
 			st.executeUpdate(sql);
 			return true;
-		} catch (SQLException ex) {
-			ex.printStackTrace();
+		} catch (SQLException e) {
+			System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + ": " + e.toString());
 			return false;
 		}
 	}
@@ -34,8 +37,8 @@ public final class DBTools {
 		try {
 			st.executeUpdate(sql);
 			return true;
-		} catch (SQLException ex) {
-			ex.printStackTrace();
+		} catch (SQLException e) {
+			System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + ": " + e.toString());
 			return false;
 		}
 	}
@@ -47,7 +50,8 @@ public final class DBTools {
 			// auf Grund der uebergebenen Feldanzahl und der ermittelten
 			// datensaetze das array redimensionieren
 			rs.last();
-			daten = new Object[rs.getRow()][iFields];
+			RowCount = rs.getRow();
+			daten = new Object[RowCount][iFields];
 			rs.beforeFirst();
 
 			// daten aus dem recordset in das stringarray lesens
@@ -57,28 +61,44 @@ public final class DBTools {
 				}
 			}
 
-			// recordset/statement wieder leeren
-			rs = null;
-		} catch (SQLException ex) {
-			ex.printStackTrace();
-		}
-	}
-
-	public void beforeFirst() {
-		try {
 			rs.beforeFirst();
+			rs.next();
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "
+					+ e.getStackTrace()[0].getLineNumber() + "): " + e.toString());
 		}
 	}
 
-	public int getInt(String columnLabel) throws SQLException {
+	public void beforeFirst() throws SQLException {
+		rs.beforeFirst();
+	}
+
+	public void first() throws SQLException {
+		rs.first();
+	}
+
+	public int getInt (String columnLabel) throws SQLException {
 		return rs.getInt(columnLabel);
 	}
 
-	public String getString(String columnLabel) throws SQLException {
+	public Array getArray (String columnLabel) throws SQLException {
+		return rs.getArray(columnLabel);
+	}
+
+	public String getString (String columnLabel) throws SQLException {
 		return rs.getString(columnLabel);
+	}
+
+	public Date getDate (String columnLabel) throws SQLException {
+		return rs.getDate(columnLabel);
+	}
+
+	public Double getDouble (String columnLabel) throws SQLException {
+		return rs.getDouble(columnLabel);
+	}
+
+	public Boolean next () throws SQLException {
+		return rs.next();
 	}
 
 	public Object[][] getData() {
@@ -86,10 +106,14 @@ public final class DBTools {
 	}
 
 	public int getRowCount() {
-		return daten.length;
+		return RowCount;
 	}
 
 	public Object getValueAt(int row, int col) {
 		return daten[row][col];
+	}
+
+	public ResultSet getResultSet() {
+		return rs;
 	}
 }
