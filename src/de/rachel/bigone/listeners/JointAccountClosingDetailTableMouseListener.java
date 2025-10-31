@@ -6,9 +6,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-
 import javax.swing.JPopupMenu;
 import javax.swing.JTable;
 import javax.swing.JFormattedTextField;
@@ -21,7 +18,6 @@ import de.rachel.bigone.models.JointAccountClosingDetailTableModel;
 public class JointAccountClosingDetailTableMouseListener extends MouseAdapter {
     private JPopupMenu popmen;
     private JointAccountClosingDetailTableModel jointAccountClosingDetailTableModel;
-    private JointAccountClosing jointAccountClosingUi;
     private JTable jointAccountClosingDetailTable;
     private int detailId;
     private DBTools query;
@@ -41,6 +37,7 @@ public class JointAccountClosingDetailTableMouseListener extends MouseAdapter {
             public void actionPerformed(ActionEvent ae) {
                 addDetailIdToSumType("planned+");
                 jointAccountClosingUi.fillSumOverview();
+                jointAccountClosingUi.fillBallaceAllocationOverview();
             }
         });
 
@@ -49,6 +46,7 @@ public class JointAccountClosingDetailTableMouseListener extends MouseAdapter {
             public void actionPerformed(ActionEvent ae) {
                 addDetailIdToSumType("planned-");
                 jointAccountClosingUi.fillSumOverview();
+                jointAccountClosingUi.fillBallaceAllocationOverview();
             }
         });
 
@@ -57,6 +55,7 @@ public class JointAccountClosingDetailTableMouseListener extends MouseAdapter {
             public void actionPerformed(ActionEvent ae) {
                 addDetailIdToSumType("unplanned+");
                 jointAccountClosingUi.fillSumOverview();
+                jointAccountClosingUi.fillBallaceAllocationOverview();
             }
         });
 
@@ -65,6 +64,7 @@ public class JointAccountClosingDetailTableMouseListener extends MouseAdapter {
             public void actionPerformed(ActionEvent ae) {
                 addDetailIdToSumType("unplanned-");
                 jointAccountClosingUi.fillSumOverview();
+                jointAccountClosingUi.fillBallaceAllocationOverview();
             }
         });
 
@@ -73,6 +73,7 @@ public class JointAccountClosingDetailTableMouseListener extends MouseAdapter {
             public void actionPerformed(ActionEvent ae) {
                 removeDetailIdFromSumType();
                 jointAccountClosingUi.fillSumOverview();
+                jointAccountClosingUi.fillBallaceAllocationOverview();
             }
         });
 

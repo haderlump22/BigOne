@@ -1,8 +1,11 @@
 package de.rachel.bigone;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.text.DecimalFormat;
 import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Pattern;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -29,6 +32,8 @@ import de.rachel.bigone.listeners.JointAccountClosingDetailTableSelectionListene
 import de.rachel.bigone.listeners.JointAccountClosingSumOverviewMouseListener;
 import de.rachel.bigone.models.JointAccountClosingBalanceAllocationOverviewDetailTableModel;
 import de.rachel.bigone.models.JointAccountClosingDetailTableModel;
+import de.rachel.bigone.records.JointAccountClosingBalanceAllocationOverviewDetailTableRow;
+import de.rachel.bigone.records.SalaryBasesSumOfIncomePerPartyTableRow;
 import de.rachel.bigone.renderer.JointAccountClosingBalanceAllocationOverviewDetailTableCellRenderer;
 import de.rachel.bigone.renderer.JointAccountClosingDetailTableCellRenderer;
 
@@ -168,7 +173,7 @@ public class JointAccountClosing {
 		sumOverviewPositiveUnplanedValue.setText("0,00");
 		sumOverviewPositiveUnplanedValue.setName("{}");
 
-		jointAccountClosingBalanceAllocationOverviewDetailTable = new JTable(new JointAccountClosingBalanceAllocationOverviewDetailTableModel(cn));
+		jointAccountClosingBalanceAllocationOverviewDetailTable = new JTable(new JointAccountClosingBalanceAllocationOverviewDetailTableModel());
 		jointAccountClosingBalanceAllocationOverviewDetailTable.setDefaultRenderer(Object.class, new JointAccountClosingBalanceAllocationOverviewDetailTableCellRenderer());
 
 		jointAccountClosingBalanceAllocationOverviewScrollPane = new JScrollPane(jointAccountClosingBalanceAllocationOverviewDetailTable);
@@ -385,11 +390,79 @@ public class JointAccountClosing {
 		}
 	}
 
-	private void fillBallaceAllocationOverview() {
+	public void fillBallaceAllocationOverview() {
 		/**
 		 * ToDo
 		 * get for the defines Liquimonth the part of income in Percent
-		 * then calculate with theese and the sumOverview Values the correct Values per Person
+		 * then calculate with theese and the sumOverview Values the correct Values per
+		 * Person
 		 */
+		List<SalaryBasesSumOfIncomePerPartyTableRow> salaryBasesForTheDefinedBillingMonth = new ArrayList<>();
+		List<JointAccountClosingBalanceAllocationOverviewDetailTableRow> jointAccountClosingBalanceAllocationOverviewDetailTableData = new ArrayList<>();
+		Double sumOfAllIncome = 0.0;
+		Double totalSumToBeDivided = 0.0;
+		DBTools getter = new DBTools(cn);
+		ResultSet rs;
+
+		getter.select("""
+				SELECT p.personen_id, p.name || ', ' || SUBSTRING(p.vorname, 1, 1) || '.' as party, sum(gg.betrag) as betrag
+				FROM personen p, ha_gehaltsgrundlagen gg
+				WHERE gilt_bis >= '%s'
+				AND gilt_ab <= '%s'
+				AND p.personen_id = gg.partei_id
+				GROUP BY p.personen_id, p.name, p.vorname
+				ORDER BY p.name;
+				""".formatted(billingMonth.getText(), billingMonth.getText()),
+				3);
+
+		rs = getter.getResultSet();
+		try {
+			rs.beforeFirst();
+
+			while (rs.next()) {
+				salaryBasesForTheDefinedBillingMonth
+						.add(new SalaryBasesSumOfIncomePerPartyTableRow(rs.getInt("personen_id"), rs.getString("party"),
+								rs.getDouble("betrag")));
+			}
+		} catch (Exception e) {
+			System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "
+					+ e.getStackTrace()[0].getLineNumber() + "): " + e.toString());
+		}
+
+		// first calculate the total sum of the Partys in this billngmonth
+		for (SalaryBasesSumOfIncomePerPartyTableRow Zeile : salaryBasesForTheDefinedBillingMonth) {
+			sumOfAllIncome = sumOfAllIncome + Zeile.Sum();
+		}
+
+		// next we calculate the total Sum of the 4 SumOverview Values
+		getter.select("""
+				SELECT sum(ha_abschlussdetails.differenz) AmountToBeDivided
+				FROM ha_abschlusssummen, ha_abschlussdetails
+				WHERE ha_abschlussdetails."abschlussMonat" = '%s'
+				AND ha_abschlussdetails."abschlussDetailId" = ha_abschlusssummen."abschlussDetailId"
+				""".formatted(billingMonth.getText(), billingMonth.getText()), 1);
+
+		rs = getter.getResultSet();
+		try {
+			rs.first();
+			totalSumToBeDivided = rs.getDouble("AmountToBeDivided");
+		} catch (Exception e) {
+			System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "
+					+ e.getStackTrace()[0].getLineNumber() + "): " + e.toString());
+		}
+
+		// at last we ca put the data, with calculated percentvalue and share of the
+		// Parties, to the nessasary record and TableModel
+		for (SalaryBasesSumOfIncomePerPartyTableRow incomePerPartyThisBillingMonthRow : salaryBasesForTheDefinedBillingMonth) {
+			jointAccountClosingBalanceAllocationOverviewDetailTableData
+					.add(new JointAccountClosingBalanceAllocationOverviewDetailTableRow(
+							incomePerPartyThisBillingMonthRow.partyId(),
+							incomePerPartyThisBillingMonthRow.Name(),
+							(incomePerPartyThisBillingMonthRow.Sum() * 100) / sumOfAllIncome,
+							((incomePerPartyThisBillingMonthRow.Sum()) / sumOfAllIncome) * totalSumToBeDivided));
+		}
+
+		((JointAccountClosingBalanceAllocationOverviewDetailTableModel) jointAccountClosingBalanceAllocationOverviewDetailTable
+				.getModel()).aktualisiere(jointAccountClosingBalanceAllocationOverviewDetailTableData);
 	}
 }

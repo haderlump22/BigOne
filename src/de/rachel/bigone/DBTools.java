@@ -64,7 +64,8 @@ public final class DBTools {
 			rs.beforeFirst();
 			rs.next();
 		} catch (SQLException e) {
-			System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + ": " + e.toString());
+			System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "
+					+ e.getStackTrace()[0].getLineNumber() + "): " + e.toString());
 		}
 	}
 

@@ -1,17 +1,9 @@
 package de.rachel.bigone.renderer;
 
-import java.awt.Color;
 import java.awt.Component;
-import java.awt.Font;
-
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
-
-import de.rachel.bigone.models.JointAccountClosingBalanceAllocationOverviewDetailTableModel;
-import de.rachel.bigone.models.JointAccountClosingDetailTableModel;
-
-// import de.rachel.bigone.BigOneTools;
 
 public class JointAccountClosingBalanceAllocationOverviewDetailTableCellRenderer implements TableCellRenderer {
 
@@ -19,9 +11,6 @@ public class JointAccountClosingBalanceAllocationOverviewDetailTableCellRenderer
          JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
 
       JLabel label = null;
-      JointAccountClosingBalanceAllocationOverviewDetailTableModel jointAccountClosingBalanceAllocationOverviewDetailTableModel;
-
-      jointAccountClosingBalanceAllocationOverviewDetailTableModel = (JointAccountClosingBalanceAllocationOverviewDetailTableModel)table.getModel();
 
       // only react when value is not null
       if (value != null) {

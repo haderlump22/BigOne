@@ -38,6 +38,9 @@ public class SalaryBasesSumOfIncomePerPartyTableModel extends AbstractTableModel
 		Object ReturnValue = null;
 
 		switch (col) {
+			case -1:
+				ReturnValue = Zeile.partyId();
+				break;
 			case 0:
 				ReturnValue = Zeile.Name();
 				break;
@@ -67,14 +70,14 @@ public class SalaryBasesSumOfIncomePerPartyTableModel extends AbstractTableModel
 		ResultSet rs;
 
 		getter.select("""
-				SELECT p.name || ', ' || SUBSTRING(p.vorname, 1, 1) || '.' as party, sum(gg.betrag) as betrag
+				SELECT p.personen_id, p.name || ', ' || SUBSTRING(p.vorname, 1, 1) || '.' as party, sum(gg.betrag) as betrag
 				FROM personen p, ha_gehaltsgrundlagen gg
 				WHERE gilt_bis IS NULL
 				AND p.personen_id = gg.partei_id
-				GROUP BY p.name, p.vorname
+				GROUP BY p.personen_id, p.name, p.vorname
 				ORDER BY p.name;
 				""",
-				2);
+				3);
 
 		rs = getter.getResultSet();
 		try {
@@ -82,7 +85,7 @@ public class SalaryBasesSumOfIncomePerPartyTableModel extends AbstractTableModel
 
 			while (rs.next()) {
 				TableData
-						.add(new SalaryBasesSumOfIncomePerPartyTableRow(rs.getString("party"), rs.getDouble("betrag")));
+						.add(new SalaryBasesSumOfIncomePerPartyTableRow(rs.getInt("personen_id"), rs.getString("party"), rs.getDouble("betrag")));
 			}
 		} catch (Exception e) {
 			System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "+e.getStackTrace()[0].getLineNumber()+"): " + e.toString());

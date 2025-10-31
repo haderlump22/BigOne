@@ -1,4 +1,4 @@
 package de.rachel.bigone.records;
 
-public record SalaryBasesSumOfIncomePerPartyTableRow(String Name, Double Sum) {
+public record SalaryBasesSumOfIncomePerPartyTableRow(Integer partyId, String Name, Double Sum) {
 };
