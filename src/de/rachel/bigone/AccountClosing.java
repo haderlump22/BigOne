@@ -191,22 +191,31 @@ public class AccountClosing {
 
 				@Override
 				public void mouseClicked(MouseEvent e) {
-					//do someone only when elements exist
-					if(lstModelAllIncome.getSize() > 0) {
-						String elementValue = lstModelAllIncome.getElementAt(lstAllIncome.getSelectedIndex());
-						lblBuchtext.setToolTipText(getBuchText(elementValue.substring(elementValue.indexOf("(") + 1, elementValue.indexOf(")"))));
+					// first deselect Elements of the other list (lstIncomPerPerson)
+					lstIncomPerPerson.clearSelection();
 
-						//chek if a splitted part of the transaktions_id of the selectet Value is already put to a
-						//person, if it is so, the checkbox split must checked and protect against unchecked
-						if(existSplittedPartInIpp(elementValue.substring(elementValue.indexOf("(") + 1, elementValue.indexOf(")")))) {
+					// do someone only when elements exist
+					if (lstModelAllIncome.getSize() > 0) {
+						String elementValue = lstModelAllIncome.getElementAt(lstAllIncome.getSelectedIndex());
+						String postingText = getBuchText(
+							elementValue.substring(elementValue.indexOf("(") + 1, elementValue.indexOf(")")));
+
+						lblBuchtext.setText("Buchungstext: " + postingText);
+						lblBuchtext.setToolTipText(postingText);
+
+						// chek if a splitted part of the transaktions_id of the selectet Value is
+						// already put to a
+						// person, if it is so, the checkbox split must checked and protect against
+						// unchecked
+						if (existSplittedPartInIpp(
+								elementValue.substring(elementValue.indexOf("(") + 1, elementValue.indexOf(")")))) {
 							chkAufteilung.setSelected(true);
 							chkAufteilung.setEnabled(false);
-						}else {
+						} else {
 							chkAufteilung.setSelected(false);
 							chkAufteilung.setEnabled(true);
 						}
 					}
-
 				}
 			});
 
@@ -218,6 +227,53 @@ public class AccountClosing {
 
 			lstIncomPerPerson = new JList<String>(lstModelIncomePerPerson);
 			lstIncomPerPerson.setFont(fontLists);
+			lstIncomPerPerson.addMouseListener(new MouseListener() {
+				@Override
+				public void mouseReleased(MouseEvent e) {
+				}
+
+				@Override
+				public void mousePressed(MouseEvent e) {
+				}
+
+				@Override
+				public void mouseExited(MouseEvent e) {
+				}
+
+				@Override
+				public void mouseEntered(MouseEvent e) {
+				}
+
+				@Override
+				public void mouseClicked(MouseEvent e) {
+					// first deselect Elements of the other list (lstAllIncom)
+					lstAllIncome.clearSelection();
+
+					// do someone only when elements exist
+					if (lstModelIncomePerPerson.getSize() > 0) {
+						String elementValue = lstModelIncomePerPerson.getElementAt(lstIncomPerPerson.getSelectedIndex());
+						String postingText = getBuchText(
+							elementValue.substring(elementValue.indexOf("(") + 1, elementValue.indexOf(")")));
+
+						lblBuchtext.setText("Buchungstext: " + postingText);
+						lblBuchtext.setToolTipText(postingText);
+
+						// chek if a splitted part of the transaktions_id of the selectet Value is
+						// already put to a
+						// person, if it is so, the checkbox split must checked and protect against
+						// unchecked
+						if (existSplittedPartInIpp(
+								elementValue.substring(elementValue.indexOf("(") + 1, elementValue.indexOf(")")))) {
+							chkAufteilung.setSelected(true);
+							chkAufteilung.setEnabled(false);
+						} else {
+							chkAufteilung.setSelected(false);
+							chkAufteilung.setEnabled(true);
+						}
+					}
+
+				}
+			});
 
 			spIncomePerPerson = new JScrollPane(lstIncomPerPerson);
 			spIncomePerPerson.setBounds(220, 65, 100, 205);
@@ -358,8 +414,8 @@ public class AccountClosing {
 	            }
 	        });
 
-			lblBuchtext = new JLabel("Buchungstext (Tooltip)");
-			lblBuchtext.setBounds(20, 275, 300, 20);
+			lblBuchtext = new JLabel("Buchungstext: ");
+			lblBuchtext.setBounds(20, 275, 600, 20);
 
 			btnCalcPercentualPortion = new JButton("Anteilberechnung");
 			btnCalcPercentualPortion.setBounds(330, 65, 160, 20);
@@ -694,7 +750,7 @@ public class AccountClosing {
 			txtHinweis.append(dblErgSql + " / " + Double.valueOf(daten[iZaehler][0].toString()).doubleValue()+":"+daten[iZaehler][2]+"\n");
 		    if(dblErgSql > 0 && dblErgSql <= Double.valueOf(daten[iZaehler][0].toString()).doubleValue())
 		    {
-		    	if(daten[iZaehler][2].toString().equals("true"))
+		    	if(daten[iZaehler][2].toString().equals("1"))
 		    		dblSumFixKosten = dblSumFixKosten + Double.valueOf(daten[iZaehler][0].toString()).doubleValue();
 		    	else
 		    		dblSumFixKosten = dblSumFixKosten + roundScale2(dblErgSql);

@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict 7L8njDpW3iQce9uWi9rbtBudiJI2uL2F0EQdsyYGNKdjZaDJVxv337P9Y1ZA42d
+\restrict 4SNe1GXpkcEjGQJGhDHI2vPd5Lway82XVVhjfaJuvF0FPMVjEFmfVeMagfnudyG
 
 -- Dumped from database version 16.10 (Ubuntu 16.10-0ubuntu0.24.04.1)
 -- Dumped by pg_dump version 16.10 (Ubuntu 16.10-0ubuntu0.24.04.1)
@@ -492,9 +492,8 @@ ALTER SEQUENCE public."ha_abschlussdetails_abschlussDetailId_seq" OWNED BY publi
 
 CREATE TABLE public.ha_abschlusssummen (
     "abschlussSummenId" integer NOT NULL,
-    "abschlussMonat" date NOT NULL,
     "summenArt" character varying(25) NOT NULL,
-    betrag numeric NOT NULL
+    "abschlussDetailId" integer
 );
 
 
@@ -645,7 +644,8 @@ CREATE TABLE public.ha_gehaltsgrundlagen (
     betrag numeric NOT NULL,
     gilt_bis date,
     art character varying(20),
-    bemerkung character varying(500)
+    bemerkung character varying(500),
+    gilt_ab date
 );
 
 
@@ -1630,5 +1630,5 @@ ALTER TABLE ONLY public.ha_gehaltsgrundlagen
 -- PostgreSQL database dump complete
 --
 
-\unrestrict 7L8njDpW3iQce9uWi9rbtBudiJI2uL2F0EQdsyYGNKdjZaDJVxv337P9Y1ZA42d
+\unrestrict 4SNe1GXpkcEjGQJGhDHI2vPd5Lway82XVVhjfaJuvF0FPMVjEFmfVeMagfnudyG
 

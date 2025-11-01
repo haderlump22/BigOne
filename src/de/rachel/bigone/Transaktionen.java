@@ -196,7 +196,8 @@ public class Transaktionen {
 		});
 
 		txtBeschreibung = new JTextArea(3, 20);
-		txtBeschreibung.setLineWrap(true); // automatischer Zeilenumbruch am Zeilenende
+		txtBeschreibung.setLineWrap(true);
+		txtBeschreibung.setWrapStyleWord(true);
 		txtBeschreibung.setBounds(110, 90, 200, 75);
 		txtBeschreibung.setBorder(BorderFactory.createEtchedBorder());
 		txtBeschreibung.setFont(fontTxtFields);
