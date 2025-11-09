@@ -5,6 +5,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.time.LocalDate;
 
 import javax.swing.JOptionPane;
@@ -17,10 +19,12 @@ import org.xml.sax.SAXException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
 /**
  * Einlesen von
  *
- * - SEPA Dateien des Formats (SEPA CAMT.053) Bank To Customer Statement = Kontoauszug
+ * - SEPA Dateien des Formats (SEPA CAMT.053) Bank To Customer Statement =
+ * Kontoauszug
  * - Kontoauszug Diba im CSV Format
  */
 public class ReadCamt {
@@ -30,15 +34,19 @@ public class ReadCamt {
 	private int buchungsAnzahl;
 	private String sIBAN = "";
 	private String AccountOwner = "";
-	private String[] NodeToFind = {"ValDt","CdtDbtInd","Amt","Ustrd","Cdtr","Dbtr"};
+	private String[] NodeToFind = { "ValDt", "CdtDbtInd", "Amt", "Ustrd", "Cdtr", "Dbtr" };
 	private static int ValueDate = 0;
 	private static int CreditDebitIndicator = 1;
 	private static int Amount = 2;
-	private static int Unstructured = 3;	//Unstrukturierter Verwendungszweck 140zeichen max
+	private static int Unstructured = 3; // Unstrukturierter Verwendungszweck 140zeichen max
 	private static int Creditor = 4;
 	private static int Debitor = 5;
+	private boolean isJointAccount = false;
+	private int accountId = 0;
+	private Connection cn = null;
 
-	ReadCamt(String PathAndFile) {
+	ReadCamt(String PathAndFile, Connection LoginCN) {
+		this.cn = LoginCN;
 
 		// decide what FileType must be read
 		if (PathAndFile.endsWith("ZIP") || PathAndFile.endsWith("zip")) {
@@ -52,13 +60,13 @@ public class ReadCamt {
 
 				buchungen = new String[buchungsAnzahl][6];
 
-				//set IBAN from EBICs File
+				// set IBAN from EBICs File
 				sIBAN = findSubs(KontoAuszug.getElementsByTagName("Acct").item(0), "IBAN", "").trim();
 
-				//write Entrys from EBICs File in to Array
+				// write Entrys from EBICs File in to Array
 				NodeList rows = KontoAuszug.getElementsByTagName("Ntry");
 
-				for(int i = 0; i < rows.getLength(); i++){
+				for (int i = 0; i < rows.getLength(); i++) {
 					buchungen[i][ValueDate] = findSubs(rows.item(i), NodeToFind[0], "").trim();
 					buchungen[i][CreditDebitIndicator] = findSubs(rows.item(i), NodeToFind[1], "").trim();
 					buchungen[i][Amount] = findSubs(rows.item(i), NodeToFind[2], "").trim();
@@ -101,8 +109,15 @@ public class ReadCamt {
 					break;
 			}
 		}
+
+		// when we know the IBAN we get the Information its an JointAccount or not
+		isJointAccount = isJointAccount(sIBAN);
+
+		// and can find the accountId from the DB Table
+		accountId = findAccountId(sIBAN);
 	}
-	private Document parseXML(String PathAndFile){
+
+	private Document parseXML(String PathAndFile) {
 		DocumentBuilder DocBuilder = getDocBuilder();
 
 		try {
@@ -115,8 +130,10 @@ public class ReadCamt {
 			return null;
 		}
 	}
-	private DocumentBuilder getDocBuilder(){
-		DocumentBuilderFactory DocBuilderFactory = DocumentBuilderFactory.newInstance();;
+
+	private DocumentBuilder getDocBuilder() {
+		DocumentBuilderFactory DocBuilderFactory = DocumentBuilderFactory.newInstance();
+		;
 
 		try {
 			return DocBuilderFactory.newDocumentBuilder();
@@ -125,7 +142,8 @@ public class ReadCamt {
 			return null;
 		}
 	}
-	public int getBuchungsanzahl(){
+
+	public int getBuchungsanzahl() {
 		if (buchungen == null) {
 			// falls nicht initialisiert
 			return 0;
@@ -133,27 +151,43 @@ public class ReadCamt {
 			return buchungen.length;
 		}
 	}
-	public String getValDt(int iZeile){
+
+	public String getValDt(int iZeile) {
 		return buchungen[iZeile][ValueDate];
 	}
-	public String getCdtDbtInd(int iZeile){
+
+	public String getCdtDbtInd(int iZeile) {
 		return buchungen[iZeile][CreditDebitIndicator];
 	}
-	public String getAmt(int iZeile){
+
+	public String getAmt(int iZeile) {
 		return buchungen[iZeile][Amount];
 	}
-	public String getUstrd(int iZeile){
+
+	public String getUstrd(int iZeile) {
 		return buchungen[iZeile][Unstructured];
 	}
-	public String getCdtr(int iZeile){
+
+	public String getCdtr(int iZeile) {
 		return buchungen[iZeile][Creditor];
 	}
+
 	public String getDbtr(int iZeile) {
 		return buchungen[iZeile][Debitor];
 	}
-	public String getIBAN(){
+
+	public String getIBAN() {
 		return sIBAN;
 	}
+
+	public boolean isJointAccount() {
+		return isJointAccount;
+	}
+
+	public int getAccountId() {
+		return accountId;
+	}
+
 	public String getIbanFormatted() {
 		// format the IBAN String with Spaces after every 4th Character
 		String sIbanFormatted = "";
@@ -161,7 +195,7 @@ public class ReadCamt {
 		int iCounter = 0;
 
 		for (iIbanCharacters = 0; iIbanCharacters < this.getIBAN().length(); iIbanCharacters++) {
-			if(iCounter == 4) {
+			if (iCounter == 4) {
 				sIbanFormatted = sIbanFormatted + " ";
 				iCounter = 0;
 			}
@@ -171,6 +205,7 @@ public class ReadCamt {
 
 		return sIbanFormatted;
 	}
+
 	public String getAccountOwner() {
 		return this.AccountOwner;
 	}
@@ -182,8 +217,9 @@ public class ReadCamt {
 			Node Item = Subs.item(i);
 
 			if (Item.getNodeName().equals(NodeName)) {
-				if (NodeName.equals("Cdtr") || NodeName.equals("Dbtr") ) {
-					// der Kreditor steht im Nm Tag unter Cdtr, bzw. der Debitor unter Dbtr, aber nicht immer an gleicher Stelle
+				if (NodeName.equals("Cdtr") || NodeName.equals("Dbtr")) {
+					// der Kreditor steht im Nm Tag unter Cdtr, bzw. der Debitor unter Dbtr, aber
+					// nicht immer an gleicher Stelle
 					// deshalb wird das Item Nm gesucht und dessen Textcontent zur�ckgeben
 					for (int b = 0; b < Item.getChildNodes().getLength(); b++) {
 						if (Item.getChildNodes().item(b).getNodeName().equals("Nm"))
@@ -206,6 +242,7 @@ public class ReadCamt {
 		}
 		return ValueToFind;
 	}
+
 	private String[] ReadCsv(String PathAndFile) {
 		String[] sContent = new String[0];
 		int iRows = 0;
@@ -232,20 +269,23 @@ public class ReadCamt {
 		}
 		return sContent;
 	}
+
 	private String delteSign(String sAmountWithSign) {
 		if (sAmountWithSign.startsWith("-"))
 			return sAmountWithSign.substring(1);
 		else
 			return sAmountWithSign;
 	}
+
 	private String getCreditDebitIndicator(String sAmount) {
-		//CRDT should have
-		//DBIT should
+		// CRDT should have
+		// DBIT should
 		if (sAmount.startsWith("-"))
 			return "DBIT";
 		else
 			return "CRDT";
 	}
+
 	private int getCsvRowCount(String PathAndFile) {
 		BufferedReader KontoauszugCsv = null;
 		try {
@@ -271,16 +311,18 @@ public class ReadCamt {
 		}
 		return iRows;
 	}
+
 	private void readDibaData(String[] csvContent) {
 		int iHeaderRow;
 		String HeaderRowStartsWith;
 
 		// search IBAN in the csvContent
-		this.sIBAN = searchIban().replaceAll(" ", "");
-		this.AccountOwner = searchAccountOwner();
+		sIBAN = searchIban().replaceAll(" ", "");
+		AccountOwner = searchAccountOwner();
 
 		// check how many usable Datarows are in the csv
-		// the length of the csvContent Array minus the not usable Rows one to that line that
+		// the length of the csvContent Array minus the not usable Rows one to that line
+		// that
 		// begins with defined Regexstring
 		HeaderRowStartsWith = "^Buchung;Wertstellungsdatum.*";
 		iHeaderRow = findHeaderRow(HeaderRowStartsWith);
@@ -312,16 +354,18 @@ public class ReadCamt {
 																						// gelesen
 			}
 		} else {
-			System.err.println("FEHLER!!! In CSV Datei keine Zeile gefunden die dem Regex \"" + HeaderRowStartsWith + "\" entspricht!");
+			System.err.println("FEHLER!!! In CSV Datei keine Zeile gefunden die dem Regex \"" + HeaderRowStartsWith
+					+ "\" entspricht!");
 		}
 	}
+
 	private void readPostbankData(String[] csvContent) {
 		int iHeaderRow;
 		String AccountBalance;
 		boolean isGermanFormat = true;
 
 		// IBAN is in Line 3 in the csvContent
-		this.sIBAN = csvContent[2].split(";")[2];
+		sIBAN = csvContent[2].split(";")[2];
 
 		// AccountOwner ar not present in Postbank CSV
 		this.AccountOwner = "";
@@ -329,11 +373,14 @@ public class ReadCamt {
 		// Headerrow is in Line 8
 		iHeaderRow = 7;
 
-		// Postbank sometimes change the Format of Numbers (sometime German (3.222,67) sometime englisch (3,112.23) )
-		// At the amount of the account balance in line 6 ca we check what Format is it at this time
+		// Postbank sometimes change the Format of Numbers (sometime German (3.222,67)
+		// sometime englisch (3,112.23) )
+		// At the amount of the account balance in line 6 ca we check what Format is it
+		// at this time
 		AccountBalance = csvContent[5].split(";")[4];
 
-		// look at the Third place from behind, if there is a dot the Format is not German
+		// look at the Third place from behind, if there is a dot the Format is not
+		// German
 		Character DecimalSeparator = AccountBalance.charAt(AccountBalance.length() - 3);
 		if (DecimalSeparator.equals('.')) {
 			isGermanFormat = false;
@@ -342,7 +389,8 @@ public class ReadCamt {
 		// reinitial the Array buchungen new
 		this.buchungen = new String[csvContent.length - 1 - 8][6];
 
-		// the Diba Data begin in the row after the Header, end ends 1 line bevor the last
+		// the Diba Data begin in the row after the Header, end ends 1 line bevor the
+		// last
 		for (int i = iHeaderRow + 1; i < (csvContent.length - 1); i++) {
 			// the Date in this fields has no leading zeros
 			// so i converted in so one
@@ -358,21 +406,28 @@ public class ReadCamt {
 			buchungen[i - (iHeaderRow + 1)][ValueDate] = convertedDate;
 
 			// the Credit or Dbit Inticator is in the csv Data not a separate field
-			// they is indicates by a minus or nothing bevore the amount (creditorische Buchung = haben / Debitorische Buchung = soll)
-			buchungen[i - (iHeaderRow + 1)][CreditDebitIndicator] = getCreditDebitIndicator(csvContent[i].split(";")[11].replace(".", "").replaceAll(",", "."));
+			// they is indicates by a minus or nothing bevore the amount (creditorische
+			// Buchung = haben / Debitorische Buchung = soll)
+			buchungen[i - (iHeaderRow + 1)][CreditDebitIndicator] = getCreditDebitIndicator(
+					csvContent[i].split(";")[11].replace(".", "").replaceAll(",", "."));
 
-			// the amount in the csv is german, we have to replace the thousand dot with null
+			// the amount in the csv is german, we have to replace the thousand dot with
+			// null
 			// and the decimal separator with a dot
 			if (isGermanFormat) {
-				buchungen[i - (iHeaderRow + 1)][Amount] = delteSign(csvContent[i].split(";")[11].replace(".", "").replaceAll(",", "."));
+				buchungen[i - (iHeaderRow + 1)][Amount] = delteSign(
+						csvContent[i].split(";")[11].replace(".", "").replaceAll(",", "."));
 			} else {
 				buchungen[i - (iHeaderRow + 1)][Amount] = delteSign(csvContent[i].split(";")[11].replaceAll(",", ""));
 			}
 			buchungen[i - (iHeaderRow + 1)][Unstructured] = csvContent[i].split(";")[4];
 			buchungen[i - (iHeaderRow + 1)][Creditor] = csvContent[i].split(";")[3];
-			buchungen[i - (iHeaderRow + 1)][Debitor] = csvContent[i].split(";")[3]; // wird nicht extra aufgeführt deshalb wird der selbe wert gelesen
+			buchungen[i - (iHeaderRow + 1)][Debitor] = csvContent[i].split(";")[3]; // wird nicht extra aufgeführt
+																					// deshalb wird der selbe wert
+																					// gelesen
 		}
 	}
+
 	private int findHeaderRow(String HeaderRowStartsWith) {
 		// find the Row that contians the Headers like "Buchung" or "Valuta"
 		for (int i = 0; i < csvContent.length; i++) {
@@ -385,6 +440,7 @@ public class ReadCamt {
 		}
 		return 0;
 	}
+
 	private String searchIban() {
 		// search in the whole Array at a german IBAN
 		for (int i = 0; i < csvContent.length; i++) {
@@ -401,6 +457,7 @@ public class ReadCamt {
 		}
 		return null;
 	}
+
 	private String searchAccountOwner() {
 		// search in the whole Array at the Line that begin with "Kunde"
 		for (int i = 0; i < csvContent.length; i++) {
@@ -416,6 +473,7 @@ public class ReadCamt {
 
 		return "";
 	}
+
 	private int checkBank() {
 		String[] rowParts;
 		// in the CSV Data we can check from witch Bank they are
@@ -433,5 +491,49 @@ public class ReadCamt {
 		}
 
 		return 0;
+	}
+
+	private boolean isJointAccount(String iban) {
+		DBTools getter = new DBTools(cn);
+		boolean isJointAccount = false;
+
+		getter.select("""
+				SELECT bemerkung
+				FROM konten
+				WHERE iban = '%s'
+				""".formatted(iban), 1);
+
+		try {
+			getter.first();
+			isJointAccount = getter.getString("bemerkung").equals("Haushaltskonto");
+		} catch (SQLException e) {
+			System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "
+					+ e.getStackTrace()[0].getLineNumber() + "): " + e.toString());
+			System.exit(1);
+		}
+
+		return isJointAccount;
+	}
+
+	private int findAccountId(String iban) {
+		DBTools getter = new DBTools(cn);
+		int accountId = 0;
+
+		getter.select("""
+				SELECT konten_id
+				FROM konten
+				WHERE iban = '%s'
+				""".formatted(iban), 1);
+
+		try {
+			getter.first();
+			accountId = getter.getInt("konten_id");
+		} catch (SQLException e) {
+			System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "
+					+ e.getStackTrace()[0].getLineNumber() + "): " + e.toString());
+			System.exit(1);
+		}
+
+		return accountId;
 	}
 }

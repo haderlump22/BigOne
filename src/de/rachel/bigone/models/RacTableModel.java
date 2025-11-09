@@ -1,15 +1,18 @@
 package de.rachel.bigone.models;
 
+import java.sql.Connection;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
-
 import javax.swing.table.AbstractTableModel;
 
+import de.rachel.bigone.DBTools;
 import de.rachel.bigone.ReadCamt;
 
 public class RacTableModel extends AbstractTableModel{
 	private static final long serialVersionUID = -2431676313753205738L;
+	private Connection cn = null;
 	private String[] columnName = new String[]{"Wertstellung","s/h","Betrag","Buchungshinweis","DBIT/CRDT","LiquiMon","Ereignis"};
 	private String[][] daten;
 	private String[][] strLager;
@@ -20,10 +23,13 @@ public class RacTableModel extends AbstractTableModel{
 	private static int CdtrDbtr = 4;		// Creditor bzw. Debitor
 	private static int LiquiMonth = 5;
 	private static int AccountBookingEvent = 6;
+	private ReadCamt Auszug = null;
+	private ArrayList<String> componentList = new ArrayList<String>();
 	SimpleDateFormat SQLDATE = new SimpleDateFormat("yyyy-MM-dd");
 
- 	public RacTableModel(ReadCamt Auszug){
-		daten = lese_werte(Auszug);
+ 	public RacTableModel(Connection LoginCN){
+		this.cn = LoginCN;
+		lese_werte();
 	}
 	public int getColumnCount() {
 		return columnName.length;
@@ -54,41 +60,47 @@ public class RacTableModel extends AbstractTableModel{
 	 * Daten des Auszugs werden hier
 	 * in das Array des Table Models eingelesen
 	 */
-	private String[][] lese_werte(ReadCamt Auszug) {
+	private void lese_werte() {
 
-		String strLager[][] = new String[Auszug.getBuchungsanzahl()][7];
+		if (Auszug != null) {
+			// if we know the Auszug we can decide where to get  the category
+			updateEntrysForCategory(Auszug.isJointAccount());
 
-		for(int iAktuelleBuchung = 0; iAktuelleBuchung < Auszug.getBuchungsanzahl(); iAktuelleBuchung++){
-			strLager[iAktuelleBuchung][ValueDate] = Auszug.getValDt(iAktuelleBuchung);
+			daten = new String[Auszug.getBuchungsanzahl()][7];
 
-			strLager[iAktuelleBuchung][LiquiMonth] = Auszug.getValDt(iAktuelleBuchung).substring(0, 8) + "01";
+			for(int iAktuelleBuchung = 0; iAktuelleBuchung < Auszug.getBuchungsanzahl(); iAktuelleBuchung++){
+				daten[iAktuelleBuchung][ValueDate] = Auszug.getValDt(iAktuelleBuchung);
 
-			strLager[iAktuelleBuchung][Amount] = Auszug.getAmt(iAktuelleBuchung);
+				daten[iAktuelleBuchung][LiquiMonth] = Auszug.getValDt(iAktuelleBuchung).substring(0, 8) + "01";
 
-			// je nachdem ob creditorische oder debitorische Buchung
-			// bestimmte Werte des Arrays mit anderen Werten füllen
-			if (Auszug.getCdtDbtInd(iAktuelleBuchung).equals("CRDT")) {
-				strLager[iAktuelleBuchung][CdtrDbtr] = Auszug.getDbtr(iAktuelleBuchung);
-				strLager[iAktuelleBuchung][CreditDebitIndicator] = "h";
-				// todo
-				// - Gültigkeit der EC karte aus dem Buchungstext entfernen (Folgenr. 02 Verfalld. 2212) oder auch (Folgenr. 002 Verfalld. 2212)
-				strLager[iAktuelleBuchung][Unstructured] = Auszug.getUstrd(iAktuelleBuchung) + " (" + Auszug.getDbtr(iAktuelleBuchung) + ")";
+				daten[iAktuelleBuchung][Amount] = Auszug.getAmt(iAktuelleBuchung);
+
+				// je nachdem ob creditorische oder debitorische Buchung
+				// bestimmte Werte des Arrays mit anderen Werten füllen
+				if (Auszug.getCdtDbtInd(iAktuelleBuchung).equals("CRDT")) {
+					daten[iAktuelleBuchung][CdtrDbtr] = Auszug.getDbtr(iAktuelleBuchung);
+					daten[iAktuelleBuchung][CreditDebitIndicator] = "h";
+					// todo
+					// - Gültigkeit der EC karte aus dem Buchungstext entfernen (Folgenr. 02 Verfalld. 2212) oder auch (Folgenr. 002 Verfalld. 2212)
+					daten[iAktuelleBuchung][Unstructured] = Auszug.getUstrd(iAktuelleBuchung) + " (" + Auszug.getDbtr(iAktuelleBuchung) + ")";
+				}
+
+				if (Auszug.getCdtDbtInd(iAktuelleBuchung).equals("DBIT")) {
+					daten[iAktuelleBuchung][CdtrDbtr] = Auszug.getCdtr(iAktuelleBuchung);
+					daten[iAktuelleBuchung][CreditDebitIndicator] = "s";
+					// todo
+					// - Gültigkeit der EC karte aus dem Buchungstext entfernen (Folgenr. 02 Verfalld. 2212) oder auch (Folgenr. 002 Verfalld. 2212)
+					daten[iAktuelleBuchung][Unstructured] = Auszug.getUstrd(iAktuelleBuchung) + " (" + Auszug.getCdtr(iAktuelleBuchung) + ")";
+				}
+
+				// am ende der verarbeitung einer Zeile wird das ereigniss fest auf
+				// HaushGeld (46) oder Haushalt (13) gesetzt, je nachdem ob es sich um ein eigenes
+				// Girokonto oder um das gemeinschaftliche Haushaltskonto handelt
+				daten[iAktuelleBuchung][AccountBookingEvent] = (Auszug.isJointAccount() ? "Haushalt (13)" : "HaushGeld (46)");
 			}
-
-			if (Auszug.getCdtDbtInd(iAktuelleBuchung).equals("DBIT")) {
-				strLager[iAktuelleBuchung][CdtrDbtr] = Auszug.getCdtr(iAktuelleBuchung);
-				strLager[iAktuelleBuchung][CreditDebitIndicator] = "s";
-				// todo
-				// - Gültigkeit der EC karte aus dem Buchungstext entfernen (Folgenr. 02 Verfalld. 2212) oder auch (Folgenr. 002 Verfalld. 2212)
-				strLager[iAktuelleBuchung][Unstructured] = Auszug.getUstrd(iAktuelleBuchung) + " (" + Auszug.getCdtr(iAktuelleBuchung) + ")";
-			}
-
-			// am ende der verarbeitung einer Zeile wird das ereigniss fest auf
-			// HaushGeld (46) gesetzt
-			strLager[iAktuelleBuchung][AccountBookingEvent] = "HaushGeld (46)";
 		}
-		return strLager;
 	}
+
 	public void removeRow(int iZeile, boolean refreshImmediately) {
 		//mit dieser methode wird die
 		//gewaehlte Zeile aus dem Array entfernt
@@ -149,7 +161,8 @@ public class RacTableModel extends AbstractTableModel{
 		fireTableDataChanged();
 	}
 	public void aktualisiere(ReadCamt Auszug) {
-		daten = lese_werte(Auszug);
+		this.Auszug = Auszug;
+		lese_werte();
 		fireTableDataChanged();
 	}
 
@@ -171,11 +184,43 @@ public class RacTableModel extends AbstractTableModel{
 					iZeile--;
 				}
 			} catch (ParseException e) {
-				e.printStackTrace();
+				System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "+e.getStackTrace()[0].getLineNumber()+"): " + e.toString());
 			}
 		}
 
 		//tabellendarstellung aktualisieren
 		fireTableDataChanged();
+	}
+
+	private void updateEntrysForCategory(boolean isJointAccount) {
+		DBTools getter = new DBTools(cn);
+
+		// first clear the old Content
+		componentList.clear();
+
+		// if the iban is from an jointAccount the Accountevents will be get from another table
+		if (isJointAccount) {
+			getter.select("SELECT ha_kategorie_id, kategoriebezeichnung FROM ha_kategorie ORDER BY 2",2);
+		} else {
+			getter.select("SELECT ereigniss_id, ereigniss_krzbez FROM kontenereignisse WHERE gueltig = 'TRUE' ORDER BY 2",2);
+		}
+
+		try {
+			getter.beforeFirst();
+
+			while (getter.next()) {
+				componentList.add(getter.getString(isJointAccount ? "kategoriebezeichnung" : "ereigniss_krzbez") + " (" + getter.getString(isJointAccount ? "ha_kategorie_id" : "ereigniss_id")+")");
+			}
+		} catch (Exception e) {
+			System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "+e.getStackTrace()[0].getLineNumber()+"): " + e.toString());
+		}
+	}
+
+	public Object[] getComponent() {
+		return componentList.toArray();
+	}
+
+	public int getAccountId() {
+		return Auszug.getAccountId();
 	}
 }

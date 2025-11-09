@@ -6,6 +6,8 @@ import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.ArrayList;
 
 import javax.swing.AbstractCellEditor;
 import javax.swing.JComboBox;
@@ -15,6 +17,7 @@ import javax.swing.event.PopupMenuListener;
 import javax.swing.table.TableCellEditor;
 
 import de.rachel.bigone.DBTools;
+import de.rachel.bigone.models.RacTableModel;
 /**
  * Generiert eine Combobox für die Auswahl eines Kontoereignis beim Importieren von
  * Kontobewegungen.
@@ -22,11 +25,11 @@ import de.rachel.bigone.DBTools;
 public class ComboTableCellEditor extends AbstractCellEditor implements TableCellEditor {
 	private static final long serialVersionUID = 4917922491523056278L;
 	private JComboBox<String> component = new JComboBox<String>();
-	private Connection cn = null;
 	private boolean cellEditingStopped = false;
+	private ArrayList<String> comboBoxSource = null;
 
-	public ComboTableCellEditor(Connection LoginCN) {
-		cn = LoginCN;
+	public ComboTableCellEditor() {
+
 		// notwendig damit eine Auswahl, für das Beenden des Editmodus der Zelle sorgt
 		component.addItemListener(new ItemListener() {
 
@@ -83,18 +86,37 @@ public class ComboTableCellEditor extends AbstractCellEditor implements TableCel
         });
 	}
 
-	public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int rowIndex, int colIndex) {
-		// nur wenn die Combobox keine Einträge hat wird sie gefüllt, damit sie nicht bei jedem Aufruf von getTableCellEditorComponent gefüllt wird
-		if (component.getItemCount() == 0) {
-			fill_component();
+	public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int rowIndex,
+			int colIndex) {
+		Object[] listEntrys = ((RacTableModel) table.getModel()).getComponent();
+
+		// check if Combobox has elements
+		if (component.getItemCount() > 0) {
+			// check if the first entry in the combobox is different from the first entry in
+			// the provided list from the table model.
+			if (!listEntrys[0].equals(component.getItemAt(0))) {
+				component.removeAllItems();
+
+				// if it so, we rebuild the Items in the Combobox
+				for (Object entry : listEntrys) {
+					component.addItem((String) entry);
+				}
+			}
+		} else {
+			// fill Combobox first time
+			for (Object entry : listEntrys) {
+				component.addItem((String) entry);
+			}
 		}
 
 		return component;
 	}
+
 	@Override
     public boolean stopCellEditing() {
         return cellEditingStopped;
     }
+
     public Object getCellEditorValue() {
 		//damit bei erneuter auswahl immer der erste eintrag selectiert ist
     	//dieser kleine umweg
@@ -104,16 +126,5 @@ public class ComboTableCellEditor extends AbstractCellEditor implements TableCel
 
 		// die bisherige Auswahl soll bestehen bleiben
 		return component.getSelectedItem().toString();
-
     }
-	private void fill_component() {
-		DBTools getter = new DBTools(cn);
-
-		getter.select("SELECT ereigniss_id, ereigniss_krzbez FROM kontenereignisse WHERE gueltig = 'TRUE' order by 2;",2);
-
-		Object[][] cmbComponentValues = getter.getData();
-
-		for(Object[] cmbComponentValue : cmbComponentValues)
-			component.addItem(cmbComponentValue[1] + " (" + cmbComponentValue[0]+")");
-	}
 }

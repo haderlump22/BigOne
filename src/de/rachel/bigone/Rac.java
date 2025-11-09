@@ -39,6 +39,7 @@ public class Rac {
 	private JLabel lblDateFrom, lblDateTo, lblIbanValue;
 	private JPanel pnlTimeRangeSection, pnlIbanInfo;
 	private String BankStatementFile;
+	private ReadCamt Auszug = null;
 
 	Rac(Connection LoginCN) {
 		cn = LoginCN;
@@ -51,7 +52,7 @@ public class Rac {
 		RACWindow.setResizable(false);
 
 		open = new JFileChooser();
-		// beim OpenDialog sollen nur XML oder CSV Dateien angezeigt werden
+		// beim OpenDialog sollen nur XML, ZIP oder CSV Dateien angezeigt werden
 		open.setFileFilter(new FileNameExtensionFilter("XML/CSV/ZIP", "xml", "csv", "zip"));
 
 		btnOpen = new JButton("Auszug öffnen");
@@ -64,21 +65,14 @@ public class Rac {
 
 				if (open.showOpenDialog(RACWindow) != JFileChooser.CANCEL_OPTION) {
 					BankStatementFile = open.getSelectedFile().toString();
-					ReadCamt Auszug = new ReadCamt(BankStatementFile);
+					Auszug = new ReadCamt(BankStatementFile, cn);
 
 					if (Auszug.getBuchungsanzahl() > 0) {
 						// set a eventualy new IBAN
 						lblIbanValue.setText(Auszug.getIbanFormatted());
 						lblIbanValue.setToolTipText(Auszug.getAccountOwner());
 
-						if (table == null) {
-							zeichne_tabelle(Auszug);
-						} else {
-							RacTableCellRenderer ren = new RacTableCellRenderer(cn, lblIbanValue.getText());
-							table.setDefaultRenderer(Object.class, ren);
-							model = (RacTableModel) table.getModel();
-							model.aktualisiere(Auszug);
-						}
+						((RacTableModel) table.getModel()).aktualisiere(Auszug);
 
 						// nach dem erfolgreichen einlesen der zu importierenden daten
 						// den Button aktivieren
@@ -103,28 +97,16 @@ public class Rac {
 			public void actionPerformed(ActionEvent ae) {
 
 				String sql = "";
-				String AccountId = "";
 				String sLiquiMonat = "";
 				boolean insert_details_success = true;
 				boolean insert_tankdaten_success = true;
 				DBTools pusher = new DBTools(cn);
 				DBTools getter = new DBTools(cn);
-				DBTools AccountIdGetter = new DBTools(cn);
 				model = (RacTableModel) table.getModel();
 
 				// insert each Row in the DB
 				// if exist a Account ID to the IBAN that comes from the Bank Statement
 				if (lblIbanValue.getText() != "") {
-					// because the IBAN in the Lable contains Spaces for easy to read, they must
-					// delete before get some Data from the DB
-					AccountIdGetter.select("""
-							SELECT konten_id
-							FROM konten
-							WHERE iban = '%s'
-							""".formatted(lblIbanValue.getText().replaceAll(" ", "")), 1);
-
-					AccountId = AccountIdGetter.getValueAt(0, 0).toString();
-
 					// tabellendaten von der letzten Zeile zur ersten hin importieren
 					// damit die altesten buchungen als erste in der Tabelle geschrieben
 					// werden
@@ -142,7 +124,7 @@ public class Rac {
 								(soll_haben, konten_id, datum, betrag, buchtext, ereigniss_id, liqui_monat)
 								VALUES
 								('%s', %s, '%s', %s, '%s', %s, %s)
-								""".formatted(model.getValueAt(i, 1), AccountId, model.getValueAt(i, 0),
+								""".formatted(model.getValueAt(i, 1), model.getAccountId(), model.getValueAt(i, 0),
 								model.getValueAt(i, 2), model.getValueAt(i, 3).toString().replace("'", "''"),
 								BigOneTools.extractEreigId(model.getValueAt(i, 6).toString()), sLiquiMonat);
 
@@ -237,11 +219,7 @@ public class Rac {
 				dateTo.setCalendar(null);
 
 				// show all Rows from the originally opened Bankfile to choose an new Timerange
-				ReadCamt Auszug = new ReadCamt(BankStatementFile);
-				RacTableCellRenderer ren = new RacTableCellRenderer(cn, lblIbanValue.getText());
-				table.setDefaultRenderer(Object.class, ren);
-				model = (RacTableModel) table.getModel();
-				model.aktualisiere(Auszug);
+				((RacTableModel) table.getModel()).aktualisiere(Auszug);
 			}
 		});
 
@@ -266,8 +244,7 @@ public class Rac {
 					if (dateTo.getDate() != null) {
 						if (dateFrom.getDate().before(dateTo.getDate())) {
 							// Arraycleaning can start
-							model = (RacTableModel) table.getModel();
-							model.removeUnusedRows(dateFrom.getDate(), dateTo.getDate());
+							((RacTableModel) table.getModel()).removeUnusedRows(dateFrom.getDate(), dateTo.getDate());
 
 							// after choose Timerange enabled Import Button
 							btnImp.setEnabled(true);
@@ -292,8 +269,7 @@ public class Rac {
 					if (dateFrom.getDate() != null) {
 						if (dateFrom.getDate().before(dateTo.getDate())) {
 							// Arraycleaning can start
-							model = (RacTableModel) table.getModel();
-							model.removeUnusedRows(dateFrom.getDate(), dateTo.getDate());
+							((RacTableModel) table.getModel()).removeUnusedRows(dateFrom.getDate(), dateTo.getDate());
 
 							// after choose Timerange enabled Import Button
 							btnImp.setEnabled(true);
@@ -321,44 +297,14 @@ public class Rac {
 
 		pnlIbanInfo.add(lblIbanValue);
 
-		// put all to the Frame
-		RACWindow.add(btnOpen);
-		RACWindow.add(btnImp);
-		RACWindow.add(pnlTimeRangeSection);
-		RACWindow.add(pnlIbanInfo);
-		RACWindow.validate();
-		RACWindow.repaint();
-
-		// Datei auswählen lassen
-		if (open.showOpenDialog(RACWindow) != JFileChooser.CANCEL_OPTION) {
-			BankStatementFile = open.getSelectedFile().toString();
-			ReadCamt Auszug = new ReadCamt(BankStatementFile);
-			if (Auszug.getBuchungsanzahl() > 0) {
-				lblIbanValue.setText(Auszug.getIbanFormatted());
-				lblIbanValue.setToolTipText(Auszug.getAccountOwner());
-				zeichne_tabelle(Auszug);
-				btnImp.setEnabled(true);
-			} else {
-				System.out.println("Keine Buchungen in Datei " + open.getSelectedFile().toString() + " gefunden!");
-				btnImp.setEnabled(false);
-			}
-		} else {
-			btnImp.setEnabled(false);
-		}
-
-		RACWindow.setVisible(true);
-	}
-
-	private void zeichne_tabelle(ReadCamt Auszug) {
-
-		table = new JTable(new RacTableModel(Auszug));
+		table = new JTable(new RacTableModel(cn));
 
 		// festlegen von diversen Verhaltensweisen der Tabelle
-		RacTableCellRenderer ren = new RacTableCellRenderer(cn, lblIbanValue.getText());
-		table.setDefaultRenderer(Object.class, ren); //vieleicht auch direkt als new in klammern???
+		table.setDefaultRenderer(Object.class, new RacTableCellRenderer(cn));
+
 		// table.getSelectionModel().addListSelectionListener(new RACSelectionListener(table));
 		table.getColumnModel().getColumn(5).setCellEditor(new LiquiDateTableCellEditor());
-		table.getColumnModel().getColumn(6).setCellEditor(new ComboTableCellEditor(cn));
+		table.getColumnModel().getColumn(6).setCellEditor(new ComboTableCellEditor());
 
 		// fuer einige spalten feste breiten einrichten
 		table.getColumnModel().getColumn(0).setMinWidth(78);
@@ -383,5 +329,35 @@ public class Rac {
 		RACWindow.add(sp);
 		RACWindow.validate();
 		RACWindow.repaint();
+
+		// put all to the Frame
+		RACWindow.add(btnOpen);
+		RACWindow.add(btnImp);
+		RACWindow.add(pnlTimeRangeSection);
+		RACWindow.add(pnlIbanInfo);
+		RACWindow.validate();
+		RACWindow.repaint();
+
+		// Datei auswählen lassen
+		if (open.showOpenDialog(RACWindow) != JFileChooser.CANCEL_OPTION) {
+			BankStatementFile = open.getSelectedFile().toString();
+			Auszug = new ReadCamt(BankStatementFile, cn);
+
+			if (Auszug.getBuchungsanzahl() > 0) {
+				lblIbanValue.setText(Auszug.getIbanFormatted());
+				lblIbanValue.setToolTipText(Auszug.getAccountOwner());
+
+				((RacTableModel) table.getModel()).aktualisiere(Auszug);
+
+				btnImp.setEnabled(true);
+			} else {
+				System.out.println("Keine Buchungen in Datei " + open.getSelectedFile().toString() + " gefunden!");
+				btnImp.setEnabled(false);
+			}
+		} else {
+			btnImp.setEnabled(false);
+		}
+
+		RACWindow.setVisible(true);
 	}
 }

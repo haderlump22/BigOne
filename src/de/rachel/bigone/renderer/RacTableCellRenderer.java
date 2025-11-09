@@ -8,6 +8,7 @@ import javax.swing.table.TableCellRenderer;
 
 import de.rachel.bigone.BigOneTools;
 import de.rachel.bigone.DBTools;
+import de.rachel.bigone.models.RacTableModel;
 
 import java.awt.Color;
 import java.sql.Connection;
@@ -16,19 +17,15 @@ import java.util.GregorianCalendar;
 
 public class RacTableCellRenderer implements TableCellRenderer {
 	private Connection cn = null;
-	private String sAccountId = "";
+	private int accountId = 0;
 
-	public RacTableCellRenderer(Connection LoginCN, String sIbanValue) {
+	public RacTableCellRenderer(Connection LoginCN) {
 		this.cn = LoginCN;
-		DBTools AccountIdGetter = new DBTools(cn);
-
-		// because the IBAN in the Lable contains Spaces for easy to read, they must
-		// delete before get some Data from the DB
-		AccountIdGetter.select("SELECT konten_id FROM konten WHERE iban = '" + sIbanValue.replaceAll(" ", "") + "'", 1);
-		sAccountId = AccountIdGetter.getValueAt(0, 0).toString();
 	}
 
 	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+
+		accountId = ((RacTableModel) table.getModel()).getAccountId();
 
 		JLabel label;
 
@@ -99,10 +96,10 @@ public class RacTableCellRenderer implements TableCellRenderer {
 				SELECT COUNT(*)
 				FROM transaktionen
 				WHERE betrag = %s
-				AND konten_id = %s
+				AND konten_id = %d
 				AND datum >= '%s'
 				AND datum <= '%s'
-				""".formatted(table.getModel().getValueAt(row, 2).toString(), sAccountId, iYear + "-" + (iMonth + 1) + "-1", iYear + "-" + (iMonth + 1) + "-" + calendar.getActualMaximum(Calendar.DAY_OF_MONTH)), 1);
+				""".formatted(table.getModel().getValueAt(row, 2).toString(), accountId, iYear + "-" + (iMonth + 1) + "-1", iYear + "-" + (iMonth + 1) + "-" + calendar.getActualMaximum(Calendar.DAY_OF_MONTH)), 1);
 
 		if (Integer.valueOf(marker.getValueAt(0, 0).toString()) > 0) {
 			return true;
