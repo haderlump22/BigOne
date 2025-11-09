@@ -452,7 +452,7 @@ public class Transaktionen {
 				INSERT INTO transaktionen
 				(soll_haben, konten_id, datum, betrag, buchtext, ereigniss_id, liqui_monat)
 				VALUES
-				('%s', %d, '%s', %s, '%s', %d)
+				('%s', %d, '%s', %s, '%s', %d
 				""".formatted(BankStatementLine.sh, BankStatementLine.KontoId, BankStatementLine.Datum,
 				BankStatementLine.Betrag, BankStatementLine.Buchungstext, BankStatementLine.EreignisId);
 
@@ -460,9 +460,9 @@ public class Transaktionen {
 		// soll darf kein hochkomma an dieser stelle
 		// im sqlstatement vorkommen
 		if (BankStatementLine.LiquiDate == "NULL")
-			sql = sql + BankStatementLine.LiquiDate + ");";
+			sql = sql + "," + BankStatementLine.LiquiDate + ")";
 		else
-			sql = sql + "'" + BankStatementLine.LiquiDate + "')";
+			sql = sql + ",'" + BankStatementLine.LiquiDate + "')";
 
 		pusher.insert(sql);
 	}

@@ -896,9 +896,9 @@ public class AccountClosing {
 		getter.select("""
 				SELECT t.buchtext, ke.ereigniss_krzbez
 				FROM transaktionen t, kontenereignisse ke
-				WHERE t.transaktions_id = transaktions_id
+				WHERE t.transaktions_id = %s
 				AND ke.ereigniss_id = t.ereigniss_id
-				""", 2);
+				""".formatted(transaktions_id), 2);
 
 		if (getter.getRowCount() > 0) {
 			return getter.getValueAt(0, 0).toString() + "//" + getter.getValueAt(0, 1).toString();
