@@ -18,6 +18,7 @@ import java.awt.event.KeyEvent;
 import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -193,14 +194,27 @@ public class JointAccountClosing {
 			public void keyReleased(KeyEvent ke) {
 				if (ke.getKeyCode() == KeyEvent.VK_ENTER
 						&& Pattern.matches("\\d{2}.\\d{2}.[1-9]{1}\\d{3}", billingMonth.getText())) {
-					((JointAccountClosingDetailTableModel) jointAccountClosingDetailTable.getModel())
-							.aktualisiere(billingMonth.getText());
+					if (existAcountClosingData(billingMonth.getText())) {
+						((JointAccountClosingDetailTableModel) jointAccountClosingDetailTable.getModel())
+								.aktualisiere(billingMonth.getText());
 
-					// now we can fill the sumOverview if there was stored Values before
-					fillSumOverview();
+						// now we can fill the sumOverview if there was stored Values before
+						fillSumOverview();
 
-					// if the Sum Overview ist filled we can calculate the Data for the ballance allocation overview and display it
-					fillBallaceAllocationOverview();
+						// if the Sum Overview ist filled we can calculate the Data for the ballance
+						// allocation overview and display it
+						fillBallaceAllocationOverview();
+					} else {
+						int result = JOptionPane.showConfirmDialog(null, "Es sind noch keine Daten für den Abrechnungsmontat zusammengestellt worden!\nSoll das jetzt gemacht werden?", "Abschluss initieren", JOptionPane.YES_NO_CANCEL_OPTION);
+
+						if (result == JOptionPane.YES_OPTION) {
+							System.out.println("hier muss noch dafür gesorgt werden das die Kategoriesummen des gewünschten Abrechnungsmontas zusammengestellt werden");;
+						} else if (result == JOptionPane.NO_OPTION) {
+							jointAccountClosingWindow.dispose();
+						}
+					}
+
+
 				}
 			}
 
@@ -464,5 +478,29 @@ public class JointAccountClosing {
 
 		((JointAccountClosingBalanceAllocationOverviewDetailTableModel) jointAccountClosingBalanceAllocationOverviewDetailTable
 				.getModel()).aktualisiere(jointAccountClosingBalanceAllocationOverviewDetailTableData);
+	}
+
+	private boolean existAcountClosingData(String billingMonth) {
+		DBTools getter = new DBTools(cn);
+		int rowCountOfAcountClosingDetails = 0;
+
+		getter.select("""
+				SELECT COUNT(*)
+				FROM ha_abschlussdetails
+				WHERE "abschlussMonat" = '%s'
+				""".formatted(billingMonth), 1);
+		try {
+			getter.first();
+			rowCountOfAcountClosingDetails = getter.getInt("COUNT");
+		} catch (Exception e) {
+			System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "
+					+ e.getStackTrace()[0].getLineNumber() + "): " + e.toString());
+		}
+
+		if (rowCountOfAcountClosingDetails > 0) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 }
