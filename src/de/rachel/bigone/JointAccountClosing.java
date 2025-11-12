@@ -416,7 +416,6 @@ public class JointAccountClosing {
 		Double sumOfAllIncome = 0.0;
 		Double totalSumToBeDivided = 0.0;
 		DBTools getter = new DBTools(cn);
-		ResultSet rs;
 
 		getter.select("""
 				SELECT p.personen_id, p.name || ', ' || SUBSTRING(p.vorname, 1, 1) || '.' as party, sum(gg.betrag) as betrag
@@ -429,14 +428,13 @@ public class JointAccountClosing {
 				""".formatted(billingMonth.getText(), billingMonth.getText()),
 				3);
 
-		rs = getter.getResultSet();
 		try {
-			rs.beforeFirst();
+			getter.beforeFirst();
 
-			while (rs.next()) {
+			while (getter.next()) {
 				salaryBasesForTheDefinedBillingMonth
-						.add(new SalaryBasesSumOfIncomePerPartyTableRow(rs.getInt("personen_id"), rs.getString("party"),
-								rs.getDouble("betrag")));
+						.add(new SalaryBasesSumOfIncomePerPartyTableRow(getter.getInt("personen_id"), getter.getString("party"),
+								getter.getDouble("betrag")));
 			}
 		} catch (Exception e) {
 			System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "
@@ -456,10 +454,9 @@ public class JointAccountClosing {
 				AND ha_abschlussdetails."abschlussDetailId" = ha_abschlusssummen."abschlussDetailId"
 				""".formatted(billingMonth.getText(), billingMonth.getText()), 1);
 
-		rs = getter.getResultSet();
 		try {
-			rs.first();
-			totalSumToBeDivided = rs.getDouble("AmountToBeDivided");
+			getter.first();
+			totalSumToBeDivided = getter.getDouble("AmountToBeDivided");
 		} catch (Exception e) {
 			System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "
 					+ e.getStackTrace()[0].getLineNumber() + "): " + e.toString());
