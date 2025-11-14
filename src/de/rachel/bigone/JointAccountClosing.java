@@ -34,6 +34,7 @@ import de.rachel.bigone.listeners.JointAccountClosingSumOverviewMouseListener;
 import de.rachel.bigone.models.JointAccountClosingBalanceAllocationOverviewDetailTableModel;
 import de.rachel.bigone.models.JointAccountClosingDetailTableModel;
 import de.rachel.bigone.records.JointAccountClosingBalanceAllocationOverviewDetailTableRow;
+import de.rachel.bigone.records.JointAccountClosingDetailTableRow;
 import de.rachel.bigone.records.SalaryBasesSumOfIncomePerPartyTableRow;
 import de.rachel.bigone.renderer.JointAccountClosingBalanceAllocationOverviewDetailTableCellRenderer;
 import de.rachel.bigone.renderer.JointAccountClosingDetailTableCellRenderer;
@@ -194,7 +195,7 @@ public class JointAccountClosing {
 			public void keyReleased(KeyEvent ke) {
 				if (ke.getKeyCode() == KeyEvent.VK_ENTER
 						&& Pattern.matches("\\d{2}.\\d{2}.[1-9]{1}\\d{3}", billingMonth.getText())) {
-					if (existAcountClosingData(billingMonth.getText())) {
+					if (existAccountClosingData(billingMonth.getText())) {
 						((JointAccountClosingDetailTableModel) jointAccountClosingDetailTable.getModel())
 								.aktualisiere(billingMonth.getText());
 
@@ -208,7 +209,7 @@ public class JointAccountClosing {
 						int result = JOptionPane.showConfirmDialog(null, "Es sind noch keine Daten für den Abrechnungsmontat zusammengestellt worden!\nSoll das jetzt gemacht werden?", "Abschluss initieren", JOptionPane.YES_NO_CANCEL_OPTION);
 
 						if (result == JOptionPane.YES_OPTION) {
-							System.out.println("hier muss noch dafür gesorgt werden das die Kategoriesummen des gewünschten Abrechnungsmontas zusammengestellt werden");;
+							prepareJointAccountClosingDetailData(billingMonth.getText());
 						} else if (result == JOptionPane.NO_OPTION) {
 							jointAccountClosingWindow.dispose();
 						}
@@ -477,7 +478,7 @@ public class JointAccountClosing {
 				.getModel()).aktualisiere(jointAccountClosingBalanceAllocationOverviewDetailTableData);
 	}
 
-	private boolean existAcountClosingData(String billingMonth) {
+	private boolean existAccountClosingData(String billingMonth) {
 		DBTools getter = new DBTools(cn);
 		int rowCountOfAcountClosingDetails = 0;
 
@@ -499,5 +500,95 @@ public class JointAccountClosing {
 		} else {
 			return false;
 		}
+	}
+
+	private void prepareJointAccountClosingDetailData(String billingMonth) {
+		DBTools dbTool = new DBTools(cn);
+		List<JointAccountClosingDetailTableRow> jointAccountDetailData = new ArrayList<>();
+		Double planedValue = 0.0;
+
+		// first put the income Values in a temporary Table
+		dbTool.insert("""
+				SELECT kategoriebezeichnung, SUM(tHaben.betrag) INTO TEMP closedetail FROM transaktionen tHaben, ha_kategorie
+				WHERE tHaben.konten_id = 13
+				AND tHaben.soll_haben = 'h'
+				AND tHaben.liqui_monat = '%s'
+				AND tHaben.ereigniss_id = ha_kategorie.ha_kategorie_id
+				GROUP BY ha_kategorie.kategoriebezeichnung
+				ORDER BY ha_kategorie.kategoriebezeichnung ASC
+				""".formatted(billingMonth));
+
+		// the came the expenditure
+		dbTool.insert("""
+				INSERT INTO closedetail
+				SELECT kategoriebezeichnung, SUM(tSoll.betrag * -1) FROM transaktionen tSoll, ha_kategorie
+				WHERE tSoll.konten_id = 13
+				AND tSoll.soll_haben = 's'
+				AND tSoll.liqui_monat = '%s'
+				AND tSoll.ereigniss_id = ha_kategorie.ha_kategorie_id
+				GROUP BY ha_kategorie.kategoriebezeichnung
+				ORDER BY ha_kategorie.kategoriebezeichnung ASC
+				""".formatted(billingMonth));
+
+		// group the incomes and expenditure Values from the temp table
+		dbTool.select("""
+				SELECT kategoriebezeichnung, SUM(sum)
+				FROM closedetail
+				GROUP BY kategoriebezeichnung
+				ORDER BY 1
+				""", 1);
+
+		// and put them into a local record
+		try {
+			dbTool.beforeFirst();
+
+			while (dbTool.next()) {
+				planedValue = getPlanedValueForCategoryInBillingMonth(dbTool.getString("kategoriebezeichnung"), billingMonth);
+
+				jointAccountDetailData.add(
+						new JointAccountClosingDetailTableRow(0, dbTool.getString("kategoriebezeichnung"),
+								dbTool.getDouble("sum"), (planedValue * -1), dbTool.getDouble("sum") - (planedValue * -1)));
+			}
+		} catch (Exception e) {
+			System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "
+					+ e.getStackTrace()[0].getLineNumber() + "): " + e.toString());
+		}
+
+		// drop the temp table after we save the data in to our own record
+		dbTool.update("DROP TABLE closedetail");
+
+		for (JointAccountClosingDetailTableRow row : jointAccountDetailData) {
+			System.out.println(row.nameOfExpenditure()+"/"+row.actualAmount()+"/"+row.planAmount()+"/"+row.difference());
+		}
+	}
+
+	private Double getPlanedValueForCategoryInBillingMonth(String categoryName, String billingMonth) {
+		DBTools dbTool = new DBTools(cn);
+		Double planedValue = 0.0;
+
+		dbTool.select("""
+				SELECT betrag
+				FROM ha_ausgaben
+				WHERE gilt_ab <= '%s'
+				AND gilt_bis >= '%s'
+				AND bezeichnung = '%s'
+				""".formatted(billingMonth, billingMonth, categoryName), 1);
+
+		try {
+			if (dbTool.getRowCount() > 0) {
+				dbTool.first();
+				planedValue = dbTool.getDouble("betrag");
+			} else {
+				// if nothing found we returned the initial Value 0.0
+				return planedValue;
+			}
+
+
+		} catch (Exception e) {
+			System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "
+					+ e.getStackTrace()[0].getLineNumber() + "): " + e.toString());
+		}
+
+		return planedValue;
 	}
 }
