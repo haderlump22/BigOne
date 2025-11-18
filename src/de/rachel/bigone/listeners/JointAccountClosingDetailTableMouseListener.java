@@ -9,6 +9,7 @@ import java.sql.SQLException;
 import javax.swing.JPopupMenu;
 import javax.swing.JTable;
 import javax.swing.JFormattedTextField;
+import javax.swing.JFrame;
 import javax.swing.JMenuItem;
 
 import de.rachel.bigone.DBTools;
@@ -23,6 +24,7 @@ public class JointAccountClosingDetailTableMouseListener extends MouseAdapter {
     private DBTools query;
     private JMenuItem addToPositiveSumPlaned, addToNegativeSumPlaned, addToPositiveSumUnplaned,
             addToNegativeSumUnplaned, removeDifferenceValueFromSum;
+    private JointAccountClosing jointAccountClosingUi;
 
     public JointAccountClosingDetailTableMouseListener(JTable jointAccountClosingDetailTable,
             JFormattedTextField billingMonth, Connection LoginCN, JointAccountClosing jointAccountClosingUi) {
@@ -31,6 +33,7 @@ public class JointAccountClosingDetailTableMouseListener extends MouseAdapter {
         this.jointAccountClosingDetailTable = jointAccountClosingDetailTable;
         this.jointAccountClosingDetailTableModel = (JointAccountClosingDetailTableModel) this.jointAccountClosingDetailTable
                 .getModel();
+        this.jointAccountClosingUi = jointAccountClosingUi;
 
         addToPositiveSumPlaned = new JMenuItem("zu SUM+ geplant hinzufügen");
         addToPositiveSumPlaned.addActionListener(new ActionListener() {
@@ -103,15 +106,22 @@ public class JointAccountClosingDetailTableMouseListener extends MouseAdapter {
             detailId = (int) jointAccountClosingDetailTableModel
                     .getValueAt(jointAccountClosingDetailTable.getSelectedRow(), -1);
 
-            // disable addTo... entries if the ID from the row where the mouse was clicked
-            // is already added to a sum type
-            if (isRowDifferenceValueAlreadyAddedToAnySumType()) {
-                setAddMenuEntrysDisabled(false);
+            // if billing month already closed disable the possibility
+            // to manipulate the Value Counting
+            if (jointAccountClosingUi.getBillingMonthAlreadyClosed()) {
+                setAddMenuEntrysDisabled(true);
             } else {
-                if (isRowDifferenceValueZero()) {
-                    setAddMenuEntrysDisabled(true);
+                // disable addTo... entries if the ID from the row where the mouse was clicked
+                // is already added to a sum type
+                if (isRowDifferenceValueAlreadyAddedToAnySumType()) {
+                    setAddMenuEntrysDisabled(false);
                 } else {
-                    setAddMenuEntrysEnabled();
+                    // if the difference Value is Zero then they can't add to any SumType
+                    if (isRowDifferenceValueZero()) {
+                        setAddMenuEntrysDisabled(true);
+                    } else {
+                        setAddMenuEntrysEnabled();
+                    }
                 }
             }
 
