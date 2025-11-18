@@ -13,8 +13,11 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.KeyListener;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 
+import javax.swing.JButton;
 import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -52,6 +55,7 @@ public class JointAccountClosing {
 	private JTextArea eventExpenditureAmountPlanInfoArea, eventInfoAreaAccountClosing;
 	private JLabel sumOverviewNegativeLabel, sumOverviewPositiveLabel, sumOverviewPlanedLabel, sumOverviewUnplanedLabel;
 	private JointAccountClosingSumOverviewMouseListener sumOverviewMouseListener;
+	private JButton closeBillingMonth;
 
     JointAccountClosing (Connection LoginCN) {
 		cn = LoginCN;
@@ -183,6 +187,11 @@ public class JointAccountClosing {
 
 		balanceAllocationOverviewPanel = new JPanel();
 		balanceAllocationOverviewPanel.setBorder(new TitledBorder("Aufteilung Saldo"));
+
+		closeBillingMonth = new JButton("Monat abschließen!");
+		// inital the Button has to disabled because only if a month is alrady open
+		// we can close them
+		closeBillingMonth.setEnabled(false);
     }
 
 	private void createListeners() {
@@ -221,6 +230,12 @@ public class JointAccountClosing {
 
 			@Override
 			public void keyPressed(KeyEvent ke) {
+			}
+		});
+
+		closeBillingMonth.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent ae) {
+				// to do => implement all nessessary
 			}
 		});
 	}
@@ -350,6 +365,13 @@ public class JointAccountClosing {
 		//gbc.anchor = GridBagConstraints.NORTH;
 		jointAccountClosingWindow.add(balanceAllocationOverviewPanel, gbc);
 
+		gbc.gridx = 2;
+		gbc.gridy = 3;
+		gbc.insets = new Insets(30, 30, 30, 30);
+		jointAccountClosingWindow.add(closeBillingMonth, gbc);
+
+		// reset insets
+		gbc.insets = new Insets(0, 0, 0, 0);
 		// ---
 
     }
@@ -408,12 +430,14 @@ public class JointAccountClosing {
 	public void fillBallaceAllocationOverview() {
 		/**
 		 * ToDo
-		 * get for the defines Liquimonth the part of income in Percent
-		 * then calculate with theese and the sumOverview Values the correct Values per
-		 * Person
+		 * We determine the percentage of income for the defined liquid month.
+		 * Then, using these values ​​and the totals from the overview, we calculate
+		 * the correct amounts per person that must be deposited into the
+		 * joint account or paid out to the parties.
 		 */
 		List<SalaryBasesSumOfIncomePerPartyTableRow> salaryBasesForTheDefinedBillingMonth = new ArrayList<>();
 		List<JointAccountClosingBalanceAllocationOverviewDetailTableRow> jointAccountClosingBalanceAllocationOverviewDetailTableData = new ArrayList<>();
+		StringBuilder jointAccountClosingBalanceAllocationOverviewDetailTableImportData = new StringBuilder();
 		Double sumOfAllIncome = 0.0;
 		Double totalSumToBeDivided = 0.0;
 		DBTools getter = new DBTools(cn);
@@ -464,8 +488,13 @@ public class JointAccountClosing {
 		}
 
 		// at last we ca put the data, with calculated percentvalue and share of the
-		// Parties, to the nessasary record and TableModel
+		// Parties, to the nessasary record
 		for (SalaryBasesSumOfIncomePerPartyTableRow incomePerPartyThisBillingMonthRow : salaryBasesForTheDefinedBillingMonth) {
+			// jointAccountClosingBalanceAllocationOverviewDetailTableImportData.append("("+incomePerPartyThisBillingMonthRow.partyId()+",'"+
+			// 				billingMonth.getText()+"',"+
+			// 				((incomePerPartyThisBillingMonthRow.Sum() * 100) / sumOfAllIncome)+","+
+			// 				(((incomePerPartyThisBillingMonthRow.Sum()) / sumOfAllIncome) * totalSumToBeDivided)+"),");
+
 			jointAccountClosingBalanceAllocationOverviewDetailTableData
 					.add(new JointAccountClosingBalanceAllocationOverviewDetailTableRow(
 							incomePerPartyThisBillingMonthRow.partyId(),
@@ -473,7 +502,11 @@ public class JointAccountClosing {
 							(incomePerPartyThisBillingMonthRow.Sum() * 100) / sumOfAllIncome,
 							((incomePerPartyThisBillingMonthRow.Sum()) / sumOfAllIncome) * totalSumToBeDivided));
 		}
-
+		// System.out.println(jointAccountClosingBalanceAllocationOverviewDetailTableImportData.delete(
+		// 		jointAccountClosingBalanceAllocationOverviewDetailTableImportData.length() - 1,
+		// 		jointAccountClosingBalanceAllocationOverviewDetailTableImportData.length()));
+		// System.exit(0);
+		// now we show that Values in the GUI
 		((JointAccountClosingBalanceAllocationOverviewDetailTableModel) jointAccountClosingBalanceAllocationOverviewDetailTable
 				.getModel()).aktualisiere(jointAccountClosingBalanceAllocationOverviewDetailTableData);
 	}
