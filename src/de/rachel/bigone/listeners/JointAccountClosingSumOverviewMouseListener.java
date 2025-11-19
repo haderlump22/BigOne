@@ -69,7 +69,8 @@ public class JointAccountClosingSumOverviewMouseListener extends MouseAdapter {
                 return (Integer[])z.getArray();
 
             } else {
-                System.out.println("keine Einträge zu dieser SummenArt gefunden!");
+                // sollte in einem Statusinfotext dargestellt werden => gibt es aber nicht
+                //System.out.println("keine Einträge zu dieser SummenArt gefunden!");
 
             }
         } catch (SQLException e) {

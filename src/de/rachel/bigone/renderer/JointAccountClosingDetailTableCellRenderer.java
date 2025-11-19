@@ -16,7 +16,6 @@ public class JointAccountClosingDetailTableCellRenderer implements TableCellRend
 
    public Component getTableCellRendererComponent(
          JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-
       JLabel label = null;
       JointAccountClosingDetailTableModel jointAccountClosingDetailTableModel;
 
@@ -57,6 +56,9 @@ public class JointAccountClosingDetailTableCellRenderer implements TableCellRend
             if (jointAccountClosingDetailTableModel.rowHasToMark(row)) {
                label.setFont(new Font(null, Font.BOLD, 13));
                label.setForeground(Color.RED);
+            } else {
+               label.setFont(new Font(null, Font.PLAIN, 13));
+               label.setForeground(Color.BLACK);
             }
             label.setHorizontalAlignment(JLabel.RIGHT);
             label.setText("%.02f".formatted((Double) value));

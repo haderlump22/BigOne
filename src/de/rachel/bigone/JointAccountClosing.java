@@ -206,6 +206,10 @@ public class JointAccountClosing {
 				if (ke.getKeyCode() == KeyEvent.VK_ENTER
 						&& Pattern.matches("\\d{2}.\\d{2}.[1-9]{1}\\d{3}", billingMonth.getText())) {
 					if (existAccountClosingData(billingMonth.getText())) {
+						// we have to clear the IDs that for marking difference Values in the Table
+						((JointAccountClosingDetailTableModel) jointAccountClosingDetailTable.getModel())
+								.setDetailIdsForMarkingDifferenceValue(new Integer[0]);
+
 						((JointAccountClosingDetailTableModel) jointAccountClosingDetailTable.getModel())
 								.aktualisiere(billingMonth.getText());
 
@@ -243,12 +247,17 @@ public class JointAccountClosing {
 	}
 
 	private void registerExistingListeners() {
-		jointAccountClosingDetailTable.getSelectionModel().addListSelectionListener(new JointAccountClosingDetailTableSelectionListener(
-			jointAccountClosingDetailTable, eventExpenditureAmountPlanInfoArea, cn, eventInfoAreaAccountClosing));
+		jointAccountClosingDetailTable.getSelectionModel()
+				.addListSelectionListener(new JointAccountClosingDetailTableSelectionListener(
+						jointAccountClosingDetailTable, eventExpenditureAmountPlanInfoArea, cn,
+						eventInfoAreaAccountClosing, sumOverviewNegativePlanedValue, sumOverviewNegativeUnplanedValue,
+						sumOverviewPositivePlanedValue, sumOverviewPositiveUnplanedValue));
 
-		eventInfoAreaAccountClosing.addKeyListener(new JointAccountClosingEventInfoAreaKeyListener(cn, jointAccountClosingDetailTable));
+		eventInfoAreaAccountClosing
+				.addKeyListener(new JointAccountClosingEventInfoAreaKeyListener(cn, jointAccountClosingDetailTable));
 
-		jointAccountClosingDetailTable.addMouseListener(new JointAccountClosingDetailTableMouseListener(jointAccountClosingDetailTable, billingMonth, cn, this));
+		jointAccountClosingDetailTable.addMouseListener(new JointAccountClosingDetailTableMouseListener(
+				jointAccountClosingDetailTable, billingMonth, cn, this));
 
 		sumOverviewMouseListener = new JointAccountClosingSumOverviewMouseListener(billingMonth,
 				jointAccountClosingDetailTable, sumOverviewNegativePlanedValue, sumOverviewNegativeUnplanedValue,

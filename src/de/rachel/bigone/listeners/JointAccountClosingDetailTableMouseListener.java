@@ -9,7 +9,6 @@ import java.sql.SQLException;
 import javax.swing.JPopupMenu;
 import javax.swing.JTable;
 import javax.swing.JFormattedTextField;
-import javax.swing.JFrame;
 import javax.swing.JMenuItem;
 
 import de.rachel.bigone.DBTools;
@@ -89,18 +88,18 @@ public class JointAccountClosingDetailTableMouseListener extends MouseAdapter {
     }
 
     public void mouseReleased(MouseEvent mouseEvent) {
+        // wenn die Zeile auf der der Rechtsklick ausgefürht wurde nicht selectiert war
+        // wird diese Zeile erst selectiert
+        JTable jointAccountClosingDetailTable = (JTable) mouseEvent.getSource();
+        int rowAtMousePoint = jointAccountClosingDetailTable.rowAtPoint(mouseEvent.getPoint());
+
+        // vorherige Selection aufheben
+        jointAccountClosingDetailTable.clearSelection();
+
+        // diese eine Zeile selectieren
+        jointAccountClosingDetailTable.addRowSelectionInterval(rowAtMousePoint, rowAtMousePoint);
+
         if (mouseEvent.getButton() == MouseEvent.BUTTON3) {
-            // wenn die Zeile auf der der Rechtsklick ausgefürht wurde nicht selectiert war
-            // wird diese Zeile erst selectiert
-            JTable jointAccountClosingDetailTable = (JTable) mouseEvent.getSource();
-            int rowAtMousePoint = jointAccountClosingDetailTable.rowAtPoint(mouseEvent.getPoint());
-
-            // vorherige Selection aufheben
-            jointAccountClosingDetailTable.clearSelection();
-
-            // diese eine Zeile selectieren
-            jointAccountClosingDetailTable.addRowSelectionInterval(rowAtMousePoint, rowAtMousePoint);
-
             // get the detailId of the, now, selected row of the
             // jointAccountClosingDetailTable
             detailId = (int) jointAccountClosingDetailTableModel
@@ -126,6 +125,13 @@ public class JointAccountClosingDetailTableMouseListener extends MouseAdapter {
             }
 
             popmen.show(mouseEvent.getComponent(), mouseEvent.getX(), mouseEvent.getY());
+        }
+
+        if (mouseEvent.getButton() == MouseEvent.BUTTON1) {
+            ((JointAccountClosingDetailTableModel)jointAccountClosingDetailTable.getModel()).setDetailIdsForMarkingDifferenceValue(new Integer[0]);
+
+            // diese eine Zeile selectieren
+            jointAccountClosingDetailTable.addRowSelectionInterval(rowAtMousePoint, rowAtMousePoint);
         }
     }
 
