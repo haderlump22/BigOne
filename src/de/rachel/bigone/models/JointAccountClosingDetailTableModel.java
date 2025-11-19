@@ -122,7 +122,7 @@ public class JointAccountClosingDetailTableModel extends AbstractTableModel {
 
 	public boolean rowHasToMark(int row) {
 		for (Integer detailId : detailIdsForMarkingDifferenceValue) {
-			if ((Integer)getValueAt(row, -1) == detailId) {
+			if (((Integer)getValueAt(row, -1)).equals(detailId)) {
 				return true;
 			}
 		}
