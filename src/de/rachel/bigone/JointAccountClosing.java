@@ -389,6 +389,12 @@ public class JointAccountClosing {
 		sumOverviewPositivePlanedValue.setName("{}");
 		sumOverviewPositiveUnplanedValue.setName("{}");
 
+		// and reset all formatting
+		sumOverviewNegativePlanedValue.setFont(new Font(null, Font.PLAIN, 14));
+        sumOverviewNegativeUnplanedValue.setFont(new Font(null, Font.PLAIN, 14));
+        sumOverviewPositivePlanedValue.setFont(new Font(null, Font.PLAIN, 14));
+        sumOverviewPositiveUnplanedValue.setFont(new Font(null, Font.PLAIN, 14));
+
 		DBTools getter = new DBTools(cn);
 
 		getter.select("""
