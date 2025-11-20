@@ -1,13 +1,19 @@
 package de.rachel.bigone;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 import javax.swing.JOptionPane;
 
@@ -44,6 +50,7 @@ public class ReadCamt {
 	private boolean isJointAccount = false;
 	private int accountId = 0;
 	private Connection cn = null;
+	private FileInputStream fis;
 
 	ReadCamt(String PathAndFile, Connection LoginCN) {
 		this.cn = LoginCN;
@@ -51,7 +58,67 @@ public class ReadCamt {
 		// decide what FileType must be read
 		if (PathAndFile.endsWith("ZIP") || PathAndFile.endsWith("zip")) {
 			// extract Zip File and read each xml file to one Array
+			try {
+				fis = new FileInputStream(new File(PathAndFile));
+				BufferedInputStream bfis = new BufferedInputStream(fis);
+				ZipInputStream zipis = new ZipInputStream(bfis);
+				String filecontent;
+				ZipEntry zipentry;
 
+				try {
+					while ((zipentry = zipis.getNextEntry()) != null) {
+						filecontent = "";
+						if (!zipentry.isDirectory() && zipentry.getName().toLowerCase().endsWith("xml")) {
+							filecontent = new String(zipis.readAllBytes(), StandardCharsets.UTF_8);
+
+							KontoAuszug = parseXMLfromString(filecontent + "\n");
+
+							if (KontoAuszug != null) {
+								buchungsAnzahl = KontoAuszug.getElementsByTagName("Ntry").getLength();
+
+								buchungen = new String[buchungsAnzahl][6];
+
+								// set IBAN from EBICs File
+								sIBAN = findSubs(KontoAuszug.getElementsByTagName("Acct").item(0), "IBAN", "").trim();
+
+								// write Entrys from EBICs File in to Array
+								NodeList rows = KontoAuszug.getElementsByTagName("Ntry");
+
+								for (int i = 0; i < rows.getLength(); i++) {
+									buchungen[i][ValueDate] = findSubs(rows.item(i), NodeToFind[0], "").trim();
+									buchungen[i][CreditDebitIndicator] = findSubs(rows.item(i), NodeToFind[1], "").trim();
+									buchungen[i][Amount] = findSubs(rows.item(i), NodeToFind[2], "").trim();
+									buchungen[i][Unstructured] = findSubs(rows.item(i), NodeToFind[3], "").trim();
+
+									if (buchungen[i][CreditDebitIndicator].equals("CRDT")) {
+										buchungen[i][Creditor] = null;
+										buchungen[i][Debitor] = findSubs(rows.item(i), NodeToFind[5], "").trim();
+									} else {
+										buchungen[i][Creditor] = findSubs(rows.item(i), NodeToFind[4], "").trim();
+										buchungen[i][Debitor] = null;
+									}
+								}
+							}
+						}
+					}
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
+                try {
+					bfis.close();
+					zipis.close();
+					fis.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
+			} catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		} else if (PathAndFile.endsWith("xml")) {
 			KontoAuszug = parseXML(PathAndFile);
 
@@ -122,6 +189,20 @@ public class ReadCamt {
 
 		try {
 			return DocBuilder.parse(new File(PathAndFile));
+		} catch (SAXException e) {
+			e.printStackTrace();
+			return null;
+		} catch (IOException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	private Document parseXMLfromString(String fileContent) {
+		DocumentBuilder DocBuilder = getDocBuilder();
+
+		try {
+			return DocBuilder.parse(new ByteArrayInputStream(fileContent.getBytes()));
 		} catch (SAXException e) {
 			e.printStackTrace();
 			return null;
