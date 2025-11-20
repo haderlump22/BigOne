@@ -35,7 +35,7 @@ import org.w3c.dom.NodeList;
  */
 public class ReadCamt {
 	private Document KontoAuszug;
-	private String[][] buchungen;
+	private String[][] buchungen = new String[0][0];
 	private String[] csvContent;
 	private int buchungsAnzahl;
 	private String sIBAN = "";
@@ -68,15 +68,19 @@ public class ReadCamt {
 				try {
 					while ((zipentry = zipis.getNextEntry()) != null) {
 						filecontent = "";
+						String[][] buchungenLager;
 						if (!zipentry.isDirectory() && zipentry.getName().toLowerCase().endsWith("xml")) {
+
 							filecontent = new String(zipis.readAllBytes(), StandardCharsets.UTF_8);
 
-							KontoAuszug = parseXMLfromString(filecontent + "\n");
+							KontoAuszug = parseXMLfromString(filecontent);
 
 							if (KontoAuszug != null) {
 								buchungsAnzahl = KontoAuszug.getElementsByTagName("Ntry").getLength();
 
-								buchungen = new String[buchungsAnzahl][6];
+								// System.out.println("Anzahl an buchungen in " + zipentry.getName() + " : " + buchungsAnzahl);
+
+								buchungenLager = new String[buchungsAnzahl][6];
 
 								// set IBAN from EBICs File
 								sIBAN = findSubs(KontoAuszug.getElementsByTagName("Acct").item(0), "IBAN", "").trim();
@@ -85,18 +89,44 @@ public class ReadCamt {
 								NodeList rows = KontoAuszug.getElementsByTagName("Ntry");
 
 								for (int i = 0; i < rows.getLength(); i++) {
-									buchungen[i][ValueDate] = findSubs(rows.item(i), NodeToFind[0], "").trim();
-									buchungen[i][CreditDebitIndicator] = findSubs(rows.item(i), NodeToFind[1], "").trim();
-									buchungen[i][Amount] = findSubs(rows.item(i), NodeToFind[2], "").trim();
-									buchungen[i][Unstructured] = findSubs(rows.item(i), NodeToFind[3], "").trim();
+									buchungenLager[i][ValueDate] = findSubs(rows.item(i), NodeToFind[0], "").trim();
+									buchungenLager[i][CreditDebitIndicator] = findSubs(rows.item(i), NodeToFind[1], "").trim();
+									buchungenLager[i][Amount] = findSubs(rows.item(i), NodeToFind[2], "").trim();
+									buchungenLager[i][Unstructured] = findSubs(rows.item(i), NodeToFind[3], "").trim();
 
-									if (buchungen[i][CreditDebitIndicator].equals("CRDT")) {
-										buchungen[i][Creditor] = null;
-										buchungen[i][Debitor] = findSubs(rows.item(i), NodeToFind[5], "").trim();
+									if (buchungenLager[i][CreditDebitIndicator].equals("CRDT")) {
+										buchungenLager[i][Creditor] = null;
+										buchungenLager[i][Debitor] = findSubs(rows.item(i), NodeToFind[5], "").trim();
 									} else {
-										buchungen[i][Creditor] = findSubs(rows.item(i), NodeToFind[4], "").trim();
-										buchungen[i][Debitor] = null;
+										buchungenLager[i][Creditor] = findSubs(rows.item(i), NodeToFind[4], "").trim();
+										buchungenLager[i][Debitor] = null;
 									}
+								}
+
+								// now we put the current Content of buchungenLager into the array that is used for the TableModel
+								if (buchungenLager.length > 0) {
+									// if the exist content in the central Array we copy them to an temp space
+									if (buchungen.length > 0) {
+										// save the until now readed buchungungen
+										String[][] lager = new String[buchungen.length][6];
+										System.arraycopy(buchungen, 0, lager, 0, buchungen.length);
+
+										// now resize the central array
+										buchungen = new String[(buchungen.length + buchungenLager.length)][6];
+
+										// copy the old content of buchungen to the resized array
+										System.arraycopy(lager, 0, buchungen, 0, lager.length);
+										// and the new content of buchungenLager to the resized arra
+										System.arraycopy(buchungenLager, 0, buchungen, lager.length, buchungenLager.length);
+									} else {
+										// now resize the central array
+										buchungen = new String[(buchungen.length + buchungenLager.length)][6];
+
+										// and copy the new content of buchungenLager to the resized central array
+										System.arraycopy(buchungenLager, 0, buchungen, 0, buchungenLager.length);
+									}
+
+
 								}
 							}
 						}
