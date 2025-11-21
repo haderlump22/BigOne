@@ -96,7 +96,7 @@ public class Values {
 					}
 					model = (ValuesTableModel) table.getModel();
 					model.aktualisiere(txtValue.getText().replace(".", "").replace(',', '.'), LiquiDate,
-							cmbKto.getSelectedItem().toString().replace(" ", ""));
+							cmbKto.getSelectedItem().toString().replace(" ", ""), cmbKto.getToolTipText());
 				}
 			}
 
@@ -182,7 +182,7 @@ public class Values {
 
 		table = new JTable(new ValuesTableModel(txtValue.getText().replace(".", "").replace(',', '.'),
 				BigOneTools.datum_wandeln(txtLiquiDate.getText(), 0),
-				cmbKto.getSelectedItem().toString().replace(" ", ""), cn));
+				cmbKto.getSelectedItem().toString().replace(" ", ""), cn, cmbKto.getToolTipText()));
 		ValuesTableCellRenderer ren = new ValuesTableCellRenderer();
 		table.setDefaultRenderer(Object.class, ren);
 		table.getColumnModel().getColumn(2).setCellEditor(new DateTableCellEditor());

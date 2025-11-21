@@ -11,10 +11,12 @@ public class ValuesTableModel extends AbstractTableModel {
 			"Ereigniss" };
 	private Object[][] daten;
 	private String strTransID;
+	private String accountType;
 
-	public ValuesTableModel(String strBetrag, String strLiquiDate, String sIban, Connection LoginCN) {
+	public ValuesTableModel(String strBetrag, String strLiquiDate, String sIban, Connection LoginCN, String accountType) {
 		// System.out.println(strLiquiDate);
 		cn = LoginCN;
+		this.accountType = accountType;
 		daten = lese_werte(strBetrag, strLiquiDate, sIban);
 	}
 
@@ -68,15 +70,20 @@ public class ValuesTableModel extends AbstractTableModel {
 		DBTools getter = new DBTools(cn);
 
 		getter.select("""
-				SELECT t.transaktions_id, t.soll_haben, t.datum, t.betrag, t.buchtext, t.liqui_monat, k.ereigniss_krzbez
-				FROM transaktionen t, kontenereignisse k, konten kto
+				SELECT t.transaktions_id, t.soll_haben, t.datum, t.betrag, t.buchtext, t.liqui_monat, k.%s
+				FROM transaktionen t, %s k, konten kto
 				WHERE t.betrag = %s
-				AND k.ereigniss_id = t.ereigniss_id
+				AND k.%s = t.ereigniss_id
 				%s
 				AND t.konten_id = kto.konten_id
 				AND kto.iban = '%s'
 				ORDER BY t.datum DESC
-				""".formatted(strValue, (strLiquiDate.isEmpty() ? "" : " and t.liqui_monat = '" + strLiquiDate + "'"), sIban), 7);
+				""".formatted((accountType.equals("Haushaltskonto") ? "kategoriebezeichnung" : "ereigniss_krzbez"),
+				(accountType.equals("Haushaltskonto") ? "ha_kategorie" : "kontenereignisse"),
+				strValue,
+				(accountType.equals("Haushaltskonto") ? "ha_kategorie_id" : "ereigniss_id"),
+				(strLiquiDate.isEmpty() ? "" : " and t.liqui_monat = '" + strLiquiDate + "'"),
+				sIban), 7);
 
 		return getter.getData();
 	}
@@ -125,7 +132,8 @@ public class ValuesTableModel extends AbstractTableModel {
 		updater.update(strSqlUpdate);
 	}
 
-	public void aktualisiere(String strValue, String strLiquiDate, String sIban) {
+	public void aktualisiere(String strValue, String strLiquiDate, String sIban, String accountType) {
+		this.accountType = accountType;
 		daten = lese_werte(strValue, strLiquiDate, sIban);
 		fireTableDataChanged();
 	}
