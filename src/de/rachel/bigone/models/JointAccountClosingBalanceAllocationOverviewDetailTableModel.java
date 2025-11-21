@@ -56,4 +56,8 @@ public class JointAccountClosingBalanceAllocationOverviewDetailTableModel extend
 		this.tableData = jointAccountClosingBalanceAllocationOverviewDetailTableData;
 		fireTableDataChanged();
 	}
+
+	public List<JointAccountClosingBalanceAllocationOverviewDetailTableRow> getTableData () {
+		return tableData;
+	}
 }

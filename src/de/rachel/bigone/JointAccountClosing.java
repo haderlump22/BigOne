@@ -217,6 +217,7 @@ public class JointAccountClosing {
 						fillSumOverview();
 
 						billingMonthAlreadyClosed = isBillingMonthAlreadyClosed(billingMonth.getText());
+
 						// if the Sum Overview is filled we can calculate the Data for the ballance
 						// allocation overview and display it, but we give to function isBillingMonthAlradyClosed
 						fillBallaceAllocationOverview();
@@ -241,7 +242,29 @@ public class JointAccountClosing {
 
 		closeBillingMonth.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
-				// to do => implement all nessessary
+				// We need a closing comment (in the current state of the program, it is stored in each party's closing record => later we can store it in a separate table... maybe)
+				String closingComment = JOptionPane.showInputDialog("Bitte einen Abschlusskommentar eingeben:", "normale Aufteilung und jeder zahlt seinen Betrag nach");
+
+				StringBuilder jointAccountClosingBalanceAllocationOverviewDetailTableImportData = new StringBuilder();
+				// first get the Values from the Tabel Model that Values already is displayed
+				List<JointAccountClosingBalanceAllocationOverviewDetailTableRow> jointAccountClosingBalanceAllocationOverviewDetailTableData = ((JointAccountClosingBalanceAllocationOverviewDetailTableModel) jointAccountClosingBalanceAllocationOverviewDetailTable
+						.getModel()).getTableData();
+
+				for (JointAccountClosingBalanceAllocationOverviewDetailTableRow jointAccountClosingBalanceAllocationOverviewDetailTableDataRow : jointAccountClosingBalanceAllocationOverviewDetailTableData) {
+					jointAccountClosingBalanceAllocationOverviewDetailTableImportData.append("("
+							+ jointAccountClosingBalanceAllocationOverviewDetailTableDataRow.partyId() + "," +
+							jointAccountClosingBalanceAllocationOverviewDetailTableDataRow.shareInPercent() + "," +
+							jointAccountClosingBalanceAllocationOverviewDetailTableDataRow.finalShare() + ",'" +
+							billingMonth.getText() + "'," +
+							"CURRENT_TIMESTAMP, '" +
+							closingComment + "'),");
+				}
+
+				// delete the Last commata from the String that represent the Import Values for the Import Statement
+				jointAccountClosingBalanceAllocationOverviewDetailTableImportData.delete(jointAccountClosingBalanceAllocationOverviewDetailTableImportData.length() - 1, jointAccountClosingBalanceAllocationOverviewDetailTableImportData.length());
+
+
+
 			}
 		});
 	}
@@ -458,14 +481,11 @@ public class JointAccountClosing {
 		 */
 		List<SalaryBasesSumOfIncomePerPartyTableRow> salaryBasesForTheDefinedBillingMonth = new ArrayList<>();
 		List<JointAccountClosingBalanceAllocationOverviewDetailTableRow> jointAccountClosingBalanceAllocationOverviewDetailTableData = new ArrayList<>();
-		StringBuilder jointAccountClosingBalanceAllocationOverviewDetailTableImportData = new StringBuilder();
 		Double sumOfAllIncome = 0.0;
 		Double totalSumToBeDivided = 0.0;
 		DBTools dbTools = new DBTools(cn);
 
 		if (!billingMonthAlreadyClosed) {
-			// we can enable the closing Button
-			closeBillingMonth.setEnabled(true);
 
 			dbTools.select("""
 				SELECT p.personen_id, p.name || ', ' || SUBSTRING(p.vorname, 1, 1) || '.' as party, sum(gg.betrag) as betrag
@@ -515,11 +535,6 @@ public class JointAccountClosing {
 			// at last we ca put the data, with calculated percentvalue and share of the
 			// Parties, to the nessasary record
 			for (SalaryBasesSumOfIncomePerPartyTableRow incomePerPartyThisBillingMonthRow : salaryBasesForTheDefinedBillingMonth) {
-				// jointAccountClosingBalanceAllocationOverviewDetailTableImportData.append("("+incomePerPartyThisBillingMonthRow.partyId()+",'"+
-				// 				billingMonth.getText()+"',"+
-				// 				((incomePerPartyThisBillingMonthRow.Sum() * 100) / sumOfAllIncome)+","+
-				// 				(((incomePerPartyThisBillingMonthRow.Sum()) / sumOfAllIncome) * totalSumToBeDivided)+"),");
-
 				jointAccountClosingBalanceAllocationOverviewDetailTableData
 						.add(new JointAccountClosingBalanceAllocationOverviewDetailTableRow(
 								incomePerPartyThisBillingMonthRow.partyId(),
@@ -527,6 +542,9 @@ public class JointAccountClosing {
 								(incomePerPartyThisBillingMonthRow.Sum() * 100) / sumOfAllIncome,
 								((incomePerPartyThisBillingMonthRow.Sum()) / sumOfAllIncome) * totalSumToBeDivided));
 			}
+
+			// now we can enable the closing Button
+			closeBillingMonth.setEnabled(true);
 		} else {
 			dbTools.select("""
 					SELECT "parteiId", p.name || ', ' || SUBSTRING(p.vorname, 1, 1) || '.' as partei, "abschlussAnteilInProzent", "abschlussAnteilBetrag"
@@ -552,6 +570,7 @@ public class JointAccountClosing {
 			}
 		}
 
+		// regardless of where the data for the record came from, now we can put tehm in the TableModel
 		((JointAccountClosingBalanceAllocationOverviewDetailTableModel) jointAccountClosingBalanceAllocationOverviewDetailTable
 				.getModel()).aktualisiere(jointAccountClosingBalanceAllocationOverviewDetailTableData);
 	}
