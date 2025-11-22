@@ -206,7 +206,7 @@ public class JointAccountClosing {
 				if (ke.getKeyCode() == KeyEvent.VK_ENTER
 						&& Pattern.matches("\\d{2}.\\d{2}.[1-9]{1}\\d{3}", billingMonth.getText())) {
 					if (existAccountClosingData(billingMonth.getText())) {
-						// we have to clear the IDs that for marking difference Values in the Table
+						// we have to clear the IDs that are for marking difference Values in the Table
 						((JointAccountClosingDetailTableModel) jointAccountClosingDetailTable.getModel())
 								.setDetailIdsForMarkingDifferenceValue(new Integer[0]);
 
@@ -225,7 +225,7 @@ public class JointAccountClosing {
 						int result = JOptionPane.showConfirmDialog(null, "Es sind noch keine Daten für den Abrechnungsmontat zusammengestellt worden!\nSoll das jetzt gemacht werden?", "Abschluss initieren", JOptionPane.YES_NO_CANCEL_OPTION);
 
 						if (result == JOptionPane.YES_OPTION) {
-							prepareJointAccountClosingDetailData(billingMonth.getText());
+							prepareJointAccountClosingDetailImportData(billingMonth.getText());
 						} else if (result == JOptionPane.NO_OPTION) {
 							jointAccountClosingWindow.dispose();
 						}
@@ -599,9 +599,10 @@ public class JointAccountClosing {
 		}
 	}
 
-	private void prepareJointAccountClosingDetailData(String billingMonth) {
+	private void prepareJointAccountClosingDetailImportData(String billingMonth) {
 		DBTools dbTool = new DBTools(cn);
-		List<JointAccountClosingDetailTableRow> jointAccountDetailData = new ArrayList<>();
+		// List<JointAccountClosingDetailTableRow> jointAccountDetailData = new ArrayList<>();
+		StringBuilder jointAccountDetailSqlValueData = new StringBuilder();
 		Double planedValue = 0.0;
 
 		// first put the income Values in a temporary Table
@@ -642,10 +643,21 @@ public class JointAccountClosing {
 			while (dbTool.next()) {
 				planedValue = getPlanedValueForCategoryInBillingMonth(dbTool.getString("kategoriebezeichnung"), billingMonth);
 
-				jointAccountDetailData.add(
-						new JointAccountClosingDetailTableRow(0, dbTool.getString("kategoriebezeichnung"),
-								dbTool.getDouble("sum"), (planedValue * -1), dbTool.getDouble("sum") - (planedValue * -1)));
+				jointAccountDetailSqlValueData.append("('" +  dbTool.getString("kategoriebezeichnung") + "'," +
+					dbTool.getDouble("sum") + "," +
+					(planedValue * -1) + "," +
+					(dbTool.getDouble("sum") - (planedValue * -1)) + ",'" +
+					billingMonth + "'," +
+					"NULL),");
+
+				// jointAccountDetailData.add(
+				// 		new JointAccountClosingDetailTableRow(0, dbTool.getString("kategoriebezeichnung"),
+				// 				dbTool.getDouble("sum"), (planedValue * -1), dbTool.getDouble("sum") - (planedValue * -1)));
 			}
+
+			// delete the last Commata from the sql Value String
+			jointAccountDetailSqlValueData.delete(jointAccountDetailSqlValueData.length() - 1, jointAccountDetailSqlValueData.length());
+
 		} catch (Exception e) {
 			System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "
 					+ e.getStackTrace()[0].getLineNumber() + "): " + e.toString());
@@ -654,9 +666,28 @@ public class JointAccountClosing {
 		// drop the temp table after we save the data in to our own record
 		dbTool.update("DROP TABLE closedetail");
 
-		for (JointAccountClosingDetailTableRow row : jointAccountDetailData) {
-			System.out.println(row.nameOfExpenditure()+"/"+row.actualAmount()+"/"+row.planAmount()+"/"+row.difference());
-		}
+		// for (JointAccountClosingDetailTableRow row : jointAccountDetailData) {
+
+		// }
+
+		// now we push the Data into the db Table
+		dbTool.insert("""
+				INSERT INTO ha_abschlussdetails
+				("kategorieBezeichnung", "summeBetraege", "planBetrag", differenz, "abschlussMonat", bemerkung)
+				VALUES
+				%s
+				""".formatted(jointAccountDetailSqlValueData));
+
+		// Now we will show the remaining UI content as if it had existed at the moment of entry in the closing month.
+		((JointAccountClosingDetailTableModel) jointAccountClosingDetailTable.getModel())
+				.aktualisiere(billingMonth);
+
+		// now we can fill the sumOverview if there was stored Values before
+		fillSumOverview();
+
+		// if the Sum Overview is filled we can calculate the Data for the ballance
+		// allocation overview and display it, but we give to function isBillingMonthAlradyClosed
+		fillBallaceAllocationOverview();
 	}
 
 	private Double getPlanedValueForCategoryInBillingMonth(String categoryName, String billingMonth) {
@@ -667,7 +698,7 @@ public class JointAccountClosing {
 				SELECT betrag
 				FROM ha_ausgaben
 				WHERE gilt_ab <= '%s'
-				AND gilt_bis >= '%s'
+				AND (gilt_bis >= '%s' OR gilt_bis IS NULL)
 				AND bezeichnung = '%s'
 				""".formatted(billingMonth, billingMonth, categoryName), 1);
 

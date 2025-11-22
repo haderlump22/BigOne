@@ -29,6 +29,8 @@ public final class DBTools {
 			return true;
 		} catch (SQLException e) {
 			System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + ": " + e.toString());
+			System.err.println("Programmabbruch!!!");
+			System.exit(1);
 			return false;
 		}
 	}
