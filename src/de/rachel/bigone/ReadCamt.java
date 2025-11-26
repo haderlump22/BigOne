@@ -40,7 +40,7 @@ public class ReadCamt {
 	private int buchungsAnzahl;
 	private String sIBAN = "";
 	private String AccountOwner = "";
-	private String[] NodeToFind = { "ValDt", "CdtDbtInd", "Amt", "Ustrd", "Cdtr", "Dbtr" };
+	private String[] NodeToFind = { "ValDt", "CdtDbtInd", "Amt", "Ustrd", "Cdtr", "Dbtr", "UltmtCdtr" };
 	private static int ValueDate = 0;
 	private static int CreditDebitIndicator = 1;
 	private static int Amount = 2;
@@ -98,7 +98,7 @@ public class ReadCamt {
 										buchungenLager[i][Creditor] = null;
 										buchungenLager[i][Debitor] = findSubs(rows.item(i), NodeToFind[5], "").trim();
 									} else {
-										buchungenLager[i][Creditor] = findSubs(rows.item(i), NodeToFind[4], "").trim();
+										buchungenLager[i][Creditor] = findSubs(rows.item(i), NodeToFind[4], "").trim() + "/" + findSubs(rows.item(i), NodeToFind[6], "").trim();
 										buchungenLager[i][Debitor] = null;
 									}
 								}
