@@ -108,7 +108,7 @@ public class Rac {
 				// if exist a Account ID to the IBAN that comes from the Bank Statement
 				if (lblIbanValue.getText() != "") {
 					// tabellendaten von der letzten Zeile zur ersten hin importieren
-					// damit die altesten buchungen als erste in der Tabelle geschrieben
+					// damit die ältesten buchungen als erste in die Tabelle geschrieben
 					// werden
 					for (int i = model.getRowCount() - 1; i >= 0; i--) {
 						insert_details_success = true;

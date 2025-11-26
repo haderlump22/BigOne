@@ -3,7 +3,9 @@ package de.rachel.bigone.models;
 import java.sql.Connection;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import javax.swing.table.AbstractTableModel;
 
@@ -16,7 +18,7 @@ public class RacTableModel extends AbstractTableModel{
 	private String[] columnName = new String[]{"Wertstellung","s/h","Betrag","Buchungshinweis","DBIT/CRDT","LiquiMon","Ereignis"};
 	private String[][] daten;
 	private String[][] strLager;
-	private static int ValueDate = 0;
+	private static int VALUE_DATE = 0;
 	private static int CreditDebitIndicator = 1;
 	private static int Amount = 2;
 	private static int Unstructured = 3;	// Unstrukturierter Verwendungszweck 140zeichen max
@@ -63,13 +65,13 @@ public class RacTableModel extends AbstractTableModel{
 	private void lese_werte() {
 
 		if (Auszug != null) {
-			// if we know the Auszug we can decide where to get  the category
+			// if we know the Auszug we can decide where to get the category
 			updateEntrysForCategory(Auszug.isJointAccount());
 
 			daten = new String[Auszug.getBuchungsanzahl()][7];
 
 			for(int iAktuelleBuchung = 0; iAktuelleBuchung < Auszug.getBuchungsanzahl(); iAktuelleBuchung++){
-				daten[iAktuelleBuchung][ValueDate] = Auszug.getValDt(iAktuelleBuchung);
+				daten[iAktuelleBuchung][VALUE_DATE] = Auszug.getValDt(iAktuelleBuchung);
 
 				daten[iAktuelleBuchung][LiquiMonth] = Auszug.getValDt(iAktuelleBuchung).substring(0, 8) + "01";
 
@@ -98,6 +100,20 @@ public class RacTableModel extends AbstractTableModel{
 				// Girokonto oder um das gemeinschaftliche Haushaltskonto handelt
 				daten[iAktuelleBuchung][AccountBookingEvent] = (Auszug.isJointAccount() ? "Haushalt (13)" : "HaushGeld (46)");
 			}
+
+			Arrays.sort(daten, new java.util.Comparator<String[]>() {
+				public int compare(String[] rowOne, String[] rowNext) {
+					LocalDate dateRowOne = LocalDate.parse(rowOne[VALUE_DATE]);
+					LocalDate dateRowNext = LocalDate.parse(rowNext[VALUE_DATE]);
+
+					// sort so that the youngest Entry is first in list
+					if (dateRowOne.isAfter(dateRowNext)) {
+						return -1;
+					} else {
+						return 1;
+					}
+				}
+			});
 		}
 	}
 
@@ -177,7 +193,7 @@ public class RacTableModel extends AbstractTableModel{
 		for (int iZeile = 0; iZeile < daten.length; iZeile++) {
 			// if is not in the timerange, remove it
 			try {
-				if (SQLDATE.parse(daten[iZeile][ValueDate]).before(SQLDATE.parse(sVon)) || SQLDATE.parse(daten[iZeile][ValueDate]).after(SQLDATE.parse(sBis))) {
+				if (SQLDATE.parse(daten[iZeile][VALUE_DATE]).before(SQLDATE.parse(sVon)) || SQLDATE.parse(daten[iZeile][VALUE_DATE]).after(SQLDATE.parse(sBis))) {
 					this.removeRow(iZeile, false);
 
 					// because we delete one Row in the array and the row after move to the actual index, wie must go on on the same index,
