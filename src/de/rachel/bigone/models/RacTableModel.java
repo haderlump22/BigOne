@@ -239,4 +239,8 @@ public class RacTableModel extends AbstractTableModel{
 	public int getAccountId() {
 		return Auszug.getAccountId();
 	}
+
+	public boolean isJointAccount() {
+		return Auszug.isJointAccount();
+	}
 }

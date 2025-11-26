@@ -174,28 +174,31 @@ public class Rac {
 								}
 								break;
 							case TANKEN:
-								// tankwerte zur eintragung aufnehmen
-								// das Programm arbeitet weiter wenn
-								// dialog geschlossen wird
-								TankDialog td = new TankDialog(RACWindow, model.getValueAt(i, 2).toString(), cn);
-								getter.select("""
-										SELECT MAX(transaktions_id)
-										FROM transaktionen
-										""", 1);
+								if (!model.isJointAccount()) {
+									// wenn kein Haushaltskonto dann
+									// tankwerte zur eintragung aufnehmen
+									// das Programm arbeitet weiter wenn
+									// dialog geschlossen wird
+									TankDialog td = new TankDialog(RACWindow, model.getValueAt(i, 2).toString(), cn);
+									getter.select("""
+											SELECT MAX(transaktions_id)
+											FROM transaktionen
+											""", 1);
 
-								String sql_tanken = """
-										INSERT INTO tankdaten
-										(transaktions_id, liter, km, kraftstoff_id, datum_bar, betrag_bar, kfz_id)
-										VALUES
-										(%s, %s, %s, %s, NULL, NULL, %s)
-										""".formatted(getter.getValueAt(0, 0), td.get_liter(), td.get_km(),
-										td.get_treibstoff_id(), td.get_kfz_id());
+									String sql_tanken = """
+											INSERT INTO tankdaten
+											(transaktions_id, liter, km, kraftstoff_id, datum_bar, betrag_bar, kfz_id)
+											VALUES
+											(%s, %s, %s, %s, NULL, NULL, %s)
+											""".formatted(getter.getValueAt(0, 0), td.get_liter(), td.get_km(),
+											td.get_treibstoff_id(), td.get_kfz_id());
 
-								// neuen datensatz einfuegen und den erfolg pruefen
-								if (pusher.insert(sql_tanken) == false) {
-									System.out.println("Fehler beim Einfuegen der Tankdaten zu Datensatz Nr: " + i);
-									insert_tankdaten_success = false;
-									break;
+									// neuen datensatz einfuegen und den erfolg pruefen
+									if (pusher.insert(sql_tanken) == false) {
+										System.out.println("Fehler beim Einfuegen der Tankdaten zu Datensatz Nr: " + i);
+										insert_tankdaten_success = false;
+										break;
+									}
 								}
 						}
 
