@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict 4SNe1GXpkcEjGQJGhDHI2vPd5Lway82XVVhjfaJuvF0FPMVjEFmfVeMagfnudyG
+\restrict fwJsMcfOdJ2aHWcfz4PwGElIQj3mOIPuYjlahiuv178jpjjE9eymjycNedV5Y6b
 
 -- Dumped from database version 16.10 (Ubuntu 16.10-0ubuntu0.24.04.1)
 -- Dumped by pg_dump version 16.10 (Ubuntu 16.10-0ubuntu0.24.04.1)
@@ -472,7 +472,7 @@ CREATE SEQUENCE public."ha_abschlussdetails_abschlussDetailId_seq"
     AS integer
     START WITH 1
     INCREMENT BY 1
-    NO MINVALUE
+    MINVALUE 0
     NO MAXVALUE
     CACHE 1;
 
@@ -526,6 +526,59 @@ ALTER SEQUENCE public."ha_abschlusssummen_abschlussSummenId_seq" OWNER TO domm;
 --
 
 ALTER SEQUENCE public."ha_abschlusssummen_abschlussSummenId_seq" OWNED BY public.ha_abschlusssummen."abschlussSummenId";
+
+
+--
+-- Name: ha_abschlusssummen_aufteilung; Type: TABLE; Schema: public; Owner: domm
+--
+
+CREATE TABLE public.ha_abschlusssummen_aufteilung (
+    "abschlussSummenAufteilungId" integer NOT NULL,
+    "parteiId" smallint NOT NULL,
+    "abschlussAnteilInProzent" double precision NOT NULL,
+    "abschlussAnteilBetrag" numeric DEFAULT 0 NOT NULL,
+    "abschlussMonat" date NOT NULL,
+    "abschlussZeitpunkt" timestamp with time zone NOT NULL,
+    "abschlussBemerkung" character varying(250)
+);
+
+
+ALTER TABLE public.ha_abschlusssummen_aufteilung OWNER TO domm;
+
+--
+-- Name: TABLE ha_abschlusssummen_aufteilung; Type: COMMENT; Schema: public; Owner: domm
+--
+
+COMMENT ON TABLE public.ha_abschlusssummen_aufteilung IS 'enthält die berechneten Aufteilungsbeträge pro Partei zum Zeitpunkt des Abschlusses, dabei werden auch die zu diesem Zeitpunkt gültigen prozentualen Anteile der Parteien, mit denen die Aufteilung gebildet werden festgehalten';
+
+
+--
+-- Name: COLUMN ha_abschlusssummen_aufteilung."abschlussZeitpunkt"; Type: COMMENT; Schema: public; Owner: domm
+--
+
+COMMENT ON COLUMN public.ha_abschlusssummen_aufteilung."abschlussZeitpunkt" IS 'Zeitpunkt an dem der Abschluss für diesen Monat gemacht worden ist';
+
+
+--
+-- Name: ha_abschlusssummen_aufteilung_abschlussSummenAufteilung_seq; Type: SEQUENCE; Schema: public; Owner: domm
+--
+
+CREATE SEQUENCE public."ha_abschlusssummen_aufteilung_abschlussSummenAufteilung_seq"
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public."ha_abschlusssummen_aufteilung_abschlussSummenAufteilung_seq" OWNER TO domm;
+
+--
+-- Name: ha_abschlusssummen_aufteilung_abschlussSummenAufteilung_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: domm
+--
+
+ALTER SEQUENCE public."ha_abschlusssummen_aufteilung_abschlussSummenAufteilung_seq" OWNED BY public.ha_abschlusssummen_aufteilung."abschlussSummenAufteilungId";
 
 
 --
@@ -737,7 +790,8 @@ CREATE TABLE public.ha_ueberweisungsbetraege (
     ueberweisungsbetrag_id integer NOT NULL,
     partei_id integer NOT NULL,
     betrag numeric NOT NULL,
-    gilt_bis date
+    gilt_bis date,
+    gilt_ab date
 );
 
 
@@ -1338,6 +1392,13 @@ ALTER TABLE ONLY public.ha_abschlusssummen ALTER COLUMN "abschlussSummenId" SET 
 
 
 --
+-- Name: ha_abschlusssummen_aufteilung abschlussSummenAufteilungId; Type: DEFAULT; Schema: public; Owner: domm
+--
+
+ALTER TABLE ONLY public.ha_abschlusssummen_aufteilung ALTER COLUMN "abschlussSummenAufteilungId" SET DEFAULT nextval('public."ha_abschlusssummen_aufteilung_abschlussSummenAufteilung_seq"'::regclass);
+
+
+--
 -- Name: ha_ausgaben_aufteilung ausgabenAufteilungId; Type: DEFAULT; Schema: public; Owner: domm
 --
 
@@ -1475,6 +1536,14 @@ ALTER TABLE ONLY public.ha_abschlussdetails
 
 
 --
+-- Name: ha_abschlusssummen_aufteilung ha_abschlusssummen_aufteilung_pkey; Type: CONSTRAINT; Schema: public; Owner: domm
+--
+
+ALTER TABLE ONLY public.ha_abschlusssummen_aufteilung
+    ADD CONSTRAINT ha_abschlusssummen_aufteilung_pkey PRIMARY KEY ("abschlussSummenAufteilungId");
+
+
+--
 -- Name: ha_abschlusssummen ha_abschlusssummen_pkey; Type: CONSTRAINT; Schema: public; Owner: domm
 --
 
@@ -1496,6 +1565,14 @@ ALTER TABLE ONLY public.ha_ausgaben_aufteilung
 
 ALTER TABLE ONLY public.ha_ausgaben
     ADD CONSTRAINT ha_ausgaben_pkey PRIMARY KEY ("ausgabenId");
+
+
+--
+-- Name: ha_kategorie ha_kategorie_pkey; Type: CONSTRAINT; Schema: public; Owner: domm
+--
+
+ALTER TABLE ONLY public.ha_kategorie
+    ADD CONSTRAINT ha_kategorie_pkey PRIMARY KEY (ha_kategorie_id);
 
 
 --
@@ -1619,6 +1696,21 @@ ALTER TABLE ONLY public.transaktionen
 
 
 --
+-- Name: ha_abschlusssummen fk_abschlussDetailId; Type: FK CONSTRAINT; Schema: public; Owner: domm
+--
+
+ALTER TABLE ONLY public.ha_abschlusssummen
+    ADD CONSTRAINT "fk_abschlussDetailId" FOREIGN KEY ("abschlussDetailId") REFERENCES public.ha_abschlussdetails("abschlussDetailId") ON UPDATE CASCADE ON DELETE CASCADE NOT VALID;
+
+
+--
+-- Name: CONSTRAINT "fk_abschlussDetailId" ON ha_abschlusssummen; Type: COMMENT; Schema: public; Owner: domm
+--
+
+COMMENT ON CONSTRAINT "fk_abschlussDetailId" ON public.ha_abschlusssummen IS 'über diesen Key wird beim Löschen eines Datensatzes aus ha_abschlussdetails auch sein Child (referenziert über das Feld abschlussDetailId) gelöscht';
+
+
+--
 -- Name: ha_gehaltsgrundlagen keyext_personen; Type: FK CONSTRAINT; Schema: public; Owner: domm
 --
 
@@ -1630,5 +1722,5 @@ ALTER TABLE ONLY public.ha_gehaltsgrundlagen
 -- PostgreSQL database dump complete
 --
 
-\unrestrict 4SNe1GXpkcEjGQJGhDHI2vPd5Lway82XVVhjfaJuvF0FPMVjEFmfVeMagfnudyG
+\unrestrict fwJsMcfOdJ2aHWcfz4PwGElIQj3mOIPuYjlahiuv178jpjjE9eymjycNedV5Y6b
 
