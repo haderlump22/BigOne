@@ -1,7 +1,6 @@
 package de.rachel.bigone;
 
 import java.sql.Connection;
-import java.sql.ResultSet;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -37,7 +36,6 @@ import de.rachel.bigone.listeners.JointAccountClosingSumOverviewMouseListener;
 import de.rachel.bigone.models.JointAccountClosingBalanceAllocationOverviewDetailTableModel;
 import de.rachel.bigone.models.JointAccountClosingDetailTableModel;
 import de.rachel.bigone.records.JointAccountClosingBalanceAllocationOverviewDetailTableRow;
-import de.rachel.bigone.records.JointAccountClosingDetailTableRow;
 import de.rachel.bigone.records.SalaryBasesSumOfIncomePerPartyTableRow;
 import de.rachel.bigone.renderer.JointAccountClosingBalanceAllocationOverviewDetailTableCellRenderer;
 import de.rachel.bigone.renderer.JointAccountClosingDetailTableCellRenderer;
@@ -216,22 +214,25 @@ public class JointAccountClosing {
 						// now we can fill the sumOverview if there was stored Values before
 						fillSumOverview();
 
+						// before we fill the ballanceAllocationOverview we check if the Month is alrady closed
 						billingMonthAlreadyClosed = isBillingMonthAlreadyClosed(billingMonth.getText());
 
 						// if the Sum Overview is filled we can calculate the Data for the ballance
-						// allocation overview and display it, but we give to function isBillingMonthAlradyClosed
+						// allocation overview and display it
 						fillBallaceAllocationOverview();
 					} else {
+						// if there are no closing Detaildata for this billing month
+						// them cant be always closed
+						billingMonthAlreadyClosed = false;
+
 						int result = JOptionPane.showConfirmDialog(null, "Es sind noch keine Daten für den Abrechnungsmontat zusammengestellt worden!\nSoll das jetzt gemacht werden?", "Abschluss initieren", JOptionPane.YES_NO_CANCEL_OPTION);
 
 						if (result == JOptionPane.YES_OPTION) {
 							prepareJointAccountClosingDetailImportData(billingMonth.getText());
 						} else if (result == JOptionPane.NO_OPTION) {
-							jointAccountClosingWindow.dispose();
+							billingMonth.setText("");
 						}
 					}
-
-
 				}
 			}
 
@@ -280,7 +281,7 @@ public class JointAccountClosing {
 				.addKeyListener(new JointAccountClosingEventInfoAreaKeyListener(cn, jointAccountClosingDetailTable));
 
 		jointAccountClosingDetailTable.addMouseListener(new JointAccountClosingDetailTableMouseListener(
-				jointAccountClosingDetailTable, billingMonth, cn, this));
+				jointAccountClosingDetailTable, cn, this));
 
 		sumOverviewMouseListener = new JointAccountClosingSumOverviewMouseListener(billingMonth,
 				jointAccountClosingDetailTable, sumOverviewNegativePlanedValue, sumOverviewNegativeUnplanedValue,
@@ -427,43 +428,47 @@ public class JointAccountClosing {
         sumOverviewPositivePlanedValue.setFont(new Font(null, Font.PLAIN, 14));
         sumOverviewPositiveUnplanedValue.setFont(new Font(null, Font.PLAIN, 14));
 
-		DBTools getter = new DBTools(cn);
+		// in the case that we reset the closing Details, the Billing Month is empty
+		// so we has nothing to do
+		if (Pattern.matches("\\d{2}.\\d{2}.[1-9]{1}\\d{3}", billingMonth.getText())) {
+			DBTools getter = new DBTools(cn);
 
-		getter.select("""
-				SELECT "summenArt", sum(ha_abschlussdetails.differenz) betrag
-				FROM ha_abschlusssummen, ha_abschlussdetails
-				WHERE ha_abschlussdetails."abschlussMonat" = '%s'
-				AND ha_abschlussdetails."abschlussDetailId" = ha_abschlusssummen."abschlussDetailId"
-				GROUP BY "summenArt"
-				""".formatted(billingMonth.getText()), 2);
+			getter.select("""
+					SELECT "summenArt", sum(ha_abschlussdetails.differenz) betrag
+					FROM ha_abschlusssummen, ha_abschlussdetails
+					WHERE ha_abschlussdetails."abschlussMonat" = '%s'
+					AND ha_abschlussdetails."abschlussDetailId" = ha_abschlusssummen."abschlussDetailId"
+					GROUP BY "summenArt"
+					""".formatted(billingMonth.getText()), 2);
 
-		try {
-			getter.beforeFirst();
+			try {
+				getter.beforeFirst();
 
-			while (getter.next()) {
-				switch (getter.getString("summenArt")) {
-					case "planned+":
-						sumOverviewPositivePlanedValue.setText("%.02f".formatted(getter.getDouble("betrag")));
-						sumOverviewPositivePlanedValue.setName(getter.getString("summenArt"));
-						break;
-					case "planned-":
-						sumOverviewNegativePlanedValue.setText("%.02f".formatted(getter.getDouble("betrag")));
-						sumOverviewNegativePlanedValue.setName(getter.getString("summenArt"));
-						break;
-					case "unplanned+":
-						sumOverviewPositiveUnplanedValue.setText("%.02f".formatted(getter.getDouble("betrag")));
-						sumOverviewPositiveUnplanedValue.setName(getter.getString("summenArt"));
-						break;
-					case "unplanned-":
-						sumOverviewNegativeUnplanedValue.setText("%.02f".formatted(getter.getDouble("betrag")));
-						sumOverviewNegativeUnplanedValue.setName(getter.getString("summenArt"));
-						break;
-					default:
-						break;
+				while (getter.next()) {
+					switch (getter.getString("summenArt")) {
+						case "planned+":
+							sumOverviewPositivePlanedValue.setText("%.02f".formatted(getter.getDouble("betrag")));
+							sumOverviewPositivePlanedValue.setName(getter.getString("summenArt"));
+							break;
+						case "planned-":
+							sumOverviewNegativePlanedValue.setText("%.02f".formatted(getter.getDouble("betrag")));
+							sumOverviewNegativePlanedValue.setName(getter.getString("summenArt"));
+							break;
+						case "unplanned+":
+							sumOverviewPositiveUnplanedValue.setText("%.02f".formatted(getter.getDouble("betrag")));
+							sumOverviewPositiveUnplanedValue.setName(getter.getString("summenArt"));
+							break;
+						case "unplanned-":
+							sumOverviewNegativeUnplanedValue.setText("%.02f".formatted(getter.getDouble("betrag")));
+							sumOverviewNegativeUnplanedValue.setName(getter.getString("summenArt"));
+							break;
+						default:
+							break;
+					}
 				}
+			} catch (Exception e) {
+				System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "+e.getStackTrace()[0].getLineNumber()+"): " + e.toString());
 			}
-		} catch (Exception e) {
-			System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "+e.getStackTrace()[0].getLineNumber()+"): " + e.toString());
 		}
 	}
 
@@ -479,100 +484,105 @@ public class JointAccountClosing {
 		 * if it so =>
 		 * we get the values for the Model from the table ha_abschlusssummen_aufteilung
 		 */
-		List<SalaryBasesSumOfIncomePerPartyTableRow> salaryBasesForTheDefinedBillingMonth = new ArrayList<>();
-		List<JointAccountClosingBalanceAllocationOverviewDetailTableRow> jointAccountClosingBalanceAllocationOverviewDetailTableData = new ArrayList<>();
-		Double sumOfAllIncome = 0.0;
-		Double totalSumToBeDivided = 0.0;
-		DBTools dbTools = new DBTools(cn);
 
-		if (!billingMonthAlreadyClosed) {
+		// in the case of resetting the DetailData, the Billing Month is empty
+		// so we has nothing to do
+		if (Pattern.matches("\\d{2}.\\d{2}.[1-9]{1}\\d{3}", billingMonth.getText())) {
+			List<SalaryBasesSumOfIncomePerPartyTableRow> salaryBasesForTheDefinedBillingMonth = new ArrayList<>();
+			List<JointAccountClosingBalanceAllocationOverviewDetailTableRow> jointAccountClosingBalanceAllocationOverviewDetailTableData = new ArrayList<>();
+			Double sumOfAllIncome = 0.0;
+			Double totalSumToBeDivided = 0.0;
+			DBTools dbTools = new DBTools(cn);
 
-			dbTools.select("""
-				SELECT p.personen_id, p.name || ', ' || SUBSTRING(p.vorname, 1, 1) || '.' as party, sum(gg.betrag) as betrag
-				FROM personen p, ha_gehaltsgrundlagen gg
-				WHERE gilt_bis >= '%s'
-				AND gilt_ab <= '%s'
-				AND p.personen_id = gg.partei_id
-				GROUP BY p.personen_id, p.name, p.vorname
-				ORDER BY p.name;
-				""".formatted(billingMonth.getText(), billingMonth.getText()),
-				3);
+			if (!billingMonthAlreadyClosed) {
 
-			try {
-				dbTools.beforeFirst();
+				dbTools.select("""
+					SELECT p.personen_id, p.name || ', ' || SUBSTRING(p.vorname, 1, 1) || '.' as party, sum(gg.betrag) as betrag
+					FROM personen p, ha_gehaltsgrundlagen gg
+					WHERE gilt_bis >= '%s'
+					AND gilt_ab <= '%s'
+					AND p.personen_id = gg.partei_id
+					GROUP BY p.personen_id, p.name, p.vorname
+					ORDER BY p.name;
+					""".formatted(billingMonth.getText(), billingMonth.getText()),
+					3);
 
-				while (dbTools.next()) {
-					salaryBasesForTheDefinedBillingMonth
-							.add(new SalaryBasesSumOfIncomePerPartyTableRow(dbTools.getInt("personen_id"), dbTools.getString("party"),
-									dbTools.getDouble("betrag")));
+				try {
+					dbTools.beforeFirst();
+
+					while (dbTools.next()) {
+						salaryBasesForTheDefinedBillingMonth
+								.add(new SalaryBasesSumOfIncomePerPartyTableRow(dbTools.getInt("personen_id"), dbTools.getString("party"),
+										dbTools.getDouble("betrag")));
+					}
+				} catch (Exception e) {
+					System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "
+							+ e.getStackTrace()[0].getLineNumber() + "): " + e.toString());
 				}
-			} catch (Exception e) {
-				System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "
-						+ e.getStackTrace()[0].getLineNumber() + "): " + e.toString());
-			}
 
-			// first calculate the total sum of the Partys in this billngmonth
-			for (SalaryBasesSumOfIncomePerPartyTableRow Zeile : salaryBasesForTheDefinedBillingMonth) {
-				sumOfAllIncome = sumOfAllIncome + Zeile.Sum();
-			}
+				// first calculate the total sum of the Partys in this billngmonth
+				for (SalaryBasesSumOfIncomePerPartyTableRow Zeile : salaryBasesForTheDefinedBillingMonth) {
+					sumOfAllIncome = sumOfAllIncome + Zeile.Sum();
+				}
 
-			// next we calculate the total Sum of the 4 SumOverview Values
-			dbTools.select("""
-					SELECT sum(ha_abschlussdetails.differenz) AmountToBeDivided
-					FROM ha_abschlusssummen, ha_abschlussdetails
-					WHERE ha_abschlussdetails."abschlussMonat" = '%s'
-					AND ha_abschlussdetails."abschlussDetailId" = ha_abschlusssummen."abschlussDetailId"
-					""".formatted(billingMonth.getText(), billingMonth.getText()), 1);
+				// next we calculate the total Sum of the 4 SumOverview Values
+				dbTools.select("""
+						SELECT sum(ha_abschlussdetails.differenz) AmountToBeDivided
+						FROM ha_abschlusssummen, ha_abschlussdetails
+						WHERE ha_abschlussdetails."abschlussMonat" = '%s'
+						AND ha_abschlussdetails."abschlussDetailId" = ha_abschlusssummen."abschlussDetailId"
+						""".formatted(billingMonth.getText(), billingMonth.getText()), 1);
 
-			try {
-				dbTools.first();
-				totalSumToBeDivided = dbTools.getDouble("AmountToBeDivided");
-			} catch (Exception e) {
-				System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "
-						+ e.getStackTrace()[0].getLineNumber() + "): " + e.toString());
-			}
+				try {
+					dbTools.first();
+					totalSumToBeDivided = dbTools.getDouble("AmountToBeDivided");
+				} catch (Exception e) {
+					System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "
+							+ e.getStackTrace()[0].getLineNumber() + "): " + e.toString());
+				}
 
-			// at last we ca put the data, with calculated percentvalue and share of the
-			// Parties, to the nessasary record
-			for (SalaryBasesSumOfIncomePerPartyTableRow incomePerPartyThisBillingMonthRow : salaryBasesForTheDefinedBillingMonth) {
-				jointAccountClosingBalanceAllocationOverviewDetailTableData
-						.add(new JointAccountClosingBalanceAllocationOverviewDetailTableRow(
-								incomePerPartyThisBillingMonthRow.partyId(),
-								incomePerPartyThisBillingMonthRow.Name(),
-								(incomePerPartyThisBillingMonthRow.Sum() * 100) / sumOfAllIncome,
-								((incomePerPartyThisBillingMonthRow.Sum()) / sumOfAllIncome) * totalSumToBeDivided));
-			}
-
-			// now we can enable the closing Button
-			closeBillingMonth.setEnabled(true);
-		} else {
-			dbTools.select("""
-					SELECT "parteiId", p.name || ', ' || SUBSTRING(p.vorname, 1, 1) || '.' as partei, "abschlussAnteilInProzent", "abschlussAnteilBetrag"
-					FROM ha_abschlusssummen_aufteilung, personen p
-					WHERE "abschlussMonat" = '%s'
-					AND ha_abschlusssummen_aufteilung."parteiId" = p.personen_id
-					""".formatted(billingMonth.getText()), 0);
-
-			try {
-				dbTools.beforeFirst();
-
-				while (dbTools.next()) {
+				// at last we ca put the data, with calculated percentvalue and share of the
+				// Parties, to the nessasary record
+				for (SalaryBasesSumOfIncomePerPartyTableRow incomePerPartyThisBillingMonthRow : salaryBasesForTheDefinedBillingMonth) {
 					jointAccountClosingBalanceAllocationOverviewDetailTableData
-						.add(new JointAccountClosingBalanceAllocationOverviewDetailTableRow(
-								dbTools.getInt("parteiId"),
-								dbTools.getString("partei"),
-								dbTools.getDouble("abschlussAnteilInProzent"),
-								dbTools.getDouble("abschlussAnteilBetrag")));
+							.add(new JointAccountClosingBalanceAllocationOverviewDetailTableRow(
+									incomePerPartyThisBillingMonthRow.partyId(),
+									incomePerPartyThisBillingMonthRow.Name(),
+									(incomePerPartyThisBillingMonthRow.Sum() * 100) / sumOfAllIncome,
+									((incomePerPartyThisBillingMonthRow.Sum()) / sumOfAllIncome) * totalSumToBeDivided));
 				}
-			} catch (Exception e) {
-				System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "
-						+ e.getStackTrace()[0].getLineNumber() + "): " + e.toString());
-			}
-		}
 
-		// regardless of where the data for the record came from, now we can put tehm in the TableModel
-		((JointAccountClosingBalanceAllocationOverviewDetailTableModel) jointAccountClosingBalanceAllocationOverviewDetailTable
-				.getModel()).aktualisiere(jointAccountClosingBalanceAllocationOverviewDetailTableData);
+				// now we can enable the closing Button
+				closeBillingMonth.setEnabled(true);
+			} else {
+				dbTools.select("""
+						SELECT "parteiId", p.name || ', ' || SUBSTRING(p.vorname, 1, 1) || '.' as partei, "abschlussAnteilInProzent", "abschlussAnteilBetrag"
+						FROM ha_abschlusssummen_aufteilung, personen p
+						WHERE "abschlussMonat" = '%s'
+						AND ha_abschlusssummen_aufteilung."parteiId" = p.personen_id
+						""".formatted(billingMonth.getText()), 0);
+
+				try {
+					dbTools.beforeFirst();
+
+					while (dbTools.next()) {
+						jointAccountClosingBalanceAllocationOverviewDetailTableData
+							.add(new JointAccountClosingBalanceAllocationOverviewDetailTableRow(
+									dbTools.getInt("parteiId"),
+									dbTools.getString("partei"),
+									dbTools.getDouble("abschlussAnteilInProzent"),
+									dbTools.getDouble("abschlussAnteilBetrag")));
+					}
+				} catch (Exception e) {
+					System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "
+							+ e.getStackTrace()[0].getLineNumber() + "): " + e.toString());
+				}
+			}
+
+			// regardless of where the data for the record came from, now we can put tehm in the TableModel
+			((JointAccountClosingBalanceAllocationOverviewDetailTableModel) jointAccountClosingBalanceAllocationOverviewDetailTable
+					.getModel()).aktualisiere(jointAccountClosingBalanceAllocationOverviewDetailTableData);
+		}
 	}
 
 	private boolean existAccountClosingData(String billingMonth) {
@@ -686,7 +696,7 @@ public class JointAccountClosing {
 		fillSumOverview();
 
 		// if the Sum Overview is filled we can calculate the Data for the ballance
-		// allocation overview and display it, but we give to function isBillingMonthAlradyClosed
+		// allocation overview and display it
 		fillBallaceAllocationOverview();
 	}
 
@@ -743,5 +753,14 @@ public class JointAccountClosing {
 
 	public boolean getBillingMonthAlreadyClosed() {
 		return billingMonthAlreadyClosed;
+	}
+
+	public String getBillingMonth() {
+		return billingMonth.getText();
+	}
+
+	public void clearBillingMonth() {
+		billingMonth.setValue("");
+		billingMonth.setText("");
 	}
 }

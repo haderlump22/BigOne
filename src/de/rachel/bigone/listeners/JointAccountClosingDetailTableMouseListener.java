@@ -8,7 +8,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import javax.swing.JPopupMenu;
 import javax.swing.JTable;
-import javax.swing.JFormattedTextField;
 import javax.swing.JMenuItem;
 
 import de.rachel.bigone.DBTools;
@@ -22,11 +21,11 @@ public class JointAccountClosingDetailTableMouseListener extends MouseAdapter {
     private int detailId;
     private DBTools query;
     private JMenuItem addToPositiveSumPlaned, addToNegativeSumPlaned, addToPositiveSumUnplaned,
-            addToNegativeSumUnplaned, removeDifferenceValueFromSum;
+            addToNegativeSumUnplaned, removeDifferenceValueFromSum, resetBillingMonthPreparedData;
     private JointAccountClosing jointAccountClosingUi;
+    private String billingMonth = "";
 
-    public JointAccountClosingDetailTableMouseListener(JTable jointAccountClosingDetailTable,
-            JFormattedTextField billingMonth, Connection LoginCN, JointAccountClosing jointAccountClosingUi) {
+    public JointAccountClosingDetailTableMouseListener(JTable jointAccountClosingDetailTable, Connection LoginCN, JointAccountClosing jointAccountClosingUi) {
         popmen = new JPopupMenu();
         query = new DBTools(LoginCN);
         this.jointAccountClosingDetailTable = jointAccountClosingDetailTable;
@@ -79,15 +78,32 @@ public class JointAccountClosingDetailTableMouseListener extends MouseAdapter {
             }
         });
 
+        resetBillingMonthPreparedData = new JMenuItem("Abschlussvorbereitung zurücksetzen");
+        resetBillingMonthPreparedData.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent ae) {
+                removeJointAccountClosingDetailData();
+                jointAccountClosingUi.clearBillingMonth();
+                jointAccountClosingDetailTableModel.setDetailIdsForMarkingDifferenceValue(new Integer[0]);
+                // we give an empty BillingMonth because we whant to clear the JTable
+                jointAccountClosingDetailTableModel.aktualisiere("");
+                jointAccountClosingUi.fillSumOverview();
+                jointAccountClosingUi.fillBallaceAllocationOverview();
+            }
+        });
+
         popmen.add(addToPositiveSumPlaned);
         popmen.add(addToNegativeSumPlaned);
         popmen.add(addToPositiveSumUnplaned);
         popmen.add(addToNegativeSumUnplaned);
         popmen.addSeparator();
         popmen.add(removeDifferenceValueFromSum);
+        popmen.add(resetBillingMonthPreparedData);
     }
 
     public void mouseReleased(MouseEvent mouseEvent) {
+        // first we renew the billingMonth Value from the UI
+        billingMonth = jointAccountClosingUi.getBillingMonth();
+
         // wenn die Zeile auf der der Rechtsklick ausgefürht wurde nicht selectiert war
         // wird diese Zeile erst selectiert
         JTable jointAccountClosingDetailTable = (JTable) mouseEvent.getSource();
@@ -108,8 +124,10 @@ public class JointAccountClosingDetailTableMouseListener extends MouseAdapter {
             // if billing month already closed disable the possibility
             // to manipulate the Value Counting
             if (jointAccountClosingUi.getBillingMonthAlreadyClosed()) {
+                resetBillingMonthPreparedData.setEnabled(false);
                 setAddMenuEntrysDisabled(true);
             } else {
+                resetBillingMonthPreparedData.setEnabled(true);
                 // disable addTo... entries if the ID from the row where the mouse was clicked
                 // is already added to a sum type
                 if (isRowDifferenceValueAlreadyAddedToAnySumType()) {
@@ -128,7 +146,7 @@ public class JointAccountClosingDetailTableMouseListener extends MouseAdapter {
         }
 
         if (mouseEvent.getButton() == MouseEvent.BUTTON1) {
-            ((JointAccountClosingDetailTableModel)jointAccountClosingDetailTable.getModel()).setDetailIdsForMarkingDifferenceValue(new Integer[0]);
+            jointAccountClosingDetailTableModel.setDetailIdsForMarkingDifferenceValue(new Integer[0]);
 
             // diese eine Zeile selectieren
             jointAccountClosingDetailTable.addRowSelectionInterval(rowAtMousePoint, rowAtMousePoint);
@@ -220,5 +238,15 @@ public class JointAccountClosingDetailTableMouseListener extends MouseAdapter {
                 DELETE FROM ha_abschlusssummen
                 WHERE "abschlussDetailId" = %d
                 """.formatted(detailId));
+    }
+
+    private void removeJointAccountClosingDetailData() {
+        // the referenced Rows in ha_abschlusssummen are also
+        // deletet, but it happend automaticly by an foreign Key in the db
+        // between the parrent table ha_abschlussdetails and child table ha_abschlusssummen
+        query.update("""
+                DELETE FROM ha_abschlussdetails
+                WHERE "abschlussMonat" = '%s'
+                """.formatted(billingMonth));
     }
 }

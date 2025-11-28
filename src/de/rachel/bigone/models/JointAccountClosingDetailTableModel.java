@@ -110,8 +110,12 @@ public class JointAccountClosingDetailTableModel extends AbstractTableModel {
 	}
 
 	public void aktualisiere(String billingMonth) {
-		this.billingMonth = billingMonth;
-		lese_werte();
+		if (!billingMonth.equals("")) {
+			this.billingMonth = billingMonth;
+			lese_werte();
+		} else {
+			tableData = new ArrayList<>();
+		}
 		fireTableDataChanged();
 	}
 

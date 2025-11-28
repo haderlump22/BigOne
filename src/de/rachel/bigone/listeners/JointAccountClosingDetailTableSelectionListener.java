@@ -169,12 +169,13 @@ public class JointAccountClosingDetailTableSelectionListener implements ListSele
                         sumOverviewPositiveUnplanedValue.setFont(new Font(null, Font.PLAIN, 14));
 						break;
 					default:
-                        sumOverviewNegativePlanedValue.setFont(new Font(null, Font.PLAIN, 14));
-                        sumOverviewNegativeUnplanedValue.setFont(new Font(null, Font.PLAIN, 14));
-                        sumOverviewPositivePlanedValue.setFont(new Font(null, Font.PLAIN, 14));
-                        sumOverviewPositiveUnplanedValue.setFont(new Font(null, Font.PLAIN, 14));
 						break;
 				}
+            } else {
+                sumOverviewNegativePlanedValue.setFont(new Font(null, Font.PLAIN, 14));
+                sumOverviewNegativeUnplanedValue.setFont(new Font(null, Font.PLAIN, 14));
+                sumOverviewPositivePlanedValue.setFont(new Font(null, Font.PLAIN, 14));
+                sumOverviewPositiveUnplanedValue.setFont(new Font(null, Font.PLAIN, 14));
             }
         } catch (Exception e) {
             System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "+e.getStackTrace()[0].getLineNumber()+"): " + e.toString());
