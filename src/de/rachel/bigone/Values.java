@@ -84,19 +84,11 @@ public class Values {
 				});
 			}
 		});
-		txtValue.addKeyListener(new KeyListener() {
-			private String LiquiDate;
 
+		txtValue.addKeyListener(new KeyListener() {
 			public void keyPressed(KeyEvent ke) {
 				if (ke.getKeyCode() == KeyEvent.VK_ENTER) {
-					if (withLiquiDate.isSelected()) {
-						LiquiDate = BigOneTools.datum_wandeln(txtLiquiDate.getText(), 0);
-					} else {
-						LiquiDate = "";
-					}
-					model = (ValuesTableModel) table.getModel();
-					model.aktualisiere(txtValue.getText().replace(".", "").replace(',', '.'), LiquiDate,
-							cmbKto.getSelectedItem().toString().replace(" ", ""), cmbKto.getToolTipText());
+					reloadData();
 				}
 			}
 
@@ -109,7 +101,6 @@ public class Values {
 			public void keyTyped(KeyEvent arg0) {
 
 			}
-
 		});
 
 		String now = new SimpleDateFormat("dd.MM.yyyy").format(new Date());
@@ -144,6 +135,7 @@ public class Values {
 				if (e.getStateChange() == ItemEvent.SELECTED) {
 					// set Tooltip of the Account Combobox with the Hint of the Account
 					cmbKto.setToolTipText(getAccountDescription(e.getItem().toString().replace(" ", "")));
+					reloadData();
 				}
 			}
 		});
@@ -154,16 +146,9 @@ public class Values {
 
 		// ad an Valuechange Listener for aktivate/deaktivate the LiquiDate Textfield
 		withLiquiDate.addActionListener(new ActionListener() {
-
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if (withLiquiDate.isSelected()) {
-					txtLiquiDate.setEnabled(true);
-					withLiquiDate.setText("mit Liquidatum suchen");
-				} else {
-					txtLiquiDate.setEnabled(false);
-					withLiquiDate.setText("ohne Liquidatum suchen");
-				}
+				reloadData();
 			}
 		});
 
@@ -241,6 +226,27 @@ public class Values {
 			return getter.getValueAt(0, 0).toString();
 		}else {
 			return "not found";
+		}
+	}
+
+	private void reloadData() {
+		String liquiDate;
+
+		if (withLiquiDate.isSelected()) {
+			liquiDate = BigOneTools.datum_wandeln(txtLiquiDate.getText(), 0);
+			txtLiquiDate.setEnabled(true);
+			withLiquiDate.setText("mit Liquidatum suchen");
+		} else {
+			liquiDate = "";
+			txtLiquiDate.setEnabled(false);
+			withLiquiDate.setText("ohne Liquidatum suchen");
+		}
+
+		// and restart the Search if an Amount is given
+		if (Double.valueOf(txtValue.getText().replace(".", "").replace(',', '.')) > 0) {
+			model = (ValuesTableModel) table.getModel();
+			model.aktualisiere(txtValue.getText().replace(".", "").replace(',', '.'), liquiDate,
+					cmbKto.getSelectedItem().toString().replace(" ", ""), cmbKto.getToolTipText());
 		}
 	}
 }
