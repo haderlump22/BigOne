@@ -39,12 +39,12 @@ import org.w3c.dom.NodeList;
  */
 public class ReadCamt {
 	private Document KontoAuszug;
-	private String[][] buchungen = new String[0][0];
+	// private String[][] buchungen = new String[0][0];
 	private String[] csvContent;
 	private int buchungsAnzahl;
 	private String sIBAN = "";
 	private String AccountOwner = "";
-	private String[] NodeToFind = { "ValDt", "CdtDbtInd", "Amt", "Ustrd", "Cdtr", "Dbtr", "UltmtCdtr" };
+	private String[] NodeToFind = { "ValDt", "CdtDbtInd", "Amt", "Ustrd", "Cdtr", "Dbtr", "UltmtCdtr", "UltmtDbtr" };
 	private static int ValueDate = 0;
 	private static int CreditDebitIndicator = 1;
 	private static int Amount = 2;
@@ -55,7 +55,7 @@ public class ReadCamt {
 	private int accountId = 0;
 	private Connection cn = null;
 	private FileInputStream fis;
-	private List<RacTableRow> tempBuchungen = new ArrayList<>();
+	private List<RacTableRow> buchungen = new ArrayList<>();
 
 	ReadCamt(String PathAndFile, Connection LoginCN) {
 		this.cn = LoginCN;
@@ -83,63 +83,25 @@ public class ReadCamt {
 							if (KontoAuszug != null) {
 								buchungsAnzahl = KontoAuszug.getElementsByTagName("Ntry").getLength();
 
-								// System.out.println("Anzahl an buchungen in " + zipentry.getName() + " : " + buchungsAnzahl);
-
-								buchungenLager = new String[buchungsAnzahl][6];
-
 								// set IBAN from EBICs File
 								sIBAN = findSubs(KontoAuszug.getElementsByTagName("Acct").item(0), "IBAN", "").trim();
+
+								// when we know the IBAN we get the Information its an JointAccount or not
+								isJointAccount = isJointAccount(sIBAN);
 
 								// write Entrys from EBICs File in to Array
 								NodeList rows = KontoAuszug.getElementsByTagName("Ntry");
 
 								for (int i = 0; i < rows.getLength(); i++) {
-									buchungenLager[i][ValueDate] = findSubs(rows.item(i), NodeToFind[0], "").trim();
-									buchungenLager[i][CreditDebitIndicator] = findSubs(rows.item(i), NodeToFind[1], "").trim();
-									buchungenLager[i][Amount] = findSubs(rows.item(i), NodeToFind[2], "").trim();
-									buchungenLager[i][Unstructured] = findSubs(rows.item(i), NodeToFind[3], "").trim();
-
-									if (buchungenLager[i][CreditDebitIndicator].equals("CRDT")) {
-										buchungenLager[i][Creditor] = null;
-										buchungenLager[i][Debitor] = findSubs(rows.item(i), NodeToFind[5], "").trim();
-									} else {
-										buchungenLager[i][Creditor] = findSubs(rows.item(i), NodeToFind[4], "").trim() + "/" + findSubs(rows.item(i), NodeToFind[6], "").trim();
-										buchungenLager[i][Debitor] = null;
-									}
-
-									// tempBuchungen.add(new RacTableRow(LocalDate.parse(findSubs(rows.item(i), NodeToFind[0], "").trim()),
-									// 		filecontent,
-									// 		null,
-									// 		PathAndFile,
-									// 		filecontent,
-									// 		null,
-									// 		null));
-								}
-
-								// now we put the current Content of buchungenLager into the array that is used for the TableModel
-								if (buchungenLager.length > 0) {
-									// if the exist content in the central Array we copy them to an temp space
-									if (buchungen.length > 0) {
-										// save the until now readed buchungungen
-										String[][] lager = new String[buchungen.length][6];
-										System.arraycopy(buchungen, 0, lager, 0, buchungen.length);
-
-										// now resize the central array
-										buchungen = new String[(buchungen.length + buchungenLager.length)][6];
-
-										// copy the old content of buchungen to the resized array
-										System.arraycopy(lager, 0, buchungen, 0, lager.length);
-										// and the new content of buchungenLager to the resized arra
-										System.arraycopy(buchungenLager, 0, buchungen, lager.length, buchungenLager.length);
-									} else {
-										// now resize the central array
-										buchungen = new String[(buchungen.length + buchungenLager.length)][6];
-
-										// and copy the new content of buchungenLager to the resized central array
-										System.arraycopy(buchungenLager, 0, buchungen, 0, buchungenLager.length);
-									}
-
-
+									buchungen.add(new RacTableRow(LocalDate.parse(findSubs(rows.item(i), NodeToFind[0], "").trim()),
+											findSubs(rows.item(i), NodeToFind[1], "").trim().equals("CRDT") ? "h" : "s",
+											findSubs(rows.item(i), NodeToFind[1], "").trim().equals("CRDT")
+												? findSubs(rows.item(i), NodeToFind[5], "").trim()
+												: findSubs(rows.item(i), NodeToFind[4], "").trim() + "/" + findSubs(rows.item(i), NodeToFind[6], "").trim(),
+											Double.valueOf(findSubs(rows.item(i), NodeToFind[2], "").trim()),
+											findSubs(rows.item(i), NodeToFind[3], "").trim(),
+											LocalDate.parse((findSubs(rows.item(i), NodeToFind[0], "").trim()).substring(0, 8) + "01"),
+											isJointAccount ? "Haushalt (13)" : "HaushGeld (46)"));
 								}
 							}
 						}
@@ -168,27 +130,25 @@ public class ReadCamt {
 			if (KontoAuszug != null) {
 				buchungsAnzahl = KontoAuszug.getElementsByTagName("Ntry").getLength();
 
-				buchungen = new String[buchungsAnzahl][6];
-
 				// set IBAN from EBICs File
 				sIBAN = findSubs(KontoAuszug.getElementsByTagName("Acct").item(0), "IBAN", "").trim();
+
+				// when we know the IBAN we get the Information its an JointAccount or not
+				isJointAccount = isJointAccount(sIBAN);
 
 				// write Entrys from EBICs File in to Array
 				NodeList rows = KontoAuszug.getElementsByTagName("Ntry");
 
 				for (int i = 0; i < rows.getLength(); i++) {
-					buchungen[i][ValueDate] = findSubs(rows.item(i), NodeToFind[0], "").trim();
-					buchungen[i][CreditDebitIndicator] = findSubs(rows.item(i), NodeToFind[1], "").trim();
-					buchungen[i][Amount] = findSubs(rows.item(i), NodeToFind[2], "").trim();
-					buchungen[i][Unstructured] = findSubs(rows.item(i), NodeToFind[3], "").trim();
-
-					if (buchungen[i][CreditDebitIndicator].equals("CRDT")) {
-						buchungen[i][Creditor] = null;
-						buchungen[i][Debitor] = findSubs(rows.item(i), NodeToFind[5], "").trim();
-					} else {
-						buchungen[i][Creditor] = findSubs(rows.item(i), NodeToFind[4], "").trim();
-						buchungen[i][Debitor] = null;
-					}
+					buchungen.add(new RacTableRow(LocalDate.parse(findSubs(rows.item(i), NodeToFind[0], "").trim()),
+							findSubs(rows.item(i), NodeToFind[1], "").trim().equals("CRDT") ? "h" : "s",
+							findSubs(rows.item(i), NodeToFind[1], "").trim().equals("CRDT")
+									? findSubs(rows.item(i), NodeToFind[5], "").trim()
+									: findSubs(rows.item(i), NodeToFind[4], "").trim() + "/" + findSubs(rows.item(i), NodeToFind[6], "").trim(),
+							Double.valueOf(findSubs(rows.item(i), NodeToFind[2], "").trim()),
+							findSubs(rows.item(i), NodeToFind[3], "").trim(),
+							LocalDate.parse((findSubs(rows.item(i), NodeToFind[0], "").trim()).substring(0, 8) + "01"),
+							isJointAccount ? "Haushalt (13)" : "HaushGeld (46)"));
 				}
 			}
 		} else {
@@ -219,9 +179,6 @@ public class ReadCamt {
 					break;
 			}
 		}
-
-		// when we know the IBAN we get the Information its an JointAccount or not
-		isJointAccount = isJointAccount(sIBAN);
 
 		// and can find the accountId from the DB Table
 		accountId = findAccountId(sIBAN);
@@ -444,6 +401,9 @@ public class ReadCamt {
 		sIBAN = searchIban().replaceAll(" ", "");
 		AccountOwner = searchAccountOwner();
 
+		// when we know the IBAN we get the Information its an JointAccount or not
+		isJointAccount = isJointAccount(sIBAN);
+
 		// check how many usable Datarows are in the csv
 		// the length of the csvContent Array minus the not usable Rows one to that line
 		// that
@@ -453,8 +413,6 @@ public class ReadCamt {
 
 		// only if the Line where we start to Read Data, was found, we go on
 		if (iHeaderRow > 0) {
-			// reinitial the Array buchunge new
-			this.buchungen = new String[csvContent.length - iHeaderRow - 1][6];
 
 			// the Diba Data begin in the row after the Header
 			for (int i = iHeaderRow + 1; i < csvContent.length; i++) {
@@ -490,6 +448,9 @@ public class ReadCamt {
 
 		// IBAN is in Line 3 in the csvContent
 		sIBAN = csvContent[2].split(";")[2];
+
+		// when we know the IBAN we get the Information its an JointAccount or not
+		isJointAccount = isJointAccount(sIBAN);
 
 		// AccountOwner ar not present in Postbank CSV
 		this.AccountOwner = "";
@@ -659,5 +620,9 @@ public class ReadCamt {
 		}
 
 		return accountId;
+	}
+
+	public List<RacTableRow> getBuchungen() {
+		return buchungen;
 	}
 }
