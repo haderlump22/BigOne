@@ -12,8 +12,10 @@ import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+import java.util.ArrayList;
 
 import javax.swing.JOptionPane;
 
@@ -21,6 +23,8 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
+
+import de.rachel.bigone.records.RacTableRow;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -51,6 +55,7 @@ public class ReadCamt {
 	private int accountId = 0;
 	private Connection cn = null;
 	private FileInputStream fis;
+	private List<RacTableRow> tempBuchungen = new ArrayList<>();
 
 	ReadCamt(String PathAndFile, Connection LoginCN) {
 		this.cn = LoginCN;
@@ -101,6 +106,14 @@ public class ReadCamt {
 										buchungenLager[i][Creditor] = findSubs(rows.item(i), NodeToFind[4], "").trim() + "/" + findSubs(rows.item(i), NodeToFind[6], "").trim();
 										buchungenLager[i][Debitor] = null;
 									}
+
+									// tempBuchungen.add(new RacTableRow(LocalDate.parse(findSubs(rows.item(i), NodeToFind[0], "").trim()),
+									// 		filecontent,
+									// 		null,
+									// 		PathAndFile,
+									// 		filecontent,
+									// 		null,
+									// 		null));
 								}
 
 								// now we put the current Content of buchungenLager into the array that is used for the TableModel
