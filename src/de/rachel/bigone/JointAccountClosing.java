@@ -626,7 +626,7 @@ public class JointAccountClosing {
 				ORDER BY ha_kategorie.kategoriebezeichnung ASC
 				""".formatted(billingMonth));
 
-		// the came the expenditure
+		// then came the expenditures
 		dbTool.insert("""
 				INSERT INTO closedetail
 				SELECT kategoriebezeichnung, SUM(tSoll.betrag * -1) FROM transaktionen tSoll, ha_kategorie
@@ -704,13 +704,24 @@ public class JointAccountClosing {
 		DBTools dbTool = new DBTools(cn);
 		Double planedValue = 0.0;
 
-		dbTool.select("""
-				SELECT betrag
-				FROM ha_ausgaben
-				WHERE gilt_ab <= '%s'
-				AND (gilt_bis >= '%s' OR gilt_bis IS NULL)
-				AND bezeichnung = '%s'
-				""".formatted(billingMonth, billingMonth, categoryName), 1);
+		// the category "Einzahlung" is a special one
+		// the plan amount for this ist a sum of all valid expenditures
+		if (categoryName.equals("Einzahlung")) {
+			dbTool.select("""
+					SELECT sum(betrag)
+					FROM ha_ausgaben
+					WHERE gilt_ab <= '%s'
+					AND (gilt_bis >= '%s' OR gilt_bis IS NULL)
+					""".formatted(billingMonth, billingMonth), 1);
+		} else {
+			dbTool.select("""
+					SELECT betrag
+					FROM ha_ausgaben
+					WHERE gilt_ab <= '%s'
+					AND (gilt_bis >= '%s' OR gilt_bis IS NULL)
+					AND bezeichnung = '%s'
+					""".formatted(billingMonth, billingMonth, categoryName), 1);
+		}
 
 		try {
 			if (dbTool.getRowCount() > 0) {
