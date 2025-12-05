@@ -129,52 +129,52 @@ public class RacTableModel extends AbstractTableModel{
 			// // if we know the Auszug we can decide where to get the category
 			// updateEntrysForCategory(Auszug.isJointAccount());
 
-			daten = new String[Auszug.getBuchungsanzahl()][7];
+			// daten = new String[Auszug.getBuchungsanzahl()][7];
 
-			for(int iAktuelleBuchung = 0; iAktuelleBuchung < Auszug.getBuchungsanzahl(); iAktuelleBuchung++){
-				daten[iAktuelleBuchung][VALUE_DATE] = Auszug.getValDt(iAktuelleBuchung);
+			// for(int iAktuelleBuchung = 0; iAktuelleBuchung < Auszug.getBuchungsanzahl(); iAktuelleBuchung++){
+			// 	daten[iAktuelleBuchung][VALUE_DATE] = Auszug.getValDt(iAktuelleBuchung);
 
-				daten[iAktuelleBuchung][LiquiMonth] = Auszug.getValDt(iAktuelleBuchung).substring(0, 8) + "01";
+			// 	daten[iAktuelleBuchung][LiquiMonth] = Auszug.getValDt(iAktuelleBuchung).substring(0, 8) + "01";
 
-				daten[iAktuelleBuchung][Amount] = Auszug.getAmt(iAktuelleBuchung);
+			// 	daten[iAktuelleBuchung][Amount] = Auszug.getAmt(iAktuelleBuchung);
 
-				// je nachdem ob creditorische oder debitorische Buchung
-				// bestimmte Werte des Arrays mit anderen Werten füllen
-				if (Auszug.getCdtDbtInd(iAktuelleBuchung).equals("CRDT")) {
-					daten[iAktuelleBuchung][CdtrDbtr] = Auszug.getDbtr(iAktuelleBuchung);
-					daten[iAktuelleBuchung][CreditDebitIndicator] = "h";
-					// todo
-					// - Gültigkeit der EC karte aus dem Buchungstext entfernen (Folgenr. 02 Verfalld. 2212) oder auch (Folgenr. 002 Verfalld. 2212)
-					daten[iAktuelleBuchung][Unstructured] = Auszug.getUstrd(iAktuelleBuchung) + " (" + Auszug.getDbtr(iAktuelleBuchung) + ")";
-				}
+			// 	// je nachdem ob creditorische oder debitorische Buchung
+			// 	// bestimmte Werte des Arrays mit anderen Werten füllen
+			// 	if (Auszug.getCdtDbtInd(iAktuelleBuchung).equals("CRDT")) {
+			// 		daten[iAktuelleBuchung][CdtrDbtr] = Auszug.getDbtr(iAktuelleBuchung);
+			// 		daten[iAktuelleBuchung][CreditDebitIndicator] = "h";
+			// 		// todo
+			// 		// - Gültigkeit der EC karte aus dem Buchungstext entfernen (Folgenr. 02 Verfalld. 2212) oder auch (Folgenr. 002 Verfalld. 2212)
+			// 		daten[iAktuelleBuchung][Unstructured] = Auszug.getUstrd(iAktuelleBuchung) + " (" + Auszug.getDbtr(iAktuelleBuchung) + ")";
+			// 	}
 
-				if (Auszug.getCdtDbtInd(iAktuelleBuchung).equals("DBIT")) {
-					daten[iAktuelleBuchung][CdtrDbtr] = Auszug.getCdtr(iAktuelleBuchung);
-					daten[iAktuelleBuchung][CreditDebitIndicator] = "s";
-					// todo
-					// - Gültigkeit der EC karte aus dem Buchungstext entfernen (Folgenr. 02 Verfalld. 2212) oder auch (Folgenr. 002 Verfalld. 2212)
-					daten[iAktuelleBuchung][Unstructured] = Auszug.getUstrd(iAktuelleBuchung) + " (" + Auszug.getCdtr(iAktuelleBuchung) + ")";
-				}
+			// 	if (Auszug.getCdtDbtInd(iAktuelleBuchung).equals("DBIT")) {
+			// 		daten[iAktuelleBuchung][CdtrDbtr] = Auszug.getCdtr(iAktuelleBuchung);
+			// 		daten[iAktuelleBuchung][CreditDebitIndicator] = "s";
+			// 		// todo
+			// 		// - Gültigkeit der EC karte aus dem Buchungstext entfernen (Folgenr. 02 Verfalld. 2212) oder auch (Folgenr. 002 Verfalld. 2212)
+			// 		daten[iAktuelleBuchung][Unstructured] = Auszug.getUstrd(iAktuelleBuchung) + " (" + Auszug.getCdtr(iAktuelleBuchung) + ")";
+			// 	}
 
-				// am ende der verarbeitung einer Zeile wird das ereigniss fest auf
-				// HaushGeld (46) oder Haushalt (13) gesetzt, je nachdem ob es sich um ein eigenes
-				// Girokonto oder um das gemeinschaftliche Haushaltskonto handelt
-				daten[iAktuelleBuchung][AccountBookingEvent] = (Auszug.isJointAccount() ? "Haushalt (13)" : "HaushGeld (46)");
-			}
+			// 	// am ende der verarbeitung einer Zeile wird das ereigniss fest auf
+			// 	// HaushGeld (46) oder Haushalt (13) gesetzt, je nachdem ob es sich um ein eigenes
+			// 	// Girokonto oder um das gemeinschaftliche Haushaltskonto handelt
+			// 	daten[iAktuelleBuchung][AccountBookingEvent] = (Auszug.isJointAccount() ? "Haushalt (13)" : "HaushGeld (46)");
+			// }
 
-			Arrays.sort(daten, new java.util.Comparator<String[]>() {
-				public int compare(String[] rowOne, String[] rowNext) {
-					LocalDate dateRowOne = LocalDate.parse(rowOne[VALUE_DATE]);
-					LocalDate dateRowNext = LocalDate.parse(rowNext[VALUE_DATE]);
+			// Arrays.sort(daten, new java.util.Comparator<String[]>() {
+			// 	public int compare(String[] rowOne, String[] rowNext) {
+			// 		LocalDate dateRowOne = LocalDate.parse(rowOne[VALUE_DATE]);
+			// 		LocalDate dateRowNext = LocalDate.parse(rowNext[VALUE_DATE]);
 
-					// sort so that the youngest Entry is first in list
-					if (dateRowOne.isAfter(dateRowNext)) {
-						return -1;
-					} else {
-						return 1;
-					}
-				}
-			});
+			// 		// sort so that the youngest Entry is first in list
+			// 		if (dateRowOne.isAfter(dateRowNext)) {
+			// 			return -1;
+			// 		} else {
+			// 			return 1;
+			// 		}
+			// 	}
+			// });
 		}
 	}
 
@@ -215,13 +215,15 @@ public class RacTableModel extends AbstractTableModel{
 	}
 
 	public void aktualisiere(ReadCamt Auszug) {
+		this.Auszug = Auszug;
+
 		// we make a copy of the List, so the original from the "Auszug"
 		// is not effected when we reduce the showing Rows with an
 		// Date Range
-		this.buchungen.addAll(Auszug.getBuchungen());
+		this.buchungen.addAll(this.Auszug.getBuchungen());
 
 		// if we know the Auszug we can decide where to get the category
-		updateEntrysForCategory(Auszug.isJointAccount());
+		updateEntrysForCategory(this.Auszug.isJointAccount());
 
 		//lese_werte();
 		fireTableDataChanged();

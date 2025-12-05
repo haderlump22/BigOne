@@ -12,6 +12,8 @@ import de.rachel.bigone.models.RacTableModel;
 
 import java.awt.Color;
 import java.sql.Connection;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
@@ -30,7 +32,7 @@ public class RacTableCellRenderer implements TableCellRenderer {
 		JLabel label;
 
 		if (!(value instanceof JLabel)) {
-			label = new JLabel((String) value);
+			label = new JLabel(value.toString());
 		} else {
 			label = (JLabel) value;
 		}
@@ -48,7 +50,7 @@ public class RacTableCellRenderer implements TableCellRenderer {
 		if (column == 0) {
 			label.setHorizontalAlignment(JLabel.CENTER);
 			if (value != null) {
-				label.setText(BigOneTools.datum_wandeln(value.toString(), 1));
+				label.setText(((LocalDate)value).format(DateTimeFormatter.ofPattern("dd.MM.yyyy")));
 				if (checkValue(row, table)) {
 					label.setBackground(Color.RED);
 					//label.setForeground(Color.BLACK);
@@ -59,19 +61,19 @@ public class RacTableCellRenderer implements TableCellRenderer {
 		if (column == 2) {
 			label.setHorizontalAlignment(JLabel.RIGHT);
 			if (value != null)
-				label.setText(value.toString().replace('.', ','));
+				label.setText("%.02f".formatted((Double) value));
 		}
 
 		if (column == 5) {
 			label.setHorizontalAlignment(JLabel.CENTER);
 			if (value != null) {// nur wenn es ein liquidatum gibt umwandeln
-				label.setText(BigOneTools.datum_wandeln(value.toString(), 1));
+				label.setText(((LocalDate)value).format(DateTimeFormatter.ofPattern("dd.MM.yyyy")));
 			}
 		}
 
 		return label;
 	}
-
+getHierweiter();
 	public boolean checkValue(int row, JTable table) {
 		// versucht anhand der Datensaetze der Importdatei
 		// aenliche in der Datenbank zu finden und rot zu markieren

@@ -12,6 +12,7 @@ import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -225,37 +226,32 @@ public class ReadCamt {
 	}
 
 	public int getBuchungsanzahl() {
-		if (buchungen == null) {
-			// falls nicht initialisiert
-			return 0;
-		} else {
-			return buchungen.length;
-		}
+		return buchungen.size();
 	}
 
-	public String getValDt(int iZeile) {
-		return buchungen[iZeile][ValueDate];
-	}
+	// public String getValDt(int iZeile) {
+	// 	return buchungen[iZeile][ValueDate];
+	// }
 
-	public String getCdtDbtInd(int iZeile) {
-		return buchungen[iZeile][CreditDebitIndicator];
-	}
+	// public String getCdtDbtInd(int iZeile) {
+	// 	return buchungen[iZeile][CreditDebitIndicator];
+	// }
 
-	public String getAmt(int iZeile) {
-		return buchungen[iZeile][Amount];
-	}
+	// public String getAmt(int iZeile) {
+	// 	return buchungen[iZeile][Amount];
+	// }
 
-	public String getUstrd(int iZeile) {
-		return buchungen[iZeile][Unstructured];
-	}
+	// public String getUstrd(int iZeile) {
+	// 	return buchungen[iZeile][Unstructured];
+	// }
 
-	public String getCdtr(int iZeile) {
-		return buchungen[iZeile][Creditor];
-	}
+	// public String getCdtr(int iZeile) {
+	// 	return buchungen[iZeile][Creditor];
+	// }
 
-	public String getDbtr(int iZeile) {
-		return buchungen[iZeile][Debitor];
-	}
+	// public String getDbtr(int iZeile) {
+	// 	return buchungen[iZeile][Debitor];
+	// }
 
 	public String getIBAN() {
 		return sIBAN;
@@ -416,24 +412,34 @@ public class ReadCamt {
 
 			// the Diba Data begin in the row after the Header
 			for (int i = iHeaderRow + 1; i < csvContent.length; i++) {
-				buchungen[i - (iHeaderRow + 1)][ValueDate] = BigOneTools.datum_wandeln(csvContent[i].split(";")[1], 0);
+// 				buchungen[i - (iHeaderRow + 1)][ValueDate] = BigOneTools.datum_wandeln(csvContent[i].split(";")[1], 0);
+// ;
+// 				// the Credit or Dbit Inticator is in the csv Data not a separate field
+// 				// they is indicates by e minus or nothing bevore the amount (creditorische
+// 				// Buchung = haben / Debitorische Buchung = soll)
+// 				buchungen[i - (iHeaderRow + 1)][CreditDebitIndicator] = getCreditDebitIndicator(
+// 						csvContent[i].split(";")[7].replace(".", "").replaceAll(",", "."));
 
-				// the Credit or Dbit Inticator is in the csv Data not a separate field
-				// they is indicates by e minus or nothing bevore the amount (creditorische
-				// Buchung = haben / Debitorische Buchung = soll)
-				buchungen[i - (iHeaderRow + 1)][CreditDebitIndicator] = getCreditDebitIndicator(
-						csvContent[i].split(";")[7].replace(".", "").replaceAll(",", "."));
+// 				// the amount in the csv is german, we have to replace the thousand dot with
+// 				// null
+// 				// and the decimal separator with a dot
+// 				buchungen[i - (iHeaderRow + 1)][Amount] = delteSign(
+// 						csvContent[i].split(";")[7].replace(".", "").replaceAll(",", "."));
+// 				buchungen[i - (iHeaderRow + 1)][Unstructured] = csvContent[i].split(";")[4];
+// 				buchungen[i - (iHeaderRow + 1)][Creditor] = csvContent[i].split(";")[2];
+// 				buchungen[i - (iHeaderRow + 1)][Debitor] = csvContent[i].split(";")[2]; // wird nicht extra aufgeführt
+// 																						// deshalb wird der selbe wert
 
-				// the amount in the csv is german, we have to replace the thousand dot with
-				// null
-				// and the decimal separator with a dot
-				buchungen[i - (iHeaderRow + 1)][Amount] = delteSign(
-						csvContent[i].split(";")[7].replace(".", "").replaceAll(",", "."));
-				buchungen[i - (iHeaderRow + 1)][Unstructured] = csvContent[i].split(";")[4];
-				buchungen[i - (iHeaderRow + 1)][Creditor] = csvContent[i].split(";")[2];
-				buchungen[i - (iHeaderRow + 1)][Debitor] = csvContent[i].split(";")[2]; // wird nicht extra aufgeführt
-																						// deshalb wird der selbe wert
-																						// gelesen
+				// to reduce the code we define some Values here																		// gelesen
+				LocalDate valueDate = LocalDate.parse(csvContent[i].split(";")[1],DateTimeFormatter.ofPattern("d.M.yyyy"));
+
+				buchungen.add(new RacTableRow(valueDate,
+						!(csvContent[i].split(";")[7].startsWith("-")) ? "h" : "s",
+						csvContent[i].split(";")[2],
+						Double.valueOf(csvContent[i].split(";")[7]),
+						csvContent[i].split(";")[4],
+						valueDate.minusDays(valueDate.getDayOfMonth() - 1),
+						isJointAccount ? "Haushalt (13)" : "HaushGeld (46)"));
 			}
 		} else {
 			System.err.println("FEHLER!!! In CSV Datei keine Zeile gefunden die dem Regex \"" + HeaderRowStartsWith
@@ -472,44 +478,55 @@ public class ReadCamt {
 		}
 
 		// reinitial the Array buchungen new
-		this.buchungen = new String[csvContent.length - 1 - 8][6];
+		// this.buchungen = new String[csvContent.length - 1 - 8][6];
 
 		// the Diba Data begin in the row after the Header, end ends 1 line bevor the
 		// last
 		for (int i = iHeaderRow + 1; i < (csvContent.length - 1); i++) {
 			// the Date in this fields has no leading zeros
 			// so i converted in so one
-			Integer year, month, day;
-			String convertedDate;
-			year = Integer.parseInt(csvContent[i].split(";")[1].split("\\.")[2]);
-			month = Integer.parseInt(csvContent[i].split(";")[1].split("\\.")[1]);
-			day = Integer.parseInt(csvContent[i].split(";")[1].split("\\.")[0]);
+			// Integer year, month, day;
+			// String convertedDate;
+			// year = Integer.parseInt(csvContent[i].split(";")[1].split("\\.")[2]);
+			// month = Integer.parseInt(csvContent[i].split(";")[1].split("\\.")[1]);
+			// day = Integer.parseInt(csvContent[i].split(";")[1].split("\\.")[0]);
 
-			// Date as String in Format yyyy-MM-dd
-			convertedDate = LocalDate.of(year, month, day).toString();
+			// // Date as String in Format yyyy-MM-dd
+			// convertedDate = LocalDate.of(year, month, day).toString();
 
-			buchungen[i - (iHeaderRow + 1)][ValueDate] = convertedDate;
+			// buchungen[i - (iHeaderRow + 1)][ValueDate] = convertedDate;
 
-			// the Credit or Dbit Inticator is in the csv Data not a separate field
-			// they is indicates by a minus or nothing bevore the amount (creditorische
-			// Buchung = haben / Debitorische Buchung = soll)
-			buchungen[i - (iHeaderRow + 1)][CreditDebitIndicator] = getCreditDebitIndicator(
-					csvContent[i].split(";")[11].replace(".", "").replaceAll(",", "."));
+			// // the Credit or Dbit Inticator is in the csv Data not a separate field
+			// // they is indicates by a minus or nothing bevore the amount (creditorische
+			// // Buchung = haben / Debitorische Buchung = soll)
+			// buchungen[i - (iHeaderRow + 1)][CreditDebitIndicator] = getCreditDebitIndicator(
+			// 		csvContent[i].split(";")[11].replace(".", "").replaceAll(",", "."));
 
-			// the amount in the csv is german, we have to replace the thousand dot with
-			// null
-			// and the decimal separator with a dot
-			if (isGermanFormat) {
-				buchungen[i - (iHeaderRow + 1)][Amount] = delteSign(
-						csvContent[i].split(";")[11].replace(".", "").replaceAll(",", "."));
-			} else {
-				buchungen[i - (iHeaderRow + 1)][Amount] = delteSign(csvContent[i].split(";")[11].replaceAll(",", ""));
-			}
-			buchungen[i - (iHeaderRow + 1)][Unstructured] = csvContent[i].split(";")[4];
-			buchungen[i - (iHeaderRow + 1)][Creditor] = csvContent[i].split(";")[3];
-			buchungen[i - (iHeaderRow + 1)][Debitor] = csvContent[i].split(";")[3]; // wird nicht extra aufgeführt
-																					// deshalb wird der selbe wert
-																					// gelesen
+			// // the amount in the csv is german, we have to replace the thousand dot with
+			// // null
+			// // and the decimal separator with a dot
+			// if (isGermanFormat) {
+			// 	buchungen[i - (iHeaderRow + 1)][Amount] = delteSign(
+			// 			csvContent[i].split(";")[11].replace(".", "").replaceAll(",", "."));
+			// } else {
+			// 	buchungen[i - (iHeaderRow + 1)][Amount] = delteSign(csvContent[i].split(";")[11].replaceAll(",", ""));
+			// }
+			// buchungen[i - (iHeaderRow + 1)][Unstructured] = csvContent[i].split(";")[4];
+			// buchungen[i - (iHeaderRow + 1)][Creditor] = csvContent[i].split(";")[3];
+			// buchungen[i - (iHeaderRow + 1)][Debitor] = csvContent[i].split(";")[3]; // wird nicht extra aufgeführt
+			// 																		// deshalb wird der selbe wert
+			// 																		// gelesen
+
+			// to reduce the code we define some Values here																		// gelesen
+			LocalDate valueDate = LocalDate.parse(csvContent[i].split(";")[1],DateTimeFormatter.ofPattern("d.M.yyyy"));
+
+			buchungen.add(new RacTableRow(valueDate,
+					!(csvContent[i].split(";")[11].startsWith("-")) ? "h" : "s",
+					csvContent[i].split(";")[3],
+					Double.valueOf(csvContent[i].split(";")[11].replace(".", "").replaceAll(",", ".")),
+					csvContent[i].split(";")[4],
+					valueDate.minusDays(valueDate.getDayOfMonth() - 1),
+					isJointAccount ? "Haushalt (13)" : "HaushGeld (46)"));
 		}
 	}
 
