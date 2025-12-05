@@ -499,7 +499,7 @@ public class JointAccountClosing {
 				dbTools.select("""
 					SELECT p.personen_id, p.name || ', ' || SUBSTRING(p.vorname, 1, 1) || '.' as party, sum(gg.betrag) as betrag
 					FROM personen p, ha_gehaltsgrundlagen gg
-					WHERE gilt_bis >= '%s'
+					WHERE (gilt_bis >= '%s' OR gilt_bis IS NULL)
 					AND gilt_ab <= '%s'
 					AND p.personen_id = gg.partei_id
 					GROUP BY p.personen_id, p.name, p.vorname
