@@ -22,12 +22,14 @@ import javax.swing.border.TitledBorder;
 import java.awt.event.KeyListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.FocusListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 
 import java.sql.Connection;
-
+import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 
@@ -45,7 +47,7 @@ public class Transaktionen {
 	private JCheckBox chkLiqui;
 	private JRadioButton soll, haben;
 	private ButtonGroup grpsh;
-	private JComboBox<String> Iban, cmbEreigniss;
+	private JComboBox<String> iban, ereigniss;
 	private JButton btnSave, btnClean;
 	private String[][] datenAuft;
 
@@ -95,9 +97,9 @@ public class Transaktionen {
 		sh.add(haben);
 
 		// add Account choose and fill it with valid Account IDs (IBAN)
-		Iban = new JComboBox<String>();
-		Iban.setBounds(270, 77, 250, 25);
-		Iban.setFont(fontIban);
+		iban = new JComboBox<String>();
+		iban.setBounds(270, 77, 250, 25);
+		iban.setFont(fontIban);
 		// fill it with Values
 		fill_Iban();
 
@@ -109,11 +111,13 @@ public class Transaktionen {
 		// Checkbox und Textfeld definieren und in das LiquiPanel setzen
 		chkLiqui = new JCheckBox("Einrechenbar", true);
 		chkLiqui.setBounds(10, 20, 180, 30);
+
 		try {
 			txtLiquiDate = new JFormattedTextField(new MaskFormatter("##-##-20##"));
 		} catch (ParseException e1) {
 			e1.printStackTrace();
 		}
+
 		txtLiquiDate.setBounds(45, 50, 110, 25);
 		txtLiquiDate.setHorizontalAlignment(JFormattedTextField.RIGHT);
 		txtLiquiDate.setFont(fontTxtFields);
@@ -135,44 +139,90 @@ public class Transaktionen {
 		lblBeschreibung.setBounds(10, 90, 90, 25);
 		lblEreigniss = new JLabel("Ereigniss", JLabel.LEFT);
 		lblEreigniss.setBounds(10, 180, 70, 25);
+
 		try {
 			txtDatum = new JFormattedTextField(new MaskFormatter("##-##-20##"));
 		} catch (ParseException e1) {
 			e1.printStackTrace();
 		}
+
 		txtDatum.setBounds(110, 20, 110, 25);
 		txtDatum.setHorizontalAlignment(JTextField.RIGHT);
 		txtDatum.setFont(fontTxtFields);
-		txtDatum.addFocusListener(new FocusListener() {
-			public void focusLost(FocusEvent fe) {
-				// nach aenderung des Datumsfeldes den Wert in das Feld fuer das
-				// liquidatum uebernehmen
-				txtLiquiDate.setText("01" + txtDatum.getText().substring(2));
-			}
-
-			public void focusGained(FocusEvent fe) {
-				// hier commt code hinein wenn das textfeld den focus erhalt
-			}
-		});
-		txtDatum.addKeyListener(new KeyListener() {
-			public void keyPressed(KeyEvent arg0) {
-			}
-
-			public void keyReleased(KeyEvent ke) {
-				if (ke.getKeyCode() == KeyEvent.VK_ENTER) {
-					txtBetrag.requestFocus();
-				}
-			}
-
-			public void keyTyped(KeyEvent arg0) {
-			}
-		});
 
 		txtBetrag = new JFormattedTextField(new NumberFormatter(new DecimalFormat("#,##0.00")));
 		txtBetrag.setBounds(110, 55, 110, 25);
 		txtBetrag.setHorizontalAlignment(JFormattedTextField.RIGHT);
 		txtBetrag.setFont(fontTxtFields);
 		txtBetrag.setText("0,00");
+
+
+		txtBeschreibung = new JTextArea(3, 20);
+		txtBeschreibung.setLineWrap(true);
+		txtBeschreibung.setWrapStyleWord(true);
+		txtBeschreibung.setBounds(110, 90, 200, 75);
+		txtBeschreibung.setBorder(BorderFactory.createEtchedBorder());
+		txtBeschreibung.setFont(fontTxtFields);
+
+		ereigniss = new JComboBox<String>();
+		ereigniss.setBounds(110, 180, 200, 25);
+		ereigniss.setFont(fontCmbBoxes);
+		fill_cmbEreigniss();
+
+		// widgets auf das Detailspanel legen
+		details.add(lblDatum);
+		details.add(lblBetrag);
+		details.add(lblBeschreibung);
+		details.add(lblEreigniss);
+		details.add(txtDatum);
+		details.add(txtBetrag);
+		details.add(txtBeschreibung);
+		details.add(ereigniss);
+
+		// inhalte fuer das buttonpanel definieren/formatieren und zuweisen
+		// dabei gleich den beiden buttons die ereignisse zuweisen
+		btnSave = new JButton("Speichern");
+		btnSave.setBounds(370, 360, 110, 55);
+
+		btnClean = new JButton(new ImageIcon(getClass().getResource("images/DevNull.png")));
+		btnClean.setBounds(550, 360, 110, 55);
+
+		lblInfoFeld = new JLabel("", JLabel.CENTER);
+		lblInfoFeld.setBounds(100, 470, 600, 25);
+		// lblInfoFeld.setBorder(new EtchedBorder());
+		lblInfoFeld.setFont(fontTxtFields);
+
+		createListeners();
+
+		// alle auf das hauptfenster setzen
+		mainwindow.add(eurol);
+		mainwindow.add(transaktion);
+		mainwindow.add(euror);
+		mainwindow.add(sh);
+		mainwindow.add(iban);
+		mainwindow.add(liqui);
+		mainwindow.add(details);
+		mainwindow.add(btnSave);
+		mainwindow.add(btnClean);
+		mainwindow.add(lblInfoFeld);
+
+		mainwindow.setVisible(true);
+
+		txtDatum.requestFocus();
+
+	}
+
+	private void createListeners() {
+		// ereigniss fuer die fuellung der Kontocombobox in
+		// abhaengigkeit der BLZ combobox festlegen
+		iban.addItemListener(new ItemListener() {
+			public void itemStateChanged(ItemEvent e) {
+				if (e.getStateChange() == ItemEvent.SELECTED) {
+					fill_cmbEreigniss();
+				}
+			}
+		});
+
 		txtBetrag.addFocusListener(new FocusListener() {
 			public void focusLost(FocusEvent fe) {
 			}
@@ -181,6 +231,7 @@ public class Transaktionen {
 				txtBetrag.selectAll();
 			}
 		});
+
 		txtBetrag.addKeyListener(new KeyListener() {
 			public void keyPressed(KeyEvent ke) {
 			}
@@ -195,12 +246,6 @@ public class Transaktionen {
 			}
 		});
 
-		txtBeschreibung = new JTextArea(3, 20);
-		txtBeschreibung.setLineWrap(true);
-		txtBeschreibung.setWrapStyleWord(true);
-		txtBeschreibung.setBounds(110, 90, 200, 75);
-		txtBeschreibung.setBorder(BorderFactory.createEtchedBorder());
-		txtBeschreibung.setFont(fontTxtFields);
 		txtBeschreibung.addKeyListener(new KeyListener() {
 			public void keyTyped(KeyEvent ke) {
 			}
@@ -211,64 +256,48 @@ public class Transaktionen {
 			public void keyReleased(KeyEvent ke) {
 				if (ke.getKeyCode() == KeyEvent.VK_TAB && txtBeschreibung.getText().length() != 0) {
 					txtBeschreibung.setText(txtBeschreibung.getText().trim());
-					cmbEreigniss.requestFocus();
+					ereigniss.requestFocus();
 				}
 			}
 		});
 
-		cmbEreigniss = new JComboBox<String>();
-		cmbEreigniss.setBounds(110, 180, 200, 25);
-		cmbEreigniss.setFont(fontCmbBoxes);
-		fill_cmbEreigniss();
-		// widgets auf das Detailspanel legen
-		details.add(lblDatum);
-		details.add(lblBetrag);
-		details.add(lblBeschreibung);
-		details.add(lblEreigniss);
-		details.add(txtDatum);
-		details.add(txtBetrag);
-		details.add(txtBeschreibung);
-		details.add(cmbEreigniss);
-
-		// inhalte fuer das buttonpanel definieren/formatieren und zuweisen
-		// dabei gleich den beiden buttons die ereignisse zuweisen
-		btnSave = new JButton("Speichern");
-		btnSave.setBounds(370, 360, 110, 55);
 		btnSave.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
 				SaveData();
 			}
 		});
 
-		btnClean = new JButton(new ImageIcon(getClass().getResource("images/DevNull.png")));
-		btnClean.setBounds(550, 360, 110, 55);
 		btnClean.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
 				setSomeDefaultValues();
 			}
 		});
 
-		lblInfoFeld = new JLabel("", JLabel.CENTER);
-		lblInfoFeld.setBounds(100, 470, 600, 25);
-		// lblInfoFeld.setBorder(new EtchedBorder());
-		lblInfoFeld.setFont(fontTxtFields);
+		txtDatum.addFocusListener(new FocusListener() {
+			public void focusLost(FocusEvent fe) {
+				// nach aenderung des Datumsfeldes den Wert in das Feld fuer das
+				// liquidatum uebernehmen
+				txtLiquiDate.setText("01" + txtDatum.getText().substring(2));
+			}
 
-		// alle auf das hauptfenster setzen
-		mainwindow.add(eurol);
-		mainwindow.add(transaktion);
-		mainwindow.add(euror);
-		mainwindow.add(sh);
-		mainwindow.add(Iban);
-		mainwindow.add(liqui);
-		mainwindow.add(details);
-		mainwindow.add(btnSave);
-		mainwindow.add(btnClean);
-		mainwindow.add(lblInfoFeld);
+			public void focusGained(FocusEvent fe) {
+				// hier commt code hinein wenn das textfeld den focus erhalt
+			}
+		});
 
-		mainwindow.setVisible(true);
+		txtDatum.addKeyListener(new KeyListener() {
+			public void keyPressed(KeyEvent arg0) {
+			}
 
-		txtDatum.requestFocus();
+			public void keyReleased(KeyEvent ke) {
+				if (ke.getKeyCode() == KeyEvent.VK_ENTER) {
+					txtBetrag.requestFocus();
+				}
+			}
 
+			public void keyTyped(KeyEvent arg0) {
+			}
+		});
 	}
 
 	private void SaveData() {
@@ -277,7 +306,7 @@ public class Transaktionen {
 			DataToSave BankStatementLine = new DataToSave();
 
 			BankStatementLine.sh = soll_oder_haben();
-			BankStatementLine.KontoId = getKontoId(Iban.getSelectedItem().toString().replace(" ", ""));
+			BankStatementLine.KontoId = getKontoId(iban.getSelectedItem().toString().replace(" ", ""));
 
 			if (BankStatementLine.KontoId == -1) {
 				lblInfoFeld.setText("Fehler bei Konten!");
@@ -299,7 +328,7 @@ public class Transaktionen {
 			else
 				BankStatementLine.LiquiDate = "NULL";
 
-			BankStatementLine.EreignisId = BigOneTools.extractEreigId(cmbEreigniss.getSelectedItem().toString());
+			BankStatementLine.EreignisId = BigOneTools.extractEreigId(ereigniss.getSelectedItem().toString());
 
 			// hier werden diverse unterformulare aufgerufen um
 			// detailierte informatioenen zu einer Transaktionen aufzunehmen
@@ -400,17 +429,35 @@ public class Transaktionen {
 	private void fill_cmbEreigniss() {
 		DBTools getter = new DBTools(cn);
 
-		getter.select("""
-				SELECT ereigniss_id, ereigniss_krzbez
-				FROM kontenereignisse
-				WHERE gueltig = TRUE
-				ORDER BY 2
-				""", 2);
+		// first clear from the old Content
+		ereigniss.removeAllItems();
 
-		Object[][] cmbEreinissValues = getter.getData();
+		if (isJointAccount(iban.getSelectedItem().toString().replace(" ", ""))) {
+			getter.select("""
+					SELECT ha_kategorie_id id, kategoriebezeichnung bez
+					FROM ha_kategorie
+					ORDER BY 2
+					""",2);
+		} else {
+			getter.select("""
+					SELECT ereigniss_id id, ereigniss_krzbez bez
+					FROM kontenereignisse
+					WHERE gueltig = TRUE
+					ORDER BY 2
+					""", 2);
+		}
 
-		for (Object[] cmbEreignissValue : cmbEreinissValues)
-			cmbEreigniss.addItem(cmbEreignissValue[1] + " (" + cmbEreignissValue[0] + ")");
+		try {
+			getter.beforeFirst();
+
+			while (getter.next()) {
+				ereigniss.addItem(getter.getString("bez") + " (" + getter.getInt("id") + ")");
+			}
+		} catch (Exception e) {
+			System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "
+					+ e.getStackTrace()[0].getLineNumber() + "): " + e.toString());
+		}
+
 	}
 
 	private boolean fuellung_pruefen() {
@@ -485,7 +532,7 @@ public class Transaktionen {
 		}
 	}
 
-	private void fill_Iban() {
+    private void fill_Iban() {
 		DBTools getter = new DBTools(cn);
 
 		getter.select("""
@@ -497,6 +544,28 @@ public class Transaktionen {
 		Object[][] cmbKtoValues = getter.getData();
 
 		for (Object[] cmbKtoValue : cmbKtoValues)
-			Iban.addItem(BigOneTools.getIbanFormatted(cmbKtoValue[0].toString()));
+			iban.addItem(BigOneTools.getIbanFormatted(cmbKtoValue[0].toString()));
+    }
+
+	private boolean isJointAccount(String iban) {
+		DBTools getter = new DBTools(cn);
+		boolean isJointAccount = false;
+
+		getter.select("""
+				SELECT bemerkung
+				FROM konten
+				WHERE iban = '%s'
+				""".formatted(iban), 1);
+
+		try {
+			getter.first();
+			isJointAccount = getter.getString("bemerkung").equals("Haushaltskonto");
+		} catch (SQLException e) {
+			System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "
+					+ e.getStackTrace()[0].getLineNumber() + "): " + e.toString());
+			System.exit(1);
+		}
+
+		return isJointAccount;
 	}
 }

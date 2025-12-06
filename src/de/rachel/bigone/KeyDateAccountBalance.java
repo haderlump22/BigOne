@@ -65,7 +65,7 @@ public class KeyDateAccountBalance {
 		//abhaengigkeit der BLZ combobox festlegen
 		cmbBLZ.addItemListener( new ItemListener() {
 		      public void itemStateChanged( ItemEvent e ) {
-		    	  if(e.getStateChange() == 1) {
+		    	  if(e.getStateChange() == ItemEvent.SELECTED) {
 		    		  cmbKto.removeAllItems();
 		    		  fill_cmbKto(cmbBLZ.getSelectedItem().toString().substring(0,cmbBLZ.getSelectedItem().toString().indexOf(' ')));
 		    	  }
