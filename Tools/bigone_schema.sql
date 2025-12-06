@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict fwJsMcfOdJ2aHWcfz4PwGElIQj3mOIPuYjlahiuv178jpjjE9eymjycNedV5Y6b
+\restrict fGX5eTeggPYHYlPTOemrfcIVfpiIjQus7e65H6GDU2ELx0DVzbK7XmE8d12quNr
 
 -- Dumped from database version 16.10 (Ubuntu 16.10-0ubuntu0.24.04.1)
 -- Dumped by pg_dump version 16.10 (Ubuntu 16.10-0ubuntu0.24.04.1)
@@ -606,7 +606,8 @@ CREATE TABLE public.ha_ausgaben (
     aufteilungsart character varying(20),
     gilt_bis date,
     bemerkung character varying(250),
-    gilt_ab date
+    gilt_ab date,
+    haeufigkeit integer
 );
 
 
@@ -627,6 +628,13 @@ COMMENT ON COLUMN public.ha_ausgaben.gilt_bis IS 'Monat bis zu dem der Wert für
 Der Montat wird als 01.MM.YYYY angegeben, aber es gilt bis Einschliesslich
 Ende dieses Monats
 Noch gültige Einträge haben hier NULL stehen';
+
+
+--
+-- Name: COLUMN ha_ausgaben.haeufigkeit; Type: COMMENT; Schema: public; Owner: domm
+--
+
+COMMENT ON COLUMN public.ha_ausgaben.haeufigkeit IS 'Rythmus in Monaten in denen der Betrag fällig wird, Grundsteuer wird z.B. nur alle 3Monate abgebucht';
 
 
 --
@@ -1722,5 +1730,5 @@ ALTER TABLE ONLY public.ha_gehaltsgrundlagen
 -- PostgreSQL database dump complete
 --
 
-\unrestrict fwJsMcfOdJ2aHWcfz4PwGElIQj3mOIPuYjlahiuv178jpjjE9eymjycNedV5Y6b
+\unrestrict fGX5eTeggPYHYlPTOemrfcIVfpiIjQus7e65H6GDU2ELx0DVzbK7XmE8d12quNr
 
