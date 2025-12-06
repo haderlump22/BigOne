@@ -655,8 +655,8 @@ public class JointAccountClosing {
 
 				jointAccountDetailSqlValueData.append("('" +  dbTool.getString("kategoriebezeichnung") + "'," +
 					dbTool.getDouble("sum") + "," +
-					(planedValue * -1) + "," +
-					(dbTool.getDouble("sum") - (planedValue * -1)) + ",'" +
+					(!dbTool.getString("kategoriebezeichnung").equals("Einzahlung") ? (planedValue * -1) : (planedValue)) + "," +
+					(dbTool.getDouble("sum") - (!dbTool.getString("kategoriebezeichnung").equals("Einzahlung") ? (planedValue * -1) : (planedValue))) + ",'" +
 					billingMonth + "'," +
 					"NULL),");
 
@@ -708,14 +708,14 @@ public class JointAccountClosing {
 		// the plan amount for this ist a sum of all valid expenditures
 		if (categoryName.equals("Einzahlung")) {
 			dbTool.select("""
-					SELECT sum(betrag)
+					SELECT sum(betrag) betrag
 					FROM ha_ausgaben
 					WHERE gilt_ab <= '%s'
 					AND (gilt_bis >= '%s' OR gilt_bis IS NULL)
 					""".formatted(billingMonth, billingMonth), 1);
 		} else {
 			dbTool.select("""
-					SELECT betrag
+					SELECT (betrag * haeufigkeit) betrag
 					FROM ha_ausgaben
 					WHERE gilt_ab <= '%s'
 					AND (gilt_bis >= '%s' OR gilt_bis IS NULL)
