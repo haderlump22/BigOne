@@ -12,6 +12,7 @@ import de.rachel.bigone.models.RacTableModel;
 
 import java.awt.Color;
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
@@ -73,7 +74,7 @@ public class RacTableCellRenderer implements TableCellRenderer {
 
 		return label;
 	}
-getHierweiter();
+
 	public boolean checkValue(int row, JTable table) {
 		// versucht anhand der Datensaetze der Importdatei
 		// aenliche in der Datenbank zu finden und rot zu markieren
@@ -83,17 +84,11 @@ getHierweiter();
 		// eingefaerbt anstatt die ganze zeile
 		// fuer die ganze zeile muesste diese funktion auch
 		// fuer jede Zelle aufgerufen werden und das dauert
-
-		// der letzte tag eines Monats ist 30 oder 31 bzw im feb 28 (normales jahr)
-		// oder 29 im schaltjahr
-		String dateValue = table.getModel().getValueAt(row, 0).toString();
-		int iYear = Integer.valueOf(dateValue.substring(0, 4));
-		int iMonth = Integer.valueOf(dateValue.substring(5, 7)) - 1;
-		int iDay = Integer.valueOf(dateValue.substring(8));
-
-		GregorianCalendar calendar = new GregorianCalendar(iYear, iMonth, iDay);
+		boolean checkValue = false;
+		LocalDate dateValue = (LocalDate) table.getModel().getValueAt(row, 0);
 
 		DBTools marker = new DBTools(cn);
+
 		marker.select("""
 				SELECT COUNT(*)
 				FROM transaktionen
@@ -101,12 +96,19 @@ getHierweiter();
 				AND konten_id = %d
 				AND datum >= '%s'
 				AND datum <= '%s'
-				""".formatted(table.getModel().getValueAt(row, 2).toString(), accountId, iYear + "-" + (iMonth + 1) + "-1", iYear + "-" + (iMonth + 1) + "-" + calendar.getActualMaximum(Calendar.DAY_OF_MONTH)), 1);
+				""".formatted(table.getModel().getValueAt(row, 2).toString(), accountId, dateValue.minusDays(dateValue.getDayOfMonth() - 1).toString(), dateValue.plusDays(dateValue.lengthOfMonth() - dateValue.getDayOfMonth()).toString()), 1);
 
-		if (Integer.valueOf(marker.getValueAt(0, 0).toString()) > 0) {
-			return true;
-		} else {
-			return false;
+		try {
+			if (marker.getInt("count") > 0) {
+				checkValue = true;
+			} else {
+				checkValue = false;
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
+
+		return checkValue;
 	}
 }
