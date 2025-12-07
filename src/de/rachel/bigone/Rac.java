@@ -248,7 +248,7 @@ public class Rac {
 				if (evt.getPropertyName() == "date" && evt.getNewValue() != null) {
 					// before compare the Dates, check is not null
 					if (dateTo.getDate() != null) {
-						if (dateFrom.getDate().before(dateTo.getDate())) {
+						if (dateFrom.getDate().before(dateTo.getDate()) || dateFrom.getDate().compareTo(dateTo.getDate()) == 0) {
 							// Arraycleaning can start
 							((RacTableModel) table.getModel()).removeUnusedRows(LocalDate.ofInstant(dateFrom.getDate().toInstant(), ZoneId.systemDefault()), LocalDate.ofInstant(dateTo.getDate().toInstant(), ZoneId.systemDefault()));
 
@@ -273,7 +273,7 @@ public class Rac {
 				if (evt.getPropertyName() == "date" && evt.getNewValue() != null) {
 					// before compare the Dates, check is not null
 					if (dateFrom.getDate() != null) {
-						if (dateFrom.getDate().before(dateTo.getDate())) {
+						if (dateFrom.getDate().before(dateTo.getDate()) || dateFrom.getDate().compareTo(dateTo.getDate()) == 0) {
 							// Arraycleaning can start
 							((RacTableModel) table.getModel()).removeUnusedRows(LocalDate.ofInstant(dateFrom.getDate().toInstant(), ZoneId.systemDefault()), LocalDate.ofInstant(dateTo.getDate().toInstant(), ZoneId.systemDefault()));
 
