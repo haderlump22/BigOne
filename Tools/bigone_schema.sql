@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict fGX5eTeggPYHYlPTOemrfcIVfpiIjQus7e65H6GDU2ELx0DVzbK7XmE8d12quNr
+\restrict omyVJykMEthZZHhNzrl3qE7xL7hZOytA2LFoc7bRpY7UIUkQvyO7f3NMZJP86cd
 
 -- Dumped from database version 16.10 (Ubuntu 16.10-0ubuntu0.24.04.1)
 -- Dumped by pg_dump version 16.10 (Ubuntu 16.10-0ubuntu0.24.04.1)
@@ -161,7 +161,8 @@ CREATE TABLE public.kreditinstitut (
     kreditinstitut_id integer NOT NULL,
     kreditinstitut character varying(60) DEFAULT ''::character varying NOT NULL,
     blz character varying(20) DEFAULT ''::character varying NOT NULL,
-    gilt_bis date
+    gilt_bis date,
+    bic character varying(11)
 );
 
 
@@ -1730,5 +1731,5 @@ ALTER TABLE ONLY public.ha_gehaltsgrundlagen
 -- PostgreSQL database dump complete
 --
 
-\unrestrict fGX5eTeggPYHYlPTOemrfcIVfpiIjQus7e65H6GDU2ELx0DVzbK7XmE8d12quNr
+\unrestrict omyVJykMEthZZHhNzrl3qE7xL7hZOytA2LFoc7bRpY7UIUkQvyO7f3NMZJP86cd
 
