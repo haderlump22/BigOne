@@ -12,6 +12,9 @@ import de.rachel.bigone.models.RacTableModel;
 
 import java.awt.Color;
 import java.sql.Connection;
+import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
@@ -30,7 +33,7 @@ public class RacTableCellRenderer implements TableCellRenderer {
 		JLabel label;
 
 		if (!(value instanceof JLabel)) {
-			label = new JLabel((String) value);
+			label = new JLabel(value.toString());
 		} else {
 			label = (JLabel) value;
 		}
@@ -48,7 +51,7 @@ public class RacTableCellRenderer implements TableCellRenderer {
 		if (column == 0) {
 			label.setHorizontalAlignment(JLabel.CENTER);
 			if (value != null) {
-				label.setText(BigOneTools.datum_wandeln(value.toString(), 1));
+				label.setText(((LocalDate)value).format(DateTimeFormatter.ofPattern("dd.MM.yyyy")));
 				if (checkValue(row, table)) {
 					label.setBackground(Color.RED);
 					//label.setForeground(Color.BLACK);
@@ -59,13 +62,13 @@ public class RacTableCellRenderer implements TableCellRenderer {
 		if (column == 2) {
 			label.setHorizontalAlignment(JLabel.RIGHT);
 			if (value != null)
-				label.setText(value.toString().replace('.', ','));
+				label.setText("%.02f".formatted((Double) value));
 		}
 
 		if (column == 5) {
 			label.setHorizontalAlignment(JLabel.CENTER);
 			if (value != null) {// nur wenn es ein liquidatum gibt umwandeln
-				label.setText(BigOneTools.datum_wandeln(value.toString(), 1));
+				label.setText(((LocalDate)value).format(DateTimeFormatter.ofPattern("dd.MM.yyyy")));
 			}
 		}
 
@@ -81,17 +84,11 @@ public class RacTableCellRenderer implements TableCellRenderer {
 		// eingefaerbt anstatt die ganze zeile
 		// fuer die ganze zeile muesste diese funktion auch
 		// fuer jede Zelle aufgerufen werden und das dauert
-
-		// der letzte tag eines Monats ist 30 oder 31 bzw im feb 28 (normales jahr)
-		// oder 29 im schaltjahr
-		String dateValue = table.getModel().getValueAt(row, 0).toString();
-		int iYear = Integer.valueOf(dateValue.substring(0, 4));
-		int iMonth = Integer.valueOf(dateValue.substring(5, 7)) - 1;
-		int iDay = Integer.valueOf(dateValue.substring(8));
-
-		GregorianCalendar calendar = new GregorianCalendar(iYear, iMonth, iDay);
+		boolean checkValue = false;
+		LocalDate dateValue = (LocalDate) table.getModel().getValueAt(row, 0);
 
 		DBTools marker = new DBTools(cn);
+
 		marker.select("""
 				SELECT COUNT(*)
 				FROM transaktionen
@@ -99,12 +96,19 @@ public class RacTableCellRenderer implements TableCellRenderer {
 				AND konten_id = %d
 				AND datum >= '%s'
 				AND datum <= '%s'
-				""".formatted(table.getModel().getValueAt(row, 2).toString(), accountId, iYear + "-" + (iMonth + 1) + "-1", iYear + "-" + (iMonth + 1) + "-" + calendar.getActualMaximum(Calendar.DAY_OF_MONTH)), 1);
+				""".formatted(table.getModel().getValueAt(row, 2).toString(), accountId, dateValue.minusDays(dateValue.getDayOfMonth() - 1).toString(), dateValue.plusDays(dateValue.lengthOfMonth() - dateValue.getDayOfMonth()).toString()), 1);
 
-		if (Integer.valueOf(marker.getValueAt(0, 0).toString()) > 0) {
-			return true;
-		} else {
-			return false;
+		try {
+			if (marker.getInt("count") > 0) {
+				checkValue = true;
+			} else {
+				checkValue = false;
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
+
+		return checkValue;
 	}
 }

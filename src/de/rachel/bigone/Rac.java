@@ -5,11 +5,14 @@ import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.sql.Connection;
+import java.time.LocalDate;
+import java.time.ZoneId;
 
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -247,12 +250,12 @@ public class Rac {
 					if (dateTo.getDate() != null) {
 						if (dateFrom.getDate().before(dateTo.getDate())) {
 							// Arraycleaning can start
-							((RacTableModel) table.getModel()).removeUnusedRows(dateFrom.getDate(), dateTo.getDate());
+							((RacTableModel) table.getModel()).removeUnusedRows(LocalDate.ofInstant(dateFrom.getDate().toInstant(), ZoneId.systemDefault()), LocalDate.ofInstant(dateTo.getDate().toInstant(), ZoneId.systemDefault()));
 
 							// after choose Timerange enabled Import Button
 							btnImp.setEnabled(true);
 						} else {
-							System.out.println("bis Datum ist kleiner als das von Datum!!!");
+							JOptionPane.showMessageDialog(null, "Datum BIS muss nach Datum VON liegen!!!", "Achtung", JOptionPane.INFORMATION_MESSAGE);
 						}
 					}
 				}
@@ -265,19 +268,19 @@ public class Rac {
 		dateTo = new JDateChooser();
 		dateTo.setBounds(40, 40, 100, 20);
 		dateTo.addPropertyChangeListener(new PropertyChangeListener() {
-			@Override
-			public void propertyChange(PropertyChangeEvent evt) {
+				@Override
+				public void propertyChange(PropertyChangeEvent evt) {
 				if (evt.getPropertyName() == "date" && evt.getNewValue() != null) {
 					// before compare the Dates, check is not null
 					if (dateFrom.getDate() != null) {
 						if (dateFrom.getDate().before(dateTo.getDate())) {
 							// Arraycleaning can start
-							((RacTableModel) table.getModel()).removeUnusedRows(dateFrom.getDate(), dateTo.getDate());
+							((RacTableModel) table.getModel()).removeUnusedRows(LocalDate.ofInstant(dateFrom.getDate().toInstant(), ZoneId.systemDefault()), LocalDate.ofInstant(dateTo.getDate().toInstant(), ZoneId.systemDefault()));
 
 							// after choose Timerange enabled Import Button
 							btnImp.setEnabled(true);
 						} else {
-							System.out.println("bis Datum ist kleiner als das von Datum!!!");
+							JOptionPane.showMessageDialog(null, "Datum BIS muss nach Datum VON liegen!!!", "Achtung", JOptionPane.INFORMATION_MESSAGE);
 						}
 					}
 				}
