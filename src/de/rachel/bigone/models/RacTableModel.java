@@ -19,15 +19,7 @@ public class RacTableModel extends AbstractTableModel{
 	private static final long serialVersionUID = -2431676313753205738L;
 	private Connection cn = null;
 	private String[] columnName = new String[]{"Wertstellung","s/h","Betrag","Buchungshinweis","DBIT/CRDT","LiquiMon","Ereignis"};
-	private String[][] daten;
-	private String[][] strLager;
-	private static int VALUE_DATE = 0;
-	private static int CreditDebitIndicator = 1;
-	private static int Amount = 2;
-	private static int Unstructured = 3;	// Unstrukturierter Verwendungszweck 140zeichen max
-	private static int CdtrDbtr = 4;		// Creditor bzw. Debitor
 	private static int LiquiMonth = 5;
-	private static int AccountBookingEvent = 6;
 	private ReadCamt Auszug = null;
 	private ArrayList<String> componentList = new ArrayList<String>();
 	private List<RacTableRow> buchungen = new ArrayList<>();
@@ -119,15 +111,6 @@ public class RacTableModel extends AbstractTableModel{
         fireTableCellUpdated(row, col);
     }
 
-	public void removeRow(int iZeile, boolean refreshImmediately) {
-		if(iZeile < buchungen.size()) {
-			buchungen.remove(iZeile);
-
-			if (refreshImmediately)
-				fireTableDataChanged();
-		}
-	}
-
 	public void setLiquiToNull(int iZeile) {
 		RacTableRow tmpRow;
 
@@ -181,25 +164,17 @@ public class RacTableModel extends AbstractTableModel{
 		fireTableDataChanged();
 	}
 
-	public void removeUnusedRows(Date von, Date bis) {
+	public void removeUnusedRows(LocalDate from, LocalDate to) {
 		// remove all Rows that are not in the Timerange
 
-		// remove the hour, minutes and seconds to compare only the yyyy-mm-dd
-		String sVon = SQLDATE.format(von);
-		String sBis = SQLDATE.format(bis);
-
 		// check rows
-		for (int iZeile = 0; iZeile < daten.length; iZeile++) {
+		for (int iRow = 0; iRow < buchungen.size(); iRow++) {
 			// if is not in the timerange, remove it
-			try {
-				if (SQLDATE.parse(daten[iZeile][VALUE_DATE]).before(SQLDATE.parse(sVon)) || SQLDATE.parse(daten[iZeile][VALUE_DATE]).after(SQLDATE.parse(sBis))) {
-					this.removeRow(iZeile, false);
+			if (buchungen.get(iRow).valueDate().isBefore(from) || buchungen.get(iRow).valueDate().isAfter(to)) {
+				buchungen.remove(iRow);
 
-					// because we delete one Row in the array and the row after move to the actual index, wie must go on on the same index,
-					iZeile--;
-				}
-			} catch (ParseException e) {
-				System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "+e.getStackTrace()[0].getLineNumber()+"): " + e.toString());
+				// because we delete one Row in the array and the row after move to the actual index, wie must go on on the same index,
+				iRow--;
 			}
 		}
 
