@@ -54,7 +54,7 @@ public class RacTableModel extends AbstractTableModel{
 				ReturnValue = racTableRow.amount();
 				break;
 			case 3:
-				ReturnValue = racTableRow.comment() + " (" + racTableRow.cdtDbtName() + ")";
+				ReturnValue = racTableRow.comment();
 				break;
 			case 4:
 				ReturnValue = racTableRow.cdtDbtName();
@@ -142,6 +142,7 @@ public class RacTableModel extends AbstractTableModel{
 		// we make a copy of the List, so the original from the "Auszug"
 		// is not effected when we reduce the showing Rows with an
 		// Date Range
+		this.buchungen.clear();
 		this.buchungen.addAll(this.Auszug.getBuchungen());
 
 		// sorting the intern ArrayList from new to old

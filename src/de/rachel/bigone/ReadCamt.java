@@ -42,16 +42,9 @@ public class ReadCamt {
 	private Document KontoAuszug;
 	// private String[][] buchungen = new String[0][0];
 	private String[] csvContent;
-	private int buchungsAnzahl;
 	private String sIBAN = "";
 	private String AccountOwner = "";
 	private String[] NodeToFind = { "ValDt", "CdtDbtInd", "Amt", "Ustrd", "Cdtr", "Dbtr", "UltmtCdtr", "UltmtDbtr" };
-	private static int ValueDate = 0;
-	private static int CreditDebitIndicator = 1;
-	private static int Amount = 2;
-	private static int Unstructured = 3; // Unstrukturierter Verwendungszweck 140zeichen max
-	private static int Creditor = 4;
-	private static int Debitor = 5;
 	private boolean isJointAccount = false;
 	private int accountId = 0;
 	private Connection cn = null;
@@ -74,7 +67,6 @@ public class ReadCamt {
 				try {
 					while ((zipentry = zipis.getNextEntry()) != null) {
 						filecontent = "";
-						String[][] buchungenLager;
 						if (!zipentry.isDirectory() && zipentry.getName().toLowerCase().endsWith("xml")) {
 
 							filecontent = new String(zipis.readAllBytes(), StandardCharsets.UTF_8);
@@ -82,8 +74,6 @@ public class ReadCamt {
 							KontoAuszug = parseXMLfromString(filecontent);
 
 							if (KontoAuszug != null) {
-								buchungsAnzahl = KontoAuszug.getElementsByTagName("Ntry").getLength();
-
 								// set IBAN from EBICs File
 								sIBAN = findSubs(KontoAuszug.getElementsByTagName("Acct").item(0), "IBAN", "").trim();
 
@@ -100,7 +90,10 @@ public class ReadCamt {
 												? findSubs(rows.item(i), NodeToFind[5], "").trim()
 												: findSubs(rows.item(i), NodeToFind[4], "").trim() + "/" + findSubs(rows.item(i), NodeToFind[6], "").trim(),
 											Double.valueOf(findSubs(rows.item(i), NodeToFind[2], "").trim()),
-											findSubs(rows.item(i), NodeToFind[3], "").trim(),
+											findSubs(rows.item(i), NodeToFind[3], "").trim() + " (" + (
+												findSubs(rows.item(i), NodeToFind[1], "").trim().equals("CRDT")
+													? findSubs(rows.item(i), NodeToFind[5], "").trim()
+													: findSubs(rows.item(i), NodeToFind[4], "").trim() + "/" + findSubs(rows.item(i), NodeToFind[6], "").trim()) + ")",
 											LocalDate.parse((findSubs(rows.item(i), NodeToFind[0], "").trim()).substring(0, 8) + "01"),
 											isJointAccount ? "Haushalt (13)" : "HaushGeld (46)"));
 								}
@@ -129,8 +122,6 @@ public class ReadCamt {
 			KontoAuszug = parseXML(PathAndFile);
 
 			if (KontoAuszug != null) {
-				buchungsAnzahl = KontoAuszug.getElementsByTagName("Ntry").getLength();
-
 				// set IBAN from EBICs File
 				sIBAN = findSubs(KontoAuszug.getElementsByTagName("Acct").item(0), "IBAN", "").trim();
 
@@ -147,7 +138,10 @@ public class ReadCamt {
 									? findSubs(rows.item(i), NodeToFind[5], "").trim()
 									: findSubs(rows.item(i), NodeToFind[4], "").trim() + "/" + findSubs(rows.item(i), NodeToFind[6], "").trim(),
 							Double.valueOf(findSubs(rows.item(i), NodeToFind[2], "").trim()),
-							findSubs(rows.item(i), NodeToFind[3], "").trim(),
+							findSubs(rows.item(i), NodeToFind[3], "").trim() + " (" + (
+								findSubs(rows.item(i), NodeToFind[1], "").trim().equals("CRDT")
+									? findSubs(rows.item(i), NodeToFind[5], "").trim()
+									: findSubs(rows.item(i), NodeToFind[4], "").trim() + "/" + findSubs(rows.item(i), NodeToFind[6], "").trim()) + ")",
 							LocalDate.parse((findSubs(rows.item(i), NodeToFind[0], "").trim()).substring(0, 8) + "01"),
 							isJointAccount ? "Haushalt (13)" : "HaushGeld (46)"));
 				}
@@ -347,22 +341,6 @@ public class ReadCamt {
 		return sContent;
 	}
 
-	private String delteSign(String sAmountWithSign) {
-		if (sAmountWithSign.startsWith("-"))
-			return sAmountWithSign.substring(1);
-		else
-			return sAmountWithSign;
-	}
-
-	private String getCreditDebitIndicator(String sAmount) {
-		// CRDT should have
-		// DBIT should
-		if (sAmount.startsWith("-"))
-			return "DBIT";
-		else
-			return "CRDT";
-	}
-
 	private int getCsvRowCount(String PathAndFile) {
 		BufferedReader KontoauszugCsv = null;
 		try {
@@ -436,8 +414,10 @@ public class ReadCamt {
 				buchungen.add(new RacTableRow(valueDate,
 						!(csvContent[i].split(";")[7].startsWith("-")) ? "h" : "s",
 						csvContent[i].split(";")[2],
-						Double.valueOf(csvContent[i].split(";")[7]),
-						csvContent[i].split(";")[4],
+						(csvContent[i].split(";")[7].startsWith("-")
+							? Double.valueOf(csvContent[i].split(";")[7].replace("-", "").replace(".", "").replaceAll(",", "."))
+							: Double.valueOf(csvContent[i].split(";")[7].replace(".", "").replaceAll(",", "."))),
+						csvContent[i].split(";")[4] + " (" + csvContent[i].split(";")[2] + ")",
 						valueDate.minusDays(valueDate.getDayOfMonth() - 1),
 						isJointAccount ? "Haushalt (13)" : "HaushGeld (46)"));
 			}
@@ -523,8 +503,10 @@ public class ReadCamt {
 			buchungen.add(new RacTableRow(valueDate,
 					!(csvContent[i].split(";")[11].startsWith("-")) ? "h" : "s",
 					csvContent[i].split(";")[3],
-					Double.valueOf(csvContent[i].split(";")[11].replace(".", "").replaceAll(",", ".")),
-					csvContent[i].split(";")[4],
+					(csvContent[i].split(";")[11].startsWith("-")
+						? Double.valueOf(csvContent[i].split(";")[11].replace("-","").replace(".", "").replaceAll(",", "."))
+						: Double.valueOf(csvContent[i].split(";")[11].replace(".", "").replaceAll(",", "."))),
+					csvContent[i].split(";")[4] + " (" + csvContent[i].split(";")[3] + ")",
 					valueDate.minusDays(valueDate.getDayOfMonth() - 1),
 					isJointAccount ? "Haushalt (13)" : "HaushGeld (46)"));
 		}

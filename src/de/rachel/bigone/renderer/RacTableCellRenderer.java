@@ -6,7 +6,6 @@ import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
 
-import de.rachel.bigone.BigOneTools;
 import de.rachel.bigone.DBTools;
 import de.rachel.bigone.models.RacTableModel;
 
@@ -15,8 +14,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
 
 public class RacTableCellRenderer implements TableCellRenderer {
 	private Connection cn = null;
@@ -32,10 +29,14 @@ public class RacTableCellRenderer implements TableCellRenderer {
 
 		JLabel label;
 
-		if (!(value instanceof JLabel)) {
+		if (!(value instanceof JLabel) && value != null) {
 			label = new JLabel(value.toString());
 		} else {
-			label = (JLabel) value;
+			if (value != null) {
+				label = (JLabel) value;
+			} else {
+				label = new JLabel("");
+			}
 		}
 
 		label.setOpaque(true);
