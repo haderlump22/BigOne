@@ -1,12 +1,10 @@
 package de.rachel.bigone.models;
 
 import java.sql.Connection;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
 
 import javax.swing.table.AbstractTableModel;
