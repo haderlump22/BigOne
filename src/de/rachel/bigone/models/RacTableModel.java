@@ -162,6 +162,15 @@ public class RacTableModel extends AbstractTableModel{
 		fireTableDataChanged();
 	}
 
+	public void removeRow(int iZeile, boolean refreshImmediately) {
+		if (iZeile < buchungen.size()) {
+			buchungen.remove(iZeile);
+
+			if (refreshImmediately)
+				fireTableDataChanged();
+		}
+	}
+
 	public void removeUnusedRows(LocalDate from, LocalDate to) {
 		// remove all Rows that are not in the Timerange
 
