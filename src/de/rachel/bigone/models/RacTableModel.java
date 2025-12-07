@@ -5,7 +5,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -13,7 +13,6 @@ import javax.swing.table.AbstractTableModel;
 
 import de.rachel.bigone.DBTools;
 import de.rachel.bigone.ReadCamt;
-import de.rachel.bigone.records.JointAccountClosingDetailTableRow;
 import de.rachel.bigone.records.RacTableRow;
 
 public class RacTableModel extends AbstractTableModel{
@@ -119,64 +118,6 @@ public class RacTableModel extends AbstractTableModel{
 		}
         fireTableCellUpdated(row, col);
     }
-	/**
-	 * Daten des Auszugs werden hier
-	 * in das Array des Table Models eingelesen
-	 */
-	private void lese_werte() {
-
-		if (Auszug != null) {
-			// // if we know the Auszug we can decide where to get the category
-			// updateEntrysForCategory(Auszug.isJointAccount());
-
-			// daten = new String[Auszug.getBuchungsanzahl()][7];
-
-			// for(int iAktuelleBuchung = 0; iAktuelleBuchung < Auszug.getBuchungsanzahl(); iAktuelleBuchung++){
-			// 	daten[iAktuelleBuchung][VALUE_DATE] = Auszug.getValDt(iAktuelleBuchung);
-
-			// 	daten[iAktuelleBuchung][LiquiMonth] = Auszug.getValDt(iAktuelleBuchung).substring(0, 8) + "01";
-
-			// 	daten[iAktuelleBuchung][Amount] = Auszug.getAmt(iAktuelleBuchung);
-
-			// 	// je nachdem ob creditorische oder debitorische Buchung
-			// 	// bestimmte Werte des Arrays mit anderen Werten füllen
-			// 	if (Auszug.getCdtDbtInd(iAktuelleBuchung).equals("CRDT")) {
-			// 		daten[iAktuelleBuchung][CdtrDbtr] = Auszug.getDbtr(iAktuelleBuchung);
-			// 		daten[iAktuelleBuchung][CreditDebitIndicator] = "h";
-			// 		// todo
-			// 		// - Gültigkeit der EC karte aus dem Buchungstext entfernen (Folgenr. 02 Verfalld. 2212) oder auch (Folgenr. 002 Verfalld. 2212)
-			// 		daten[iAktuelleBuchung][Unstructured] = Auszug.getUstrd(iAktuelleBuchung) + " (" + Auszug.getDbtr(iAktuelleBuchung) + ")";
-			// 	}
-
-			// 	if (Auszug.getCdtDbtInd(iAktuelleBuchung).equals("DBIT")) {
-			// 		daten[iAktuelleBuchung][CdtrDbtr] = Auszug.getCdtr(iAktuelleBuchung);
-			// 		daten[iAktuelleBuchung][CreditDebitIndicator] = "s";
-			// 		// todo
-			// 		// - Gültigkeit der EC karte aus dem Buchungstext entfernen (Folgenr. 02 Verfalld. 2212) oder auch (Folgenr. 002 Verfalld. 2212)
-			// 		daten[iAktuelleBuchung][Unstructured] = Auszug.getUstrd(iAktuelleBuchung) + " (" + Auszug.getCdtr(iAktuelleBuchung) + ")";
-			// 	}
-
-			// 	// am ende der verarbeitung einer Zeile wird das ereigniss fest auf
-			// 	// HaushGeld (46) oder Haushalt (13) gesetzt, je nachdem ob es sich um ein eigenes
-			// 	// Girokonto oder um das gemeinschaftliche Haushaltskonto handelt
-			// 	daten[iAktuelleBuchung][AccountBookingEvent] = (Auszug.isJointAccount() ? "Haushalt (13)" : "HaushGeld (46)");
-			// }
-
-			// Arrays.sort(daten, new java.util.Comparator<String[]>() {
-			// 	public int compare(String[] rowOne, String[] rowNext) {
-			// 		LocalDate dateRowOne = LocalDate.parse(rowOne[VALUE_DATE]);
-			// 		LocalDate dateRowNext = LocalDate.parse(rowNext[VALUE_DATE]);
-
-			// 		// sort so that the youngest Entry is first in list
-			// 		if (dateRowOne.isAfter(dateRowNext)) {
-			// 			return -1;
-			// 		} else {
-			// 			return 1;
-			// 		}
-			// 	}
-			// });
-		}
-	}
 
 	public void removeRow(int iZeile, boolean refreshImmediately) {
 		if(iZeile < buchungen.size()) {
@@ -222,10 +163,21 @@ public class RacTableModel extends AbstractTableModel{
 		// Date Range
 		this.buchungen.addAll(this.Auszug.getBuchungen());
 
+		// sorting the intern ArrayList from new to old
+		this.buchungen.sort(new Comparator<RacTableRow>() {
+			@Override
+			public int compare(RacTableRow rowOne, RacTableRow rowNext) {
+				if (rowOne.valueDate().isAfter(rowNext.valueDate())) {
+					return -1;
+				} else {
+					return 1;
+				}
+			}
+		});
+
 		// if we know the Auszug we can decide where to get the category
 		updateEntrysForCategory(this.Auszug.isJointAccount());
 
-		//lese_werte();
 		fireTableDataChanged();
 	}
 
