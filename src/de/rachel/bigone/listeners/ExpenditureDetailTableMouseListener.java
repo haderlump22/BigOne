@@ -4,8 +4,14 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.sql.Connection;
+
 import javax.swing.JPopupMenu;
 import javax.swing.JTable;
+
+import de.rachel.bigone.ExpenditureSuccessor;
+
+import javax.swing.JFrame;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 
@@ -13,15 +19,20 @@ import javax.swing.JOptionPane;
 
 public class ExpenditureDetailTableMouseListener extends MouseAdapter {
     private JPopupMenu popmen;
+    private JFrame expenditureUi;
+    private Connection cn;
     // private SalaryBasesIncomeDetailTableModel model;
 
-    public ExpenditureDetailTableMouseListener(JTable ExpenditureDetailTable) {
+    public ExpenditureDetailTableMouseListener(JTable ExpenditureDetailTable, JFrame expenditureUi, Connection cn) {
+        this.cn = cn;
+        this.expenditureUi = expenditureUi;
         popmen = new JPopupMenu();
         // Menüeintrag für das Löschen einer Zeile
         JMenuItem createSuccessor = new JMenuItem("nachfolger anlegen");
         createSuccessor.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ae) {
-                JOptionPane.showMessageDialog(null, "ALERT MESSAGE", "TITLE", JOptionPane.WARNING_MESSAGE);
+                // JOptionPane.showMessageDialog(null, "ALERT MESSAGE", "TITLE", JOptionPane.WARNING_MESSAGE);
+                new ExpenditureSuccessor(expenditureUi, cn);
             }
         });
         popmen.add(createSuccessor);

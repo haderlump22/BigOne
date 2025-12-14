@@ -133,7 +133,7 @@ public class Expenditure {
         ExpenditureDetailTable.getColumnModel().getColumn(0).setMaxWidth(110);
 
         // selbst definierten Mouselistener hinzufügen
-        ExpenditureDetailTable.addMouseListener(new ExpenditureDetailTableMouseListener(ExpenditureDetailTable));
+        ExpenditureDetailTable.addMouseListener(new ExpenditureDetailTableMouseListener(ExpenditureDetailTable, ExpenditureWindow, cn));
     }
 
     private void createExpenditureDistributionTable() {
