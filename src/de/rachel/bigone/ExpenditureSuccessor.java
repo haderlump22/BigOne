@@ -1,6 +1,8 @@
 package de.rachel.bigone;
 
 import java.sql.Connection;
+import java.text.DecimalFormat;
+import java.text.ParseException;
 
 import javax.swing.JDialog;
 import javax.swing.JFormattedTextField;
@@ -8,6 +10,8 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
 import javax.swing.WindowConstants;
+import javax.swing.text.MaskFormatter;
+import javax.swing.text.NumberFormatter;
 
 import java.awt.Dimension;
 import java.awt.Font;
@@ -59,14 +63,22 @@ public class ExpenditureSuccessor extends JFrame{
         expenditureDescription = new JTextField();
         expenditureDescription.setPreferredSize(new Dimension(70, 25));
 
-        expenditureAmount = new JFormattedTextField();
+        expenditureAmount = new JFormattedTextField(new NumberFormatter(new DecimalFormat("#,##0.00")));
+        expenditureAmount.setHorizontalAlignment(JFormattedTextField.RIGHT);
         expenditureAmount.setPreferredSize(new Dimension(70, 25));
+        expenditureAmount.setText("0,00");
+
 
         expenditureDivideType = new JTextField();
         expenditureDivideType.setPreferredSize(new Dimension(70, 25));
 
-        expenditureValidFrom = new JFormattedTextField();
+        try {
+            expenditureValidFrom = new JFormattedTextField(new MaskFormatter("01-##-20##"));
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
         expenditureValidFrom.setPreferredSize(new Dimension(70, 25));
+        expenditureValidFrom.setHorizontalAlignment(JTextField.RIGHT);
     }
 
     private void registerExistingListeners() {
