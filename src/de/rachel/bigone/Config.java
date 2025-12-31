@@ -10,48 +10,57 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 /**
- * Read some settings that the Programm need 
+ * Read some settings that the Programm need
  * from a config file in a Subdirectory in the UserHome
- * 
+ *
  * @author Normen Rachel
  *
  */
 public class Config {
 	private String DbDrv, DbUrl, DbName, DbUserName, DbPw;
+	private boolean devMode = true;
+	private File configDir, configFile;
+
 	Config() {
-		File ConfigDir = new File(System.getProperty("user.home") + "/BigOneConfig");
-		File ConfigFile = new File(ConfigDir.getPath()+"/BigOneConfig.json");
-		
+		if (devMode) {
+			configDir = new File(System.getProperty("user.home") + "/BigOneConfig");
+			configFile = new File(configDir.getPath()+"/BigOneConfigDev.json");
+		} else {
+			configDir = new File(System.getProperty("user.home") + "/BigOneConfig");
+			configFile = new File(configDir.getPath()+"/BigOneConfig.json");
+		}
+
+
 		try {
 			// check if Dir exist, else create it
-			if (!checkConfigDir(ConfigDir)) {
-				
-				ConfigDir.mkdir();
-				ConfigFile.createNewFile();
-				
+			if (!checkConfigDir(configDir)) {
+
+				configDir.mkdir();
+				configFile.createNewFile();
+
 				// if configfile generated than put some template settings
-				writeTemplateConfig(new FileWriter(ConfigFile));
+				writeTemplateConfig(new FileWriter(configFile));
 			} else {
 				// check if File exist, else create it
-				if (!checkConfigFile(ConfigFile)) {
-					
-					ConfigFile.createNewFile();
-					
+				if (!checkConfigFile(configFile)) {
+
+					configFile.createNewFile();
+
 					// if configfile generated than put some template settings
-					writeTemplateConfig(new FileWriter(ConfigFile));
+					writeTemplateConfig(new FileWriter(configFile));
 				} else {
 					// if file exist then try to read the necessary info
-					readSettings(new FileReader(ConfigFile));
+					readSettings(new FileReader(configFile));
 				}
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
-	
+
 	private void readSettings(FileReader ConfigFile) {
 		JSONParser parser = new JSONParser();
-		
+
         try {
 
             JSONObject jsonObject = (JSONObject) parser.parse(ConfigFile);
@@ -78,14 +87,14 @@ public class Config {
 		else
 			return false;
 	}
-	
+
 	private boolean checkConfigFile(File ConfigFile) {
 		if (ConfigFile.isFile())
 			return true;
 		else
 			return false;
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	private void writeTemplateConfig(FileWriter ConfigFile) {
 		JSONObject obj = new JSONObject();
