@@ -5,8 +5,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.sql.Connection;
-import java.sql.Date;
-import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -17,7 +16,6 @@ import javax.swing.JTable;
 
 import de.rachel.bigone.DBTools;
 import de.rachel.bigone.ExpenditureSuccessor;
-import de.rachel.bigone.records.SalaryBasesSumOfIncomePerPartyTableRow;
 
 import javax.swing.JFrame;
 import javax.swing.JMenuItem;
@@ -114,12 +112,12 @@ public class ExpenditureDetailTableMouseListener extends MouseAdapter {
 
         // die aktuellen Ausgaben die im Modus "Verhältnis" aufgeteilt werden
         // merken
-        DBTools expentitureStatement = new DBTools(cn);
+        DBTools expentitureBackup = new DBTools(cn);
         record ActualRatioExpenditure(Integer expenditureId, String description, Double amount, String divideType,
         LocalDate validFrom, String expenditureHint, Integer frequency) {};
         List<ActualRatioExpenditure> actualRatioExpenditure = new ArrayList<>();
 
-		expentitureStatement.select("""
+		expentitureBackup.select("""
 				SELECT "ausgabenId", bezeichnung, betrag, aufteilungsart, gilt_ab, bemerkung, haeufigkeit
                 FROM ha_ausgaben
                 WHERE aufteilungsart = 'V'
@@ -128,16 +126,16 @@ public class ExpenditureDetailTableMouseListener extends MouseAdapter {
 				2);
 
 		try {
-            expentitureStatement.beforeFirst();
+            expentitureBackup.beforeFirst();
 
-            while (expentitureStatement.next()) {
-                actualRatioExpenditure.add(new ActualRatioExpenditure(expentitureStatement.getInt("ausgabenId"),
-                        expentitureStatement.getString("bezeichnung"),
-                        expentitureStatement.getDouble("betrag"),
-                        expentitureStatement.getString("aufteilungsart"),
-                        (expentitureStatement.getDate("gilt_ab")).toLocalDate(),
-                        expentitureStatement.getString("bemerkung"),
-                        expentitureStatement.getInt("haeufigkeit")));
+            while (expentitureBackup.next()) {
+                actualRatioExpenditure.add(new ActualRatioExpenditure(expentitureBackup.getInt("ausgabenId"),
+                        expentitureBackup.getString("bezeichnung"),
+                        expentitureBackup.getDouble("betrag"),
+                        expentitureBackup.getString("aufteilungsart"),
+                        (expentitureBackup.getDate("gilt_ab")).toLocalDate(),
+                        expentitureBackup.getString("bemerkung"),
+                        expentitureBackup.getInt("haeufigkeit")));
             }
             System.out.println("Sicherheitsausgabe von zu verändernden Datensätzen:");
             System.out.println(actualRatioExpenditure);
@@ -146,11 +144,70 @@ public class ExpenditureDetailTableMouseListener extends MouseAdapter {
 		}
 
         // aktuell gültige Verhältnissbeträge mit einem GiltBis Wert versehen
+        DBTools expenditureUpdate = new DBTools(cn);
+
+        if (!expenditureUpdate.update("""
+				UPDATE ha_ausgaben
+                SET gilt_bis = '%s'
+                WHERE aufteilungsart = 'V'
+                AND gilt_bis IS NULL;
+				""".formatted(newValidFromPeriod.minusMonths(1)))) {
+            System.out.println("Fehler beim aktualisieren der alten Ausgabendatensätze vom Typ 'Verhältnis'");
+            System.exit(1);
+        }
 
         // neue Datensätze für die Verhältnissbeträge anlegen mit einem GiltAb
         // das der gewünschten Periode entspricht
+        DBTools expenditureInsert = new DBTools(cn);
+        DBTools expenditureDistributionInsert = new DBTools(cn);
 
-        // für diese Datensätze neue Aufteilungen anhand der aktuell ermittelten
-        // Prozentanteile erstellen
+        for (ActualRatioExpenditure actualRatioExpenditureRow : actualRatioExpenditure) {
+            int lastInsertId;
+
+            if (!expenditureInsert.insertWithReturn("""
+                    INSERT INTO ha_ausgaben
+                    (bezeichnung, betrag, aufteilungsart, bemerkung, gilt_ab, haeufigkeit)
+                    VALUES
+                    ('%s', %s, '%s', '%s', '%s', %d)
+                    RETURNING "%s"
+                    """.formatted(actualRatioExpenditureRow.description,
+                    actualRatioExpenditureRow.amount,
+                    actualRatioExpenditureRow.divideType,
+                    actualRatioExpenditureRow.expenditureHint,
+                    newValidFromPeriod.toString(),
+                    actualRatioExpenditureRow.frequency,
+                    "ausgabenId"))) {
+                System.out.println("Fehler beim einfügen des neuen Ausgabendatenstz vom Typ 'Verhältnis' mit der Bezeichnung:" + actualRatioExpenditureRow.description);
+                System.exit(1);
+            }
+
+            try {
+                // für diese Datensätze neue Aufteilungen anhand der aktuell ermittelten
+                // Prozentanteile erstellen
+                for (PercentOfEachParty percentOfParty : partyPercents) {
+                    expenditureInsert.first();
+                    lastInsertId = expenditureInsert.getInt("ausgabenId");
+
+                    if (!expenditureDistributionInsert.insert("""
+                            INSERT INTO ha_ausgaben_aufteilung
+                            ("parteiId", betrag, bemerkung, "ausgabenId")
+                            VALUES
+                            (%d, %s, '%s', %d)
+                            """.formatted(percentOfParty.partyId,
+                            (actualRatioExpenditureRow.amount * percentOfParty.percent),
+                            "Verhältinisanteils Aktualisierung",
+                            lastInsertId))) {
+                        System.out.println("Fehler beim einfügen des neuen AusgabenAufteilungsdatensatz für Partei: -" + percentOfParty.partyId + "- der Ausgabe: " + actualRatioExpenditureRow.description);
+                        System.exit(1);
+                    }
+                }
+            } catch (SQLException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+
+            // refresh the Expenditure UI
+
+        }
     }
 }
