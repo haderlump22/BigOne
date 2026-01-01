@@ -20,8 +20,7 @@ import javax.swing.JLabel;
 import javax.swing.WindowConstants;
 import javax.swing.text.NumberFormatter;
 
-public class Aufteilung extends JFrame {
-	private static final long serialVersionUID = -2262653597062890751L;
+public class Aufteilung {
 	private JLabel lblBetrag, lblEreigniss, lblRestInfo, lblBuchText;
 	private JCheckBox chkLiquiFaehig;
 	private JComboBox<String> cmbEreigniss;
@@ -147,7 +146,6 @@ public class Aufteilung extends JFrame {
 			public void actionPerformed(ActionEvent ae) {
 				dialog.setVisible(false);
 				dialog.dispose();
-
 			}
 		});
 
