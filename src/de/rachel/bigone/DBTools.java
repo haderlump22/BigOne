@@ -29,7 +29,19 @@ public final class DBTools {
 			return true;
 		} catch (SQLException e) {
 			System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + ": " + e.toString());
-			System.err.println("Programmabbruch!!!");
+			System.err.println("insert: Programmabbruch!!!");
+			System.exit(1);
+			return false;
+		}
+	}
+
+	public boolean insertWithReturn(String sql) {
+		try {
+			rs = st.executeQuery(sql);
+			return true;
+		} catch (SQLException e) {
+			System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + ": " + e.toString());
+			System.err.println("insertWithReturn: Programmabbruch!!!");
 			System.exit(1);
 			return false;
 		}
@@ -40,6 +52,7 @@ public final class DBTools {
 			st.executeUpdate(sql);
 			return true;
 		} catch (SQLException e) {
+			System.err.println("UpdateStatement failed: -" + sql + "-");
 			System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + ": " + e.toString());
 			return false;
 		}
