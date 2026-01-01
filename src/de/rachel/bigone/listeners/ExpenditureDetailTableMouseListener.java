@@ -15,9 +15,9 @@ import javax.swing.JPopupMenu;
 import javax.swing.JTable;
 
 import de.rachel.bigone.DBTools;
+import de.rachel.bigone.Expenditure;
 import de.rachel.bigone.ExpenditureSuccessor;
 
-import javax.swing.JFrame;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 
@@ -25,11 +25,11 @@ import javax.swing.JOptionPane;
 
 public class ExpenditureDetailTableMouseListener extends MouseAdapter {
     private JPopupMenu popmen;
-    private JFrame expenditureUi;
+    private Expenditure expenditureUi;
     private Connection cn;
     // private SalaryBasesIncomeDetailTableModel model;
 
-    public ExpenditureDetailTableMouseListener(JTable ExpenditureDetailTable, JFrame expenditureUi, Connection cn) {
+    public ExpenditureDetailTableMouseListener(JTable expenditureDetailTable, Expenditure expenditureUi, Connection cn) {
         this.cn = cn;
         this.expenditureUi = expenditureUi;
         popmen = new JPopupMenu();
@@ -38,7 +38,7 @@ public class ExpenditureDetailTableMouseListener extends MouseAdapter {
         createSuccessor.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ae) {
                 // JOptionPane.showMessageDialog(null, "ALERT MESSAGE", "TITLE", JOptionPane.WARNING_MESSAGE); ratio share
-                new ExpenditureSuccessor(expenditureUi, cn);
+                new ExpenditureSuccessor(expenditureUi.getExpenditureJFrame(), cn);
             }
         });
 
@@ -205,9 +205,9 @@ public class ExpenditureDetailTableMouseListener extends MouseAdapter {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
-
-            // refresh the Expenditure UI
-
         }
+
+        // refresh the detailTable
+        expenditureUi.refreshContent();
     }
 }

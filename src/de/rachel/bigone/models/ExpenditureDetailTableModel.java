@@ -13,7 +13,7 @@ import de.rachel.bigone.records.ExpenditureDetailTableRow;
 public class ExpenditureDetailTableModel extends AbstractTableModel {
     private Connection cn = null;
     private String[] columnName = new String[] { "Bezeichung", "Betrag", "Aufteilungsart", "gilt bis" };
-    private List<ExpenditureDetailTableRow> TableData = new ArrayList<>();
+    private List<ExpenditureDetailTableRow> tableData = new ArrayList<>();
 
     public ExpenditureDetailTableModel(Connection LoginCN) {
         cn = LoginCN;
@@ -25,7 +25,7 @@ public class ExpenditureDetailTableModel extends AbstractTableModel {
     }
 
     public int getRowCount() {
-        return TableData.size();
+        return tableData.size();
     }
 
     public String getColumnName(int col) {
@@ -33,33 +33,33 @@ public class ExpenditureDetailTableModel extends AbstractTableModel {
     }
 
     public Object getValueAt(int row, int col) {
-        ExpenditureDetailTableRow Zeile = TableData.get(row);
-        Object ReturnValue = null;
+        ExpenditureDetailTableRow expenditureDetailTableRow = tableData.get(row);
+        Object returnValue = null;
 
         switch (col) {
             case -1: //it only called by the listener "ExpenditureDetailTableSelectionListener"
-                ReturnValue = Zeile.ExpenditureId();
+                returnValue = expenditureDetailTableRow.ExpenditureId();
                 break;
             case -2: // //it only called by the listener "ExpenditureDetailTableSelectionListener"
-                ReturnValue = Zeile.ExpenditureHint();
+                returnValue = expenditureDetailTableRow.ExpenditureHint();
                 break;
             case 0:
-                ReturnValue = Zeile.Description();
+                returnValue = expenditureDetailTableRow.Description();
                 break;
             case 1:
-                ReturnValue = Zeile.Amount();
+                returnValue = expenditureDetailTableRow.Amount();
                 break;
             case 2:
-                ReturnValue = Zeile.DivideType();
+                returnValue = expenditureDetailTableRow.DivideType();
                 break;
             case 3:
-                ReturnValue = Zeile.ValidUntil();
+                returnValue = expenditureDetailTableRow.ValidUntil();
                 break;
             default:
                 break;
         }
 
-        return ReturnValue;
+        return returnValue;
     }
 
     public boolean isCellEditable(int row, int col) {
@@ -84,11 +84,17 @@ public class ExpenditureDetailTableModel extends AbstractTableModel {
             rs.beforeFirst();
 
             while (rs.next()) {
-                TableData.add(new ExpenditureDetailTableRow(rs.getInt("ausgabenId"), rs.getString("bezeichnung"), rs.getDouble("betrag"),
+                tableData.add(new ExpenditureDetailTableRow(rs.getInt("ausgabenId"), rs.getString("bezeichnung"), rs.getDouble("betrag"),
                         rs.getString("aufteilungsart"), rs.getDate("gilt_bis"), rs.getString("bemerkung")));
             }
         } catch (Exception e) {
             System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "+e.getStackTrace()[0].getLineNumber()+"): " + e.toString());
         }
     }
+
+    public void aktualisiere() {
+        tableData.clear();
+        lese_werte();
+		fireTableDataChanged();
+	}
 }

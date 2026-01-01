@@ -11,19 +11,19 @@ import de.rachel.bigone.models.ExpenditureDistributionTableModel;
 
 public class ExpenditureDetailTableSelectionListener implements ListSelectionListener {
 
-    private JTable ExpenditureDetailTable, ExpenditureDistributionTable;
-    private JScrollPane ExpenditureDistributionScrollPane;
-    private JTextArea HintArea;
-    private Integer ExpenditureId;
+    private JTable expenditureDetailTable, expenditureDistributionTable;
+    private JScrollPane expenditureDistributionScrollPane;
+    private JTextArea hintArea;
+    private Integer expenditureId;
     private Integer zaehler = 0;
 
-    public ExpenditureDetailTableSelectionListener(JTable ExpenditureDetailTable,
-            JScrollPane ExpenditureDistributionScrollPane, JTable ExpenditureDistributionTable,
-            JTextArea HintArea) {
-        this.ExpenditureDetailTable = ExpenditureDetailTable;
-        this.ExpenditureDistributionScrollPane = ExpenditureDistributionScrollPane;
-        this.ExpenditureDistributionTable = ExpenditureDistributionTable;
-        this.HintArea = HintArea;
+    public ExpenditureDetailTableSelectionListener(JTable expenditureDetailTable,
+            JScrollPane expenditureDistributionScrollPane, JTable expenditureDistributionTable,
+            JTextArea hintArea) {
+        this.expenditureDetailTable = expenditureDetailTable;
+        this.expenditureDistributionScrollPane = expenditureDistributionScrollPane;
+        this.expenditureDistributionTable = expenditureDistributionTable;
+        this.hintArea = hintArea;
     }
 
     @Override
@@ -34,20 +34,26 @@ public class ExpenditureDetailTableSelectionListener implements ListSelectionLis
         if (!lsm.getValueIsAdjusting() && !lsm.isSelectionEmpty()) {
             // refresh Tablemodeldata of the dristributiontable with the choosen id of the
             // detailtable
-            ExpenditureId = (Integer) ExpenditureDetailTable.getValueAt(ExpenditureDetailTable.getSelectedRow(), -1);
-            ((ExpenditureDistributionTableModel) ExpenditureDistributionTable.getModel()).aktualisiere(ExpenditureId);
+            expenditureId = (Integer) expenditureDetailTable.getValueAt(expenditureDetailTable.getSelectedRow(), -1);
+            ((ExpenditureDistributionTableModel) expenditureDistributionTable.getModel()).aktualisiere(expenditureId);
 
             // refresh the content of the jtextarea with the hint from the choosen detailtable row
             // the hint is only in the tablemodel and is not show in the detailtable
-            HintArea.setText((String) ExpenditureDetailTable.getValueAt(ExpenditureDetailTable.getSelectedRow(), -2));
+            hintArea.setText((String) expenditureDetailTable.getValueAt(expenditureDetailTable.getSelectedRow(), -2));
 
             // if it's the first call of the listener then
             // change the component in the scrollpane from the jtextarea to the table
             if (zaehler == 0) {
-                ExpenditureDistributionScrollPane.setViewportView(ExpenditureDistributionTable);
+                expenditureDistributionScrollPane.setViewportView(expenditureDistributionTable);
             }
 
             zaehler++;
         }
+    }
+
+    public void resetCallCounter() {
+        // we has to set the Counter to 0 if Data had refreshed
+        // for example in the Case of update the ratioShare Data
+        zaehler = 0;
     }
 }

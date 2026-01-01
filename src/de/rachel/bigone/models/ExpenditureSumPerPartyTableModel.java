@@ -13,10 +13,10 @@ import de.rachel.bigone.records.ExpenditureSumPerPartyTableRow;
 public class ExpenditureSumPerPartyTableModel extends AbstractTableModel {
     private Connection cn = null;
     private String[] columnName = new String[] { "Name", "Summe" };
-    private List<ExpenditureSumPerPartyTableRow> TableData = new ArrayList<>();
+    private List<ExpenditureSumPerPartyTableRow> tableData = new ArrayList<>();
 
-    public ExpenditureSumPerPartyTableModel(Connection LoginCN) {
-        cn = LoginCN;
+    public ExpenditureSumPerPartyTableModel(Connection loginCN) {
+        cn = loginCN;
         lese_werte();
     }
 
@@ -25,7 +25,7 @@ public class ExpenditureSumPerPartyTableModel extends AbstractTableModel {
     }
 
     public int getRowCount() {
-        return TableData.size();
+        return tableData.size();
     }
 
     public String getColumnName(int col) {
@@ -33,21 +33,21 @@ public class ExpenditureSumPerPartyTableModel extends AbstractTableModel {
     }
 
     public Object getValueAt(int row, int col) {
-        ExpenditureSumPerPartyTableRow Zeile = TableData.get(row);
-        Object ReturnValue = null;
+        ExpenditureSumPerPartyTableRow expenditureSumPerPartyTableRow = tableData.get(row);
+        Object returnValue = null;
 
         switch (col) {
             case 0:
-                ReturnValue = Zeile.NameOfParty();
+                returnValue = expenditureSumPerPartyTableRow.NameOfParty();
                 break;
             case 1:
-                ReturnValue = Zeile.ExpenditureSum();
+                returnValue = expenditureSumPerPartyTableRow.ExpenditureSum();
                 break;
             default:
                 break;
         }
 
-        return ReturnValue;
+        return returnValue;
     }
 
     public boolean isCellEditable(int row, int col) {
@@ -75,10 +75,16 @@ public class ExpenditureSumPerPartyTableModel extends AbstractTableModel {
             rs.beforeFirst();
 
             while (rs.next()) {
-                TableData.add(new ExpenditureSumPerPartyTableRow(rs.getString("party"), rs.getDouble("betrag")));
+                tableData.add(new ExpenditureSumPerPartyTableRow(rs.getString("party"), rs.getDouble("betrag")));
             }
         } catch (Exception e) {
             System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "+e.getStackTrace()[0].getLineNumber()+"): " + e.toString());
         }
     }
+
+    public void aktualisiere() {
+        tableData.clear();
+        lese_werte();
+		fireTableDataChanged();
+	}
 }
