@@ -1,4 +1,4 @@
-package de.rachel.bigone;
+package de.rachel.bigone.dialogs;
 
 import java.sql.Connection;
 import java.text.DecimalFormat;
@@ -19,7 +19,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 
-public class ExpenditureSuccessor extends JFrame{
+public class ExpenditureSuccessorDialog extends JFrame{
     private Connection cn = null;
     private JFrame dialogOwner;
     private JDialog dialog;
@@ -29,7 +29,7 @@ public class ExpenditureSuccessor extends JFrame{
     private Font fontTxtFields;
 
 
-    public ExpenditureSuccessor(JFrame dialogOwner, Connection LoginCN) {
+    public ExpenditureSuccessorDialog(JFrame dialogOwner, Connection LoginCN) {
         cn = LoginCN;
         this.dialogOwner = dialogOwner;
 

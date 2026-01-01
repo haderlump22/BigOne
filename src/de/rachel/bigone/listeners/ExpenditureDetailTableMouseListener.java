@@ -16,7 +16,7 @@ import javax.swing.JTable;
 
 import de.rachel.bigone.DBTools;
 import de.rachel.bigone.Expenditure;
-import de.rachel.bigone.ExpenditureSuccessor;
+import de.rachel.bigone.dialogs.ExpenditureSuccessorDialog;
 
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
@@ -38,7 +38,7 @@ public class ExpenditureDetailTableMouseListener extends MouseAdapter {
         createSuccessor.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ae) {
                 // JOptionPane.showMessageDialog(null, "ALERT MESSAGE", "TITLE", JOptionPane.WARNING_MESSAGE); ratio share
-                new ExpenditureSuccessor(expenditureUi.getExpenditureJFrame(), cn);
+                new ExpenditureSuccessorDialog(expenditureUi.getExpenditureJFrame(), cn);
             }
         });
 
