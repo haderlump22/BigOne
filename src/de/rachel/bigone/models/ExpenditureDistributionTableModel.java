@@ -13,7 +13,7 @@ import de.rachel.bigone.records.ExpenditureDistributionTableRow;
 public class ExpenditureDistributionTableModel extends AbstractTableModel {
     private Connection cn = null;
     private String[] columnName = new String[] { "Name", "Betrag" };
-    private List<ExpenditureDistributionTableRow> TableData = new ArrayList<>();
+    private List<ExpenditureDistributionTableRow> tableData = new ArrayList<>();
 
     public ExpenditureDistributionTableModel(Connection LoginCN) {
         cn = LoginCN;
@@ -24,7 +24,7 @@ public class ExpenditureDistributionTableModel extends AbstractTableModel {
     }
 
     public int getRowCount() {
-        return TableData.size();
+        return tableData.size();
     }
 
     public String getColumnName(int col) {
@@ -32,21 +32,24 @@ public class ExpenditureDistributionTableModel extends AbstractTableModel {
     }
 
     public Object getValueAt(int row, int col) {
-        ExpenditureDistributionTableRow Zeile = TableData.get(row);
-        Object ReturnValue = null;
+        ExpenditureDistributionTableRow expenditureDistributionTableRow = tableData.get(row);
+        Object returnValue = null;
 
         switch (col) {
+            case -1: // //it only called by the listener "ExpenditureDistributionTableSelectionListener"
+                returnValue = expenditureDistributionTableRow.expenditureDistributionComment();
+                break;
             case 0:
-                ReturnValue = Zeile.NameOfParty();
+                returnValue = expenditureDistributionTableRow.NameOfParty();
                 break;
             case 1:
-                ReturnValue = Zeile.Amount();
+                returnValue = expenditureDistributionTableRow.Amount();
                 break;
             default:
                 break;
         }
 
-        return ReturnValue;
+        return returnValue;
     }
 
     public boolean isCellEditable(int row, int col) {
@@ -61,7 +64,7 @@ public class ExpenditureDistributionTableModel extends AbstractTableModel {
         ResultSet rs;
 
         getter.select("""
-                SELECT haaa."ausgabenAufteilungId", p.name || ', ' || SUBSTRING(p.vorname, 1, 1) || '.' AS party, betrag
+                SELECT haaa."ausgabenAufteilungId", p.name || ', ' || SUBSTRING(p.vorname, 1, 1) || '.' AS party, betrag, bemerkung
                 FROM ha_ausgaben_aufteilung haaa, personen p
                 WHERE haaa."parteiId" = p.personen_id
                 AND haaa."ausgabenId" = %s
@@ -73,8 +76,8 @@ public class ExpenditureDistributionTableModel extends AbstractTableModel {
             rs.beforeFirst();
 
             while (rs.next()) {
-                TableData.add(new ExpenditureDistributionTableRow(rs.getInt("ausgabenAufteilungId"),
-                        rs.getString("party"), rs.getDouble("betrag")));
+                tableData.add(new ExpenditureDistributionTableRow(rs.getInt("ausgabenAufteilungId"),
+                        rs.getString("party"), rs.getDouble("betrag"), rs.getString("bemerkung")));
             }
         } catch (Exception e) {
             System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "
@@ -83,8 +86,8 @@ public class ExpenditureDistributionTableModel extends AbstractTableModel {
     }
 
     public void aktualisiere(Integer ExpenditureId) {
-        // before adding new data, remove the old in the TableData List
-        TableData.clear();
+        // before adding new data, remove the old in the tableData List
+        tableData.clear();
 		lese_werte(ExpenditureId);
 		fireTableDataChanged();
 	}
