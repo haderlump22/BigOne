@@ -25,7 +25,7 @@ public class TransferAmount {
         cn = LoginCN;
 
         TransferAmountWindow = new JFrame("Überweisungsbeträge");
-        TransferAmountWindow.setSize(785, 530);
+        TransferAmountWindow.setSize(320, 430);
         TransferAmountWindow.setLocation(200, 200);
         TransferAmountWindow.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         TransferAmountWindow.setLayout(null);
@@ -33,7 +33,7 @@ public class TransferAmount {
 
         TransferAmountDetailTablePanel = new JPanel();
         TransferAmountDetailTablePanel.setLayout(null);
-        TransferAmountDetailTablePanel.setBounds(10, 120, 300, 370);
+        TransferAmountDetailTablePanel.setBounds(10, 10, 300, 370);
         TransferAmountDetailTablePanel.setBorder(new TitledBorder("Überweisungsbeträge"));
 
         // create Table for the Details of Income of Partys

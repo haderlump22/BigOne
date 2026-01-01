@@ -11,10 +11,10 @@ import de.rachel.bigone.records.TransferAmountDetailTableRow;
 public class TransferAmountDetailTableModel extends AbstractTableModel {
 	private Connection cn = null;
 	private String[] columnName = new String[] { "Name", "Betrag", "gilt bis" };
-	private List<TransferAmountDetailTableRow> TableData = new ArrayList<>();
+	private List<TransferAmountDetailTableRow> tableData = new ArrayList<>();
 
-	public TransferAmountDetailTableModel(Connection LoginCN) {
-		cn = LoginCN;
+	public TransferAmountDetailTableModel(Connection loginCN) {
+		cn = loginCN;
 		lese_werte();
 	}
 
@@ -23,7 +23,7 @@ public class TransferAmountDetailTableModel extends AbstractTableModel {
 	}
 
 	public int getRowCount() {
-		return TableData.size();
+		return tableData.size();
 	}
 
 	public String getColumnName(int col) {
@@ -31,27 +31,27 @@ public class TransferAmountDetailTableModel extends AbstractTableModel {
 	}
 
 	public Object getValueAt(int row, int col) {
-		TransferAmountDetailTableRow Zeile = TableData.get(row);
-		Object ReturnValue = null;
+		TransferAmountDetailTableRow transferAmountDetailTableRow = tableData.get(row);
+		Object returnValue = null;
 
 		switch (col) {
 			case -1:
-				ReturnValue = Zeile.TransferAmountId();
+				returnValue = transferAmountDetailTableRow.TransferAmountId();
 				break;
 			case 0:
-				ReturnValue = Zeile.NameOfParty();
+				returnValue = transferAmountDetailTableRow.NameOfParty();
 				break;
 			case 1:
-				ReturnValue = Zeile.Amount();
+				returnValue = transferAmountDetailTableRow.Amount();
 				break;
 			case 2:
-				ReturnValue = Zeile.ValidUntil();
+				returnValue = transferAmountDetailTableRow.ValidUntil();
 				break;
 			default:
 				break;
 		}
 
-		return ReturnValue;
+		return returnValue;
 	}
 
 	public boolean isCellEditable(int row, int col) {
@@ -75,7 +75,7 @@ public class TransferAmountDetailTableModel extends AbstractTableModel {
 			getter.beforeFirst();
 
 			while (getter.next()) {
-				TableData.add(new TransferAmountDetailTableRow(getter.getInt("ueberweisungsbetrag_id"), getter.getString("party"),
+				tableData.add(new TransferAmountDetailTableRow(getter.getInt("ueberweisungsbetrag_id"), getter.getString("party"),
 						getter.getDouble("betrag"), getter.getDate("gilt_bis")));
 			}
 		} catch (Exception e) {
@@ -84,12 +84,18 @@ public class TransferAmountDetailTableModel extends AbstractTableModel {
 	}
 
 	public boolean isDateFilled(int RowNumber) {
-		TransferAmountDetailTableRow Zeile = TableData.get(RowNumber);
+		TransferAmountDetailTableRow transferAmountDetailTableRow = tableData.get(RowNumber);
 
-		if (Zeile.ValidUntil() == null) {
+		if (transferAmountDetailTableRow.ValidUntil() == null) {
 			return false;
 		} else {
 			return true;
 		}
+	}
+
+	public void aktualisiere() {
+        tableData.clear();
+        lese_werte();
+		fireTableDataChanged();
 	}
 }

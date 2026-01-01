@@ -9,7 +9,7 @@ import java.sql.Connection;
 import javax.swing.JPopupMenu;
 import javax.swing.JTable;
 
-import de.rachel.bigone.dialogs.TransferAmountDetailTableCreateSuccessorDialog;
+import de.rachel.bigone.dialogs.TransferAmountSuccessorDialog;
 import de.rachel.bigone.models.TransferAmountDetailTableModel;
 
 import javax.swing.JFrame;
@@ -23,8 +23,8 @@ public class TransferAmountDetailTableMouseListener extends MouseAdapter {
     private Connection cn = null;
     // private SalaryBasesIncomeDetailTableModel model;
 
-    public TransferAmountDetailTableMouseListener(JTable TransferAmountDetailTable, JFrame TransferAmountWindow, Connection LoginCN) {
-        cn = LoginCN;
+    public TransferAmountDetailTableMouseListener(JTable transferAmountDetailTable, JFrame transferAmountWindow, Connection loginCN) {
+        cn = loginCN;
 
         popmen = new JPopupMenu();
         // Menüeintrag für das Löschen einer Zeile
@@ -34,17 +34,17 @@ public class TransferAmountDetailTableMouseListener extends MouseAdapter {
                 final TransferAmountDetailTableModel modelOfSourceTable;
 
                 // show Popup only on Rows where Datefield is not filled
-                modelOfSourceTable = (TransferAmountDetailTableModel) TransferAmountDetailTable.getModel();
+                modelOfSourceTable = (TransferAmountDetailTableModel) transferAmountDetailTable.getModel();
 
-                if (modelOfSourceTable.isDateFilled(TransferAmountDetailTable.getSelectedRow())) {
+                if (modelOfSourceTable.isDateFilled(transferAmountDetailTable.getSelectedRow())) {
                     JOptionPane.showMessageDialog(null,
                             "Nachfolger kann nicht angelegt werden.\nEnddatum schon enthalten",
                             "Nachfolger nicht möglich", JOptionPane.WARNING_MESSAGE);
                 } else {
-                    TransferAmountDetailTableCreateSuccessorDialog dialog = new TransferAmountDetailTableCreateSuccessorDialog(
-                            modelOfSourceTable, TransferAmountDetailTable.getSelectedRow(),
-                            TransferAmountWindow, cn);
-                    dialog.createSuccessor(modelOfSourceTable, TransferAmountDetailTable.getSelectedRow());
+                    TransferAmountSuccessorDialog dialog = new TransferAmountSuccessorDialog(
+                            modelOfSourceTable, transferAmountDetailTable.getSelectedRow(),
+                            transferAmountWindow, cn);
+                    dialog.createSuccessor(modelOfSourceTable, (int) transferAmountDetailTable.getValueAt(transferAmountDetailTable.getSelectedRow(), -1));
                 }
             }
         });
@@ -55,14 +55,14 @@ public class TransferAmountDetailTableMouseListener extends MouseAdapter {
         if (me.getButton() == MouseEvent.BUTTON3) {
             // wenn die Zeile auf der der Rechtsklick ausgefürht wurde nicht selectiert war
             // wird diese Zeile erst selectiert
-            JTable TransferAmountDetailTable = (JTable) me.getSource();
-            int RowAtMousePoint = TransferAmountDetailTable.rowAtPoint(me.getPoint());
+            JTable transferAmountDetailTable = (JTable) me.getSource();
+            int RowAtMousePoint = transferAmountDetailTable.rowAtPoint(me.getPoint());
 
             // vorherige Selection aufheben
-            TransferAmountDetailTable.clearSelection();
+            transferAmountDetailTable.clearSelection();
 
             // diese eine Zeile selectieren
-            TransferAmountDetailTable.addRowSelectionInterval(RowAtMousePoint, RowAtMousePoint);
+            transferAmountDetailTable.addRowSelectionInterval(RowAtMousePoint, RowAtMousePoint);
 
             // popup zum Löschen der selectierten Zeile anzeigen
             popmen.show(me.getComponent(), me.getX(), me.getY());
