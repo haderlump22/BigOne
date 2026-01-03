@@ -44,7 +44,9 @@ public class TransferAmountDetailTableMouseListener extends MouseAdapter {
                     TransferAmountSuccessorDialog dialog = new TransferAmountSuccessorDialog(
                             modelOfSourceTable, transferAmountDetailTable.getSelectedRow(),
                             transferAmountWindow, cn);
-                    dialog.createSuccessor(modelOfSourceTable, (int) transferAmountDetailTable.getValueAt(transferAmountDetailTable.getSelectedRow(), -1));
+                    if (dialog.areValuesCorrect()) {
+                        dialog.createSuccessor(modelOfSourceTable, (int) transferAmountDetailTable.getValueAt(transferAmountDetailTable.getSelectedRow(), -1));
+                    }
                 }
             }
         });

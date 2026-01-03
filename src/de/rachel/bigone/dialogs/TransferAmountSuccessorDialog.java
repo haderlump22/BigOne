@@ -10,7 +10,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.sql.Connection;
-import java.sql.ResultSet;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.time.LocalDate;
@@ -66,13 +65,13 @@ public class TransferAmountSuccessorDialog {
         cmbPersonOfTransferAmountModel = new DefaultComboBoxModel<String>();
         this.fillcmbPersonOfTransferAmount(transfertAmountDetailTableModel, selectedRow);
         cmbPersonOfTransferAmount = new JComboBox<String>(cmbPersonOfTransferAmountModel);
-        // cmbPersonOfTransferAmount.setFont(new Font("Arial", Font.PLAIN,16));
+        cmbPersonOfTransferAmount.setFont(new Font("Arial", Font.PLAIN,12));
         cmbPersonOfTransferAmount.setPreferredSize(new Dimension(150, 25));
 
 
 
         transferAmountValue = new JFormattedTextField(new NumberFormatter(new DecimalFormat("#,##0.00")));
-        // transferAmountValue.setFont(new Font("Arial", Font.PLAIN,16));
+        transferAmountValue.setFont(new Font("Arial", Font.PLAIN,12));
         transferAmountValue.setText("0,00");
         transferAmountValue.setHorizontalAlignment(JFormattedTextField.RIGHT);
         transferAmountValue.setPreferredSize(new Dimension(150, 25));
@@ -92,11 +91,13 @@ public class TransferAmountSuccessorDialog {
 
         try {
             validFrom = new JFormattedTextField(new MaskFormatter("01-##-20##"));
+            validFrom.setFont(new Font("Arial", Font.PLAIN,12));
+            validFrom.setPreferredSize(new Dimension(150, 25));
+            validFrom.setHorizontalAlignment(JTextField.RIGHT);
         } catch (ParseException e) {
             e.printStackTrace();
         }
-        validFrom.setPreferredSize(new Dimension(150, 25));
-        validFrom.setHorizontalAlignment(JTextField.RIGHT);
+
 
         btnSaveNewTransferAmount = new JButton("Speichern");
         btnSaveNewTransferAmount.setPreferredSize(new Dimension(100, 30));
@@ -181,14 +182,14 @@ public class TransferAmountSuccessorDialog {
     }
 
     private void fillcmbPersonOfTransferAmount(TransferAmountDetailTableModel transfertAmountDetailTableModel, int selectedRow) {
-        int PersonIdFromSelectedRow;
-        String ComboboxElementToAdd;
+        int personIdFromSelectedRow;
+        String comboboxElementToAdd;
 
 		//put all persons to the cmbmodel cmbModelPerson
 		DBTools getter = new DBTools(cn);
 
         // if given the selectedRow, then get the Person that stands behind them
-        PersonIdFromSelectedRow = this.getPersonIdFromSelectedRow(transfertAmountDetailTableModel, selectedRow);
+        personIdFromSelectedRow = this.getPersonIdFromSelectedRow(transfertAmountDetailTableModel, selectedRow);
 
 		//set First Value (select invitation) to cmbPerson
 		cmbPersonOfTransferAmountModel.addElement("---bitte wählen---");
@@ -203,12 +204,12 @@ public class TransferAmountSuccessorDialog {
             getter.beforeFirst();
 
             while (getter.next()) {
-                ComboboxElementToAdd = getter.getString("name") + " " + getter.getString("vorname") + "(" + getter.getString("personen_id") + ")";
-                cmbPersonOfTransferAmountModel.addElement(ComboboxElementToAdd);
+                comboboxElementToAdd = getter.getString("name") + " " + getter.getString("vorname") + " (" + getter.getString("personen_id") + ")";
+                cmbPersonOfTransferAmountModel.addElement(comboboxElementToAdd);
 
                 // decide if this Element has to be preselected
-                if (PersonIdFromSelectedRow == getter.getInt("personen_id")) {
-                    cmbPersonOfTransferAmountModel.setSelectedItem(ComboboxElementToAdd);
+                if (personIdFromSelectedRow == getter.getInt("personen_id")) {
+                    cmbPersonOfTransferAmountModel.setSelectedItem(comboboxElementToAdd);
                 }
             }
         } catch (Exception e) {
@@ -270,7 +271,7 @@ public class TransferAmountSuccessorDialog {
         }
     }
 
-    private boolean areValuesCorrect() {
+    public boolean areValuesCorrect() {
         boolean allIsCorrect = false;
 
         if (Pattern.matches("\\d{2}.\\d{2}.[1-9]{1}\\d{3}", validFrom.getText())) {
