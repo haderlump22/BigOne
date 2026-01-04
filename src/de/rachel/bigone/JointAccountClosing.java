@@ -188,7 +188,7 @@ public class JointAccountClosing {
 		balanceAllocationOverviewPanel.setBorder(new TitledBorder("Aufteilung Saldo"));
 
 		closeBillingMonth = new JButton("Monat abschließen!");
-		// inital the Button has to disabled because only if a month is alrady open
+		// inital the Button has to disabled because only if a month is alredy open
 		// we can close them
 		closeBillingMonth.setEnabled(false);
     }
@@ -264,8 +264,20 @@ public class JointAccountClosing {
 				// delete the Last commata from the String that represent the Import Values for the Import Statement
 				jointAccountClosingBalanceAllocationOverviewDetailTableImportData.delete(jointAccountClosingBalanceAllocationOverviewDetailTableImportData.length() - 1, jointAccountClosingBalanceAllocationOverviewDetailTableImportData.length());
 
+				DBTools dbTool = new DBTools(cn);
 
-
+				if (!dbTool.insert("""
+						INSERT INTO ha_abschlusssummen_aufteilung
+						("parteiId", "abschlussAnteilInProzent", "abschlussAnteilBetrag", "abschlussMonat", "abschlussZeitpunkt", "abschlussBemerkung")
+						VALUES
+						%s
+						""".formatted(jointAccountClosingBalanceAllocationOverviewDetailTableImportData))) {
+					System.err.println("Einfügen der Abschlusssummenaufteilung fehlgeschlagen!");
+				} else {
+					// disable the possibility to close the actual Billing Month again
+					billingMonthAlreadyClosed = true;
+					closeBillingMonth.setEnabled(false);
+				}
 			}
 		});
 	}
