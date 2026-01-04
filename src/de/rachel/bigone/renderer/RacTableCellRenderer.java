@@ -66,6 +66,12 @@ public class RacTableCellRenderer implements TableCellRenderer {
 				label.setText("%.02f".formatted((Double) value));
 		}
 
+		if (column == 3) {
+			if (((String) value).length() > 500) {
+				label.setBackground(Color.lightGray);
+			}
+		}
+
 		if (column == 5) {
 			label.setHorizontalAlignment(JLabel.CENTER);
 			if (value != null) {// nur wenn es ein liquidatum gibt umwandeln
