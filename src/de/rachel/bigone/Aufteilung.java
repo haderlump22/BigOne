@@ -205,13 +205,23 @@ public class Aufteilung {
 	private void fill_cmbEreigniss() {
 		DBTools getter = new DBTools(cn);
 
-		getter.select("SELECT ereigniss_id, ereigniss_krzbez FROM kontenereignisse WHERE gueltig = 'TRUE' ORDER BY 2;",
+		getter.select("""
+				SELECT ereigniss_id, ereigniss_krzbez
+				FROM kontenereignisse
+				WHERE gueltig = 'TRUE'
+				ORDER BY 2
+				""",
 				2);
 
-		Object[][] cmbValues = getter.getData();
+		try {
+			getter.beforeFirst();
 
-		for (Object[] cmbValueParts : cmbValues) {
-			cmbEreigniss.addItem(cmbValueParts[1] + " (" + cmbValueParts[0] + ")");
+			while (getter.next()) {
+				cmbEreigniss.addItem(getter.getString("ereigniss_krzbez") + " (" + getter.getInt("ereigniss_id") + ")");
+			}
+		} catch (Exception e) {
+			System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "
+					+ e.getStackTrace()[0].getLineNumber() + "): " + e.toString());
 		}
 	}
 

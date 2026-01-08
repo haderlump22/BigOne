@@ -159,14 +159,16 @@ public class KeyDateAccountBalance {
 				WHERE gilt_bis IS NULL ORDER BY 1
 				""",2);
 
-	    Object[][] cmbBankValues = getter.getData();
+		try {
+			getter.beforeFirst();
 
-	    for(Object[] cmbBankValue : cmbBankValues)
-	    	cmbBLZ.addItem(cmbBankValue[0] + " (" + cmbBankValue[1] + ")");
-
-	      //Standartauswahl auf die Postbank legen
-
-
+			while (getter.next()) {
+				cmbBLZ.addItem(getter.getString("blz")+ " (" + getter.getString("kreditinstitut") + ")");
+			}
+		} catch (Exception e) {
+			System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "
+					+ e.getStackTrace()[0].getLineNumber() + "): " + e.toString());
+		}
 	}
 
 	private void fill_cmbKto(String strAuswahl) {
@@ -181,10 +183,16 @@ public class KeyDateAccountBalance {
 	      		AND konten.personen_id = personen.personen_id
 				""".formatted(strAuswahl),2);
 
-	    Object[][] cmbKtoValues = getter.getData();
+		try {
+			getter.beforeFirst();
 
-	    for(Object[] cmbKtoValue : cmbKtoValues)
-	        cmbKto.addItem(cmbKtoValue[0]+ " (" +cmbKtoValue[1]+ ")");
+			while (getter.next()) {
+				cmbKto.addItem(getter.getString("kontonummer") + " (" + getter.getString("vorname") + ")");
+			}
+		} catch (Exception e) {
+			System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "
+					+ e.getStackTrace()[0].getLineNumber() + "): " + e.toString());
+		}
 	}
 
 	private void calculate_ab(int QueryiKontoId, String QuerysDate) {

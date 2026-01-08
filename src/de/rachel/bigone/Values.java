@@ -201,15 +201,21 @@ public class Values {
 		DBTools getter = new DBTools(cn);
 
 		getter.select("""
-				SELECT konten.iban, konten.bemerkung
+				SELECT konten.iban
 				FROM konten
 				WHERE konten.gueltig = TRUE
 				""", 1);
 
-		Object[][] cmbKtoValues = getter.getData();
+		try {
+			getter.beforeFirst();
 
-		for (Object[] cmbKtoValue : cmbKtoValues)
-			cmbKto.addItem(BigOneTools.getIbanFormatted(cmbKtoValue[0].toString()));
+			while (getter.next()) {
+				cmbKto.addItem(BigOneTools.getIbanFormatted(getter.getString("iban")));
+			}
+		} catch (Exception e) {
+			System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "
+					+ e.getStackTrace()[0].getLineNumber() + "): " + e.toString());
+		}
 	}
 
 	private String getAccountDescription(String IBAN) {

@@ -12,6 +12,7 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.util.Enumeration;
@@ -533,13 +534,18 @@ public class AccountClosing {
 				AND t.liqui_monat = '%s'
 				""".formatted(personen_id, sAbrMonat),2);
 
-		if(getter.getRowCount() > 0) {
-			Object[][] lstModelIncomePerPersonValues = getter.getData();
+		try {
+			getter.beforeFirst();
 
-			for(Object[] lstModelIncomePerPersonValue : lstModelIncomePerPersonValues)
-				lstModelIncomePerPerson.addElement(lstModelIncomePerPersonValue[0].toString() + " (" + lstModelIncomePerPersonValue[1].toString() + ")");
+			while (getter.next()) {
+				lstModelIncomePerPerson.addElement(getter.getString("betrag") + " (" + getter.getInt("transaktions_id") + ")");
+			}
+		} catch (Exception e) {
+			System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "
+					+ e.getStackTrace()[0].getLineNumber() + "): " + e.toString());
 		}
 	}
+
 	protected void putPersonNameToCmbPerson() {
 		//put all persons to the cmbmodel cmbModelPerson
 		DBTools getter = new DBTools(cn);
@@ -553,11 +559,15 @@ public class AccountClosing {
 				WHERE gueltig = TRUE
 				""",3);
 
-		if(getter.getRowCount() > 0) {
-			Object[][] cmbModelPersonValues = getter.getData();
+		try {
+			getter.beforeFirst();
 
-		    for(Object[] cmbModelPersonValue : cmbModelPersonValues)
-		    	cmbModelPerson.addElement(cmbModelPersonValue[1] + " " + cmbModelPersonValue[0] + " (" + cmbModelPersonValue[2] + ")");
+			while (getter.next()) {
+				cmbModelPerson.addElement(getter.getString("vorname") + " " + getter.getString("name") + " (" + getter.getString("personen_id") + ")");
+			}
+		} catch (Exception e) {
+			System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "
+					+ e.getStackTrace()[0].getLineNumber() + "): " + e.toString());
 		}
 	}
 
@@ -576,12 +586,16 @@ public class AccountClosing {
 				AND t.liqui_monat = '%s'
 				""".formatted(KontenID, sAbrMonat), 2);
 
-		if (getter.getRowCount() > 0) {
-			Object[][] lstModelAllIncomeValues = getter.getData();
+		try {
+			getter.beforeFirst();
 
-			for (Object[] lstModelAllIncomeValue : lstModelAllIncomeValues)
+			while (getter.next()) {
 				lstModelAllIncome.addElement(
-						lstModelAllIncomeValue[0].toString() + " (" + lstModelAllIncomeValue[1].toString() + ")");
+						getter.getDouble("betrag") + " (" + getter.getInt("transaktions_id") + ")");
+			}
+		} catch (Exception e) {
+			System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "
+					+ e.getStackTrace()[0].getLineNumber() + "): " + e.toString());
 		}
 
 		// now find Balance from incomes that partially split
@@ -602,54 +616,58 @@ public class AccountClosing {
 
 		// get the the sum of partially assigned ammount for each received
 		// transaktion_id
-		if (ids_getter.getRowCount() > 0) {
+		try {
 			DBTools sum_getter = new DBTools(cn);
+			DBTools diff_getter = new DBTools(cn);
+			ids_getter.beforeFirst();
 
-			Object[][] transaktion_ids = ids_getter.getData();
-			for (Object[] ids : transaktion_ids) {
+			while (ids_getter.next()) {
 				sum_getter.select("""
-						SELECT SUM(income_per_person.betrag)
+						SELECT SUM(income_per_person.betrag) betragssumme
 						FROM income_per_person
 						WHERE split = TRUE
 						AND transaktions_id = %s
-						""".formatted(ids[0].toString()), 1);
+						""".formatted(ids_getter.getInt("transaktions_id")), 1);
 
 				// now get the difference of the just received sum and the total amount in
 				// transtaktionen
-				DBTools diff_getter = new DBTools(cn);
-
 				diff_getter.select("""
 						SELECT (t.betrag - %s) diff, t.transaktions_id
 						FROM transaktionen t
 						WHERE t.transaktions_id = %s
-						""".formatted(sum_getter.getValueAt(0, 0).toString(), ids[0].toString()), 1);
+						""".formatted(sum_getter.getDouble("betragssumme"), ids_getter.getInt("transaktions_id")), 1);
 
 				// if the diff is greater than zero than add the value and the transaktion_id to
 				// the lstModelAllIncome
-				if (Double.valueOf(diff_getter.getValueAt(0, 0).toString()).doubleValue() > 0)
-					lstModelAllIncome.addElement(Double.valueOf(diff_getter.getValueAt(0, 0).toString()).doubleValue()
-							+ " (" + ids[0].toString() + ")");
+				if (diff_getter.getDouble("diff") > 0)
+					lstModelAllIncome.addElement(diff_getter.getDouble("diff")
+							+ " (" + ids_getter.getInt("transaktions_id") + ")");
 			}
+		} catch (Exception e) {
+			System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "
+					+ e.getStackTrace()[0].getLineNumber() + "): " + e.toString());
 		}
 	}
 
 	private double getPersonAcountSumPerLiqui(Integer personen_id, String liquiDatum) {
 		DBTools getter = new DBTools(cn);
+		double returnValue = 0;
 
 		getter.select("""
-				SELECT SUM(ipp.betrag)
+				SELECT SUM(ipp.betrag) betragssumme
 				FROM income_per_person ipp, transaktionen t
 				WHERE personen_id = %d
 				AND t.transaktions_id = ipp.transaktions_id
 				AND t.liqui_monat = '%s'
 				""".formatted(personen_id, liquiDatum), 1);
 
-		// check whether income was set per person at all, if not, give back zero
-		if (getter.getValueAt(0, 0) == null) {
-			return 0;
-		} else {
-			return Double.valueOf(getter.getValueAt(0, 0).toString()).doubleValue();
+		try {
+			returnValue = getter.getDouble("betragssumme");
+		} catch (SQLException e) {
+			e.printStackTrace();
 		}
+
+		return returnValue;
 	}
 	private void calculate_profit(String sAbrMonat) {
 		double dblMtlJahrKosten, dblEin, dblAus, dblSummeFixkosten, dblNutzBetrag;

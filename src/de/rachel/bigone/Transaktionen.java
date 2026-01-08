@@ -536,15 +536,20 @@ public class Transaktionen {
 		DBTools getter = new DBTools(cn);
 
 		getter.select("""
-				SELECT iban, bemerkung
+				SELECT iban
 				FROM konten
 				WHERE gueltig = TRUE
 				""", 2);
+		try {
+			getter.beforeFirst();
 
-		Object[][] cmbKtoValues = getter.getData();
-
-		for (Object[] cmbKtoValue : cmbKtoValues)
-			iban.addItem(BigOneTools.getIbanFormatted(cmbKtoValue[0].toString()));
+			while (getter.next()) {
+				iban.addItem(BigOneTools.getIbanFormatted(getter.getString("iban")));
+			}
+		} catch (Exception e) {
+			System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "
+					+ e.getStackTrace()[0].getLineNumber() + "): " + e.toString());
+		}
     }
 
 	private boolean isJointAccount(String iban) {
