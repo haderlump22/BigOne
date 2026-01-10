@@ -217,8 +217,9 @@ public class Values {
     }
 
     private String getAccountDescription(String IBAN) {
-        //get the transaction wording to the transaktions_id
+        // get the transaction wording to the transaktions_id
         DBTools getter = new DBTools(cn);
+        String returnValue = "not found";
 
         getter.select("""
                 SELECT bemerkung
@@ -226,11 +227,20 @@ public class Values {
                 WHERE iban = '%s'
                 """.formatted(IBAN), 1);
 
-        if(getter.getRowCount() > 0) {
-            return getter.getValueAt(0, 0).toString();
-        }else {
-            return "not found";
+        try {
+            getter.beforeFirst();
+
+            while (getter.next()) {
+                returnValue = getter.getString("bemerkung");
+            }
+        } catch (Exception e) {
+            System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "
+                    + e.getStackTrace()[0].getLineNumber() + "): " + e.toString());
+            System.err.println("etwas hat beim summieren der SollSumme nicht geklappt!");
+            System.exit(1);
         }
+
+        return returnValue;
     }
 
     private void reloadData() {
