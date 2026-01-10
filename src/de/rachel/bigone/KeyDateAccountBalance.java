@@ -199,12 +199,14 @@ public class KeyDateAccountBalance {
     }
 
     private void calculate_ab(int QueryiKontoId, String QuerysDate) {
-        Number fHaben, fSoll, fErg;
+        double haben = 0;
+        double soll = 0;
+        double ergebnis = 0;
 
         DBTools getter = new DBTools(cn);
 
         getter.select("""
-                SELECT SUM(betrag)
+                SELECT SUM(betrag) betragssumme
                 FROM transaktionen
                 WHERE konten_id = %d
                 AND soll_haben = 'h'
@@ -212,10 +214,18 @@ public class KeyDateAccountBalance {
                 AND ereigniss_id NOT IN (94)
                 """.formatted(QueryiKontoId, QuerysDate), 1);
 
-        fHaben = (Number) getter.getValueAt(0, 0);
+        try {
+            haben = getter.getDouble("betragssumme");
+        } catch (Exception e) {
+            System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "
+                    + e.getStackTrace()[0].getLineNumber() + "): " + e.toString());
+            System.err.println("etwas hat beim Summieren der Habenbeträge nicht geklappt!");
+            System.exit(1);
+        }
+
 
         getter.select("""
-                SELECT SUM(betrag)
+                SELECT SUM(betrag) betragssumme
                 FROM transaktionen
                 WHERE konten_id = %d
                 AND soll_haben = 's'
@@ -223,11 +233,18 @@ public class KeyDateAccountBalance {
                 AND ereigniss_id NOT IN (94)
                 """.formatted(QueryiKontoId, QuerysDate), 1);
 
-        fSoll = (Number) getter.getValueAt(0, 0);
+        try {
+            soll = getter.getDouble("betragssumme");
+        } catch (Exception e) {
+            System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "
+                    + e.getStackTrace()[0].getLineNumber() + "): " + e.toString());
+            System.err.println("etwas hat beim Summieren der Sollbeträge nicht geklappt!");
+            System.exit(1);
+        }
 
         // ergebniss berechnen und in das Textfeld einfuegen
-        fErg = fHaben.floatValue() - fSoll.floatValue();
-        txtAmount.setText(fErg.toString().replace('.', ','));
+        ergebnis = (haben - soll);
+        txtAmount.setText("%.02f".formatted(ergebnis));
 
         // dieses focusieren und wegnehmen des Focus ist dafuer das
         // das oben festgelgte Format des Textfeldes wirksam wird
@@ -236,7 +253,7 @@ public class KeyDateAccountBalance {
     }
 
     private int konto_id_finden(String strBLZ, String strKto) {
-        Integer intKontoId;
+        Integer kontoId = -1;
 
         DBTools getter = new DBTools(cn);
 
@@ -248,13 +265,20 @@ public class KeyDateAccountBalance {
                 AND ko.kreditinstitut_id = kr.kreditinstitut_id
                 AND ko.kontonummer = '%s'
                 """.formatted(strBLZ, strKto), 1);
+        try {
+            getter.beforeFirst();
 
-        if (getter.getRowCount() == 1)
-            intKontoId = (Integer) getter.getValueAt(0, 0);
-        else
-            intKontoId = -1;
+            while (getter.next()) {
+                kontoId = getter.getInt("konten_id");
+            }
+        } catch (Exception e) {
+            System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "
+                    + e.getStackTrace()[0].getLineNumber() + "): " + e.toString());
+            System.err.println("etwas hat beim finden der KontoId nicht geklappt!");
+            System.exit(1);
+        }
 
-        return intKontoId;
+        return kontoId;
     }
 
     private String getBLZ(String strBLZroh) {
@@ -270,7 +294,7 @@ public class KeyDateAccountBalance {
          * ermittelt aktuell gueltigen Freistellungsauftrag des mittels der
          * KontenID uebergebenen Kontenkennung
          */
-        Number dblWert = 0;
+        double dblWert = 0;
 
         DBTools getter = new DBTools(cn);
 
@@ -292,11 +316,19 @@ public class KeyDateAccountBalance {
                     )
                 """.formatted(QueryiKontoId, QueryiKontoId), 1);
 
-        if (getter.getRowCount() == 1)
-            dblWert = (Number) getter.getValueAt(0, 0);
-        else
-            dblWert = 0;
+        try {
+            getter.beforeFirst();
 
-        return dblWert.doubleValue();
+            while (getter.next()) {
+                dblWert = getter.getDouble("betrag");
+            }
+        } catch (Exception e) {
+            System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "
+                    + e.getStackTrace()[0].getLineNumber() + "): " + e.toString());
+            System.err.println("etwas hat beim ermitteln des Freistellungsauftragsbetrags nicht geklappt!");
+            System.exit(1);
+        }
+
+        return dblWert;
     }
 }
