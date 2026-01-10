@@ -71,7 +71,6 @@ public class ExpenditureDetailTableModel extends AbstractTableModel {
          * get all known expenditure over the time, actual and old one
          */
         DBTools getter = new DBTools(cn);
-        ResultSet rs;
 
         getter.select("""
                 SELECT "ausgabenId", bezeichnung, betrag, aufteilungsart, gilt_bis, bemerkung
@@ -79,13 +78,12 @@ public class ExpenditureDetailTableModel extends AbstractTableModel {
                 ORDER BY gilt_bis DESC, betrag DESC
                 """,2);
 
-        rs = getter.getResultSet();
         try {
-            rs.beforeFirst();
+            getter.beforeFirst();
 
-            while (rs.next()) {
-                tableData.add(new ExpenditureDetailTableRow(rs.getInt("ausgabenId"), rs.getString("bezeichnung"), rs.getDouble("betrag"),
-                        rs.getString("aufteilungsart"), rs.getDate("gilt_bis"), rs.getString("bemerkung")));
+            while (getter.next()) {
+                tableData.add(new ExpenditureDetailTableRow(getter.getInt("ausgabenId"), getter.getString("bezeichnung"), getter.getDouble("betrag"),
+                        getter.getString("aufteilungsart"), getter.getDate("gilt_bis"), getter.getString("bemerkung")));
             }
         } catch (Exception e) {
             System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "+e.getStackTrace()[0].getLineNumber()+"): " + e.toString());

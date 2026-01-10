@@ -64,7 +64,6 @@ public class SalaryBasesIncomeDetailTableModel extends AbstractTableModel{
 		 * get the current Income of everey Party
 		 */
 		DBTools getter = new DBTools(cn);
-		ResultSet rs;
 
 		getter.select("""
 				SELECT p.name || ', ' || SUBSTRING(p.vorname, 1, 1) || '.' AS party, betrag, gilt_bis, art
@@ -74,12 +73,11 @@ public class SalaryBasesIncomeDetailTableModel extends AbstractTableModel{
 				""",
 				4);
 
-		rs = getter.getResultSet();
 		try {
-			rs.beforeFirst();
+			getter.beforeFirst();
 
-			while (rs.next()) {
-				TableData.add(new SalaryBasesIncomeDetailTableRow(rs.getString("party"), rs.getDouble("betrag"), rs.getDate("gilt_bis"), rs.getString("art")));
+			while (getter.next()) {
+				TableData.add(new SalaryBasesIncomeDetailTableRow(getter.getString("party"), getter.getDouble("betrag"), getter.getDate("gilt_bis"), getter.getString("art")));
 			}
 		} catch (Exception e) {
 			System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "+e.getStackTrace()[0].getLineNumber()+"): " + e.toString());

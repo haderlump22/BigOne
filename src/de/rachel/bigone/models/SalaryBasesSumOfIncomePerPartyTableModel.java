@@ -67,7 +67,6 @@ public class SalaryBasesSumOfIncomePerPartyTableModel extends AbstractTableModel
 		 * get the current Income of everey Party
 		 */
 		DBTools getter = new DBTools(cn);
-		ResultSet rs;
 
 		getter.select("""
 				SELECT p.personen_id, p.name || ', ' || SUBSTRING(p.vorname, 1, 1) || '.' as party, sum(gg.betrag) as betrag
@@ -79,13 +78,12 @@ public class SalaryBasesSumOfIncomePerPartyTableModel extends AbstractTableModel
 				""",
 				3);
 
-		rs = getter.getResultSet();
 		try {
-			rs.beforeFirst();
+			getter.beforeFirst();
 
-			while (rs.next()) {
+			while (getter.next()) {
 				TableData
-						.add(new SalaryBasesSumOfIncomePerPartyTableRow(rs.getInt("personen_id"), rs.getString("party"), rs.getDouble("betrag")));
+						.add(new SalaryBasesSumOfIncomePerPartyTableRow(getter.getInt("personen_id"), getter.getString("party"), getter.getDouble("betrag")));
 			}
 		} catch (Exception e) {
 			System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "+e.getStackTrace()[0].getLineNumber()+"): " + e.toString());

@@ -59,7 +59,6 @@ public class ExpenditureSumPerPartyTableModel extends AbstractTableModel {
          * get the current Income of everey Party
          */
         DBTools getter = new DBTools(cn);
-        ResultSet rs;
 
         getter.select("""
                 SELECT p.name || ', ' || SUBSTRING(p.vorname, 1, 1) || '.' AS party, SUM(haaa.betrag) betrag
@@ -70,12 +69,11 @@ public class ExpenditureSumPerPartyTableModel extends AbstractTableModel {
                 GROUP BY party
                 """, 2);
 
-        rs = getter.getResultSet();
         try {
-            rs.beforeFirst();
+            getter.beforeFirst();
 
-            while (rs.next()) {
-                tableData.add(new ExpenditureSumPerPartyTableRow(rs.getString("party"), rs.getDouble("betrag")));
+            while (getter.next()) {
+                tableData.add(new ExpenditureSumPerPartyTableRow(getter.getString("party"), getter.getDouble("betrag")));
             }
         } catch (Exception e) {
             System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "+e.getStackTrace()[0].getLineNumber()+"): " + e.toString());
