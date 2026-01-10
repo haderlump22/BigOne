@@ -185,19 +185,19 @@ public class TransferAmountSuccessorDialog {
         int personIdFromSelectedRow;
         String comboboxElementToAdd;
 
-		//put all persons to the cmbmodel cmbModelPerson
-		DBTools getter = new DBTools(cn);
+        //put all persons to the cmbmodel cmbModelPerson
+        DBTools getter = new DBTools(cn);
 
         // if given the selectedRow, then get the Person that stands behind them
         personIdFromSelectedRow = this.getPersonIdFromSelectedRow(transfertAmountDetailTableModel, selectedRow);
 
-		//set First Value (select invitation) to cmbPerson
-		cmbPersonOfTransferAmountModel.addElement("---bitte wählen---");
+        //set First Value (select invitation) to cmbPerson
+        cmbPersonOfTransferAmountModel.addElement("---bitte wählen---");
 
-		getter.select("""
+        getter.select("""
                 SELECT name, vorname, personen_id
                 FROM personen
-				WHERE gueltig = TRUE
+                WHERE gueltig = TRUE
                 """,3);
 
         try {
@@ -215,7 +215,7 @@ public class TransferAmountSuccessorDialog {
         } catch (Exception e) {
             System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "+e.getStackTrace()[0].getLineNumber()+"): " + e.toString());
         }
-	}
+    }
 
     public void createSuccessor(TransferAmountDetailTableModel transfertAmountDetailTableModel, int oldTransferAmountId) {
         DBTools sqlTool = new DBTools(cn);
