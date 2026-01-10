@@ -165,9 +165,7 @@ public class Values {
 
 	private void zeichne_tabelle() {
 
-		table = new JTable(new ValuesTableModel(txtValue.getText().replace(".", "").replace(',', '.'),
-				BigOneTools.datum_wandeln(txtLiquiDate.getText(), 0),
-				cmbKto.getSelectedItem().toString().replace(" ", ""), cn, cmbKto.getToolTipText()));
+		table = new JTable(new ValuesTableModel(cn));
 		ValuesTableCellRenderer ren = new ValuesTableCellRenderer();
 		table.setDefaultRenderer(Object.class, ren);
 		table.getColumnModel().getColumn(2).setCellEditor(new DateTableCellEditor());
