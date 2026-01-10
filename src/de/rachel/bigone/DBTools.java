@@ -112,23 +112,26 @@ public final class DBTools {
 		return rs.getDouble(columnLabel);
 	}
 
+	public boolean getBoolean (String columnLabel) throws SQLException {
+		return rs.getBoolean(columnLabel);
+	}
+
 	public Boolean next () throws SQLException {
 		return rs.next();
 	}
 
-	public Object[][] getData() {
-		return daten;
-	}
-
 	public int getRowCount() {
-		return RowCount;
-	}
+		Integer row = 0;
 
-	public Object getValueAt(int row, int col) {
-		return daten[row][col];
-	}
+		try {
+			if (rs.last()) {
+				row = rs.getRow();
+				rs.beforeFirst();
+			}
+		} catch (Exception e) {
+			System.err.println("Fehler beim ermitteln der Zeilenanzahl im Resultset");
+		}
 
-	public ResultSet getResultSet() {
-		return rs;
+		return row;
 	}
 }
