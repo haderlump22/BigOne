@@ -134,10 +134,11 @@ public class Rac {
                         // neuen datensatz einfuegen und den erfolg pruefen
                         // falls Datensatz nicht eingefuegt werden konnt
                         // mit dem naechsten weiter machen und nicht abbrechen
-                        if (pusher.insert(sql) == false) {
+                        if (!pusher.insert(sql)) {
                             System.out.println("Fehler beim Import des Datensatzes Nr: " + i);
                             continue;
                         }
+
                         // die Ereignissid pruefen und eventuelle Tankdaten oder
                         // aufteilungen in die DB Tabellen eintragen
                         switch (BigOneTools.extractEreigId(model.getValueAt(i, 6).toString())) {
@@ -152,29 +153,37 @@ public class Rac {
                                 // da gerade der letzte Datensatz in die tabelle transaktionen eingetragen
                                 // wurde kann man auch schon dessen ID feststellen
                                 getter.select("""
-                                        SELECT MAX(transaktions_id)
+                                        SELECT MAX(transaktions_id) maxtransaktionsid
                                         FROM transaktionen
                                         """, 1);
 
-                                String[][] datenAuft = aufteil.getDaten();
+                                try {
+                                    String[][] datenAuft = aufteil.getDaten();
 
-                                for (String[] arg : datenAuft) {
-                                    String sql_auft = """
-                                            INSERT INTO aufteilung
-                                            (transaktions_id, betrag, ereigniss_id, liqui)
-                                            VALUES
-                                            (%s, %s, %s, %s)
-                                            """.formatted(getter.getValueAt(0, 0), arg[1], arg[0], arg[2]);
+                                    for (String[] arg : datenAuft) {
+                                        String sql_auft = """
+                                                INSERT INTO aufteilung
+                                                (transaktions_id, betrag, ereigniss_id, liqui)
+                                                VALUES
+                                                (%s, %s, %s, %s)
+                                                """.formatted(getter.getInt("maxtransaktionsid"), arg[1], arg[0], arg[2]);
 
-                                    // System.out.println(sql_auft);
+                                        // System.out.println(sql_auft);
 
-                                    if (pusher.insert(sql_auft) == false) {
-                                        System.out.println(
-                                                "Fehler beim Einfuegen der Detaildatensaetze zu Datensatz Nr: " + i);
-                                        insert_details_success = false;
-                                        continue; // mit dem naechsten Datensatz beim einfuegen weitermachen
+                                        if (!pusher.insert(sql_auft)) {
+                                            System.out.println(
+                                                    "Fehler beim Einfuegen der Detaildatensaetze zu Datensatz Nr: " + i);
+                                            insert_details_success = false;
+                                            continue; // mit dem naechsten Datensatz beim einfuegen weitermachen
+                                        }
                                     }
+                                } catch (Exception e) {
+                                    System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "
+                                            + e.getStackTrace()[0].getLineNumber() + "): " + e.toString());
+                                    System.err.println("etwas hat beim ermitteln der max TransaktonsId nicht geklappt!");
+                                    System.exit(1);
                                 }
+
                                 break;
                             case TANKEN:
                                 if (!model.isJointAccount()) {
@@ -184,24 +193,32 @@ public class Rac {
                                     // dialog geschlossen wird
                                     TankDialog td = new TankDialog(RACWindow, model.getValueAt(i, 2).toString(), cn);
                                     getter.select("""
-                                            SELECT MAX(transaktions_id)
+                                            SELECT MAX(transaktions_id) maxtransaktionsid
                                             FROM transaktionen
                                             """, 1);
 
-                                    String sql_tanken = """
-                                            INSERT INTO tankdaten
-                                            (transaktions_id, liter, km, kraftstoff_id, datum_bar, betrag_bar, kfz_id)
-                                            VALUES
-                                            (%s, %s, %s, %s, NULL, NULL, %s)
-                                            """.formatted(getter.getValueAt(0, 0), td.get_liter(), td.get_km(),
-                                            td.get_treibstoff_id(), td.get_kfz_id());
+                                    try {
+                                        String sql_tanken = """
+                                                INSERT INTO tankdaten
+                                                (transaktions_id, liter, km, kraftstoff_id, datum_bar, betrag_bar, kfz_id)
+                                                VALUES
+                                                (%s, %s, %s, %s, NULL, NULL, %s)
+                                                """.formatted(getter.getInt("maxtransaktionsid"), td.get_liter(), td.get_km(),
+                                                td.get_treibstoff_id(), td.get_kfz_id());
 
-                                    // neuen datensatz einfuegen und den erfolg pruefen
-                                    if (pusher.insert(sql_tanken) == false) {
-                                        System.out.println("Fehler beim Einfuegen der Tankdaten zu Datensatz Nr: " + i);
-                                        insert_tankdaten_success = false;
-                                        break;
+                                        // neuen datensatz einfuegen und den erfolg pruefen
+                                        if (!pusher.insert(sql_tanken)) {
+                                            System.out.println("Fehler beim Einfuegen der Tankdaten zu Datensatz Nr: " + i);
+                                            insert_tankdaten_success = false;
+                                            break;
+                                        }
+                                    } catch (Exception e) {
+                                        System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "
+                                                + e.getStackTrace()[0].getLineNumber() + "): " + e.toString());
+                                        System.err.println("etwas hat beim ermitteln der max TransaktonsId nicht geklappt!");
+                                        System.exit(1);
                                     }
+
                                 }
                         }
 
