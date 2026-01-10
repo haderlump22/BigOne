@@ -376,7 +376,7 @@ public class Transaktionen {
 		setSomeDefaultValues();
 	}
 
-	private void tankdaten_einfuegen(int transaktions_id, DataToSave BankStatementLine) {
+	private void tankdaten_einfuegen(Integer transaktions_id, DataToSave BankStatementLine) {
 		// fuegt die Tanktaden in die entsprechende Tabelle anhand der im
 		// BankStatementLine hinterlegten werte ein
 		DBTools pusher = new DBTools(cn);
@@ -391,23 +391,29 @@ public class Transaktionen {
 
 	}
 
-	private int get_max_transaktions_id() {
+	private Integer get_max_transaktions_id() {
 		// findet die aktuell groesste Transaktonsid
-		Number max_transaktons_id;
+		Integer max_transaktons_id = -1;
 
 		DBTools getter = new DBTools(cn);
 
 		getter.select("""
-				SELECT MAX(transaktions_id)
+				SELECT MAX(transaktions_id) maxtransaktionsid
 				FROM transaktionen
 				""", 1);
 
-		if (getter.getRowCount() == 1)
-			max_transaktons_id = (Number) getter.getValueAt(0, 0);
-		else
-			max_transaktons_id = -1;
+        try {
+            getter.first();
 
-		return max_transaktons_id.intValue();
+            max_transaktons_id = getter.getInt("maxtransaktionsid");
+        } catch (Exception e) {
+            System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "
+                    + e.getStackTrace()[0].getLineNumber() + "): " + e.toString());
+            System.err.println("etwas hat beim ermitteln der max TransaktonsId nicht geklappt!");
+            System.exit(1);
+        }
+
+		return max_transaktons_id;
 	}
 
 	private void setSomeDefaultValues() {
@@ -472,9 +478,8 @@ public class Transaktionen {
 			return "h";
 	}
 
-	private int getKontoId(String Iban) {
-		Number KontoId;
-
+	private Integer getKontoId(String Iban) {
+		Integer kontoId = -1;
 		DBTools getter = new DBTools(cn);
 
 		getter.select("""
@@ -484,12 +489,23 @@ public class Transaktionen {
 				AND iban = '%s'
 				""".formatted(Iban), 1);
 
-		if (getter.getRowCount() == 1)
-			KontoId = (Number) getter.getValueAt(0, 0);
-		else
-			KontoId = -1;
+        try {
+            // we can have one or no one Record
+            // so is never mind that we run through
+            // the resultset
+            getter.beforeFirst();
 
-		return KontoId.intValue();
+            while (getter.next()) {
+                kontoId = getter.getInt("konten_id");
+            }
+        } catch (Exception e) {
+            System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "
+                    + e.getStackTrace()[0].getLineNumber() + "): " + e.toString());
+            System.err.println("etwas hat beim ermitteln der KontenId nicht geklappt!");
+            System.exit(1);
+        }
+
+		return kontoId;
 	}
 
 	private void transaktionsdaten_einfuegen(DataToSave BankStatementLine) {
@@ -514,7 +530,7 @@ public class Transaktionen {
 		pusher.insert(sql);
 	}
 
-	private void aufteilungsdaten_einfuegen(int transaktions_id, String[][] datenAuft) {
+	private void aufteilungsdaten_einfuegen(Integer transaktions_id, String[][] datenAuft) {
 		// fuegt die aufteilungsdaten in die entsprechende Tabelle anhand der im
 		// array hinterlegten werte ein
 		DBTools pusher = new DBTools(cn);
