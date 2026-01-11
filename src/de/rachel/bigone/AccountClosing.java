@@ -576,7 +576,7 @@ public class AccountClosing {
                 WHERE personen_id = %d
                 AND income_per_person.transaktions_id = t.transaktions_id
                 AND t.liqui_monat = '%s'
-                """.formatted(personen_id, sAbrMonat), 2);
+                """.formatted(personen_id, sAbrMonat));
 
         try {
             getter.beforeFirst();
@@ -602,7 +602,7 @@ public class AccountClosing {
                 SELECT name, vorname, personen_id
                 FROM personen
                 WHERE gueltig = TRUE
-                """, 3);
+                """);
 
         try {
             getter.beforeFirst();
@@ -630,7 +630,7 @@ public class AccountClosing {
                 AND t.soll_haben = 'h'
                 AND t.konten_id = %s
                 AND t.liqui_monat = '%s'
-                """.formatted(KontenID, sAbrMonat), 2);
+                """.formatted(KontenID, sAbrMonat));
 
         try {
             getter.beforeFirst();
@@ -658,7 +658,7 @@ public class AccountClosing {
                 AND income_per_person.transaktions_id = t.transaktions_id
                 AND income_per_person.split = TRUE
                 GROUP BY income_per_person.transaktions_id
-                """.formatted(sAbrMonat, KontenID), 1);
+                """.formatted(sAbrMonat, KontenID));
 
         // get the the sum of partially assigned ammount for each received
         // transaktion_id
@@ -673,7 +673,7 @@ public class AccountClosing {
                         FROM income_per_person
                         WHERE split = TRUE
                         AND transaktions_id = %s
-                        """.formatted(ids_getter.getInt("transaktions_id")), 1);
+                        """.formatted(ids_getter.getInt("transaktions_id")));
 
                 // now get the difference of the just received sum and the total amount in
                 // transtaktionen
@@ -681,7 +681,7 @@ public class AccountClosing {
                         SELECT (t.betrag - %s) diff, t.transaktions_id
                         FROM transaktionen t
                         WHERE t.transaktions_id = %s
-                        """.formatted(sum_getter.getDouble("betragssumme"), ids_getter.getInt("transaktions_id")), 1);
+                        """.formatted(sum_getter.getDouble("betragssumme"), ids_getter.getInt("transaktions_id")));
 
                 // if the diff is greater than zero than add the value and the transaktion_id to
                 // the lstModelAllIncome
@@ -705,7 +705,7 @@ public class AccountClosing {
                 WHERE personen_id = %d
                 AND t.transaktions_id = ipp.transaktions_id
                 AND t.liqui_monat = '%s'
-                """.formatted(personen_id, liquiDatum), 1);
+                """.formatted(personen_id, liquiDatum));
 
         try {
             returnValue = getter.getDouble("betragssumme");
@@ -778,7 +778,7 @@ public class AccountClosing {
                     AND konten_id = %s
                     AND soll_haben = 's'
                     AND liqui_monat = '%s'
-                    """.formatted(monthlyFixedCost.eventId(), KontenID, sAbrMonat), 1);
+                    """.formatted(monthlyFixedCost.eventId(), KontenID, sAbrMonat));
 
             // eventuelle Habenbuchungen für Monatsfixkostenermitteln
             // z.B. ein Rücküberweisung von zuviel überwiesenen HaushaltHolle Beträgen
@@ -789,7 +789,7 @@ public class AccountClosing {
                     AND konten_id = %s
                     AND soll_haben = 'h'
                     AND liqui_monat = '%s'
-                    """.formatted(monthlyFixedCost.eventId(), KontenID, sAbrMonat), 1);
+                    """.formatted(monthlyFixedCost.eventId(), KontenID, sAbrMonat));
 
             // sowohl in getterHaben als auch in getter Soll kommt nur ein Datensatz raus
             // der kann aber NULL enthalten
@@ -870,7 +870,7 @@ public class AccountClosing {
                 AND transaktionen.konten_id = %s
                 AND transaktionen.transaktions_id = aufteilung.transaktions_id
                 AND aufteilung.liqui = TRUE
-                """.formatted(sh, sAbrMonat, KontenID), 1);
+                """.formatted(sh, sAbrMonat, KontenID));
 
         try {
             getter.first();
@@ -904,7 +904,7 @@ public class AccountClosing {
                     AND gilt_bis >= '%s'
                     )
                 AND ereigniss_id NOT IN (47,52)
-                """.formatted(KontenID, sAbrMonat, sAbrMonat, sAbrMonat), 1);
+                """.formatted(KontenID, sAbrMonat, sAbrMonat, sAbrMonat));
 
         // wenn keine Ausgaben (erkennbar an null im Objekt) dann 0.00 zurueckgeben
         try {
@@ -932,7 +932,7 @@ public class AccountClosing {
                 AND konten_id = %s
                 AND liqui_monat = '%s'
                 AND ereigniss_id NOT IN (52);
-                """.formatted(KontenID, sAbrMonat), 1);
+                """.formatted(KontenID, sAbrMonat));
 
         // wenn keine Einnahmen (erkennbar an null im Objekt) dann 0.00 zurueckgeben
         try {
@@ -958,7 +958,7 @@ public class AccountClosing {
                 FROM mtlausgaben
                 WHERE gilt_ab <= '%s'
                 AND gilt_bis >= '%s'
-                """.formatted(BigOneTools.datum_wandeln(txtAbrMonat.getText(), 0), sAbrMonat), 3);
+                """.formatted(BigOneTools.datum_wandeln(txtAbrMonat.getText(), 0), sAbrMonat));
 
         // datenarray der liquiDBC instanz in das lokale datenarray kopieren
         try {
@@ -985,7 +985,7 @@ public class AccountClosing {
                 FROM jahresausgaben
                 WHERE gilt_ab <= '%s'
                 AND gilt_bis >= '%s'
-                """.formatted(BigOneTools.datum_wandeln(txtAbrMonat.getText(), 0), sAbrMonat), 1);
+                """.formatted(BigOneTools.datum_wandeln(txtAbrMonat.getText(), 0), sAbrMonat));
 
         try {
             getter.first();
@@ -1015,7 +1015,7 @@ public class AccountClosing {
                 FROM transaktionen t, kontenereignisse ke
                 WHERE t.transaktions_id = %s
                 AND ke.ereigniss_id = t.ereigniss_id
-                """.formatted(transaktions_id), 2);
+                """.formatted(transaktions_id));
 
         try {
             getter.first();
@@ -1039,7 +1039,7 @@ public class AccountClosing {
                 SELECT COUNT(*) anzahl
                 FROM income_per_person ipp
                 WHERE ipp.transaktions_id = %s
-                """.formatted(transaktions_id), 1);
+                """.formatted(transaktions_id));
 
         try {
             getter.first();
@@ -1067,7 +1067,7 @@ public class AccountClosing {
                 SELECT abgeschlossen
                 FROM abschluss
                 WHERE liqui_monat = '%s'
-                """.formatted(txtAbrMonat), 1);
+                """.formatted(txtAbrMonat));
 
         try {
             getter.beforeFirst();

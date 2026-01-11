@@ -155,10 +155,12 @@ public class Rac {
                                 getter.select("""
                                         SELECT MAX(transaktions_id) maxtransaktionsid
                                         FROM transaktionen
-                                        """, 1);
+                                        """);
 
                                 try {
                                     String[][] datenAuft = aufteil.getDaten();
+
+                                    getter.first();
 
                                     for (String[] arg : datenAuft) {
                                         String sql_auft = """
@@ -195,9 +197,11 @@ public class Rac {
                                     getter.select("""
                                             SELECT MAX(transaktions_id) maxtransaktionsid
                                             FROM transaktionen
-                                            """, 1);
+                                            """);
 
                                     try {
+                                        getter.first();
+
                                         String sql_tanken = """
                                                 INSERT INTO tankdaten
                                                 (transaktions_id, liter, km, kraftstoff_id, datum_bar, betrag_bar, kfz_id)

@@ -68,7 +68,7 @@ public class ExpenditureDistributionTableModel extends AbstractTableModel {
                 WHERE haaa."parteiId" = p.personen_id
                 AND haaa."ausgabenId" = %s
                 ORDER BY party
-                """.formatted(ExpenditureId.toString()), 2);
+                """.formatted(ExpenditureId.toString()));
 
         try {
             getter.beforeFirst();

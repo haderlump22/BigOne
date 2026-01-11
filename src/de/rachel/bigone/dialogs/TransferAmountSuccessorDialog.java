@@ -198,7 +198,7 @@ public class TransferAmountSuccessorDialog {
                 SELECT name, vorname, personen_id
                 FROM personen
                 WHERE gueltig = TRUE
-                """,3);
+                """);
 
         try {
             getter.beforeFirst();
@@ -259,7 +259,7 @@ public class TransferAmountSuccessorDialog {
                 SELECT partei_id
                 FROM ha_ueberweisungsbetraege
                 WHERE ueberweisungsbetrag_id = %d
-                """.formatted(transfertAmountDetailTableModel.getValueAt(selectedRow, -1)), 1);
+                """.formatted(transfertAmountDetailTableModel.getValueAt(selectedRow, -1)));
 
         try {
             getter.first();

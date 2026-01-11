@@ -210,8 +210,7 @@ public class Aufteilung {
 				FROM kontenereignisse
 				WHERE gueltig = 'TRUE'
 				ORDER BY 2
-				""",
-				2);
+				""");
 
 		try {
 			getter.beforeFirst();

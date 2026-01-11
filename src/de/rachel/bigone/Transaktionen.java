@@ -399,7 +399,7 @@ public class Transaktionen {
         getter.select("""
                 SELECT MAX(transaktions_id) maxtransaktionsid
                 FROM transaktionen
-                """, 1);
+                """);
 
         try {
             getter.first();
@@ -442,14 +442,14 @@ public class Transaktionen {
                     SELECT ha_kategorie_id id, kategoriebezeichnung bez
                     FROM ha_kategorie
                     ORDER BY 2
-                    """, 2);
+                    """);
         } else {
             getter.select("""
                     SELECT ereigniss_id id, ereigniss_krzbez bez
                     FROM kontenereignisse
                     WHERE gueltig = TRUE
                     ORDER BY 2
-                    """, 2);
+                    """);
         }
 
         try {
@@ -486,7 +486,7 @@ public class Transaktionen {
                 FROM konten
                 WHERE gueltig = TRUE
                 AND iban = '%s'
-                """.formatted(Iban), 1);
+                """.formatted(Iban));
 
         try {
             // we can have one or no one Record
@@ -554,7 +554,7 @@ public class Transaktionen {
                 SELECT iban
                 FROM konten
                 WHERE gueltig = TRUE
-                """, 2);
+                """);
         try {
             getter.beforeFirst();
 
@@ -575,7 +575,7 @@ public class Transaktionen {
                 SELECT bemerkung
                 FROM konten
                 WHERE iban = '%s'
-                """.formatted(iban), 1);
+                """.formatted(iban));
 
         try {
             getter.first();

@@ -161,7 +161,7 @@ public class KeyDateAccountBalance {
                 SELECT blz, kreditinstitut
                 FROM kreditinstitut
                 WHERE gilt_bis IS NULL ORDER BY 1
-                """, 2);
+                """);
 
         try {
             getter.beforeFirst();
@@ -184,7 +184,7 @@ public class KeyDateAccountBalance {
                            WHERE konten.kreditinstitut_id = kreditinstitut.kreditinstitut_id
                            AND kreditinstitut.blz = '%s'
                            AND konten.personen_id = personen.personen_id
-                """.formatted(strAuswahl), 2);
+                """.formatted(strAuswahl));
 
         try {
             getter.beforeFirst();
@@ -212,7 +212,7 @@ public class KeyDateAccountBalance {
                 AND soll_haben = 'h'
                 AND datum <= '%s'
                 AND ereigniss_id NOT IN (94)
-                """.formatted(QueryiKontoId, QuerysDate), 1);
+                """.formatted(QueryiKontoId, QuerysDate));
 
         try {
             haben = getter.getDouble("betragssumme");
@@ -231,7 +231,7 @@ public class KeyDateAccountBalance {
                 AND soll_haben = 's'
                 AND datum <= '%s'
                 AND ereigniss_id NOT IN (94)
-                """.formatted(QueryiKontoId, QuerysDate), 1);
+                """.formatted(QueryiKontoId, QuerysDate));
 
         try {
             soll = getter.getDouble("betragssumme");
@@ -264,7 +264,7 @@ public class KeyDateAccountBalance {
                 AND kr.gilt_bis IS NULL
                 AND ko.kreditinstitut_id = kr.kreditinstitut_id
                 AND ko.kontonummer = '%s'
-                """.formatted(strBLZ, strKto), 1);
+                """.formatted(strBLZ, strKto));
         try {
             getter.beforeFirst();
 
@@ -314,7 +314,7 @@ public class KeyDateAccountBalance {
                     FROM konten k
                     WHERE k.konten_id = %d
                     )
-                """.formatted(QueryiKontoId, QueryiKontoId), 1);
+                """.formatted(QueryiKontoId, QueryiKontoId));
 
         try {
             getter.beforeFirst();

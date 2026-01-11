@@ -202,7 +202,7 @@ public class Values {
                 SELECT konten.iban
                 FROM konten
                 WHERE konten.gueltig = TRUE
-                """, 1);
+                """);
 
         try {
             getter.beforeFirst();
@@ -225,7 +225,7 @@ public class Values {
                 SELECT bemerkung
                 FROM konten
                 WHERE iban = '%s'
-                """.formatted(IBAN), 1);
+                """.formatted(IBAN));
 
         try {
             getter.beforeFirst();

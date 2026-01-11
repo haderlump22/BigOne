@@ -70,8 +70,7 @@ public class SalaryBasesIncomeDetailTableModel extends AbstractTableModel{
 				FROM personen p, ha_gehaltsgrundlagen gg
 				WHERE p.personen_id = gg.partei_id
 				ORDER BY gilt_bis DESC, party, betrag DESC;
-				""",
-				4);
+				""");
 
 		try {
 			getter.beforeFirst();

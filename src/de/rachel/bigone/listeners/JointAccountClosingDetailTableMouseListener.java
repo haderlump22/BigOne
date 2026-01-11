@@ -196,7 +196,7 @@ public class JointAccountClosingDetailTableMouseListener extends MouseAdapter {
                 SELECT COUNT(*)
                 FROM ha_abschlusssummen
                 WHERE "abschlussDetailId" = %d
-                """.formatted(detailId), 1);
+                """.formatted(detailId));
 
         try {
             query.first();

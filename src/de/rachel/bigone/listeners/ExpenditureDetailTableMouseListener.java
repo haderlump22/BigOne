@@ -89,8 +89,7 @@ public class ExpenditureDetailTableMouseListener extends MouseAdapter {
 				WHERE gilt_bis IS NULL
 				GROUP BY partei_id
 				ORDER BY partei_id;
-				""",
-				2);
+				""");
 
 		try {
             // first get the Sum of all Incomes
@@ -122,8 +121,7 @@ public class ExpenditureDetailTableMouseListener extends MouseAdapter {
                 FROM ha_ausgaben
                 WHERE aufteilungsart = 'V'
                 AND gilt_bis IS NULL;
-				""",
-				2);
+				""");
 
 		try {
             expentitureBackup.beforeFirst();

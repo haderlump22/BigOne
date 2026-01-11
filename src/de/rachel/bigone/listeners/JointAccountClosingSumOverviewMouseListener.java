@@ -61,7 +61,7 @@ public class JointAccountClosingSumOverviewMouseListener extends MouseAdapter {
                 WHERE ha_abschlusssummen."summenArt" = '%s'
                 AND ha_abschlussdetails."abschlussDetailId" = ha_abschlusssummen."abschlussDetailId"
                 AND ha_abschlussdetails."abschlussMonat" = '%s'
-                """.formatted(sumType, billingMonth), 1);
+                """.formatted(sumType, billingMonth));
         try {
             getter.first();
             if (getter.getArray("idsOfSumSources") != null) {

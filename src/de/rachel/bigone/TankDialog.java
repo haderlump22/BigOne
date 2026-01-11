@@ -123,7 +123,7 @@ public class TankDialog extends JFrame {
 				SELECT typ, kfz_id
 				FROM kfz
 				ORDER BY 1
-				""", 2);
+				""");
 
 		try {
 			getter.beforeFirst();
@@ -144,7 +144,7 @@ public class TankDialog extends JFrame {
 				SELECT bez, kraftstoff_id
 				FROM kraftstoffe
 				ORDER BY 1
-				""", 2);
+				""");
 
 		try {
 			getter.beforeFirst();

@@ -76,7 +76,7 @@ public class ExpenditureDetailTableModel extends AbstractTableModel {
                 SELECT "ausgabenId", bezeichnung, betrag, aufteilungsart, gilt_bis, bemerkung
                 FROM ha_ausgaben
                 ORDER BY gilt_bis DESC, betrag DESC
-                """,2);
+                """);
 
         try {
             getter.beforeFirst();

@@ -67,7 +67,7 @@ public class ExpenditureSumPerPartyTableModel extends AbstractTableModel {
                 AND haaa."ausgabenId" = haa."ausgabenId"
                 AND haaa."parteiId" = p.personen_id
                 GROUP BY party
-                """, 2);
+                """);
 
         try {
             getter.beforeFirst();

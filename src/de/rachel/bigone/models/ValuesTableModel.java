@@ -149,7 +149,7 @@ public class ValuesTableModel extends AbstractTableModel {
 				strValue,
 				(accountType.equals("Haushaltskonto") ? "ha_kategorie_id" : "ereigniss_id"),
 				(strLiquiDate.isEmpty() ? "" : " and t.liqui_monat = '" + strLiquiDate + "'"),
-				sIban), 7);
+				sIban));
 
 		try {
 			getter.beforeFirst();

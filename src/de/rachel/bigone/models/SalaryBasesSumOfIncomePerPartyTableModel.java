@@ -75,8 +75,7 @@ public class SalaryBasesSumOfIncomePerPartyTableModel extends AbstractTableModel
 				AND p.personen_id = gg.partei_id
 				GROUP BY p.personen_id, p.name, p.vorname
 				ORDER BY p.name;
-				""",
-				3);
+				""");
 
 		try {
 			getter.beforeFirst();
