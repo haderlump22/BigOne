@@ -675,6 +675,7 @@ public class AccountClosing {
                         AND transaktions_id = %s
                         """.formatted(ids_getter.getInt("transaktions_id")));
 
+                sum_getter.first();
                 // now get the difference of the just received sum and the total amount in
                 // transtaktionen
                 diff_getter.select("""
@@ -683,6 +684,7 @@ public class AccountClosing {
                         WHERE t.transaktions_id = %s
                         """.formatted(sum_getter.getDouble("betragssumme"), ids_getter.getInt("transaktions_id")));
 
+                diff_getter.first();
                 // if the diff is greater than zero than add the value and the transaktion_id to
                 // the lstModelAllIncome
                 if (diff_getter.getDouble("diff") > 0)
@@ -708,6 +710,7 @@ public class AccountClosing {
                 """.formatted(personen_id, liquiDatum));
 
         try {
+            getter.first();
             returnValue = getter.getDouble("betragssumme");
         } catch (SQLException e) {
             e.printStackTrace();

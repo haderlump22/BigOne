@@ -108,6 +108,8 @@ public class RacTableCellRenderer implements TableCellRenderer {
                 dateValue.plusDays(dateValue.lengthOfMonth() - dateValue.getDayOfMonth()).toString()));
 
         try {
+            marker.first();
+
             if (marker.getInt("count") > 0) {
                 checkValue = true;
             } else {

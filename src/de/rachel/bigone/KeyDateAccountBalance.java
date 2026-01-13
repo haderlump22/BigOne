@@ -215,6 +215,7 @@ public class KeyDateAccountBalance {
                 """.formatted(QueryiKontoId, QuerysDate));
 
         try {
+            getter.first();
             haben = getter.getDouble("betragssumme");
         } catch (Exception e) {
             System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "
@@ -234,6 +235,7 @@ public class KeyDateAccountBalance {
                 """.formatted(QueryiKontoId, QuerysDate));
 
         try {
+            getter.first();
             soll = getter.getDouble("betragssumme");
         } catch (Exception e) {
             System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "
