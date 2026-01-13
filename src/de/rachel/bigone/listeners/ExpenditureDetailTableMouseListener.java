@@ -25,6 +25,7 @@ import javax.swing.JOptionPane;
 
 public class ExpenditureDetailTableMouseListener extends MouseAdapter {
     private JPopupMenu popmen;
+    private JMenuItem updateRatioShare, createSuccessor;
     private Expenditure expenditureUi;
     private Connection cn;
     // private SalaryBasesIncomeDetailTableModel model;
@@ -34,7 +35,7 @@ public class ExpenditureDetailTableMouseListener extends MouseAdapter {
         this.expenditureUi = expenditureUi;
         popmen = new JPopupMenu();
 
-        JMenuItem createSuccessor = new JMenuItem("nachfolger anlegen");
+        createSuccessor = new JMenuItem("nachfolger anlegen");
         createSuccessor.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ae) {
                 // JOptionPane.showMessageDialog(null, "ALERT MESSAGE", "TITLE", JOptionPane.WARNING_MESSAGE); ratio share
@@ -42,7 +43,7 @@ public class ExpenditureDetailTableMouseListener extends MouseAdapter {
             }
         });
 
-        JMenuItem updateRatioShare = new JMenuItem("Verhältnisanteile aktualisieren");
+        updateRatioShare = new JMenuItem("Verhältnisanteile aktualisieren");
         updateRatioShare.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ae) {
                 createNewRatioShareData();
@@ -57,16 +58,26 @@ public class ExpenditureDetailTableMouseListener extends MouseAdapter {
         if (me.getButton() == MouseEvent.BUTTON3) {
             // wenn die Zeile auf der der Rechtsklick ausgefürht wurde nicht selectiert war
             // wird diese Zeile erst selectiert
-            JTable ExpenditureDetailTable = (JTable) me.getSource();
-            int RowAtMousePoint = ExpenditureDetailTable.rowAtPoint(me.getPoint());
+            JTable expenditureDetailTable = (JTable) me.getSource();
+            int RowAtMousePoint = expenditureDetailTable.rowAtPoint(me.getPoint());
 
-            // vorherige Selection aufheben
-            ExpenditureDetailTable.clearSelection();
+            expenditureDetailTable.clearSelection();
 
-            // diese eine Zeile selectieren
-            ExpenditureDetailTable.addRowSelectionInterval(RowAtMousePoint, RowAtMousePoint);
+            expenditureDetailTable.addRowSelectionInterval(RowAtMousePoint, RowAtMousePoint);
 
-            // popup zum Löschen der selectierten Zeile anzeigen
+            // if the rightclick came from a expenditure where the divide Type ist not "V"
+            // then disable the menu entry "updateRatioShare"
+            String divideType = (String) expenditureDetailTable.getValueAt(expenditureDetailTable.getSelectedRow(), 2);
+            LocalDate validUntil = (LocalDate) expenditureDetailTable.getValueAt(expenditureDetailTable.getSelectedRow(), 3);
+
+            if (divideType.equals("V")) {
+                updateRatioShare.setEnabled(true);
+                createSuccessor.setEnabled(false);
+            } else {
+                updateRatioShare.setEnabled(false);
+                createSuccessor.setEnabled(true);
+            }
+
             popmen.show(me.getComponent(), me.getX(), me.getY());
         }
     }
