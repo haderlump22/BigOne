@@ -3,11 +3,14 @@ package de.rachel.bigone.dialogs;
 import java.sql.Connection;
 import java.text.DecimalFormat;
 import java.text.ParseException;
+import java.util.regex.Pattern;
 
+import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.WindowConstants;
 import javax.swing.text.MaskFormatter;
@@ -18,14 +21,17 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
-public class ExpenditureSuccessorDialog extends JFrame{
+public class ExpenditureSuccessorDialog {
     private Connection cn = null;
     private JFrame dialogOwner;
-    private JDialog dialog;
+    private JDialog expenditureSuccessorDialog;
     private JLabel expenditureDescriptionLabel, expenditureAmountLabel, expenditureDivideTypeLabel, expenditureValidFromLabel;
     private JFormattedTextField expenditureAmount, expenditureValidFrom;
     private JTextField expenditureDescription, expenditureDivideType;
+    private JButton saveExpenditureSuccessorButton;
     private Font fontTxtFields;
 
 
@@ -35,22 +41,22 @@ public class ExpenditureSuccessorDialog extends JFrame{
 
         createComponents();
 
-		// createListeners();
+		createListeners();
 
 		// registerExistingListeners();
 
         createLayout();
 
-        dialog.setVisible(true);
+        expenditureSuccessorDialog.setVisible(true);
 
     }
 
     private void createComponents() {
-        dialog = new JDialog(dialogOwner, "Nachfolger erstellen", true);
-		dialog.setSize(300, 250);
-		dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+        expenditureSuccessorDialog = new JDialog(dialogOwner, "Nachfolger erstellen", true);
+		expenditureSuccessorDialog.setSize(280, 300);
+		expenditureSuccessorDialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
-        fontTxtFields = new Font("Arial", Font.PLAIN, 14);
+        fontTxtFields = new Font("Arial", Font.PLAIN, 12);
 
         expenditureDescriptionLabel = new JLabel("Bezeichnung");
 
@@ -61,24 +67,32 @@ public class ExpenditureSuccessorDialog extends JFrame{
         expenditureValidFromLabel = new JLabel("gilt ab");
 
         expenditureDescription = new JTextField();
-        expenditureDescription.setPreferredSize(new Dimension(70, 25));
+        expenditureDescription.setFont(fontTxtFields);
+        expenditureDescription.setPreferredSize(new Dimension(90, 25));
 
         expenditureAmount = new JFormattedTextField(new NumberFormatter(new DecimalFormat("#,##0.00")));
+        expenditureAmount.setFont(fontTxtFields);
         expenditureAmount.setHorizontalAlignment(JFormattedTextField.RIGHT);
-        expenditureAmount.setPreferredSize(new Dimension(70, 25));
+        expenditureAmount.setPreferredSize(new Dimension(90, 25));
         expenditureAmount.setText("0,00");
 
 
         expenditureDivideType = new JTextField();
-        expenditureDivideType.setPreferredSize(new Dimension(70, 25));
+        expenditureDivideType.setPreferredSize(new Dimension(90, 25));
 
         try {
             expenditureValidFrom = new JFormattedTextField(new MaskFormatter("01-##-20##"));
+            expenditureValidFrom.setFont(fontTxtFields);
+            expenditureValidFrom.setPreferredSize(new Dimension(90, 25));
+            expenditureValidFrom.setHorizontalAlignment(JTextField.RIGHT);
         } catch (ParseException e) {
             e.printStackTrace();
         }
-        expenditureValidFrom.setPreferredSize(new Dimension(70, 25));
-        expenditureValidFrom.setHorizontalAlignment(JTextField.RIGHT);
+
+        saveExpenditureSuccessorButton = new JButton("Speichern");
+        saveExpenditureSuccessorButton.setPreferredSize(new Dimension(100, 30));
+
+
     }
 
     private void registerExistingListeners() {
@@ -87,58 +101,89 @@ public class ExpenditureSuccessorDialog extends JFrame{
     }
 
     private void createListeners() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'createListeners'");
+        saveExpenditureSuccessorButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent ae) {
+                if (areValuesCorrect()) {
+                    expenditureSuccessorDialog.setVisible(false);
+                    expenditureSuccessorDialog.dispose();
+                } else {
+                    JOptionPane.showMessageDialog(null, "alle Werte müssen korrekt gefüllt sein", "Achtung", JOptionPane.INFORMATION_MESSAGE);
+                }
+            }
+        });
     }
 
     private void createLayout() {
         // ---
 		GridBagLayout expenditureLayout = new GridBagLayout();
 		GridBagConstraints expenditureLayoutConstraints = new GridBagConstraints();
-		dialog.setLayout(expenditureLayout);
+		expenditureSuccessorDialog.setLayout(expenditureLayout);
 
         expenditureLayoutConstraints.gridx = 0;
 		expenditureLayoutConstraints.gridy = 0;
 		expenditureLayoutConstraints.anchor = GridBagConstraints.WEST;
-		dialog.add(expenditureDescriptionLabel, expenditureLayoutConstraints);
+		expenditureSuccessorDialog.add(expenditureDescriptionLabel, expenditureLayoutConstraints);
 
         expenditureLayoutConstraints.gridx = 0;
 		expenditureLayoutConstraints.gridy = 1;
 		expenditureLayoutConstraints.anchor = GridBagConstraints.WEST;
-		dialog.add(expenditureAmountLabel, expenditureLayoutConstraints);
+		expenditureSuccessorDialog.add(expenditureAmountLabel, expenditureLayoutConstraints);
 
         expenditureLayoutConstraints.gridx = 0;
 		expenditureLayoutConstraints.gridy = 2;
 		expenditureLayoutConstraints.anchor = GridBagConstraints.WEST;
-		dialog.add(expenditureDivideTypeLabel, expenditureLayoutConstraints);
+		expenditureSuccessorDialog.add(expenditureDivideTypeLabel, expenditureLayoutConstraints);
 
         expenditureLayoutConstraints.gridx = 0;
 		expenditureLayoutConstraints.gridy = 3;
 		expenditureLayoutConstraints.anchor = GridBagConstraints.WEST;
-		dialog.add(expenditureValidFromLabel, expenditureLayoutConstraints);
+		expenditureSuccessorDialog.add(expenditureValidFromLabel, expenditureLayoutConstraints);
 
         expenditureLayoutConstraints.gridx = 1;
 		expenditureLayoutConstraints.gridy = 0;
         expenditureLayoutConstraints.insets = new Insets(0, 20, 5, 0);
 		expenditureLayoutConstraints.anchor = GridBagConstraints.WEST;
-		dialog.add(expenditureDescription, expenditureLayoutConstraints);
+		expenditureSuccessorDialog.add(expenditureDescription, expenditureLayoutConstraints);
 
         expenditureLayoutConstraints.gridx = 1;
 		expenditureLayoutConstraints.gridy = 1;
 		expenditureLayoutConstraints.anchor = GridBagConstraints.WEST;
-		dialog.add(expenditureAmount, expenditureLayoutConstraints);
+		expenditureSuccessorDialog.add(expenditureAmount, expenditureLayoutConstraints);
 
         expenditureLayoutConstraints.gridx = 1;
 		expenditureLayoutConstraints.gridy = 2;
 		expenditureLayoutConstraints.anchor = GridBagConstraints.WEST;
-		dialog.add(expenditureDivideType, expenditureLayoutConstraints);
+		expenditureSuccessorDialog.add(expenditureDivideType, expenditureLayoutConstraints);
 
         expenditureLayoutConstraints.gridx = 1;
 		expenditureLayoutConstraints.gridy = 3;
 		expenditureLayoutConstraints.anchor = GridBagConstraints.WEST;
-		dialog.add(expenditureValidFrom, expenditureLayoutConstraints);
+		expenditureSuccessorDialog.add(expenditureValidFrom, expenditureLayoutConstraints);
 
-        // reset insets
-		expenditureLayoutConstraints.insets = new Insets(0, 0, 0, 0);
+        expenditureLayoutConstraints.gridx = 1;
+        expenditureLayoutConstraints.gridy = 4;
+        // expenditureLayoutConstraints.fill = GridBagConstraints.HORIZONTAL;
+        expenditureLayoutConstraints.anchor = GridBagConstraints.EAST;
+        expenditureLayoutConstraints.insets = new Insets(10, 0, 0, 0);
+        expenditureSuccessorDialog.add(saveExpenditureSuccessorButton, expenditureLayoutConstraints);
+
+    }
+
+    public boolean areValuesCorrect() {
+        boolean allIsCorrect = false;
+
+        if (Pattern.matches("\\d{2}.\\d{2}.[1-9]{1}\\d{3}", expenditureValidFrom.getText())) {
+            allIsCorrect = true;
+        } else {
+            return false;
+        }
+
+        if (Double.valueOf(expenditureAmount.getText().replace(".", "").replace(',', '.')) > 0) {
+            allIsCorrect = true;
+        } else {
+            return false;
+        }
+
+        return allIsCorrect;
     }
 }

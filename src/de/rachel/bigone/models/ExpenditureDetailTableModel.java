@@ -1,7 +1,6 @@
 package de.rachel.bigone.models;
 
 import java.sql.Connection;
-import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -83,7 +82,7 @@ public class ExpenditureDetailTableModel extends AbstractTableModel {
 
             while (getter.next()) {
                 tableData.add(new ExpenditureDetailTableRow(getter.getInt("ausgabenId"), getter.getString("bezeichnung"), getter.getDouble("betrag"),
-                        getter.getString("aufteilungsart"), getter.getDate("gilt_bis"), getter.getString("bemerkung")));
+                        getter.getString("aufteilungsart"), getter.getDate("gilt_bis").toLocalDate(), getter.getString("bemerkung")));
             }
         } catch (Exception e) {
             System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "+e.getStackTrace()[0].getLineNumber()+"): " + e.toString());
