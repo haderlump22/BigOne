@@ -1,7 +1,6 @@
 package de.rachel.bigone.models;
 
 import java.sql.Connection;
-import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 

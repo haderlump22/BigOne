@@ -11,8 +11,6 @@ public final class DBTools {
 	private Statement st = null;
 	private ResultSet rs = null;
 	private Connection cn = null;
-	private int RowCount;
-	private Object[][] daten;
 
 	public DBTools(Connection LoginCN) {
 		try {

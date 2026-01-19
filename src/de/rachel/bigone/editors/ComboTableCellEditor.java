@@ -5,9 +5,6 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.ArrayList;
 
 import javax.swing.AbstractCellEditor;
 import javax.swing.JComboBox;
@@ -16,17 +13,14 @@ import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 import javax.swing.table.TableCellEditor;
 
-import de.rachel.bigone.DBTools;
 import de.rachel.bigone.models.RacTableModel;
 /**
  * Generiert eine Combobox für die Auswahl eines Kontoereignis beim Importieren von
  * Kontobewegungen.
  */
 public class ComboTableCellEditor extends AbstractCellEditor implements TableCellEditor {
-	private static final long serialVersionUID = 4917922491523056278L;
 	private JComboBox<String> component = new JComboBox<String>();
 	private boolean cellEditingStopped = false;
-	private ArrayList<String> comboBoxSource = null;
 
 	public ComboTableCellEditor() {
 
