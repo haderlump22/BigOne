@@ -9,6 +9,7 @@ import java.io.IOException;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+
 /**
  * Read some settings that the Programm need
  * from a config file in a Subdirectory in the UserHome
@@ -17,49 +18,48 @@ import org.json.simple.parser.ParseException;
  *
  */
 public class Config {
-	private String DbDrv, DbUrl, DbName, DbUserName, DbPw;
-	private boolean devMode = true;
-	private File configDir, configFile;
+    private String DbDrv, DbUrl, DbName, DbUserName, DbPw;
+    private boolean devMode = false;
+    private File configDir, configFile;
 
-	Config() {
-		if (devMode) {
-			configDir = new File(System.getProperty("user.home") + "/BigOneConfig");
-			configFile = new File(configDir.getPath()+"/BigOneConfigDev.json");
-		} else {
-			configDir = new File(System.getProperty("user.home") + "/BigOneConfig");
-			configFile = new File(configDir.getPath()+"/BigOneConfig.json");
-		}
+    Config() {
+        if (devMode) {
+            configDir = new File(System.getProperty("user.home") + "/BigOneConfig");
+            configFile = new File(configDir.getPath() + "/BigOneConfigDev.json");
+        } else {
+            configDir = new File(System.getProperty("user.home") + "/BigOneConfig");
+            configFile = new File(configDir.getPath() + "/BigOneConfig.json");
+        }
 
+        try {
+            // check if Dir exist, else create it
+            if (!checkConfigDir(configDir)) {
 
-		try {
-			// check if Dir exist, else create it
-			if (!checkConfigDir(configDir)) {
+                configDir.mkdir();
+                configFile.createNewFile();
 
-				configDir.mkdir();
-				configFile.createNewFile();
+                // if configfile generated than put some template settings
+                writeTemplateConfig(new FileWriter(configFile));
+            } else {
+                // check if File exist, else create it
+                if (!checkConfigFile(configFile)) {
 
-				// if configfile generated than put some template settings
-				writeTemplateConfig(new FileWriter(configFile));
-			} else {
-				// check if File exist, else create it
-				if (!checkConfigFile(configFile)) {
+                    configFile.createNewFile();
 
-					configFile.createNewFile();
+                    // if configfile generated than put some template settings
+                    writeTemplateConfig(new FileWriter(configFile));
+                } else {
+                    // if file exist then try to read the necessary info
+                    readSettings(new FileReader(configFile));
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
-					// if configfile generated than put some template settings
-					writeTemplateConfig(new FileWriter(configFile));
-				} else {
-					// if file exist then try to read the necessary info
-					readSettings(new FileReader(configFile));
-				}
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
-	private void readSettings(FileReader ConfigFile) {
-		JSONParser parser = new JSONParser();
+    private void readSettings(FileReader ConfigFile) {
+        JSONParser parser = new JSONParser();
 
         try {
 
@@ -79,54 +79,63 @@ public class Config {
             e.printStackTrace();
             System.out.println("keine JSON Datei, oder falsches Format");
         }
-	}
+    }
 
-	private boolean checkConfigDir(File ConfigDir) {
-		if (ConfigDir.isDirectory())
-			return true;
-		else
-			return false;
-	}
+    private boolean checkConfigDir(File ConfigDir) {
+        if (ConfigDir.isDirectory())
+            return true;
+        else
+            return false;
+    }
 
-	private boolean checkConfigFile(File ConfigFile) {
-		if (ConfigFile.isFile())
-			return true;
-		else
-			return false;
-	}
+    private boolean checkConfigFile(File ConfigFile) {
+        if (ConfigFile.isFile())
+            return true;
+        else
+            return false;
+    }
 
-	@SuppressWarnings("unchecked")
-	private void writeTemplateConfig(FileWriter ConfigFile) {
-		JSONObject obj = new JSONObject();
+    @SuppressWarnings("unchecked")
+    private void writeTemplateConfig(FileWriter ConfigFile) {
+        JSONObject obj = new JSONObject();
 
-		obj.put("DbDrv", "org.postgresql.Driver");
-		obj.put("DbUrl", "jdbc:postgresql://localhost:5432/");
-		obj.put("DbName", "bigone");
-		obj.put("DbUser", "DbUser");
-		obj.put("DbPw", "DbPw");
+        obj.put("DbDrv", "org.postgresql.Driver");
+        obj.put("DbUrl", "jdbc:postgresql://localhost:5432/");
+        obj.put("DbName", "bigone");
+        obj.put("DbUser", "DbUser");
+        obj.put("DbPw", "DbPw");
 
-		try {
+        try {
 
-			ConfigFile.write(obj.toJSONString());
-			ConfigFile.flush();
+            ConfigFile.write(obj.toJSONString());
+            ConfigFile.flush();
 
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-	public String getDbDrv() {
-		return DbDrv;
-	}
-	public String getDbUrl() {
-		return DbUrl;
-	}
-	public String getDbName() {
-		return DbName;
-	}
-	public String getDbUserName() {
-		return DbUserName;
-	}
-	public String getDbPw() {
-		return DbPw;
-	}
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public String getDbDrv() {
+        return DbDrv;
+    }
+
+    public String getDbUrl() {
+        return DbUrl;
+    }
+
+    public String getDbName() {
+        return DbName;
+    }
+
+    public String getDbUserName() {
+        return DbUserName;
+    }
+
+    public String getDbPw() {
+        return DbPw;
+    }
+
+    public boolean isDevMode() {
+        return devMode;
+    }
 }
