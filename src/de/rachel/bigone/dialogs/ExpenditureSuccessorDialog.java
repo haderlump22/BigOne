@@ -3,6 +3,8 @@ package de.rachel.bigone.dialogs;
 import java.sql.Connection;
 import java.text.DecimalFormat;
 import java.text.ParseException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.regex.Pattern;
 
 import javax.swing.JButton;
@@ -13,7 +15,6 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.WindowConstants;
@@ -43,12 +44,13 @@ public class ExpenditureSuccessorDialog {
     private Font fontTxtFields;
     private JPanel successorDivideTablePanel;
     private JScrollPane successorDivideTableScrollPane;
-    private JTable successorDivideTable;
+    private JTable successorDivideTable, expenditureDetailTable;
 
 
-    public ExpenditureSuccessorDialog(JFrame dialogOwner, Connection LoginCN) {
+    public ExpenditureSuccessorDialog(JFrame dialogOwner, Connection LoginCN, JTable expenditureDetailTable) {
         cn = LoginCN;
         this.dialogOwner = dialogOwner;
+        this.expenditureDetailTable = expenditureDetailTable;
 
         createComponents();
 
@@ -64,7 +66,7 @@ public class ExpenditureSuccessorDialog {
 
     private void createComponents() {
         expenditureSuccessorDialog = new JDialog(dialogOwner, "Nachfolger erstellen", true);
-		expenditureSuccessorDialog.setSize(280, 450);
+		expenditureSuccessorDialog.setSize(350, 550);
 		expenditureSuccessorDialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
         fontTxtFields = new Font("Arial", Font.PLAIN, 12);
@@ -80,39 +82,44 @@ public class ExpenditureSuccessorDialog {
         expenditureDescription = new JTextField();
         expenditureDescription.setFont(fontTxtFields);
         expenditureDescription.setPreferredSize(new Dimension(90, 25));
+        expenditureDescription.setText((String) expenditureDetailTable.getValueAt(expenditureDetailTable.getSelectedRow(), 0));
 
         expenditureAmount = new JFormattedTextField(new NumberFormatter(new DecimalFormat("#,##0.00")));
         expenditureAmount.setFont(fontTxtFields);
         expenditureAmount.setHorizontalAlignment(JFormattedTextField.RIGHT);
         expenditureAmount.setPreferredSize(new Dimension(90, 25));
-        expenditureAmount.setText("0,00");
+        expenditureAmount.setText("%.02f".formatted((Double)(expenditureDetailTable.getValueAt(expenditureDetailTable.getSelectedRow(), 1))));
 
 
         expenditureDivideType = new JTextField();
         expenditureDivideType.setPreferredSize(new Dimension(90, 25));
+        expenditureDivideType.setHorizontalAlignment(JFormattedTextField.CENTER);
+        expenditureDivideType.setText((String) expenditureDetailTable.getValueAt(expenditureDetailTable.getSelectedRow(), 2));
 
         try {
-            expenditureValidFrom = new JFormattedTextField(new MaskFormatter("01-##-20##"));
+            expenditureValidFrom = new JFormattedTextField(new MaskFormatter("01.##.20##"));
             expenditureValidFrom.setFont(fontTxtFields);
             expenditureValidFrom.setPreferredSize(new Dimension(90, 25));
             expenditureValidFrom.setHorizontalAlignment(JTextField.RIGHT);
+            // we set the new valid from Date to the first of the next month
+            LocalDate actualDayInNextMonth = LocalDate.now().plusMonths(1);
+            LocalDate firstOfNextMonth = actualDayInNextMonth.minusDays(actualDayInNextMonth.getDayOfMonth() - 1);
+            expenditureValidFrom.setText(firstOfNextMonth.format(DateTimeFormatter.ofPattern("dd.MM.yyyy")).toString());
         } catch (ParseException e) {
             e.printStackTrace();
         }
 
-        saveExpenditureSuccessorButton = new JButton("Speichern");
-        saveExpenditureSuccessorButton.setPreferredSize(new Dimension(100, 30));
-
-        successorDivideTable = new JTable(new ExpenditureSuccessorDistributionTableModel(cn));
+        successorDivideTable = new JTable(new ExpenditureSuccessorDistributionTableModel(cn, expenditureDetailTable));
         successorDivideTable.setDefaultRenderer(Object.class, new ExpenditureSuccessorDistributionTableCellRenderer());
 
         successorDivideTableScrollPane = new JScrollPane(successorDivideTable);
-        successorDivideTableScrollPane.setPreferredSize(new Dimension(420, 170));
+        successorDivideTableScrollPane.setPreferredSize(new Dimension(300, 90));
 
         successorDivideTablePanel = new JPanel();
 		successorDivideTablePanel.setBorder(new TitledBorder("Nachfolger Aufteilung"));
 
-
+        saveExpenditureSuccessorButton = new JButton("Speichern");
+        saveExpenditureSuccessorButton.setPreferredSize(new Dimension(100, 30));
     }
 
     private void registerExistingListeners() {
@@ -191,19 +198,19 @@ public class ExpenditureSuccessorDialog {
 		expenditureLayoutConstraints.anchor = GridBagConstraints.WEST;
 		expenditureSuccessorDialog.add(expenditureValidFrom, expenditureLayoutConstraints);
 
-        expenditureLayoutConstraints.gridx = 1;
+        expenditureLayoutConstraints.insets = new Insets(0, 0, 0, 0);
+
+        expenditureLayoutConstraints.gridx = 0;
         expenditureLayoutConstraints.gridy = 4;
+        expenditureLayoutConstraints.gridwidth = GridBagConstraints.REMAINDER;
+        expenditureSuccessorDialog.add(successorDivideTablePanel, expenditureLayoutConstraints);
+
+        expenditureLayoutConstraints.gridx = 1;
+        expenditureLayoutConstraints.gridy = 5;
         // expenditureLayoutConstraints.fill = GridBagConstraints.HORIZONTAL;
         expenditureLayoutConstraints.anchor = GridBagConstraints.EAST;
         expenditureLayoutConstraints.insets = new Insets(10, 0, 0, 0);
         expenditureSuccessorDialog.add(saveExpenditureSuccessorButton, expenditureLayoutConstraints);
-
-        expenditureLayoutConstraints.insets = new Insets(0, 0, 0, 0);
-
-        expenditureLayoutConstraints.gridx = 0;
-        expenditureLayoutConstraints.gridy = 5;
-        expenditureLayoutConstraints.gridwidth = GridBagConstraints.REMAINDER;
-        expenditureSuccessorDialog.add(successorDivideTablePanel, expenditureLayoutConstraints);
 
     }
 

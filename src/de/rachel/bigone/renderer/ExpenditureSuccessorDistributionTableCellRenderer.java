@@ -4,20 +4,12 @@ import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
 
-import de.rachel.bigone.models.JointAccountClosingDetailTableModel;
-import de.rachel.bigone.models.ExpenditureSuccessorDistributionTableModel;
-
 import java.awt.Component;
-import java.awt.Font;
-import java.awt.Color;
 
 public class ExpenditureSuccessorDistributionTableCellRenderer implements TableCellRenderer {
     public Component getTableCellRendererComponent(
             JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
         JLabel label = null;
-        ExpenditureSuccessorDistributionTableModel successorDivideTableModel;
-
-        successorDivideTableModel = (ExpenditureSuccessorDistributionTableModel) table.getModel();
 
         // only react when value is not null
         if (value != null) {
@@ -46,13 +38,7 @@ public class ExpenditureSuccessorDistributionTableCellRenderer implements TableC
             }
 
             if (column == 2) {
-                label.setHorizontalAlignment(JLabel.RIGHT);
-                label.setText("%.02f".formatted((Double) value));
-            }
-
-            if (column == 3) {
-                label.setHorizontalAlignment(JLabel.RIGHT);
-                label.setText("%.02f".formatted((Double) value));
+                label.setHorizontalAlignment(JLabel.LEFT);
             }
 
             return label;

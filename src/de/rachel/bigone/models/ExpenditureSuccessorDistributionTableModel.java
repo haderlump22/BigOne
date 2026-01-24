@@ -3,24 +3,25 @@ package de.rachel.bigone.models;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Pattern;
 
+import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
 
 import de.rachel.bigone.DBTools;
 import de.rachel.bigone.records.ExpenditureSuccessorDistributionTableRow;
-import de.rachel.bigone.records.JointAccountClosingDetailTableRow;
 
 public class ExpenditureSuccessorDistributionTableModel  extends AbstractTableModel {
 private Connection cn = null;
-	private String[] columnName = new String[] { "Ausgabenart", "Betrag IST", "Betrag PLAN", "Differenz" };
+	private String[] columnName = new String[] { "Name", "Betrag", "Bemerkung" };
 	private List<ExpenditureSuccessorDistributionTableRow> tableData = new ArrayList<>();
-	private String billingMonth = null;
 	private Integer[] detailIdsForMarkingDifferenceValue = new Integer[0];
+    private JTable expenditureDetailTable;
 
-	public ExpenditureSuccessorDistributionTableModel(Connection LoginCN) {
+	public ExpenditureSuccessorDistributionTableModel(Connection LoginCN, JTable expenditureDetailTable) {
 		cn = LoginCN;
-		lese_werte();
+        this.expenditureDetailTable = expenditureDetailTable;
+        Integer expenditureId = (Integer) expenditureDetailTable.getValueAt(expenditureDetailTable.getSelectedRow(), -1);
+		lese_werte(expenditureId);
 	}
 
 	public int getColumnCount() {
@@ -64,54 +65,41 @@ private Connection cn = null;
 		return false;
 	}
 
-	private void lese_werte() {
+	private void lese_werte(Integer expenditureId) {
 		/*
-		 * get the current Amount Sum of each type of money
+		 * Determine the current distribution of the expenditure that's to be replaced
 		 */
-		int closingDetailId = 0;
-		String expenditureEventName = "";
-		Double expenditureAmount = 0.0;
-		Double expenditureAmountPlan = 0.0;
-		Double expenditureDifference = 0.0;
 
-		if (billingMonth != null && Pattern.matches("\\d{2}.\\d{2}.[1-9]{1}\\d{3}",billingMonth)) {
-			// if TableData contain Values => flush them before fill it with new data
-			if (tableData.size() > 0) {
-				tableData.clear();
-			}
+		DBTools getter = new DBTools(cn);
 
-			DBTools getter = new DBTools(cn);
+		getter.select("""
+				SELECT haaa."parteiId", p.name || ', ' || SUBSTRING(p.vorname, 1, 1) || '.' AS party, betrag, bemerkung
+                FROM ha_ausgaben_aufteilung haaa, personen p
+                WHERE haaa."parteiId" = p.personen_id
+                AND haaa."ausgabenId" = %d
+                ORDER BY party
+				""".formatted(expenditureId));
 
-			getter.select("""
-					SELECT "abschlussDetailId", "kategorieBezeichnung", "summeBetraege", "planBetrag", differenz
-					FROM ha_abschlussdetails
-					WHERE "abschlussMonat" = '%s'
-					ORDER BY "kategorieBezeichnung"
-					""".formatted(billingMonth));
+        try {
+            getter.beforeFirst();
 
-			try {
-				getter.beforeFirst();
-
-				while (getter.next()) {
-					closingDetailId = getter.getInt("abschlussDetailId");
-					expenditureEventName = getter.getString("kategorieBezeichnung");
-					expenditureAmount = getter.getDouble("summeBetraege");
-					expenditureAmountPlan = getter.getDouble("planBetrag");
-					expenditureDifference = getter.getDouble("differenz");
-
-					tableData.add(new JointAccountClosingDetailTableRow(closingDetailId, expenditureEventName,
-							expenditureAmount, expenditureAmountPlan, expenditureDifference));
-				}
-			} catch (Exception e) {
-				System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "+e.getStackTrace()[0].getLineNumber()+"): " + e.toString());
-			}
-		}
+            while (getter.next()) {
+                tableData.add(new ExpenditureSuccessorDistributionTableRow(
+                        getter.getInt("parteiId"),
+                        getter.getString("party"),
+                        getter.getDouble("betrag"),
+                        getter.getString("bemerkung")));
+            }
+        } catch (Exception e) {
+            System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "
+                    + e.getStackTrace()[0].getLineNumber() + "): " + e.toString());
+        }
 	}
 
 	public void aktualisiere(String billingMonth) {
 		if (!billingMonth.equals("")) {
 			this.billingMonth = billingMonth;
-			lese_werte();
+			// lese_werte();
 		} else {
 			tableData = new ArrayList<>();
 		}

@@ -39,7 +39,7 @@ public class ExpenditureDetailTableMouseListener extends MouseAdapter {
         createSuccessor.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ae) {
                 // JOptionPane.showMessageDialog(null, "ALERT MESSAGE", "TITLE", JOptionPane.WARNING_MESSAGE); ratio share
-                new ExpenditureSuccessorDialog(expenditureUi.getExpenditureJFrame(), cn);
+                new ExpenditureSuccessorDialog(expenditureUi.getExpenditureJFrame(), cn, expenditureDetailTable);
             }
         });
 
