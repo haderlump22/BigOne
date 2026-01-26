@@ -2,7 +2,6 @@ package de.rachel.bigone.models;
 
 import java.sql.Connection;
 import java.util.ArrayList;
-import java.util.List;
 
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
@@ -13,13 +12,10 @@ import de.rachel.bigone.records.ExpenditureSuccessorDistributionTableRow;
 public class ExpenditureSuccessorDistributionTableModel  extends AbstractTableModel {
 private Connection cn = null;
 	private String[] columnName = new String[] { "Name", "Betrag", "Bemerkung" };
-	private List<ExpenditureSuccessorDistributionTableRow> tableData = new ArrayList<>();
-	private Integer[] detailIdsForMarkingDifferenceValue = new Integer[0];
-    private JTable expenditureDetailTable;
+	private ArrayList<ExpenditureSuccessorDistributionTableRow> expenditureSuccessorDistributionTable = new ArrayList<>();
 
 	public ExpenditureSuccessorDistributionTableModel(Connection LoginCN, JTable expenditureDetailTable) {
 		cn = LoginCN;
-        this.expenditureDetailTable = expenditureDetailTable;
         Integer expenditureId = (Integer) expenditureDetailTable.getValueAt(expenditureDetailTable.getSelectedRow(), -1);
 		lese_werte(expenditureId);
 	}
@@ -29,7 +25,7 @@ private Connection cn = null;
 	}
 
 	public int getRowCount() {
-		return tableData.size();
+		return expenditureSuccessorDistributionTable.size();
 	}
 
 	public String getColumnName(int col) {
@@ -37,21 +33,21 @@ private Connection cn = null;
 	}
 
 	public Object getValueAt(int row, int col) {
-		ExpenditureSuccessorDistributionTableRow accountClosingDetailTableModelRow = tableData.get(row);
+		ExpenditureSuccessorDistributionTableRow expenditureSuccessorDistributionTableRow = expenditureSuccessorDistributionTable.get(row);
 		Object ReturnValue = null;
 
 		switch (col) {
 			case -1:
-				ReturnValue = accountClosingDetailTableModelRow.partyId();
+				ReturnValue = expenditureSuccessorDistributionTableRow.partyId();
 				break;
 			case 0:
-				ReturnValue = accountClosingDetailTableModelRow.nameOfParty();
+				ReturnValue = expenditureSuccessorDistributionTableRow.nameOfParty();
 				break;
 			case 1:
-				ReturnValue = accountClosingDetailTableModelRow.amount();
+				ReturnValue = expenditureSuccessorDistributionTableRow.amount();
 				break;
 			case 2:
-				ReturnValue = accountClosingDetailTableModelRow.comment();
+				ReturnValue = expenditureSuccessorDistributionTableRow.comment();
 				break;
 			default:
 				break;
@@ -61,8 +57,45 @@ private Connection cn = null;
 	}
 
 	public boolean isCellEditable(int row, int col) {
-		// this has to change, because for AccountClosing we must edit this Values sometimes
-		return false;
+		if (col == 1 || col == 2) {
+            return true;
+        } else {
+            return false;
+        }
+	}
+
+    	public void setValueAt(Object value, int row, int col) {
+		ExpenditureSuccessorDistributionTableRow tmpRow;
+
+		// first del row and save temporary the content
+		tmpRow = expenditureSuccessorDistributionTable.remove(row);
+
+        if (value != null) {
+            switch (col) {
+                case 1:
+                    // and then put an new at the same position
+                    expenditureSuccessorDistributionTable.add(row,
+                            new ExpenditureSuccessorDistributionTableRow(
+                                    tmpRow.partyId(),
+                                    tmpRow.nameOfParty(),
+                                    Double.valueOf(value.toString()),
+                                    tmpRow.comment()));
+                    break;
+                case 2:
+                    // and then put an new at the same position
+                    expenditureSuccessorDistributionTable.add(row,
+                            new ExpenditureSuccessorDistributionTableRow(
+                                    tmpRow.partyId(),
+                                    tmpRow.nameOfParty(),
+                                    tmpRow.amount(),
+                                    value.toString()));
+                    break;
+                default:
+                    break;
+            }
+        }
+
+		fireTableCellUpdated(row, col);
 	}
 
 	private void lese_werte(Integer expenditureId) {
@@ -84,7 +117,7 @@ private Connection cn = null;
             getter.beforeFirst();
 
             while (getter.next()) {
-                tableData.add(new ExpenditureSuccessorDistributionTableRow(
+                expenditureSuccessorDistributionTable.add(new ExpenditureSuccessorDistributionTableRow(
                         getter.getInt("parteiId"),
                         getter.getString("party"),
                         getter.getDouble("betrag"),
@@ -96,27 +129,7 @@ private Connection cn = null;
         }
 	}
 
-	public void aktualisiere(String billingMonth) {
-		if (!billingMonth.equals("")) {
-			this.billingMonth = billingMonth;
-			// lese_werte();
-		} else {
-			tableData = new ArrayList<>();
-		}
-		fireTableDataChanged();
-	}
-
-	public void setDetailIdsForMarkingDifferenceValue(Integer[] detailIdsForMarkingDifferenceValue) {
-		this.detailIdsForMarkingDifferenceValue = detailIdsForMarkingDifferenceValue;
-		fireTableDataChanged();
-	}
-
-	public boolean rowHasToMark(int row) {
-		for (Integer detailId : detailIdsForMarkingDifferenceValue) {
-			if (((Integer)getValueAt(row, -1)).equals(detailId)) {
-				return true;
-			}
-		}
-		return false;
-	}
+    public ArrayList<ExpenditureSuccessorDistributionTableRow> getTableData() {
+        return expenditureSuccessorDistributionTable;
+    }
 }

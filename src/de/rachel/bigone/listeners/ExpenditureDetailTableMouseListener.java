@@ -38,8 +38,9 @@ public class ExpenditureDetailTableMouseListener extends MouseAdapter {
         createSuccessor = new JMenuItem("nachfolger anlegen");
         createSuccessor.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ae) {
-                // JOptionPane.showMessageDialog(null, "ALERT MESSAGE", "TITLE", JOptionPane.WARNING_MESSAGE); ratio share
-                new ExpenditureSuccessorDialog(expenditureUi.getExpenditureJFrame(), cn, expenditureDetailTable);
+                ExpenditureSuccessorDialog dialog = new ExpenditureSuccessorDialog(expenditureUi.getExpenditureJFrame(), cn, expenditureDetailTable);
+
+                System.out.println(dialog.getNewAmount());
             }
         });
 

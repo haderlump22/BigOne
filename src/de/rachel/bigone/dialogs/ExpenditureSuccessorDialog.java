@@ -5,6 +5,7 @@ import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.regex.Pattern;
 
 import javax.swing.JButton;
@@ -22,7 +23,9 @@ import javax.swing.border.TitledBorder;
 import javax.swing.text.MaskFormatter;
 import javax.swing.text.NumberFormatter;
 
+import de.rachel.bigone.editors.DecimalTableCellEditor;
 import de.rachel.bigone.models.ExpenditureSuccessorDistributionTableModel;
+import de.rachel.bigone.records.ExpenditureSuccessorDistributionTableRow;
 import de.rachel.bigone.renderer.ExpenditureSuccessorDistributionTableCellRenderer;
 
 import java.awt.Dimension;
@@ -111,6 +114,7 @@ public class ExpenditureSuccessorDialog {
 
         successorDivideTable = new JTable(new ExpenditureSuccessorDistributionTableModel(cn, expenditureDetailTable));
         successorDivideTable.setDefaultRenderer(Object.class, new ExpenditureSuccessorDistributionTableCellRenderer());
+        successorDivideTable.getColumnModel().getColumn(1).setCellEditor(new DecimalTableCellEditor());
 
         successorDivideTableScrollPane = new JScrollPane(successorDivideTable);
         successorDivideTableScrollPane.setPreferredSize(new Dimension(300, 90));
@@ -230,5 +234,25 @@ public class ExpenditureSuccessorDialog {
         }
 
         return allIsCorrect;
+    }
+
+    public String getNewDescription() {
+        return expenditureDescription.getText();
+    }
+
+    public String getNewAmount() {
+        return expenditureAmount.getText();
+    }
+
+    public String getNewDivideType() {
+        return expenditureDivideType.getText();
+    }
+
+    public LocalDate getNewValidFrom() {
+        return LocalDate.parse(expenditureValidFrom.getText(), DateTimeFormatter.ofPattern("dd.MM.yyyy"));
+    }
+
+    public ArrayList<ExpenditureSuccessorDistributionTableRow> getNewSuccessorDivideTableData() {
+        return ((ExpenditureSuccessorDistributionTableModel)(successorDivideTable.getModel())).getTableData();
     }
 }
