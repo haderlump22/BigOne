@@ -17,6 +17,7 @@ import javax.swing.JTable;
 import de.rachel.bigone.DBTools;
 import de.rachel.bigone.Expenditure;
 import de.rachel.bigone.dialogs.ExpenditureSuccessorDialog;
+import de.rachel.bigone.records.ExpenditureSuccessorDistributionTableRow;
 
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
@@ -38,9 +39,10 @@ public class ExpenditureDetailTableMouseListener extends MouseAdapter {
         createSuccessor = new JMenuItem("nachfolger anlegen");
         createSuccessor.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ae) {
-                ExpenditureSuccessorDialog dialog = new ExpenditureSuccessorDialog(expenditureUi.getExpenditureJFrame(), cn, expenditureDetailTable);
-
-                System.out.println(dialog.getNewAmount());
+                ExpenditureSuccessorDialog dialog = new ExpenditureSuccessorDialog(expenditureUi.getExpenditureJFrame(),
+                        cn, expenditureDetailTable);
+                createNewSuccessorData(dialog.getNewDescription(), dialog.getNewAmount(), dialog.getNewDivideType(),
+                        dialog.getNewValidFrom(), dialog.getNewSuccessorDivideTableData());
             }
         });
 
@@ -219,5 +221,11 @@ public class ExpenditureDetailTableMouseListener extends MouseAdapter {
 
         // refresh the detailTable
         expenditureUi.refreshContent();
+    }
+
+    private void createNewSuccessorData(String newExpenditureDescription, Double newExpenditureAmount,
+            String newExpenditureDivideType, LocalDate newExpenditureValidFrom,
+            ArrayList<ExpenditureSuccessorDistributionTableRow> newExpenditureDivideData) {
+        System.out.println(newExpenditureDivideData);
     }
 }

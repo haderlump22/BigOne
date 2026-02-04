@@ -240,8 +240,8 @@ public class ExpenditureSuccessorDialog {
         return expenditureDescription.getText();
     }
 
-    public String getNewAmount() {
-        return expenditureAmount.getText();
+    public Double getNewAmount() {
+        return Double.valueOf(expenditureAmount.getText().replace(".", "").replace(',', '.'));
     }
 
     public String getNewDivideType() {
