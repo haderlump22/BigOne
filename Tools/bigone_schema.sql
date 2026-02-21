@@ -2,10 +2,10 @@
 -- PostgreSQL database dump
 --
 
-\restrict omyVJykMEthZZHhNzrl3qE7xL7hZOytA2LFoc7bRpY7UIUkQvyO7f3NMZJP86cd
+\restrict igLBae6FvlOA6P7FZ50YfFaUjLt1xoKEmI29dXG2saIecXit0ZvXKF72uLvSE7K
 
--- Dumped from database version 16.10 (Ubuntu 16.10-0ubuntu0.24.04.1)
--- Dumped by pg_dump version 16.10 (Ubuntu 16.10-0ubuntu0.24.04.1)
+-- Dumped from database version 16.11 (Ubuntu 16.11-0ubuntu0.24.04.1)
+-- Dumped by pg_dump version 16.11 (Ubuntu 16.11-0ubuntu0.24.04.1)
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -17,6 +17,49 @@ SET check_function_bodies = false;
 SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
+
+--
+-- Name: getCurrentValueForMonth(integer, integer, date); Type: FUNCTION; Schema: public; Owner: domm
+--
+
+CREATE FUNCTION public."getCurrentValueForMonth"(ereignisid integer, kontoid integer, "forMonth" date) RETURNS numeric
+    LANGUAGE plpgsql
+    AS $$Declare  
+     SummeHaben DECIMAL;
+     SummeSoll DECIMAL;
+    Begin  
+       select sum(betrag)   
+       into SummeHaben  
+       from transaktionen  
+       where soll_haben = 'h' 
+	   and konten_id = KontoId 
+	   and ereigniss_id = EreignisId
+	   and datum >= "forMonth"
+	   and datum < ("forMonth" + INTERVAL '1 month');  
+       
+       select sum(betrag)   
+       into SummeSoll  
+       from transaktionen  
+       where soll_haben = 's' 
+	   and konten_id = KontoId 
+	   and ereigniss_id = EreignisId
+	   and datum >= "forMonth"
+	   and datum < ("forMonth" + INTERVAL '1 month');  
+       
+       -- eventuell gibt es keine Datensätze, der Summe 0 zuweisen
+       IF SummeHaben IS NULL THEN
+          SummeHaben := 0;
+       END IF;
+       
+       IF SummeSoll IS NULL THEN
+          SummeSoll := 0;
+       END IF;
+       
+       RETURN SummeHaben - SummeSoll;
+    End;$$;
+
+
+ALTER FUNCTION public."getCurrentValueForMonth"(ereignisid integer, kontoid integer, "forMonth" date) OWNER TO domm;
 
 --
 -- Name: get_actualAmount(integer, integer, date); Type: FUNCTION; Schema: public; Owner: domm
@@ -1731,5 +1774,5 @@ ALTER TABLE ONLY public.ha_gehaltsgrundlagen
 -- PostgreSQL database dump complete
 --
 
-\unrestrict omyVJykMEthZZHhNzrl3qE7xL7hZOytA2LFoc7bRpY7UIUkQvyO7f3NMZJP86cd
+\unrestrict igLBae6FvlOA6P7FZ50YfFaUjLt1xoKEmI29dXG2saIecXit0ZvXKF72uLvSE7K
 
