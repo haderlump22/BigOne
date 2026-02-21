@@ -588,6 +588,9 @@ public class JointAccountClosing {
 					System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "
 							+ e.getStackTrace()[0].getLineNumber() + "): " + e.toString());
 				}
+
+                // we has to disable the closing Button
+				closeBillingMonth.setEnabled(false);
 			}
 
 			// regardless of where the data for the record came from, now we can put tehm in the TableModel
