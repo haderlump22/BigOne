@@ -10,9 +10,9 @@ import de.rachel.bigone.DBTools;
 import de.rachel.bigone.records.ExpenditureSuccessorDistributionTableRow;
 
 public class ExpenditureSuccessorDistributionTableModel  extends AbstractTableModel {
-private Connection cn = null;
+    private Connection cn = null;
 	private String[] columnName = new String[] { "Name", "Betrag", "Bemerkung" };
-	private ArrayList<ExpenditureSuccessorDistributionTableRow> expenditureSuccessorDistributionTable = new ArrayList<>();
+	private ArrayList<ExpenditureSuccessorDistributionTableRow> expenditureSuccessorDistributionTableData = new ArrayList<>();
 
 	public ExpenditureSuccessorDistributionTableModel(Connection LoginCN, JTable expenditureDetailTable) {
 		cn = LoginCN;
@@ -25,7 +25,7 @@ private Connection cn = null;
 	}
 
 	public int getRowCount() {
-		return expenditureSuccessorDistributionTable.size();
+		return expenditureSuccessorDistributionTableData.size();
 	}
 
 	public String getColumnName(int col) {
@@ -33,7 +33,7 @@ private Connection cn = null;
 	}
 
 	public Object getValueAt(int row, int col) {
-		ExpenditureSuccessorDistributionTableRow expenditureSuccessorDistributionTableRow = expenditureSuccessorDistributionTable.get(row);
+		ExpenditureSuccessorDistributionTableRow expenditureSuccessorDistributionTableRow = expenditureSuccessorDistributionTableData.get(row);
 		Object ReturnValue = null;
 
 		switch (col) {
@@ -64,17 +64,17 @@ private Connection cn = null;
         }
 	}
 
-    	public void setValueAt(Object value, int row, int col) {
+	public void setValueAt(Object value, int row, int col) {
 		ExpenditureSuccessorDistributionTableRow tmpRow;
 
 		// first del row and save temporary the content
-		tmpRow = expenditureSuccessorDistributionTable.remove(row);
+		tmpRow = expenditureSuccessorDistributionTableData.remove(row);
 
         if (value != null) {
             switch (col) {
                 case 1:
                     // and then put an new at the same position
-                    expenditureSuccessorDistributionTable.add(row,
+                    expenditureSuccessorDistributionTableData.add(row,
                             new ExpenditureSuccessorDistributionTableRow(
                                     tmpRow.partyId(),
                                     tmpRow.nameOfParty(),
@@ -83,7 +83,7 @@ private Connection cn = null;
                     break;
                 case 2:
                     // and then put an new at the same position
-                    expenditureSuccessorDistributionTable.add(row,
+                    expenditureSuccessorDistributionTableData.add(row,
                             new ExpenditureSuccessorDistributionTableRow(
                                     tmpRow.partyId(),
                                     tmpRow.nameOfParty(),
@@ -117,7 +117,7 @@ private Connection cn = null;
             getter.beforeFirst();
 
             while (getter.next()) {
-                expenditureSuccessorDistributionTable.add(new ExpenditureSuccessorDistributionTableRow(
+                expenditureSuccessorDistributionTableData.add(new ExpenditureSuccessorDistributionTableRow(
                         getter.getInt("parteiId"),
                         getter.getString("party"),
                         getter.getDouble("betrag"),
@@ -130,6 +130,6 @@ private Connection cn = null;
 	}
 
     public ArrayList<ExpenditureSuccessorDistributionTableRow> getTableData() {
-        return expenditureSuccessorDistributionTable;
+        return expenditureSuccessorDistributionTableData;
     }
 }
