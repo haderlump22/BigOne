@@ -37,22 +37,25 @@ public class ExpenditureDetailTableModel extends AbstractTableModel {
 
         switch (col) {
             case -1: //it only called by the listener "ExpenditureDetailTableSelectionListener"
-                returnValue = expenditureDetailTableRow.ExpenditureId();
+                returnValue = expenditureDetailTableRow.expenditureId();
                 break;
             case -2: // //it only called by the listener "ExpenditureDetailTableSelectionListener"
-                returnValue = expenditureDetailTableRow.ExpenditureHint();
+                returnValue = expenditureDetailTableRow.expenditureHint();
+                break;
+            case -3: // it only called by the ExpenditureDetailTableMouseListener for successor creation
+                returnValue = expenditureDetailTableRow.frequency();
                 break;
             case 0:
-                returnValue = expenditureDetailTableRow.Description();
+                returnValue = expenditureDetailTableRow.description();
                 break;
             case 1:
-                returnValue = expenditureDetailTableRow.Amount();
+                returnValue = expenditureDetailTableRow.amount();
                 break;
             case 2:
-                returnValue = expenditureDetailTableRow.DivideType();
+                returnValue = expenditureDetailTableRow.divideType();
                 break;
             case 3:
-                returnValue = expenditureDetailTableRow.ValidUntil();
+                returnValue = expenditureDetailTableRow.validUntil();
                 break;
             default:
                 break;
@@ -72,7 +75,7 @@ public class ExpenditureDetailTableModel extends AbstractTableModel {
         DBTools getter = new DBTools(cn);
 
         getter.select("""
-                SELECT "ausgabenId", bezeichnung, betrag, aufteilungsart, gilt_bis, bemerkung
+                SELECT "ausgabenId", bezeichnung, betrag, aufteilungsart, gilt_bis, bemerkung, haeufigkeit
                 FROM ha_ausgaben
                 ORDER BY gilt_bis DESC, betrag DESC
                 """);
@@ -86,7 +89,8 @@ public class ExpenditureDetailTableModel extends AbstractTableModel {
                         getter.getDouble("betrag"),
                         getter.getString("aufteilungsart"),
                         getter.getDate("gilt_bis") == null ? null : getter.getDate("gilt_bis").toLocalDate(),
-                        getter.getString("bemerkung")));
+                        getter.getString("bemerkung"),
+                        getter.getInt("haeufigkeit")));
             }
         } catch (Exception e) {
             System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "

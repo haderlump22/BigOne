@@ -22,8 +22,6 @@ import de.rachel.bigone.records.ExpenditureSuccessorDistributionTableRow;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 
-// import de.rachel.bigone.Models.SalaryBasesIncomeDetailTableModel;
-
 public class ExpenditureDetailTableMouseListener extends MouseAdapter {
     private JPopupMenu popmen;
     private JMenuItem updateRatioShare, createSuccessor;
@@ -41,8 +39,12 @@ public class ExpenditureDetailTableMouseListener extends MouseAdapter {
             public void actionPerformed(ActionEvent ae) {
                 ExpenditureSuccessorDialog dialog = new ExpenditureSuccessorDialog(expenditureUi.getExpenditureJFrame(),
                         cn, expenditureDetailTable);
+
                 createNewSuccessorData(dialog.getNewDescription(), dialog.getNewAmount(), dialog.getNewDivideType(),
-                        dialog.getNewValidFrom(), dialog.getNewSuccessorDivideTableData());
+                        dialog.getNewValidFrom(), dialog.getNewComment(), dialog.getNewSuccessorDivideTableData(), dialog.getSuccessorToId(), dialog.getFrequency());
+
+                // ((ExpenditureDetailTableModel)expenditureDetailTable.getModel()).aktualisiere();
+                expenditureUi.refreshContent();
             }
         });
 
@@ -69,9 +71,8 @@ public class ExpenditureDetailTableMouseListener extends MouseAdapter {
             expenditureDetailTable.addRowSelectionInterval(RowAtMousePoint, RowAtMousePoint);
 
             // if the rightclick came from a expenditure where the divide Type ist not "V"
-            // then disable the menu entry "updateRatioShare"
+            // then disable the menu entry "updateRatioShare" and vice versa
             String divideType = (String) expenditureDetailTable.getValueAt(expenditureDetailTable.getSelectedRow(), 2);
-            LocalDate validUntil = (LocalDate) expenditureDetailTable.getValueAt(expenditureDetailTable.getSelectedRow(), 3);
 
             if (divideType.equals("V")) {
                 updateRatioShare.setEnabled(true);
@@ -191,31 +192,30 @@ public class ExpenditureDetailTableMouseListener extends MouseAdapter {
                     "ausgabenId"))) {
                 System.out.println("Fehler beim einfügen des neuen Ausgabendatenstz vom Typ 'Verhältnis' mit der Bezeichnung:" + actualRatioExpenditureRow.description);
                 System.exit(1);
-            }
+            } else {
+                try {
+                    // für diese Datensätze neue Aufteilungen anhand der aktuell ermittelten
+                    // Prozentanteile erstellen
+                    for (PercentOfEachParty percentOfParty : partyPercents) {
+                        expenditureInsert.first();
+                        lastInsertId = expenditureInsert.getInt("ausgabenId");
 
-            try {
-                // für diese Datensätze neue Aufteilungen anhand der aktuell ermittelten
-                // Prozentanteile erstellen
-                for (PercentOfEachParty percentOfParty : partyPercents) {
-                    expenditureInsert.first();
-                    lastInsertId = expenditureInsert.getInt("ausgabenId");
-
-                    if (!expenditureDistributionInsert.insert("""
-                            INSERT INTO ha_ausgaben_aufteilung
-                            ("parteiId", betrag, bemerkung, "ausgabenId")
-                            VALUES
-                            (%d, %s, '%s', %d)
-                            """.formatted(percentOfParty.partyId,
-                            (actualRatioExpenditureRow.amount * percentOfParty.percent),
-                            "Verhältinisanteils Aktualisierung",
-                            lastInsertId))) {
-                        System.out.println("Fehler beim einfügen des neuen AusgabenAufteilungsdatensatz für Partei: -" + percentOfParty.partyId + "- der Ausgabe: " + actualRatioExpenditureRow.description);
-                        System.exit(1);
+                        if (!expenditureDistributionInsert.insert("""
+                                INSERT INTO ha_ausgaben_aufteilung
+                                ("parteiId", betrag, bemerkung, "ausgabenId")
+                                VALUES
+                                (%d, %s, '%s', %d)
+                                """.formatted(percentOfParty.partyId,
+                                (actualRatioExpenditureRow.amount * percentOfParty.percent),
+                                "Verhältinisanteils Aktualisierung",
+                                lastInsertId))) {
+                            System.out.println("Fehler beim einfügen des neuen AusgabenAufteilungsdatensatz für Partei: -" + percentOfParty.partyId + "- der Ausgabe: " + actualRatioExpenditureRow.description);
+                            System.exit(1);
+                        }
                     }
+                } catch (SQLException e) {
+                    e.printStackTrace();
                 }
-            } catch (SQLException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
             }
         }
 
@@ -224,8 +224,63 @@ public class ExpenditureDetailTableMouseListener extends MouseAdapter {
     }
 
     private void createNewSuccessorData(String newExpenditureDescription, Double newExpenditureAmount,
-            String newExpenditureDivideType, LocalDate newExpenditureValidFrom,
-            ArrayList<ExpenditureSuccessorDistributionTableRow> newExpenditureDivideData) {
-        System.out.println(newExpenditureDivideData);
+            String newExpenditureDivideType, LocalDate newExpenditureValidFrom, String newExpenditureComment,
+            ArrayList<ExpenditureSuccessorDistributionTableRow> newExpenditureDivideData, Integer successorToId, Integer frequency) {
+
+        DBTools dbManipulate = new DBTools(cn);
+
+        // first update the validTo Value of the old expenditure
+        if (!dbManipulate.update("""
+                UPDATE ha_ausgaben
+                SET gilt_bis = '%s'
+                WHERE "ausgabenId" = %d
+                """.formatted(newExpenditureValidFrom.minusMonths(1), successorToId))) {
+            System.out.println("Fehler beim aktualisieren der alten Ausgabendatensätze vom Typ 'Verhältnis'");
+            System.exit(1);
+        };
+
+        // // then ad a new Record in Table expenditure and keep the new ID in mind
+        int lastInsertId;
+
+        if (!dbManipulate.insertWithReturn("""
+                INSERT INTO ha_ausgaben
+                (bezeichnung, betrag, aufteilungsart, bemerkung, gilt_ab, haeufigkeit)
+                VALUES
+                ('%s', %s, '%s', '%s', '%s', %d)
+                RETURNING "%s"
+                """.formatted(newExpenditureDescription,
+                newExpenditureAmount,
+                newExpenditureDivideType,
+                newExpenditureComment,
+                newExpenditureValidFrom.toString(),
+                frequency,
+                "ausgabenId"))) {
+            System.out.println("Fehler beim einfügen des neuen Ausgabendatensatz vom Typ '" + newExpenditureDivideType + "' mit der Bezeichnung:" + newExpenditureDescription);
+            System.exit(1);
+        } else {
+            try {
+                dbManipulate.first();
+                lastInsertId = dbManipulate.getInt("ausgabenId");
+
+                // and add the new expenditure distribuition Values of the new expenditure if
+                // insert the expenditur
+                for (ExpenditureSuccessorDistributionTableRow expenditureDivideOfParty : newExpenditureDivideData) {
+                    if (!dbManipulate.insert("""
+                            INSERT INTO ha_ausgaben_aufteilung
+                            ("parteiId", betrag, bemerkung, "ausgabenId")
+                            VALUES
+                            (%d, %s, '%s', %d)
+                            """.formatted(expenditureDivideOfParty.partyId(),
+                            expenditureDivideOfParty.amount(),
+                            expenditureDivideOfParty.comment(),
+                            lastInsertId))) {
+                        System.out.println("Fehler beim einfügen des neuen AusgabenAufteilungsdatensatz für Partei: -" + expenditureDivideOfParty.partyId() + "- der Ausgabe: " + newExpenditureDescription);
+                        System.exit(1);
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

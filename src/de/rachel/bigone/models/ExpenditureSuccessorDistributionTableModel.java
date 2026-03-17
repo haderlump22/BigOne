@@ -132,4 +132,14 @@ public class ExpenditureSuccessorDistributionTableModel  extends AbstractTableMo
     public ArrayList<ExpenditureSuccessorDistributionTableRow> getTableData() {
         return expenditureSuccessorDistributionTableData;
     }
+
+    public Double getSumOfAmounts() {
+        Double sumOfAmounts = 0.0;
+
+        for (ExpenditureSuccessorDistributionTableRow divideDataOfParty : expenditureSuccessorDistributionTableData ) {
+            sumOfAmounts = sumOfAmounts + divideDataOfParty.amount();
+        }
+
+        return sumOfAmounts;
+    }
 }

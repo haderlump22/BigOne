@@ -17,7 +17,9 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 import javax.swing.border.TitledBorder;
 import javax.swing.text.MaskFormatter;
@@ -35,25 +37,34 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 
 public class ExpenditureSuccessorDialog {
     private Connection cn = null;
     private JFrame dialogOwner;
     private JDialog expenditureSuccessorDialog;
-    private JLabel expenditureDescriptionLabel, expenditureAmountLabel, expenditureDivideTypeLabel, expenditureValidFromLabel;
-    private JFormattedTextField expenditureAmount, expenditureValidFrom;
-    private JTextField expenditureDescription, expenditureDivideType;
+    private JLabel expenditureSuccessorDescriptionLabel, expenditureSuccessorAmountLabel,
+            expenditureSuccessorDivideTypeLabel, expenditureSuccessorValidFromLabel, expenditureSuccessorCommentLabel,
+            expenditureSuccessorFrequencyLabel;
+    private JFormattedTextField expenditureSuccessorAmount, expenditureSuccessorValidFrom;
+    private JTextField expenditureSuccessorDescription, expenditureSuccessorDivideType, expenditureSuccessorFrequency;
+    private JTextArea expenditureSuccessorCommentArea;
     private JButton saveExpenditureSuccessorButton;
     private Font fontTxtFields;
     private JPanel successorDivideTablePanel;
-    private JScrollPane successorDivideTableScrollPane;
+    private JScrollPane successorDivideTableScrollPane, expenditureSuccessorCommentAreaScrollPane;
     private JTable successorDivideTable, expenditureDetailTable;
+    private Integer successorToId, frequency;
+    private String valueCheckComment = "";
 
 
     public ExpenditureSuccessorDialog(JFrame dialogOwner, Connection LoginCN, JTable expenditureDetailTable) {
         cn = LoginCN;
         this.dialogOwner = dialogOwner;
         this.expenditureDetailTable = expenditureDetailTable;
+        this.successorToId = (Integer) expenditureDetailTable.getValueAt(expenditureDetailTable.getSelectedRow(), -1);
+        this.frequency = (Integer) expenditureDetailTable.getValueAt(expenditureDetailTable.getSelectedRow(), -3);
 
         createComponents();
 
@@ -74,43 +85,62 @@ public class ExpenditureSuccessorDialog {
 
         fontTxtFields = new Font("Arial", Font.PLAIN, 12);
 
-        expenditureDescriptionLabel = new JLabel("Bezeichnung");
+        expenditureSuccessorDescriptionLabel = new JLabel("Bezeichnung");
 
-        expenditureAmountLabel = new JLabel("Betrag");
+        expenditureSuccessorAmountLabel = new JLabel("Betrag");
 
-        expenditureDivideTypeLabel = new JLabel("Aufteilungsart");
+        expenditureSuccessorDivideTypeLabel = new JLabel("Aufteilungsart");
 
-        expenditureValidFromLabel = new JLabel("gilt ab");
+        expenditureSuccessorValidFromLabel = new JLabel("gilt ab");
 
-        expenditureDescription = new JTextField();
-        expenditureDescription.setFont(fontTxtFields);
-        expenditureDescription.setPreferredSize(new Dimension(90, 25));
-        expenditureDescription.setText((String) expenditureDetailTable.getValueAt(expenditureDetailTable.getSelectedRow(), 0));
+        expenditureSuccessorCommentLabel = new JLabel("Bemerkung");
 
-        expenditureAmount = new JFormattedTextField(new NumberFormatter(new DecimalFormat("#,##0.00")));
-        expenditureAmount.setFont(fontTxtFields);
-        expenditureAmount.setHorizontalAlignment(JFormattedTextField.RIGHT);
-        expenditureAmount.setPreferredSize(new Dimension(90, 25));
-        expenditureAmount.setText("%.02f".formatted((Double)(expenditureDetailTable.getValueAt(expenditureDetailTable.getSelectedRow(), 1))));
+        expenditureSuccessorFrequencyLabel = new JLabel("Häufigkeit");
+
+        // fix Me
+        // add an Commentsection, has forgot this
+
+        expenditureSuccessorDescription = new JTextField();
+        expenditureSuccessorDescription.setFont(fontTxtFields);
+        expenditureSuccessorDescription.setPreferredSize(new Dimension(90, 25));
+        expenditureSuccessorDescription.setText((String) expenditureDetailTable.getValueAt(expenditureDetailTable.getSelectedRow(), 0));
+
+        expenditureSuccessorAmount = new JFormattedTextField(new NumberFormatter(new DecimalFormat("#,##0.00")));
+        expenditureSuccessorAmount.setFont(fontTxtFields);
+        expenditureSuccessorAmount.setHorizontalAlignment(JFormattedTextField.RIGHT);
+        expenditureSuccessorAmount.setPreferredSize(new Dimension(90, 25));
+        expenditureSuccessorAmount.setText("%.02f".formatted((Double)(expenditureDetailTable.getValueAt(expenditureDetailTable.getSelectedRow(), 1))));
 
 
-        expenditureDivideType = new JTextField();
-        expenditureDivideType.setPreferredSize(new Dimension(90, 25));
-        expenditureDivideType.setHorizontalAlignment(JFormattedTextField.CENTER);
-        expenditureDivideType.setText((String) expenditureDetailTable.getValueAt(expenditureDetailTable.getSelectedRow(), 2));
+        expenditureSuccessorDivideType = new JTextField();
+        expenditureSuccessorDivideType.setPreferredSize(new Dimension(90, 25));
+        expenditureSuccessorDivideType.setHorizontalAlignment(JFormattedTextField.CENTER);
+        expenditureSuccessorDivideType.setText((String) expenditureDetailTable.getValueAt(expenditureDetailTable.getSelectedRow(), 2));
 
         try {
-            expenditureValidFrom = new JFormattedTextField(new MaskFormatter("01.##.20##"));
-            expenditureValidFrom.setFont(fontTxtFields);
-            expenditureValidFrom.setPreferredSize(new Dimension(90, 25));
-            expenditureValidFrom.setHorizontalAlignment(JTextField.RIGHT);
-            // we set the new valid from Date to the first of the next month
+            expenditureSuccessorValidFrom = new JFormattedTextField(new MaskFormatter("01.##.20##"));
+            expenditureSuccessorValidFrom.setFont(fontTxtFields);
+            expenditureSuccessorValidFrom.setPreferredSize(new Dimension(90, 25));
+            expenditureSuccessorValidFrom.setHorizontalAlignment(JTextField.RIGHT);
+
+            // the new valid from Date is ever the first of the next month
             LocalDate actualDayInNextMonth = LocalDate.now().plusMonths(1);
             LocalDate firstOfNextMonth = actualDayInNextMonth.minusDays(actualDayInNextMonth.getDayOfMonth() - 1);
-            expenditureValidFrom.setText(firstOfNextMonth.format(DateTimeFormatter.ofPattern("dd.MM.yyyy")).toString());
+            expenditureSuccessorValidFrom.setText(firstOfNextMonth.format(DateTimeFormatter.ofPattern("dd.MM.yyyy")).toString());
         } catch (ParseException e) {
             e.printStackTrace();
         }
+
+        expenditureSuccessorCommentArea = new JTextArea((String)(expenditureDetailTable.getValueAt(expenditureDetailTable.getSelectedRow(), -2)));
+        expenditureSuccessorCommentArea.setLineWrap(true);
+        expenditureSuccessorCommentArea.setWrapStyleWord(true);
+        expenditureSuccessorCommentAreaScrollPane = new JScrollPane(expenditureSuccessorCommentArea);
+        expenditureSuccessorCommentAreaScrollPane.setPreferredSize(new Dimension(200, 70));
+
+        expenditureSuccessorFrequency = new JTextField();
+        expenditureSuccessorFrequency.setFont(fontTxtFields);
+        expenditureSuccessorFrequency.setPreferredSize(new Dimension(90, 25));
+        expenditureSuccessorFrequency.setText(((Integer) expenditureDetailTable.getValueAt(expenditureDetailTable.getSelectedRow(), -3)).toString());
 
         successorDivideTable = new JTable(new ExpenditureSuccessorDistributionTableModel(cn, expenditureDetailTable));
         successorDivideTable.setDefaultRenderer(Object.class, new ExpenditureSuccessorDistributionTableCellRenderer());
@@ -127,19 +157,42 @@ public class ExpenditureSuccessorDialog {
     }
 
     private void registerExistingListeners() {
-        // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'registerExistingListeners'");
     }
 
     private void createListeners() {
         saveExpenditureSuccessorButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ae) {
+                if (successorDivideTable.isEditing()) {
+                    successorDivideTable.getCellEditor().stopCellEditing();
+                    successorDivideTable.clearSelection();
+                }
+
                 if (areValuesCorrect()) {
                     expenditureSuccessorDialog.setVisible(false);
                     expenditureSuccessorDialog.dispose();
                 } else {
-                    JOptionPane.showMessageDialog(null, "alle Werte müssen korrekt gefüllt sein", "Achtung", JOptionPane.INFORMATION_MESSAGE);
+                    JOptionPane.showMessageDialog(null,
+                            "alle Werte müssen korrekt gefüllt sein\n(" + valueCheckComment + ")", "Achtung",
+                            JOptionPane.INFORMATION_MESSAGE);
                 }
+            }
+        });
+
+        expenditureSuccessorAmount.addFocusListener(new FocusListener() {
+            public void focusLost(FocusEvent fe) {
+                // fixme
+                // maybe split the new amount automaticly
+                // over the rows of the divideTable
+            }
+
+            public void focusGained(FocusEvent fe) {
+                SwingUtilities.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        expenditureSuccessorAmount.selectAll();
+                    }
+                });
             }
         });
     }
@@ -164,53 +217,73 @@ public class ExpenditureSuccessorDialog {
         expenditureLayoutConstraints.gridx = 0;
 		expenditureLayoutConstraints.gridy = 0;
 		expenditureLayoutConstraints.anchor = GridBagConstraints.WEST;
-		expenditureSuccessorDialog.add(expenditureDescriptionLabel, expenditureLayoutConstraints);
+		expenditureSuccessorDialog.add(expenditureSuccessorDescriptionLabel, expenditureLayoutConstraints);
 
         expenditureLayoutConstraints.gridx = 0;
 		expenditureLayoutConstraints.gridy = 1;
 		expenditureLayoutConstraints.anchor = GridBagConstraints.WEST;
-		expenditureSuccessorDialog.add(expenditureAmountLabel, expenditureLayoutConstraints);
+		expenditureSuccessorDialog.add(expenditureSuccessorAmountLabel, expenditureLayoutConstraints);
 
         expenditureLayoutConstraints.gridx = 0;
 		expenditureLayoutConstraints.gridy = 2;
 		expenditureLayoutConstraints.anchor = GridBagConstraints.WEST;
-		expenditureSuccessorDialog.add(expenditureDivideTypeLabel, expenditureLayoutConstraints);
+		expenditureSuccessorDialog.add(expenditureSuccessorDivideTypeLabel, expenditureLayoutConstraints);
 
         expenditureLayoutConstraints.gridx = 0;
 		expenditureLayoutConstraints.gridy = 3;
 		expenditureLayoutConstraints.anchor = GridBagConstraints.WEST;
-		expenditureSuccessorDialog.add(expenditureValidFromLabel, expenditureLayoutConstraints);
+		expenditureSuccessorDialog.add(expenditureSuccessorValidFromLabel, expenditureLayoutConstraints);
+
+        expenditureLayoutConstraints.gridx = 0;
+		expenditureLayoutConstraints.gridy = 4;
+		expenditureLayoutConstraints.anchor = GridBagConstraints.WEST;
+		expenditureSuccessorDialog.add(expenditureSuccessorCommentLabel, expenditureLayoutConstraints);
+
+        expenditureLayoutConstraints.gridx = 0;
+		expenditureLayoutConstraints.gridy = 5;
+		expenditureLayoutConstraints.anchor = GridBagConstraints.WEST;
+		expenditureSuccessorDialog.add(expenditureSuccessorFrequencyLabel, expenditureLayoutConstraints);
 
         expenditureLayoutConstraints.gridx = 1;
 		expenditureLayoutConstraints.gridy = 0;
         expenditureLayoutConstraints.insets = new Insets(0, 20, 5, 0);
 		expenditureLayoutConstraints.anchor = GridBagConstraints.WEST;
-		expenditureSuccessorDialog.add(expenditureDescription, expenditureLayoutConstraints);
+		expenditureSuccessorDialog.add(expenditureSuccessorDescription, expenditureLayoutConstraints);
 
         expenditureLayoutConstraints.gridx = 1;
 		expenditureLayoutConstraints.gridy = 1;
 		expenditureLayoutConstraints.anchor = GridBagConstraints.WEST;
-		expenditureSuccessorDialog.add(expenditureAmount, expenditureLayoutConstraints);
+		expenditureSuccessorDialog.add(expenditureSuccessorAmount, expenditureLayoutConstraints);
 
         expenditureLayoutConstraints.gridx = 1;
 		expenditureLayoutConstraints.gridy = 2;
 		expenditureLayoutConstraints.anchor = GridBagConstraints.WEST;
-		expenditureSuccessorDialog.add(expenditureDivideType, expenditureLayoutConstraints);
+		expenditureSuccessorDialog.add(expenditureSuccessorDivideType, expenditureLayoutConstraints);
 
         expenditureLayoutConstraints.gridx = 1;
 		expenditureLayoutConstraints.gridy = 3;
 		expenditureLayoutConstraints.anchor = GridBagConstraints.WEST;
-		expenditureSuccessorDialog.add(expenditureValidFrom, expenditureLayoutConstraints);
+		expenditureSuccessorDialog.add(expenditureSuccessorValidFrom, expenditureLayoutConstraints);
+
+        expenditureLayoutConstraints.gridx = 1;
+		expenditureLayoutConstraints.gridy = 4;
+		expenditureLayoutConstraints.anchor = GridBagConstraints.WEST;
+		expenditureSuccessorDialog.add(expenditureSuccessorCommentAreaScrollPane, expenditureLayoutConstraints);
+
+        expenditureLayoutConstraints.gridx = 1;
+		expenditureLayoutConstraints.gridy = 5;
+		expenditureLayoutConstraints.anchor = GridBagConstraints.WEST;
+		expenditureSuccessorDialog.add(expenditureSuccessorFrequency, expenditureLayoutConstraints);
 
         expenditureLayoutConstraints.insets = new Insets(0, 0, 0, 0);
 
         expenditureLayoutConstraints.gridx = 0;
-        expenditureLayoutConstraints.gridy = 4;
+        expenditureLayoutConstraints.gridy = 6;
         expenditureLayoutConstraints.gridwidth = GridBagConstraints.REMAINDER;
         expenditureSuccessorDialog.add(successorDivideTablePanel, expenditureLayoutConstraints);
 
         expenditureLayoutConstraints.gridx = 1;
-        expenditureLayoutConstraints.gridy = 5;
+        expenditureLayoutConstraints.gridy = 7;
         // expenditureLayoutConstraints.fill = GridBagConstraints.HORIZONTAL;
         expenditureLayoutConstraints.anchor = GridBagConstraints.EAST;
         expenditureLayoutConstraints.insets = new Insets(10, 0, 0, 0);
@@ -221,15 +294,30 @@ public class ExpenditureSuccessorDialog {
     public boolean areValuesCorrect() {
         boolean allIsCorrect = false;
 
-        if (Pattern.matches("\\d{2}.\\d{2}.[1-9]{1}\\d{3}", expenditureValidFrom.getText())) {
+        if (Pattern.matches("\\d{2}.\\d{2}.[1-9]{1}\\d{3}", expenditureSuccessorValidFrom.getText())) {
             allIsCorrect = true;
         } else {
+            valueCheckComment = "Datumswert nicht korrekt";
             return false;
         }
 
-        if (Double.valueOf(expenditureAmount.getText().replace(".", "").replace(',', '.')) > 0) {
+        if (Double.valueOf(expenditureSuccessorAmount.getText().replace(".", "").replace(',', '.')) > 0) {
             allIsCorrect = true;
         } else {
+            valueCheckComment = "neuer Betrag nicht größer 0";
+            return false;
+        }
+
+        // The sum of the individual values ​​in the distribution table must correspond
+        // to the total value of the successor amount.
+        Integer compareResult = Double.compare(
+                ((ExpenditureSuccessorDistributionTableModel) successorDivideTable.getModel()).getSumOfAmounts(),
+                Double.valueOf(expenditureSuccessorAmount.getText().replace(".", "").replace(',', '.')));
+
+        if (compareResult == 0) {
+            allIsCorrect = true;
+        } else {
+            valueCheckComment = "Nachfolgebetrag nicht korrekt aufgeteilt";
             return false;
         }
 
@@ -237,22 +325,34 @@ public class ExpenditureSuccessorDialog {
     }
 
     public String getNewDescription() {
-        return expenditureDescription.getText();
+        return expenditureSuccessorDescription.getText();
     }
 
     public Double getNewAmount() {
-        return Double.valueOf(expenditureAmount.getText().replace(".", "").replace(',', '.'));
+        return Double.valueOf(expenditureSuccessorAmount.getText().replace(".", "").replace(',', '.'));
     }
 
     public String getNewDivideType() {
-        return expenditureDivideType.getText();
+        return expenditureSuccessorDivideType.getText();
     }
 
     public LocalDate getNewValidFrom() {
-        return LocalDate.parse(expenditureValidFrom.getText(), DateTimeFormatter.ofPattern("dd.MM.yyyy"));
+        return LocalDate.parse(expenditureSuccessorValidFrom.getText(), DateTimeFormatter.ofPattern("dd.MM.yyyy"));
     }
 
     public ArrayList<ExpenditureSuccessorDistributionTableRow> getNewSuccessorDivideTableData() {
         return ((ExpenditureSuccessorDistributionTableModel)(successorDivideTable.getModel())).getTableData();
+    }
+
+    public Integer getSuccessorToId() {
+        return successorToId;
+    }
+
+    public String getNewComment() {
+        return expenditureSuccessorCommentArea.getText();
+    }
+
+    public Integer getFrequency() {
+        return frequency;
     }
 }
