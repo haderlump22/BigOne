@@ -1,8 +1,8 @@
 package de.rachel.bigone.renderer;
 
 import java.awt.Component;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 import javax.swing.JLabel;
 import javax.swing.JTable;
@@ -49,7 +49,7 @@ public class ExpenditureDetailTableCellRenderer implements TableCellRenderer {
 
          if (column == 3) {
             label.setHorizontalAlignment(JLabel.LEFT);
-            label.setText(new SimpleDateFormat("MMM yyyy").format((Date) value));
+            label.setText(((LocalDate)value).format(DateTimeFormatter.ofPattern("MMM yyyy")));
          }
 
          return label;

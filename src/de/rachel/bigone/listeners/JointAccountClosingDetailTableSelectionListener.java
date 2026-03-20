@@ -70,7 +70,7 @@ public class JointAccountClosingDetailTableSelectionListener implements ListSele
                 AND ha_ausgaben.bezeichnung = ha_abschlussdetails."kategorieBezeichnung"
                 AND (ha_ausgaben.gilt_bis >= ha_abschlussdetails."abschlussMonat" OR ha_ausgaben.gilt_bis IS NULL)
                 AND ha_ausgaben.gilt_ab <= ha_abschlussdetails."abschlussMonat"
-                """.formatted(closingDetailId),1);
+                """.formatted(closingDetailId));
 
         // define the text depending on the data obtained
         try {
@@ -102,7 +102,7 @@ public class JointAccountClosingDetailTableSelectionListener implements ListSele
                 SELECT bemerkung
                 FROM ha_abschlussdetails
                 WHERE "abschlussDetailId" = %d
-                """.formatted(closingDetailId),1);
+                """.formatted(closingDetailId));
 
         try {
             if (getter.getRowCount() > 1) {
@@ -134,7 +134,7 @@ public class JointAccountClosingDetailTableSelectionListener implements ListSele
                 SELECT "summenArt"
                 FROM ha_abschlusssummen
                 WHERE "abschlussDetailId" = %d
-                """.formatted(closingDetailId), 0);
+                """.formatted(closingDetailId));
 
         try {
             if (dbTools.getRowCount() > 0) {

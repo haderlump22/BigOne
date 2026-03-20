@@ -585,7 +585,7 @@ public class ReadCamt {
 				SELECT bemerkung
 				FROM konten
 				WHERE iban = '%s'
-				""".formatted(iban), 1);
+				""".formatted(iban));
 
 		try {
 			getter.first();
@@ -607,7 +607,7 @@ public class ReadCamt {
 				SELECT konten_id
 				FROM konten
 				WHERE iban = '%s'
-				""".formatted(iban), 1);
+				""".formatted(iban));
 
 		try {
 			getter.first();

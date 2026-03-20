@@ -188,7 +188,7 @@ public class JointAccountClosing {
 		balanceAllocationOverviewPanel.setBorder(new TitledBorder("Aufteilung Saldo"));
 
 		closeBillingMonth = new JButton("Monat abschließen!");
-		// inital the Button has to disabled because only if a month is alrady open
+		// inital the Button has to disabled because only if a month is alredy open
 		// we can close them
 		closeBillingMonth.setEnabled(false);
     }
@@ -451,7 +451,7 @@ public class JointAccountClosing {
 					WHERE ha_abschlussdetails."abschlussMonat" = '%s'
 					AND ha_abschlussdetails."abschlussDetailId" = ha_abschlusssummen."abschlussDetailId"
 					GROUP BY "summenArt"
-					""".formatted(billingMonth.getText()), 2);
+					""".formatted(billingMonth.getText()));
 
 			try {
 				getter.beforeFirst();
@@ -516,8 +516,7 @@ public class JointAccountClosing {
 					AND p.personen_id = gg.partei_id
 					GROUP BY p.personen_id, p.name, p.vorname
 					ORDER BY p.name;
-					""".formatted(billingMonth.getText(), billingMonth.getText()),
-					3);
+					""".formatted(billingMonth.getText(), billingMonth.getText()));
 
 				try {
 					dbTools.beforeFirst();
@@ -543,7 +542,7 @@ public class JointAccountClosing {
 						FROM ha_abschlusssummen, ha_abschlussdetails
 						WHERE ha_abschlussdetails."abschlussMonat" = '%s'
 						AND ha_abschlussdetails."abschlussDetailId" = ha_abschlusssummen."abschlussDetailId"
-						""".formatted(billingMonth.getText(), billingMonth.getText()), 1);
+						""".formatted(billingMonth.getText(), billingMonth.getText()));
 
 				try {
 					dbTools.first();
@@ -572,7 +571,7 @@ public class JointAccountClosing {
 						FROM ha_abschlusssummen_aufteilung, personen p
 						WHERE "abschlussMonat" = '%s'
 						AND ha_abschlusssummen_aufteilung."parteiId" = p.personen_id
-						""".formatted(billingMonth.getText()), 0);
+						""".formatted(billingMonth.getText()));
 
 				try {
 					dbTools.beforeFirst();
@@ -589,6 +588,9 @@ public class JointAccountClosing {
 					System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "
 							+ e.getStackTrace()[0].getLineNumber() + "): " + e.toString());
 				}
+
+                // we has to disable the closing Button
+				closeBillingMonth.setEnabled(false);
 			}
 
 			// regardless of where the data for the record came from, now we can put tehm in the TableModel
@@ -605,7 +607,7 @@ public class JointAccountClosing {
 				SELECT COUNT(*)
 				FROM ha_abschlussdetails
 				WHERE "abschlussMonat" = '%s'
-				""".formatted(billingMonth), 1);
+				""".formatted(billingMonth));
 		try {
 			getter.first();
 			rowCountOfAcountClosingDetails = getter.getInt("COUNT");
@@ -656,7 +658,7 @@ public class JointAccountClosing {
 				FROM closedetail
 				GROUP BY kategoriebezeichnung
 				ORDER BY 1
-				""", 1);
+				""");
 
 		// and put them into a local record
 		try {
@@ -724,7 +726,7 @@ public class JointAccountClosing {
 					FROM ha_ausgaben
 					WHERE gilt_ab <= '%s'
 					AND (gilt_bis >= '%s' OR gilt_bis IS NULL)
-					""".formatted(billingMonth, billingMonth), 1);
+					""".formatted(billingMonth, billingMonth));
 		} else {
 			dbTool.select("""
 					SELECT (betrag * haeufigkeit) betrag
@@ -732,7 +734,7 @@ public class JointAccountClosing {
 					WHERE gilt_ab <= '%s'
 					AND (gilt_bis >= '%s' OR gilt_bis IS NULL)
 					AND bezeichnung = '%s'
-					""".formatted(billingMonth, billingMonth, categoryName), 1);
+					""".formatted(billingMonth, billingMonth, categoryName));
 		}
 
 		try {
@@ -761,7 +763,7 @@ public class JointAccountClosing {
 				SELECT count(*)
 				FROM ha_abschlusssummen_aufteilung
 				WHERE "abschlussMonat" = '%s'
-				""".formatted(billingMonth), 1);
+				""".formatted(billingMonth));
 
 		try {
 			dbTool.first();

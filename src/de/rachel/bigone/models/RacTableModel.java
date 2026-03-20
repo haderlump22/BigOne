@@ -198,9 +198,9 @@ public class RacTableModel extends AbstractTableModel{
 
 		// if the iban is from an jointAccount the Accountevents will be get from another table
 		if (isJointAccount) {
-			getter.select("SELECT ha_kategorie_id, kategoriebezeichnung FROM ha_kategorie ORDER BY 2",2);
+			getter.select("SELECT ha_kategorie_id, kategoriebezeichnung FROM ha_kategorie ORDER BY 2");
 		} else {
-			getter.select("SELECT ereigniss_id, ereigniss_krzbez FROM kontenereignisse WHERE gueltig = 'TRUE' ORDER BY 2",2);
+			getter.select("SELECT ereigniss_id, ereigniss_krzbez FROM kontenereignisse WHERE gueltig = 'TRUE' ORDER BY 2");
 		}
 
 		try {

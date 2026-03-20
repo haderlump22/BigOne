@@ -66,6 +66,12 @@ public class RacTableCellRenderer implements TableCellRenderer {
 				label.setText("%.02f".formatted((Double) value));
 		}
 
+		if (column == 3) {
+			if (((String) value).length() > 500) {
+				label.setBackground(Color.lightGray);
+			}
+		}
+
 		if (column == 5) {
 			label.setHorizontalAlignment(JLabel.CENTER);
 			if (value != null) {// nur wenn es ein liquidatum gibt umwandeln
@@ -76,40 +82,44 @@ public class RacTableCellRenderer implements TableCellRenderer {
 		return label;
 	}
 
-	public boolean checkValue(int row, JTable table) {
-		// versucht anhand der Datensaetze der Importdatei
-		// aenliche in der Datenbank zu finden und rot zu markieren
-		// dabei wird auf die Menge der Datensaetze mit dem selben
-		// Betrag innerhalb eines Monats (01 bis 31) fuer das konto geprueft
-		// es wird hier aus performancegrunden nur eine zelle
-		// eingefaerbt anstatt die ganze zeile
-		// fuer die ganze zeile muesste diese funktion auch
-		// fuer jede Zelle aufgerufen werden und das dauert
-		boolean checkValue = false;
-		LocalDate dateValue = (LocalDate) table.getModel().getValueAt(row, 0);
+    public boolean checkValue(int row, JTable table) {
+        // versucht anhand der Datensaetze der Importdatei
+        // aenliche in der Datenbank zu finden und rot zu markieren
+        // dabei wird auf die Menge der Datensaetze mit dem selben
+        // Betrag innerhalb eines Monats (01 bis 31) fuer das konto geprueft
+        // es wird hier aus performancegrunden nur eine zelle
+        // eingefaerbt anstatt die ganze zeile
+        // fuer die ganze zeile muesste diese funktion auch
+        // fuer jede Zelle aufgerufen werden und das dauert
+        boolean checkValue = false;
+        LocalDate dateValue = (LocalDate) table.getModel().getValueAt(row, 0);
 
-		DBTools marker = new DBTools(cn);
+        DBTools marker = new DBTools(cn);
 
-		marker.select("""
-				SELECT COUNT(*)
-				FROM transaktionen
-				WHERE betrag = %s
-				AND konten_id = %d
-				AND datum >= '%s'
-				AND datum <= '%s'
-				""".formatted(table.getModel().getValueAt(row, 2).toString(), accountId, dateValue.minusDays(dateValue.getDayOfMonth() - 1).toString(), dateValue.plusDays(dateValue.lengthOfMonth() - dateValue.getDayOfMonth()).toString()), 1);
+        marker.select("""
+                SELECT COUNT(*)
+                FROM transaktionen
+                WHERE betrag = %s
+                AND konten_id = %d
+                AND datum >= '%s'
+                AND datum <= '%s'
+                """.formatted(table.getModel().getValueAt(row, 2).toString(), accountId,
+                dateValue.minusDays(dateValue.getDayOfMonth() - 1).toString(),
+                dateValue.plusDays(dateValue.lengthOfMonth() - dateValue.getDayOfMonth()).toString()));
 
-		try {
-			if (marker.getInt("count") > 0) {
-				checkValue = true;
-			} else {
-				checkValue = false;
-			}
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+        try {
+            marker.first();
 
-		return checkValue;
-	}
+            if (marker.getInt("count") > 0) {
+                checkValue = true;
+            } else {
+                checkValue = false;
+            }
+        } catch (SQLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        return checkValue;
+    }
 }

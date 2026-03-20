@@ -123,12 +123,18 @@ public class TankDialog extends JFrame {
 				SELECT typ, kfz_id
 				FROM kfz
 				ORDER BY 1
-				""", 2);
+				""");
 
-		Object[][] cmbKfzValues = getter.getData();
+		try {
+			getter.beforeFirst();
 
-		for (Object[] cmbKfzValue : cmbKfzValues)
-			cmbKfz.addItem(cmbKfzValue[0] + " (" + cmbKfzValue[1] + ")");
+			while (getter.next()) {
+				cmbKfz.addItem(getter.getString("typ") + " (" + getter.getString("kfz_id") + ")");
+			}
+		} catch (Exception e) {
+			System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "
+					+ e.getStackTrace()[0].getLineNumber() + "): " + e.toString());
+		}
 	}
 
 	private void fill_cmbTreibstoff() {
@@ -138,12 +144,18 @@ public class TankDialog extends JFrame {
 				SELECT bez, kraftstoff_id
 				FROM kraftstoffe
 				ORDER BY 1
-				""", 2);
+				""");
 
-		Object[][] cmbTreibstoffValues = getter.getData();
+		try {
+			getter.beforeFirst();
 
-		for (Object[] cmbTreibstoffValue : cmbTreibstoffValues)
-			cmbTreibstoff.addItem(cmbTreibstoffValue[0] + " (" + cmbTreibstoffValue[1] + ")");
+			while (getter.next()) {
+				cmbTreibstoff.addItem(getter.getString("bez") + " (" + getter.getInt("kraftstoff_id") + ")");
+			}
+		} catch (Exception e) {
+			System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "
+					+ e.getStackTrace()[0].getLineNumber() + "): " + e.toString());
+		}
 	}
 
 	public String get_km() {

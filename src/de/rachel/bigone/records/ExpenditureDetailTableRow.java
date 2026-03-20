@@ -1,7 +1,7 @@
 package de.rachel.bigone.records;
 
-import java.sql.Date;
+import java.time.LocalDate;
 
-public record ExpenditureDetailTableRow(Integer ExpenditureId, String Description, Double Amount, String DivideType,
-        Date ValidUntil, String ExpenditureHint) {
+public record ExpenditureDetailTableRow(Integer expenditureId, String description, Double amount, String divideType,
+        LocalDate validUntil, String expenditureHint, Integer frequency) {
 };

@@ -1,7 +1,6 @@
 package de.rachel.bigone.models;
 
 import java.sql.Connection;
-import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -61,7 +60,6 @@ public class ExpenditureDistributionTableModel extends AbstractTableModel {
          * get all known expenditure over the time, actual and old one
          */
         DBTools getter = new DBTools(cn);
-        ResultSet rs;
 
         getter.select("""
                 SELECT haaa."ausgabenAufteilungId", p.name || ', ' || SUBSTRING(p.vorname, 1, 1) || '.' AS party, betrag, bemerkung
@@ -69,15 +67,14 @@ public class ExpenditureDistributionTableModel extends AbstractTableModel {
                 WHERE haaa."parteiId" = p.personen_id
                 AND haaa."ausgabenId" = %s
                 ORDER BY party
-                """.formatted(ExpenditureId.toString()), 2);
+                """.formatted(ExpenditureId.toString()));
 
-        rs = getter.getResultSet();
         try {
-            rs.beforeFirst();
+            getter.beforeFirst();
 
-            while (rs.next()) {
-                tableData.add(new ExpenditureDistributionTableRow(rs.getInt("ausgabenAufteilungId"),
-                        rs.getString("party"), rs.getDouble("betrag"), rs.getString("bemerkung")));
+            while (getter.next()) {
+                tableData.add(new ExpenditureDistributionTableRow(getter.getInt("ausgabenAufteilungId"),
+                        getter.getString("party"), getter.getDouble("betrag"), getter.getString("bemerkung")));
             }
         } catch (Exception e) {
             System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "

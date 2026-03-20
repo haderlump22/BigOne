@@ -69,7 +69,7 @@ public class TransferAmountDetailTableModel extends AbstractTableModel {
 				FROM personen p, ha_ueberweisungsbetraege ueb
 				WHERE p.personen_id = ueb.partei_id
 				ORDER BY gilt_bis DESC, party, betrag DESC;
-				""",4);
+				""");
 
 		try {
 			getter.beforeFirst();

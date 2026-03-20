@@ -34,13 +34,10 @@ public class IncomeDetailTableMouseListener extends MouseAdapter {
             JTable IncomeDetailTable = (JTable) me.getSource();
             int RowAtMousePoint = IncomeDetailTable.rowAtPoint(me.getPoint());
 
-            // vorherige Selection aufheben
             IncomeDetailTable.clearSelection();
 
-            // diese eine Zeile selectieren
             IncomeDetailTable.addRowSelectionInterval(RowAtMousePoint, RowAtMousePoint);
 
-            // popup zum Löschen der selectierten Zeile anzeigen
             popmen.show(me.getComponent(), me.getX(), me.getY());
         }
     }
