@@ -83,7 +83,7 @@ public class ExpenditureSuccessorDialog {
 		expenditureSuccessorDialog.setSize(350, 550);
 		expenditureSuccessorDialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
-        fontTxtFields = new Font("Arial", Font.PLAIN, 12);
+        fontTxtFields = new Font("Arial", Font.PLAIN, 14);
 
         expenditureSuccessorDescriptionLabel = new JLabel("Bezeichnung");
 
