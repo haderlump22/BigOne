@@ -1,32 +1,9 @@
 package de.rachel.bigone;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-
 public class BigOneTools {
-	private String strFileName;
 
 	BigOneTools() {
 
-	}
-
-	public int ermittle_anzahl_zeilen(String strValue) {
-		// ermittelt die Anzahl der Zeilen strValue uebergebenen
-		// Datei
-		strFileName = strValue;
-		int iZeilen = 0;
-
-		try {
-			BufferedReader in = new BufferedReader(new FileReader(strFileName));
-			while (in.readLine() != null) {
-				iZeilen++; // zeilenzaehler erhoehen
-			}
-			in.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return iZeilen;
 	}
 
 	public double roundScale2(double d) {
