@@ -56,7 +56,7 @@ public class AccountClosing {
     private Font fontTxtFields, fontCmbBoxes, fontLists;
     private List<MonthlyFixedCostsRow> monthlyFixedCosts = new ArrayList<>();
     private Connection cn = null;
-    private String KontenID = "12";
+    private Integer bankAccountId;
 
     AccountClosing(Connection LoginCN) {
         cn = LoginCN;
@@ -66,6 +66,25 @@ public class AccountClosing {
         liquiwindow.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         liquiwindow.setLayout(null);
         liquiwindow.setResizable(false);
+
+        // the Bank Account ID is the one form that Bank Account that is standard and not "Haushaltskonto"
+        DBTools getBankAccount = new DBTools(cn);
+
+        getBankAccount.select("""
+                        SELECT konten_id
+                        FROM konten
+                        WHERE standard = true
+                        AND bemerkung <> 'Haushaltskonto'
+                        """);
+
+        try {
+            bankAccountId = getBankAccount.getInt("konten_id");
+        } catch (SQLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            System.err.println("ID des Standardgirokontos konnte nicht ermittelt werden. ABBRUCH");
+            System.exit(1);
+        }
 
         // schriftenfestlegungen
         fontTxtFields = new Font("Arial", Font.PLAIN, 16);
@@ -630,7 +649,7 @@ public class AccountClosing {
                 AND t.soll_haben = 'h'
                 AND t.konten_id = %s
                 AND t.liqui_monat = '%s'
-                """.formatted(KontenID, sAbrMonat));
+                """.formatted(bankAccountId, sAbrMonat));
 
         try {
             getter.beforeFirst();
@@ -658,7 +677,7 @@ public class AccountClosing {
                 AND income_per_person.transaktions_id = t.transaktions_id
                 AND income_per_person.split = TRUE
                 GROUP BY income_per_person.transaktions_id
-                """.formatted(sAbrMonat, KontenID));
+                """.formatted(sAbrMonat, bankAccountId));
 
         // get the the sum of partially assigned ammount for each received
         // transaktion_id
@@ -781,7 +800,7 @@ public class AccountClosing {
                     AND konten_id = %s
                     AND soll_haben = 's'
                     AND liqui_monat = '%s'
-                    """.formatted(monthlyFixedCost.eventId(), KontenID, sAbrMonat));
+                    """.formatted(monthlyFixedCost.eventId(), bankAccountId, sAbrMonat));
 
             // eventuelle Habenbuchungen für Monatsfixkostenermitteln
             // z.B. ein Rücküberweisung von zuviel überwiesenen HaushaltHolle Beträgen
@@ -792,7 +811,7 @@ public class AccountClosing {
                     AND konten_id = %s
                     AND soll_haben = 'h'
                     AND liqui_monat = '%s'
-                    """.formatted(monthlyFixedCost.eventId(), KontenID, sAbrMonat));
+                    """.formatted(monthlyFixedCost.eventId(), bankAccountId, sAbrMonat));
 
             // sowohl in getterHaben als auch in getter Soll kommt nur ein Datensatz raus
             // der kann aber NULL enthalten
@@ -873,7 +892,7 @@ public class AccountClosing {
                 AND transaktionen.konten_id = %s
                 AND transaktionen.transaktions_id = aufteilung.transaktions_id
                 AND aufteilung.liqui = TRUE
-                """.formatted(sh, sAbrMonat, KontenID));
+                """.formatted(sh, sAbrMonat, bankAccountId));
 
         try {
             getter.first();
@@ -907,7 +926,7 @@ public class AccountClosing {
                     AND gilt_bis >= '%s'
                     )
                 AND ereigniss_id NOT IN (47,52)
-                """.formatted(KontenID, sAbrMonat, sAbrMonat, sAbrMonat));
+                """.formatted(bankAccountId, sAbrMonat, sAbrMonat, sAbrMonat));
 
         // wenn keine Ausgaben (erkennbar an null im Objekt) dann 0.00 zurueckgeben
         try {
@@ -935,7 +954,7 @@ public class AccountClosing {
                 AND konten_id = %s
                 AND liqui_monat = '%s'
                 AND ereigniss_id NOT IN (52);
-                """.formatted(KontenID, sAbrMonat));
+                """.formatted(bankAccountId, sAbrMonat));
 
         // wenn keine Einnahmen (erkennbar an null im Objekt) dann 0.00 zurueckgeben
         try {
