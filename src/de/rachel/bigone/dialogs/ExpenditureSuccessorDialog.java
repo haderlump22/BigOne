@@ -321,6 +321,28 @@ public class ExpenditureSuccessorDialog {
             return false;
         }
 
+        // Some database fields only hold a certain number of characters.
+        if (expenditureSuccessorDescription.getText().length() <= 100) {
+            allIsCorrect = true;
+        } else {
+            valueCheckComment = "Ausgabenbezeichung enthält mehr als 100 Zeichen";
+            return false;
+        }
+
+        if (expenditureSuccessorDivideType.getText().length() <= 20) {
+            allIsCorrect = true;
+        } else {
+            valueCheckComment = "Aufteilungsart enthält mehr als 20 Zeichen";
+            return false;
+        }
+
+        if (expenditureSuccessorCommentArea.getText().length() <= 250) {
+            allIsCorrect = true;
+        } else {
+            valueCheckComment = "Hinweis enthält mehr als 250 Zeichen";
+            return false;
+        }
+
         return allIsCorrect;
     }
 
