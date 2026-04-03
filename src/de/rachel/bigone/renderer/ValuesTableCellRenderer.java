@@ -35,25 +35,25 @@ public class ValuesTableCellRenderer implements TableCellRenderer {
               label.setHorizontalAlignment(JLabel.RIGHT);
            }
            if(column == 1) {
-     	     label.setHorizontalAlignment(JLabel.CENTER);
-     	  }
+              label.setHorizontalAlignment(JLabel.CENTER);
+           }
            if(column == 2) {
-     	     label.setHorizontalAlignment(JLabel.CENTER);
-     	     label.setText(BigOneTools.datum_wandeln(value.toString(),1));
-     	  }
+              label.setHorizontalAlignment(JLabel.CENTER);
+              label.setText(BigOneTools.datum_wandeln(value.toString(),1));
+           }
            if(column == 3) {
               label.setHorizontalAlignment(JLabel.RIGHT);
               label.setText(value.toString().replace('.', ','));
            }
            if(column == 5) {
-     	     label.setHorizontalAlignment(JLabel.CENTER);
-     	     if(value != null) {//nur wenn es ein liquidatum gibt umwandeln
-     	    	 label.setText(BigOneTools.datum_wandeln(value.toString(),1));
-     	     }
-     	  }
+              label.setHorizontalAlignment(JLabel.CENTER);
+              if(value != null) {//nur wenn es ein liquidatum gibt umwandeln
+                  label.setText(BigOneTools.datum_wandeln(value.toString(),1));
+              }
+           }
            return label;
       } else {
-    	  return label;
+          return label;
       }
 
    }

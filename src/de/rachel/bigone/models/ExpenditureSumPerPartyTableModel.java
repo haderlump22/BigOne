@@ -82,6 +82,6 @@ public class ExpenditureSumPerPartyTableModel extends AbstractTableModel {
     public void aktualisiere() {
         tableData.clear();
         lese_werte();
-		fireTableDataChanged();
-	}
+        fireTableDataChanged();
+    }
 }

@@ -145,32 +145,32 @@ public class JointAccountClosingDetailTableSelectionListener implements ListSele
 
                 switch (sumOverviewType) {
                     case "planned+":
-						sumOverviewPositivePlanedValue.setFont(new Font(null, Font.BOLD, 14));
+                        sumOverviewPositivePlanedValue.setFont(new Font(null, Font.BOLD, 14));
                         sumOverviewNegativePlanedValue.setFont(new Font(null, Font.PLAIN, 14));
                         sumOverviewNegativeUnplanedValue.setFont(new Font(null, Font.PLAIN, 14));
                         sumOverviewPositiveUnplanedValue.setFont(new Font(null, Font.PLAIN, 14));
-						break;
-					case "planned-":
-						sumOverviewNegativePlanedValue.setFont(new Font(null, Font.BOLD, 14));
+                        break;
+                    case "planned-":
+                        sumOverviewNegativePlanedValue.setFont(new Font(null, Font.BOLD, 14));
                         sumOverviewNegativeUnplanedValue.setFont(new Font(null, Font.PLAIN, 14));
                         sumOverviewPositivePlanedValue.setFont(new Font(null, Font.PLAIN, 14));
                         sumOverviewPositiveUnplanedValue.setFont(new Font(null, Font.PLAIN, 14));
-						break;
-					case "unplanned+":
-						sumOverviewPositiveUnplanedValue.setFont(new Font(null, Font.BOLD, 14));
+                        break;
+                    case "unplanned+":
+                        sumOverviewPositiveUnplanedValue.setFont(new Font(null, Font.BOLD, 14));
                         sumOverviewNegativePlanedValue.setFont(new Font(null, Font.PLAIN, 14));
                         sumOverviewNegativeUnplanedValue.setFont(new Font(null, Font.PLAIN, 14));
                         sumOverviewPositivePlanedValue.setFont(new Font(null, Font.PLAIN, 14));
-						break;
-					case "unplanned-":
-						sumOverviewNegativeUnplanedValue.setFont(new Font(null, Font.BOLD, 14));
+                        break;
+                    case "unplanned-":
+                        sumOverviewNegativeUnplanedValue.setFont(new Font(null, Font.BOLD, 14));
                         sumOverviewNegativePlanedValue.setFont(new Font(null, Font.PLAIN, 14));
                         sumOverviewPositivePlanedValue.setFont(new Font(null, Font.PLAIN, 14));
                         sumOverviewPositiveUnplanedValue.setFont(new Font(null, Font.PLAIN, 14));
-						break;
-					default:
-						break;
-				}
+                        break;
+                    default:
+                        break;
+                }
             } else {
                 sumOverviewNegativePlanedValue.setFont(new Font(null, Font.PLAIN, 14));
                 sumOverviewNegativeUnplanedValue.setFont(new Font(null, Font.PLAIN, 14));

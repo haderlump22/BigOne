@@ -93,36 +93,36 @@ public class ExpenditureDetailTableMouseListener extends MouseAdapter {
         LocalDate newValidFromPeriod = LocalDate.parse(JOptionPane.showInputDialog("Bitte Periode angeben ab der die Werte gültig sind:", firstOfActualMonth.format(DateTimeFormatter.ofPattern("dd.MM.yyyy"))), DateTimeFormatter.ofPattern("dd.MM.yyyy"));
 
         // aktuell Prozentanteile der Parteien ermitteln
-		DBTools percentStatement = new DBTools(cn);
+        DBTools percentStatement = new DBTools(cn);
         Double sumOfAllIncome = 0.0;
         record PercentOfEachParty(Integer partyId, double percent) {};
         List<PercentOfEachParty> partyPercents = new ArrayList<>();
 
-		percentStatement.select("""
-				SELECT partei_id, sum(betrag) as betrag
-				FROM ha_gehaltsgrundlagen gg
-				WHERE gilt_bis IS NULL
-				GROUP BY partei_id
-				ORDER BY partei_id;
-				""");
+        percentStatement.select("""
+                SELECT partei_id, sum(betrag) as betrag
+                FROM ha_gehaltsgrundlagen gg
+                WHERE gilt_bis IS NULL
+                GROUP BY partei_id
+                ORDER BY partei_id;
+                """);
 
-		try {
+        try {
             // first get the Sum of all Incomes
-			percentStatement.beforeFirst();
+            percentStatement.beforeFirst();
 
-			while (percentStatement.next()) {
-				sumOfAllIncome = sumOfAllIncome + percentStatement.getDouble("betrag");
-			}
+            while (percentStatement.next()) {
+                sumOfAllIncome = sumOfAllIncome + percentStatement.getDouble("betrag");
+            }
 
             // then we calculate the actual percent of each Party
             percentStatement.beforeFirst();
 
-			while (percentStatement.next()) {
-				partyPercents.add(new PercentOfEachParty(percentStatement.getInt("partei_id"), percentStatement.getDouble("betrag") / sumOfAllIncome));
-			}
-		} catch (Exception e) {
-			System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "+e.getStackTrace()[0].getLineNumber()+"): " + e.toString());
-		}
+            while (percentStatement.next()) {
+                partyPercents.add(new PercentOfEachParty(percentStatement.getInt("partei_id"), percentStatement.getDouble("betrag") / sumOfAllIncome));
+            }
+        } catch (Exception e) {
+            System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "+e.getStackTrace()[0].getLineNumber()+"): " + e.toString());
+        }
 
         // die aktuellen Ausgaben die im Modus "Verhältnis" aufgeteilt werden
         // merken
@@ -131,14 +131,14 @@ public class ExpenditureDetailTableMouseListener extends MouseAdapter {
         LocalDate validFrom, String expenditureHint, Integer frequency) {};
         List<ActualRatioExpenditure> actualRatioExpenditure = new ArrayList<>();
 
-		expentitureBackup.select("""
-				SELECT "ausgabenId", bezeichnung, betrag, aufteilungsart, gilt_ab, bemerkung, haeufigkeit
+        expentitureBackup.select("""
+                SELECT "ausgabenId", bezeichnung, betrag, aufteilungsart, gilt_ab, bemerkung, haeufigkeit
                 FROM ha_ausgaben
                 WHERE aufteilungsart = 'V'
                 AND gilt_bis IS NULL;
-				""");
+                """);
 
-		try {
+        try {
             expentitureBackup.beforeFirst();
 
             while (expentitureBackup.next()) {
@@ -152,19 +152,19 @@ public class ExpenditureDetailTableMouseListener extends MouseAdapter {
             }
             System.out.println("Sicherheitsausgabe von zu verändernden Datensätzen:");
             System.out.println(actualRatioExpenditure);
-		} catch (Exception e) {
-			System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "+e.getStackTrace()[0].getLineNumber()+"): " + e.toString());
-		}
+        } catch (Exception e) {
+            System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "+e.getStackTrace()[0].getLineNumber()+"): " + e.toString());
+        }
 
         // aktuell gültige Verhältnissbeträge mit einem GiltBis Wert versehen
         DBTools expenditureUpdate = new DBTools(cn);
 
         if (!expenditureUpdate.update("""
-				UPDATE ha_ausgaben
+                UPDATE ha_ausgaben
                 SET gilt_bis = '%s'
                 WHERE aufteilungsart = 'V'
                 AND gilt_bis IS NULL;
-				""".formatted(newValidFromPeriod.minusMonths(1)))) {
+                """.formatted(newValidFromPeriod.minusMonths(1)))) {
             System.out.println("Fehler beim aktualisieren der alten Ausgabendatensätze vom Typ 'Verhältnis'");
             System.exit(1);
         }

@@ -85,7 +85,7 @@ public class ExpenditureDistributionTableModel extends AbstractTableModel {
     public void aktualisiere(Integer ExpenditureId) {
         // before adding new data, remove the old in the tableData List
         tableData.clear();
-		lese_werte(ExpenditureId);
-		fireTableDataChanged();
-	}
+        lese_werte(ExpenditureId);
+        fireTableDataChanged();
+    }
 }

@@ -19,47 +19,47 @@ import de.rachel.bigone.models.RacTableModel;
  * Kontobewegungen.
  */
 public class ComboTableCellEditor extends AbstractCellEditor implements TableCellEditor {
-	private JComboBox<String> component = new JComboBox<String>();
-	private boolean cellEditingStopped = false;
+    private JComboBox<String> component = new JComboBox<String>();
+    private boolean cellEditingStopped = false;
 
-	public ComboTableCellEditor() {
+    public ComboTableCellEditor() {
 
-		// notwendig damit eine Auswahl, für das Beenden des Editmodus der Zelle sorgt
-		component.addItemListener(new ItemListener() {
+        // notwendig damit eine Auswahl, für das Beenden des Editmodus der Zelle sorgt
+        component.addItemListener(new ItemListener() {
 
-			@Override
-			public void itemStateChanged(ItemEvent e) {
-				// cellEdititngStopped wird hier mit überprüft, damit, wenn ein Tastendruck die Änderung (auswahl eines anderen Elements)
-				// bewirkt, die Combobox nicht geschlossen wird
-				if (e.getStateChange() == ItemEvent.SELECTED && cellEditingStopped) {
-					fireEditingStopped();
-				}
-			}
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                // cellEdititngStopped wird hier mit überprüft, damit, wenn ein Tastendruck die Änderung (auswahl eines anderen Elements)
+                // bewirkt, die Combobox nicht geschlossen wird
+                if (e.getStateChange() == ItemEvent.SELECTED && cellEditingStopped) {
+                    fireEditingStopped();
+                }
+            }
         });
 
-		//test keylistener
-		component.addKeyListener(new KeyListener() {
+        //test keylistener
+        component.addKeyListener(new KeyListener() {
 
-			@Override
-			public void keyPressed(KeyEvent e) {
-				// damit das StateChange Event die cobobox nicht schliesst
-				cellEditingStopped = false;
-			}
+            @Override
+            public void keyPressed(KeyEvent e) {
+                // damit das StateChange Event die cobobox nicht schliesst
+                cellEditingStopped = false;
+            }
 
-			@Override
-			public void keyReleased(KeyEvent e) {
+            @Override
+            public void keyReleased(KeyEvent e) {
 
-			}
+            }
 
-			@Override
-			public void keyTyped(KeyEvent e) {
+            @Override
+            public void keyTyped(KeyEvent e) {
 
-			}
+            }
 
-		});
+        });
 
-		// auch wichtig damit der Editing Modus der Celle beendet wird
-		component.addPopupMenuListener(new PopupMenuListener() {
+        // auch wichtig damit der Editing Modus der Celle beendet wird
+        component.addPopupMenuListener(new PopupMenuListener() {
 
             @Override
             public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
@@ -69,56 +69,56 @@ public class ComboTableCellEditor extends AbstractCellEditor implements TableCel
             @Override
             public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
                 cellEditingStopped = true;
-				fireEditingStopped();
+                fireEditingStopped();
                 //fireEditingCanceled();
             }
 
             @Override
             public void popupMenuCanceled(PopupMenuEvent e) {
 
-			}
+            }
         });
-	}
+    }
 
-	public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int rowIndex,
-			int colIndex) {
-		Object[] listEntrys = ((RacTableModel) table.getModel()).getComponent();
+    public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int rowIndex,
+            int colIndex) {
+        Object[] listEntrys = ((RacTableModel) table.getModel()).getComponent();
 
-		// check if Combobox has elements
-		if (component.getItemCount() > 0) {
-			// check if the first entry in the combobox is different from the first entry in
-			// the provided list from the table model.
-			if (!listEntrys[0].equals(component.getItemAt(0))) {
-				component.removeAllItems();
+        // check if Combobox has elements
+        if (component.getItemCount() > 0) {
+            // check if the first entry in the combobox is different from the first entry in
+            // the provided list from the table model.
+            if (!listEntrys[0].equals(component.getItemAt(0))) {
+                component.removeAllItems();
 
-				// if it so, we rebuild the Items in the Combobox
-				for (Object entry : listEntrys) {
-					component.addItem((String) entry);
-				}
-			}
-		} else {
-			// fill Combobox first time
-			for (Object entry : listEntrys) {
-				component.addItem((String) entry);
-			}
-		}
+                // if it so, we rebuild the Items in the Combobox
+                for (Object entry : listEntrys) {
+                    component.addItem((String) entry);
+                }
+            }
+        } else {
+            // fill Combobox first time
+            for (Object entry : listEntrys) {
+                component.addItem((String) entry);
+            }
+        }
 
-		return component;
-	}
+        return component;
+    }
 
-	@Override
+    @Override
     public boolean stopCellEditing() {
         return cellEditingStopped;
     }
 
     public Object getCellEditorValue() {
-		//damit bei erneuter auswahl immer der erste eintrag selectiert ist
-    	//dieser kleine umweg
-    	// String strLager = new String(component.getSelectedItem().toString());
-    	// component.setSelectedIndex(0);
-		// return strLager;
+        //damit bei erneuter auswahl immer der erste eintrag selectiert ist
+        //dieser kleine umweg
+        // String strLager = new String(component.getSelectedItem().toString());
+        // component.setSelectedIndex(0);
+        // return strLager;
 
-		// die bisherige Auswahl soll bestehen bleiben
-		return component.getSelectedItem().toString();
+        // die bisherige Auswahl soll bestehen bleiben
+        return component.getSelectedItem().toString();
     }
 }

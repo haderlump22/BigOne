@@ -55,7 +55,7 @@ public class JointAccountClosingSumOverviewMouseListener extends MouseAdapter {
     private Integer[] getIdsOfSumSources(String sumType, String billingMonth) {
         DBTools getter = new DBTools(LoginCN);
 
-		getter.select("""
+        getter.select("""
                 SELECT ARRAY_AGG(ha_abschlusssummen."abschlussDetailId") idsOfSumSources
                 FROM ha_abschlusssummen, ha_abschlussdetails
                 WHERE ha_abschlusssummen."summenArt" = '%s'

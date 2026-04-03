@@ -92,6 +92,6 @@ public class SalaryBases {
         IncomeDetailTable.getColumnModel().getColumn(2).setMaxWidth(78);
 
         // selbst definierten Mouselistener hinzufügen
-		IncomeDetailTable.addMouseListener(new IncomeDetailTableMouseListener(IncomeDetailTable));
+        IncomeDetailTable.addMouseListener(new IncomeDetailTableMouseListener(IncomeDetailTable));
     }
 }

@@ -68,9 +68,9 @@ public class ExpenditureSuccessorDialog {
 
         createComponents();
 
-		createListeners();
+        createListeners();
 
-		// registerExistingListeners();
+        // registerExistingListeners();
 
         createLayout();
 
@@ -80,8 +80,8 @@ public class ExpenditureSuccessorDialog {
 
     private void createComponents() {
         expenditureSuccessorDialog = new JDialog(dialogOwner, "Nachfolger erstellen", true);
-		expenditureSuccessorDialog.setSize(350, 550);
-		expenditureSuccessorDialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+        expenditureSuccessorDialog.setSize(350, 550);
+        expenditureSuccessorDialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
         fontTxtFields = new Font("Arial", Font.PLAIN, 14);
 
@@ -150,7 +150,7 @@ public class ExpenditureSuccessorDialog {
         successorDivideTableScrollPane.setPreferredSize(new Dimension(300, 90));
 
         successorDivideTablePanel = new JPanel();
-		successorDivideTablePanel.setBorder(new TitledBorder("Nachfolger Aufteilung"));
+        successorDivideTablePanel.setBorder(new TitledBorder("Nachfolger Aufteilung"));
 
         saveExpenditureSuccessorButton = new JButton("Speichern");
         saveExpenditureSuccessorButton.setPreferredSize(new Dimension(100, 30));
@@ -203,77 +203,77 @@ public class ExpenditureSuccessorDialog {
         GridBagConstraints successorDividePanelLayoutConstraints = new GridBagConstraints();
         successorDivideTablePanel.setLayout(successorDividePanelLayout);
 
-		successorDividePanelLayoutConstraints.gridx = 0;
-		successorDividePanelLayoutConstraints.gridy = 0;
-		successorDividePanelLayoutConstraints.fill = GridBagConstraints.BOTH;
-		successorDivideTablePanel.add(successorDivideTableScrollPane, successorDividePanelLayoutConstraints);
-		// ---
+        successorDividePanelLayoutConstraints.gridx = 0;
+        successorDividePanelLayoutConstraints.gridy = 0;
+        successorDividePanelLayoutConstraints.fill = GridBagConstraints.BOTH;
+        successorDivideTablePanel.add(successorDivideTableScrollPane, successorDividePanelLayoutConstraints);
+        // ---
 
-		// ---
-		GridBagLayout expenditureLayout = new GridBagLayout();
-		GridBagConstraints expenditureLayoutConstraints = new GridBagConstraints();
-		expenditureSuccessorDialog.setLayout(expenditureLayout);
-
-        expenditureLayoutConstraints.gridx = 0;
-		expenditureLayoutConstraints.gridy = 0;
-		expenditureLayoutConstraints.anchor = GridBagConstraints.WEST;
-		expenditureSuccessorDialog.add(expenditureSuccessorDescriptionLabel, expenditureLayoutConstraints);
+        // ---
+        GridBagLayout expenditureLayout = new GridBagLayout();
+        GridBagConstraints expenditureLayoutConstraints = new GridBagConstraints();
+        expenditureSuccessorDialog.setLayout(expenditureLayout);
 
         expenditureLayoutConstraints.gridx = 0;
-		expenditureLayoutConstraints.gridy = 1;
-		expenditureLayoutConstraints.anchor = GridBagConstraints.WEST;
-		expenditureSuccessorDialog.add(expenditureSuccessorAmountLabel, expenditureLayoutConstraints);
+        expenditureLayoutConstraints.gridy = 0;
+        expenditureLayoutConstraints.anchor = GridBagConstraints.WEST;
+        expenditureSuccessorDialog.add(expenditureSuccessorDescriptionLabel, expenditureLayoutConstraints);
 
         expenditureLayoutConstraints.gridx = 0;
-		expenditureLayoutConstraints.gridy = 2;
-		expenditureLayoutConstraints.anchor = GridBagConstraints.WEST;
-		expenditureSuccessorDialog.add(expenditureSuccessorDivideTypeLabel, expenditureLayoutConstraints);
+        expenditureLayoutConstraints.gridy = 1;
+        expenditureLayoutConstraints.anchor = GridBagConstraints.WEST;
+        expenditureSuccessorDialog.add(expenditureSuccessorAmountLabel, expenditureLayoutConstraints);
 
         expenditureLayoutConstraints.gridx = 0;
-		expenditureLayoutConstraints.gridy = 3;
-		expenditureLayoutConstraints.anchor = GridBagConstraints.WEST;
-		expenditureSuccessorDialog.add(expenditureSuccessorValidFromLabel, expenditureLayoutConstraints);
+        expenditureLayoutConstraints.gridy = 2;
+        expenditureLayoutConstraints.anchor = GridBagConstraints.WEST;
+        expenditureSuccessorDialog.add(expenditureSuccessorDivideTypeLabel, expenditureLayoutConstraints);
 
         expenditureLayoutConstraints.gridx = 0;
-		expenditureLayoutConstraints.gridy = 4;
-		expenditureLayoutConstraints.anchor = GridBagConstraints.WEST;
-		expenditureSuccessorDialog.add(expenditureSuccessorCommentLabel, expenditureLayoutConstraints);
+        expenditureLayoutConstraints.gridy = 3;
+        expenditureLayoutConstraints.anchor = GridBagConstraints.WEST;
+        expenditureSuccessorDialog.add(expenditureSuccessorValidFromLabel, expenditureLayoutConstraints);
 
         expenditureLayoutConstraints.gridx = 0;
-		expenditureLayoutConstraints.gridy = 5;
-		expenditureLayoutConstraints.anchor = GridBagConstraints.WEST;
-		expenditureSuccessorDialog.add(expenditureSuccessorFrequencyLabel, expenditureLayoutConstraints);
+        expenditureLayoutConstraints.gridy = 4;
+        expenditureLayoutConstraints.anchor = GridBagConstraints.WEST;
+        expenditureSuccessorDialog.add(expenditureSuccessorCommentLabel, expenditureLayoutConstraints);
+
+        expenditureLayoutConstraints.gridx = 0;
+        expenditureLayoutConstraints.gridy = 5;
+        expenditureLayoutConstraints.anchor = GridBagConstraints.WEST;
+        expenditureSuccessorDialog.add(expenditureSuccessorFrequencyLabel, expenditureLayoutConstraints);
 
         expenditureLayoutConstraints.gridx = 1;
-		expenditureLayoutConstraints.gridy = 0;
+        expenditureLayoutConstraints.gridy = 0;
         expenditureLayoutConstraints.insets = new Insets(0, 20, 5, 0);
-		expenditureLayoutConstraints.anchor = GridBagConstraints.WEST;
-		expenditureSuccessorDialog.add(expenditureSuccessorDescription, expenditureLayoutConstraints);
+        expenditureLayoutConstraints.anchor = GridBagConstraints.WEST;
+        expenditureSuccessorDialog.add(expenditureSuccessorDescription, expenditureLayoutConstraints);
 
         expenditureLayoutConstraints.gridx = 1;
-		expenditureLayoutConstraints.gridy = 1;
-		expenditureLayoutConstraints.anchor = GridBagConstraints.WEST;
-		expenditureSuccessorDialog.add(expenditureSuccessorAmount, expenditureLayoutConstraints);
+        expenditureLayoutConstraints.gridy = 1;
+        expenditureLayoutConstraints.anchor = GridBagConstraints.WEST;
+        expenditureSuccessorDialog.add(expenditureSuccessorAmount, expenditureLayoutConstraints);
 
         expenditureLayoutConstraints.gridx = 1;
-		expenditureLayoutConstraints.gridy = 2;
-		expenditureLayoutConstraints.anchor = GridBagConstraints.WEST;
-		expenditureSuccessorDialog.add(expenditureSuccessorDivideType, expenditureLayoutConstraints);
+        expenditureLayoutConstraints.gridy = 2;
+        expenditureLayoutConstraints.anchor = GridBagConstraints.WEST;
+        expenditureSuccessorDialog.add(expenditureSuccessorDivideType, expenditureLayoutConstraints);
 
         expenditureLayoutConstraints.gridx = 1;
-		expenditureLayoutConstraints.gridy = 3;
-		expenditureLayoutConstraints.anchor = GridBagConstraints.WEST;
-		expenditureSuccessorDialog.add(expenditureSuccessorValidFrom, expenditureLayoutConstraints);
+        expenditureLayoutConstraints.gridy = 3;
+        expenditureLayoutConstraints.anchor = GridBagConstraints.WEST;
+        expenditureSuccessorDialog.add(expenditureSuccessorValidFrom, expenditureLayoutConstraints);
 
         expenditureLayoutConstraints.gridx = 1;
-		expenditureLayoutConstraints.gridy = 4;
-		expenditureLayoutConstraints.anchor = GridBagConstraints.WEST;
-		expenditureSuccessorDialog.add(expenditureSuccessorCommentAreaScrollPane, expenditureLayoutConstraints);
+        expenditureLayoutConstraints.gridy = 4;
+        expenditureLayoutConstraints.anchor = GridBagConstraints.WEST;
+        expenditureSuccessorDialog.add(expenditureSuccessorCommentAreaScrollPane, expenditureLayoutConstraints);
 
         expenditureLayoutConstraints.gridx = 1;
-		expenditureLayoutConstraints.gridy = 5;
-		expenditureLayoutConstraints.anchor = GridBagConstraints.WEST;
-		expenditureSuccessorDialog.add(expenditureSuccessorFrequency, expenditureLayoutConstraints);
+        expenditureLayoutConstraints.gridy = 5;
+        expenditureLayoutConstraints.anchor = GridBagConstraints.WEST;
+        expenditureSuccessorDialog.add(expenditureSuccessorFrequency, expenditureLayoutConstraints);
 
         expenditureLayoutConstraints.insets = new Insets(0, 0, 0, 0);
 
