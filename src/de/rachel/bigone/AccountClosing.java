@@ -78,6 +78,7 @@ public class AccountClosing {
                         """);
 
         try {
+            getBankAccount.first();
             bankAccountId = getBankAccount.getInt("konten_id");
         } catch (SQLException e) {
             // TODO Auto-generated catch block
