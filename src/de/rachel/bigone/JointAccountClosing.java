@@ -51,7 +51,7 @@ public class JointAccountClosing {
 	private JScrollPane jointAccountClosingDetailScrollPane, eventExpenditureAmountPlanInfoAreaScrollPane,
 			eventInfoAreaAccountClosingScrollPane, jointAccountClosingBalanceAllocationOverviewScrollPane;
 	private JTextArea eventExpenditureAmountPlanInfoArea, eventInfoAreaAccountClosing;
-	private JLabel sumOverviewNegativeLabel, sumOverviewPositiveLabel, sumOverviewPlanedLabel, sumOverviewUnplanedLabel, closingComment;
+	private JLabel sumOverviewNegativeLabel, sumOverviewPositiveLabel, sumOverviewPlanedLabel, sumOverviewUnplanedLabel, closingCommentLabel;
 	private JointAccountClosingSumOverviewMouseListener sumOverviewMouseListener;
 	private JButton closeBillingMonth;
 	private boolean billingMonthAlreadyClosed = false;
@@ -192,9 +192,9 @@ public class JointAccountClosing {
 		// we can close them
 		closeBillingMonth.setEnabled(false);
 
-        closingComment = new JLabel();
-        closingComment.setPreferredSize(new Dimension(70, 25));
-		closingComment.setFont(fontTxtFields);
+        closingCommentLabel = new JLabel();
+        closingCommentLabel.setPreferredSize(new Dimension(70, 25));
+		closingCommentLabel.setFont(fontTxtFields);
     }
 
 	private void createListeners() {
@@ -229,8 +229,8 @@ public class JointAccountClosing {
 						billingMonthAlreadyClosed = false;
 
                         // And of course, there are no closing comments.
-                        closingComment.setText("");
-                        closingComment.setToolTipText("");
+                        closingCommentLabel.setText("");
+                        closingCommentLabel.setToolTipText("");
 
 						int result = JOptionPane.showConfirmDialog(null, "Es sind noch keine Daten für den Abrechnungsmontat zusammengestellt worden!\nSoll das jetzt gemacht werden?", "Abschluss initieren", JOptionPane.YES_NO_CANCEL_OPTION);
 
@@ -284,6 +284,8 @@ public class JointAccountClosing {
 					// disable the possibility to close the actual Billing Month again
 					billingMonthAlreadyClosed = true;
 					closeBillingMonth.setEnabled(false);
+                    closingCommentLabel.setText(closingComment);
+                    closingCommentLabel.setToolTipText(closingComment);
 				}
 			}
 		});
@@ -428,7 +430,7 @@ public class JointAccountClosing {
 		gbc.gridy = 4;
         gbc.gridwidth = 3;
 		gbc.insets = new Insets(15, 20, 0, 0);
-		jointAccountClosingWindow.add(closingComment, gbc);
+		jointAccountClosingWindow.add(closingCommentLabel, gbc);
 
 		// reset insets
 		gbc.insets = new Insets(0, 0, 0, 0);
@@ -600,8 +602,8 @@ public class JointAccountClosing {
 
                     // the closingComment is already in every data record. (need to fix, so that give a separate Table with this closing Comment???)
                     dbTools.first();
-                    closingComment.setText(dbTools.getString("abschlussBemerkung"));
-                    closingComment.setToolTipText(dbTools.getString("abschlussBemerkung"));
+                    closingCommentLabel.setText(dbTools.getString("abschlussBemerkung"));
+                    closingCommentLabel.setToolTipText(dbTools.getString("abschlussBemerkung"));
 				} catch (Exception e) {
 					System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "
 							+ e.getStackTrace()[0].getLineNumber() + "): " + e.toString());
