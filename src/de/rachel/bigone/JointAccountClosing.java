@@ -251,7 +251,11 @@ public class JointAccountClosing {
         closeBillingMonth.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ae) {
                 // We need a closing comment (in the current state of the program, it is stored in each party's closing record => later we can store it in a separate table... maybe)
-                String closingComment = JOptionPane.showInputDialog("Bitte einen Abschlusskommentar eingeben:", "normale Aufteilung und jeder zahlt seinen Betrag nach");
+                String closingComment = "";
+
+                while (closingComment.length() == 0 || closingComment.length() > 250) {
+                    closingComment = JOptionPane.showInputDialog("Bitte einen Abschlusskommentar eingeben (max 250 Zeichen):", "normale Aufteilung und jeder zahlt seinen Betrag nach");
+                }
 
                 StringBuilder jointAccountClosingBalanceAllocationOverviewDetailTableImportData = new StringBuilder();
                 // first get the Values from the Tabel Model that Values already is displayed
