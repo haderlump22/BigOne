@@ -954,8 +954,15 @@ public class AccountClosing {
                 WHERE soll_haben = 'h'
                 AND konten_id = %s
                 AND liqui_monat = '%s'
+                AND ereigniss_id NOT IN
+                    (
+                    SELECT ereigniss_id
+                    FROM mtlausgaben
+                    WHERE gilt_ab <= '%s'
+                    AND gilt_bis >= '%s'
+                    )
                 AND ereigniss_id NOT IN (52);
-                """.formatted(bankAccountId, sAbrMonat));
+                """.formatted(bankAccountId, sAbrMonat, sAbrMonat, sAbrMonat));
 
         // wenn keine Einnahmen (erkennbar an null im Objekt) dann 0.00 zurueckgeben
         try {
