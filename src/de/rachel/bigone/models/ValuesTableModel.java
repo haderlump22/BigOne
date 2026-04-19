@@ -160,7 +160,7 @@ public class ValuesTableModel extends AbstractTableModel {
                         (getter.getDate("datum")).toLocalDate(),
                         getter.getDouble("betrag"),
                         getter.getString("buchtext"),
-                        (getter.getDate("liqui_monat")).toLocalDate(),
+                        (getter.getDate("liqui_monat") != null) ? (getter.getDate("liqui_monat")).toLocalDate() : null,
                         getter.getString("ereignis")));
             }
         } catch (Exception e) {

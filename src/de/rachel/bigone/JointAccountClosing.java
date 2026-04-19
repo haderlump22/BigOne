@@ -72,7 +72,7 @@ public class JointAccountClosing {
 
     private void createComponents() {
         jointAccountClosingWindow = new JFrame("Haushaltskontoabschluss");
-        jointAccountClosingWindow.setSize(900, 680);
+        jointAccountClosingWindow.setSize(720, 490);
         jointAccountClosingWindow.setLocation(200, 200);
         jointAccountClosingWindow.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         jointAccountClosingWindow.setResizable(true);
