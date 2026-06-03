@@ -676,6 +676,11 @@ public class JointAccountClosing {
                 ORDER BY ha_kategorie.kategoriebezeichnung ASC
                 """.formatted(billingMonth));
 
+
+        // fixme => we must add planed Values that are not taken from the Account in this Month
+        // for example water Costs that in case of yearly invoicing are suspended at a month
+        // so we has that money over but without Hint at this time
+
         // group the incomes and expenditure Values from the temp table
         dbTool.select("""
                 SELECT kategoriebezeichnung, SUM(sum)
