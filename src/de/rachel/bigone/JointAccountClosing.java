@@ -1,6 +1,7 @@
 package de.rachel.bigone;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -676,11 +677,6 @@ public class JointAccountClosing {
                 ORDER BY ha_kategorie.kategoriebezeichnung ASC
                 """.formatted(billingMonth));
 
-
-        // fixme => we must add planed Values that are not taken from the Account in this Month
-        // for example water Costs that in case of yearly invoicing are suspended at a month
-        // so we has that money over but without Hint at this time
-
         // group the incomes and expenditure Values from the temp table
         dbTool.select("""
                 SELECT kategoriebezeichnung, SUM(sum)
@@ -689,7 +685,7 @@ public class JointAccountClosing {
                 ORDER BY 1
                 """);
 
-        // and put them into a local record
+        // search for planed Values for each summerized categorie
         try {
             dbTool.beforeFirst();
 
@@ -702,10 +698,42 @@ public class JointAccountClosing {
                     (dbTool.getDouble("sum") - (!dbTool.getString("kategoriebezeichnung").equals("Einzahlung") ? (planedValue * -1) : (planedValue))) + ",'" +
                     billingMonth + "'," +
                     "NULL),");
+            }
 
-                // jointAccountDetailData.add(
-                //         new JointAccountClosingDetailTableRow(0, dbTool.getString("kategoriebezeichnung"),
-                //                 dbTool.getDouble("sum"), (planedValue * -1), dbTool.getDouble("sum") - (planedValue * -1)));
+            // Looking for planned values ​​that did not actually occur this month, even though they should have.
+            dbTool.select("""
+                    SELECT bezeichnung, betrag planedValue, haeufigkeit
+                    FROM ha_ausgaben
+                    WHERE gilt_ab <= '%s'
+                    AND (gilt_bis >= '%s' OR gilt_bis IS NULL)
+                    AND bezeichnung not in
+                    (
+                        SELECT kategoriebezeichnung from closedetail
+                        GROUP BY kategoriebezeichnung
+                    )
+                    """.formatted(billingMonth, billingMonth));
+
+            if (dbTool.getRowCount() > 0) {
+                try {
+                    dbTool.beforeFirst();
+
+                    while (dbTool.next()) {
+                        if (dbTool.getInt("haeufigkeit") == 1) {
+                            jointAccountDetailSqlValueData.append("('" +  dbTool.getString("bezeichnung") + "'," +
+                            "0.0" + "," +
+                            dbTool.getDouble("planedValue") + "," +
+                            (dbTool.getDouble("planedValue") - 0) + ",'" +
+                            billingMonth + "'," +
+                            "NULL),");
+                        } else {
+                            // FIX ME
+                            // we need a workflow for Planed Values that not came everey Month
+                        }
+                    }
+                } catch (SQLException e) {
+                    System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "
+                        + e.getStackTrace()[0].getLineNumber() + "): " + e.toString());
+                }
             }
 
             // delete the last Commata from the sql Value String
@@ -718,10 +746,6 @@ public class JointAccountClosing {
 
         // drop the temp table after we save the data in to our own record
         dbTool.update("DROP TABLE closedetail");
-
-        // for (JointAccountClosingDetailTableRow row : jointAccountDetailData) {
-
-        // }
 
         // now we push the Data into the db Table
         dbTool.insert("""
@@ -748,7 +772,7 @@ public class JointAccountClosing {
         Double planedValue = 0.0;
 
         // the category "Einzahlung" is a special one
-        // the plan amount for this ist a sum of all valid expenditures
+        // the plan amount for this is a sum of all valid expenditures
         if (categoryName.equals("Einzahlung")) {
             dbTool.select("""
                     SELECT sum(betrag) betrag
