@@ -19,7 +19,7 @@ import org.json.simple.parser.ParseException;
  */
 public class Config {
     private String DbDrv, DbUrl, DbName, DbUserName, DbPw;
-    private boolean devMode = false;
+    private boolean devMode = true;
     private File configDir, configFile;
 
     Config() {

@@ -198,16 +198,16 @@ public class RacTableModel extends AbstractTableModel{
 
         // if the iban is from an jointAccount the Accountevents will be get from another table
         if (isJointAccount) {
-            getter.select("SELECT ha_kategorie_id, kategoriebezeichnung FROM ha_kategorie ORDER BY 2");
+            getter.select("SELECT kategoriebezeichnung || ' (' || ha_kategorie_id || ')' entrysForCategory FROM ha_kategorie ORDER BY 1");
         } else {
-            getter.select("SELECT ereigniss_id, ereigniss_krzbez FROM kontenereignisse WHERE gueltig = 'TRUE' ORDER BY 2");
+            getter.select("SELECT ereigniss_krzbez || ' (' || ereigniss_id || ')' entrysForCategory FROM kontenereignisse WHERE gueltig = 'TRUE' ORDER BY 1");
         }
 
         try {
             getter.beforeFirst();
 
             while (getter.next()) {
-                componentList.add(getter.getString(isJointAccount ? "kategoriebezeichnung" : "ereigniss_krzbez") + " (" + getter.getString(isJointAccount ? "ha_kategorie_id" : "ereigniss_id")+")");
+                componentList.add(getter.getString("entrysForCategory"));
             }
         } catch (Exception e) {
             System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "+e.getStackTrace()[0].getLineNumber()+"): " + e.toString());

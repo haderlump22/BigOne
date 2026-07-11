@@ -50,6 +50,9 @@ public class ReadCamt {
     private Connection cn = null;
     private FileInputStream fis;
     private List<RacTableRow> buchungen = new ArrayList<>();
+    private LocalDate valueDate, billingMonth;
+    private String cdtDbtInd, cdtDbtName, comment, bookingEvent;
+    private Double amount;
 
     ReadCamt(String PathAndFile, Connection LoginCN) {
         this.cn = LoginCN;
@@ -84,18 +87,24 @@ public class ReadCamt {
                                 NodeList rows = KontoAuszug.getElementsByTagName("Ntry");
 
                                 for (int i = 0; i < rows.getLength(); i++) {
-                                    buchungen.add(new RacTableRow(LocalDate.parse(findSubs(rows.item(i), NodeToFind[0], "").trim()),
-                                            findSubs(rows.item(i), NodeToFind[1], "").trim().equals("CRDT") ? "h" : "s",
-                                            findSubs(rows.item(i), NodeToFind[1], "").trim().equals("CRDT")
-                                                ? findSubs(rows.item(i), NodeToFind[5], "").trim()
-                                                : findSubs(rows.item(i), NodeToFind[4], "").trim() + "/" + findSubs(rows.item(i), NodeToFind[6], "").trim(),
-                                            Double.valueOf(findSubs(rows.item(i), NodeToFind[2], "").trim()),
-                                            findSubs(rows.item(i), NodeToFind[3], "").trim() + " (" + (
+                                    valueDate = LocalDate.parse(findSubs(rows.item(i), NodeToFind[0], "").trim());
+                                    cdtDbtInd = findSubs(rows.item(i), NodeToFind[1], "").trim().equals("CRDT") ? "h"
+                                            : "s";
+                                    cdtDbtName = findSubs(rows.item(i), NodeToFind[1], "").trim().equals("CRDT")
+                                            ? findSubs(rows.item(i), NodeToFind[5], "").trim()
+                                            : findSubs(rows.item(i), NodeToFind[4], "").trim() + "/"
+                                                    + findSubs(rows.item(i), NodeToFind[6], "").trim();
+                                    amount = Double.valueOf(findSubs(rows.item(i), NodeToFind[2], "").trim());
+
+                                    comment = findSubs(rows.item(i), NodeToFind[3], "").trim() + " (" + (
                                                 findSubs(rows.item(i), NodeToFind[1], "").trim().equals("CRDT")
                                                     ? findSubs(rows.item(i), NodeToFind[5], "").trim()
-                                                    : findSubs(rows.item(i), NodeToFind[4], "").trim() + "/" + findSubs(rows.item(i), NodeToFind[6], "").trim()) + ")",
-                                            LocalDate.parse((findSubs(rows.item(i), NodeToFind[0], "").trim()).substring(0, 8) + "01"),
-                                            isJointAccount ? "Haushalt (13)" : "HaushGeld (46)"));
+                                                    : findSubs(rows.item(i), NodeToFind[4], "").trim() + "/" + findSubs(rows.item(i), NodeToFind[6], "").trim()) + ")";
+
+                                    billingMonth = LocalDate.parse((findSubs(rows.item(i), NodeToFind[0], "").trim()).substring(0, 8) + "01");
+                                    bookingEvent = getPossibleEventId(comment);
+
+                                    buchungen.add(new RacTableRow(valueDate, cdtDbtInd, cdtDbtName, amount, comment, billingMonth, bookingEvent));
                                 }
                             }
                         }
@@ -132,18 +141,24 @@ public class ReadCamt {
                 NodeList rows = KontoAuszug.getElementsByTagName("Ntry");
 
                 for (int i = 0; i < rows.getLength(); i++) {
-                    buchungen.add(new RacTableRow(LocalDate.parse(findSubs(rows.item(i), NodeToFind[0], "").trim()),
-                            findSubs(rows.item(i), NodeToFind[1], "").trim().equals("CRDT") ? "h" : "s",
-                            findSubs(rows.item(i), NodeToFind[1], "").trim().equals("CRDT")
-                                    ? findSubs(rows.item(i), NodeToFind[5], "").trim()
-                                    : findSubs(rows.item(i), NodeToFind[4], "").trim() + "/" + findSubs(rows.item(i), NodeToFind[6], "").trim(),
-                            Double.valueOf(findSubs(rows.item(i), NodeToFind[2], "").trim()),
-                            findSubs(rows.item(i), NodeToFind[3], "").trim() + " (" + (
+                    valueDate = LocalDate.parse(findSubs(rows.item(i), NodeToFind[0], "").trim());
+                    cdtDbtInd = findSubs(rows.item(i), NodeToFind[1], "").trim().equals("CRDT") ? "h"
+                            : "s";
+                    cdtDbtName = findSubs(rows.item(i), NodeToFind[1], "").trim().equals("CRDT")
+                            ? findSubs(rows.item(i), NodeToFind[5], "").trim()
+                            : findSubs(rows.item(i), NodeToFind[4], "").trim() + "/"
+                                    + findSubs(rows.item(i), NodeToFind[6], "").trim();
+                    amount = Double.valueOf(findSubs(rows.item(i), NodeToFind[2], "").trim());
+
+                    comment = findSubs(rows.item(i), NodeToFind[3], "").trim() + " (" + (
                                 findSubs(rows.item(i), NodeToFind[1], "").trim().equals("CRDT")
                                     ? findSubs(rows.item(i), NodeToFind[5], "").trim()
-                                    : findSubs(rows.item(i), NodeToFind[4], "").trim() + "/" + findSubs(rows.item(i), NodeToFind[6], "").trim()) + ")",
-                            LocalDate.parse((findSubs(rows.item(i), NodeToFind[0], "").trim()).substring(0, 8) + "01"),
-                            isJointAccount ? "Haushalt (13)" : "HaushGeld (46)"));
+                                    : findSubs(rows.item(i), NodeToFind[4], "").trim() + "/" + findSubs(rows.item(i), NodeToFind[6], "").trim()) + ")";
+
+                    billingMonth = LocalDate.parse((findSubs(rows.item(i), NodeToFind[0], "").trim()).substring(0, 8) + "01");
+                    bookingEvent = getPossibleEventId(comment);
+
+                    buchungen.add(new RacTableRow(valueDate, cdtDbtInd, cdtDbtName, amount, comment, billingMonth, bookingEvent));
                 }
             }
         } else {
@@ -409,17 +424,20 @@ public class ReadCamt {
 //                                                                                         // deshalb wird der selbe wert
 
                 // to reduce the code we define some Values here                                                                        // gelesen
-                LocalDate valueDate = LocalDate.parse(csvContent[i].split(";")[1],DateTimeFormatter.ofPattern("d.M.yyyy"));
+                valueDate = LocalDate.parse(csvContent[i].split(";")[1], DateTimeFormatter.ofPattern("d.M.yyyy"));
+                cdtDbtInd = !(csvContent[i].split(";")[7].startsWith("-")) ? "h" : "s";
+                cdtDbtName = csvContent[i].split(";")[2];
+                amount = (csvContent[i].split(";")[7].startsWith("-")
+                        ? Double.valueOf(
+                                csvContent[i].split(";")[7].replace("-", "").replace(".", "").replaceAll(",", "."))
+                        : Double.valueOf(csvContent[i].split(";")[7].replace(".", "").replaceAll(",", ".")));
 
-                buchungen.add(new RacTableRow(valueDate,
-                        !(csvContent[i].split(";")[7].startsWith("-")) ? "h" : "s",
-                        csvContent[i].split(";")[2],
-                        (csvContent[i].split(";")[7].startsWith("-")
-                            ? Double.valueOf(csvContent[i].split(";")[7].replace("-", "").replace(".", "").replaceAll(",", "."))
-                            : Double.valueOf(csvContent[i].split(";")[7].replace(".", "").replaceAll(",", "."))),
-                        csvContent[i].split(";")[4] + " (" + csvContent[i].split(";")[2] + ")",
-                        valueDate.minusDays(valueDate.getDayOfMonth() - 1),
-                        isJointAccount ? "Haushalt (13)" : "HaushGeld (46)"));
+                comment = csvContent[i].split(";")[4] + " (" + csvContent[i].split(";")[2] + ")";
+
+                billingMonth = valueDate.minusDays(valueDate.getDayOfMonth() - 1);
+                bookingEvent = getPossibleEventId(comment);
+
+                buchungen.add(new RacTableRow(valueDate, cdtDbtInd, cdtDbtName, amount, comment, billingMonth, bookingEvent));
             }
         } else {
             System.err.println("FEHLER!!! In CSV Datei keine Zeile gefunden die dem Regex \"" + HeaderRowStartsWith
@@ -498,17 +516,20 @@ public class ReadCamt {
             //                                                                         // gelesen
 
             // to reduce the code we define some Values here                                                                        // gelesen
-            LocalDate valueDate = LocalDate.parse(csvContent[i].split(";")[1],DateTimeFormatter.ofPattern("d.M.yyyy"));
+            valueDate = LocalDate.parse(csvContent[i].split(";")[1], DateTimeFormatter.ofPattern("d.M.yyyy"));
+            cdtDbtInd = !(csvContent[i].split(";")[11].startsWith("-")) ? "h" : "s";
+            cdtDbtName = csvContent[i].split(";")[3];
+            amount = (csvContent[i].split(";")[11].startsWith("-")
+                    ? Double.valueOf(
+                            csvContent[i].split(";")[11].replace("-", "").replace(".", "").replaceAll(",", "."))
+                    : Double.valueOf(csvContent[i].split(";")[11].replace(".", "").replaceAll(",", ".")));
 
-            buchungen.add(new RacTableRow(valueDate,
-                    !(csvContent[i].split(";")[11].startsWith("-")) ? "h" : "s",
-                    csvContent[i].split(";")[3],
-                    (csvContent[i].split(";")[11].startsWith("-")
-                        ? Double.valueOf(csvContent[i].split(";")[11].replace("-","").replace(".", "").replaceAll(",", "."))
-                        : Double.valueOf(csvContent[i].split(";")[11].replace(".", "").replaceAll(",", "."))),
-                    csvContent[i].split(";")[4] + " (" + csvContent[i].split(";")[3] + ")",
-                    valueDate.minusDays(valueDate.getDayOfMonth() - 1),
-                    isJointAccount ? "Haushalt (13)" : "HaushGeld (46)"));
+            comment = csvContent[i].split(";")[4] + " (" + csvContent[i].split(";")[3] + ")";
+
+            billingMonth = valueDate.minusDays(valueDate.getDayOfMonth() - 1);
+            bookingEvent = getPossibleEventId(comment);
+
+            buchungen.add(new RacTableRow(valueDate, cdtDbtInd, cdtDbtName, amount, comment, billingMonth, bookingEvent));
         }
     }
 
@@ -623,5 +644,44 @@ public class ReadCamt {
 
     public List<RacTableRow> getBuchungen() {
         return buchungen;
+    }
+
+    private String getPossibleEventId(String bookingComment) {
+        DBTools getter = new DBTools(cn);
+        String foundBookingEvent = "";
+
+        if (isJointAccount) {
+            getter.select("""
+                SELECT ha_kategorie.kategoriebezeichnung || ' (' || ha_kategorie_regex.ha_kategorie_id || ')' ereignisKurzform
+                FROM ha_kategorie_regex, ha_kategorie
+                WHERE '%s' ~* regex_value
+                AND ha_kategorie.ha_kategorie_id = ha_kategorie_regex.ha_kategorie_id
+                GROUP BY ha_kategorie.kategoriebezeichnung, ha_kategorie_regex.ha_kategorie_id
+                """.formatted(bookingComment));
+        } else {
+            getter.select("""
+                SELECT kontenereignisse.ereigniss_krzbez || ' (' || kontenereignisse_regex.ereigniss_id || ')' ereignisKurzform
+                FROM kontenereignisse_regex, kontenereignisse
+                WHERE '%s' ~* regex_value
+                AND kontenereignisse.ereigniss_id = kontenereignisse_regex.ereigniss_id
+                GROUP BY kontenereignisse.ereigniss_krzbez, kontenereignisse_regex.ereigniss_id
+                """.formatted(bookingComment));
+        }
+
+        try {
+            if (getter.getRowCount() == 0 || getter.getRowCount() > 1) {
+                foundBookingEvent = isJointAccount ? "Haushalt (13)" : "HaushGeld (46)";
+            } else {
+                getter.first();
+                foundBookingEvent = getter.getString("ereignisKurzform");
+            }
+
+        } catch (SQLException e) {
+            System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "
+                    + e.getStackTrace()[0].getLineNumber() + "): " + e.toString());
+            System.exit(1);
+        }
+
+        return foundBookingEvent;
     }
 }
