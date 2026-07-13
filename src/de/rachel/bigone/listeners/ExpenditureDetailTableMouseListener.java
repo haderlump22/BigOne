@@ -43,7 +43,6 @@ public class ExpenditureDetailTableMouseListener extends MouseAdapter {
                 createNewSuccessorData(dialog.getNewDescription(), dialog.getNewAmount(), dialog.getNewDivideType(),
                         dialog.getNewValidFrom(), dialog.getNewComment(), dialog.getNewSuccessorDivideTableData(), dialog.getSuccessorToId(), dialog.getFrequency());
 
-                // ((ExpenditureDetailTableModel)expenditureDetailTable.getModel()).aktualisiere();
                 expenditureUi.refreshContent();
             }
         });
@@ -219,7 +218,6 @@ public class ExpenditureDetailTableMouseListener extends MouseAdapter {
             }
         }
 
-        // refresh the detailTable
         expenditureUi.refreshContent();
     }
 

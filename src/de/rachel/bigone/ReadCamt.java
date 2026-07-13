@@ -87,23 +87,7 @@ public class ReadCamt {
                                 NodeList rows = KontoAuszug.getElementsByTagName("Ntry");
 
                                 for (int i = 0; i < rows.getLength(); i++) {
-                                    valueDate = LocalDate.parse(findSubs(rows.item(i), NodeToFind[0], "").trim());
-                                    cdtDbtInd = findSubs(rows.item(i), NodeToFind[1], "").trim().equals("CRDT") ? "h"
-                                            : "s";
-                                    cdtDbtName = findSubs(rows.item(i), NodeToFind[1], "").trim().equals("CRDT")
-                                            ? findSubs(rows.item(i), NodeToFind[5], "").trim()
-                                            : findSubs(rows.item(i), NodeToFind[4], "").trim() + "/"
-                                                    + findSubs(rows.item(i), NodeToFind[6], "").trim();
-                                    amount = Double.valueOf(findSubs(rows.item(i), NodeToFind[2], "").trim());
-
-                                    comment = findSubs(rows.item(i), NodeToFind[3], "").trim() + " (" + (
-                                                findSubs(rows.item(i), NodeToFind[1], "").trim().equals("CRDT")
-                                                    ? findSubs(rows.item(i), NodeToFind[5], "").trim()
-                                                    : findSubs(rows.item(i), NodeToFind[4], "").trim() + "/" + findSubs(rows.item(i), NodeToFind[6], "").trim()) + ")";
-
-                                    billingMonth = LocalDate.parse((findSubs(rows.item(i), NodeToFind[0], "").trim()).substring(0, 8) + "01");
-                                    bookingEvent = getPossibleEventId(comment);
-
+                                    fillVariablesWithNodeSubs(rows.item(i));
                                     buchungen.add(new RacTableRow(valueDate, cdtDbtInd, cdtDbtName, amount, comment, billingMonth, bookingEvent));
                                 }
                             }
@@ -141,23 +125,7 @@ public class ReadCamt {
                 NodeList rows = KontoAuszug.getElementsByTagName("Ntry");
 
                 for (int i = 0; i < rows.getLength(); i++) {
-                    valueDate = LocalDate.parse(findSubs(rows.item(i), NodeToFind[0], "").trim());
-                    cdtDbtInd = findSubs(rows.item(i), NodeToFind[1], "").trim().equals("CRDT") ? "h"
-                            : "s";
-                    cdtDbtName = findSubs(rows.item(i), NodeToFind[1], "").trim().equals("CRDT")
-                            ? findSubs(rows.item(i), NodeToFind[5], "").trim()
-                            : findSubs(rows.item(i), NodeToFind[4], "").trim() + "/"
-                                    + findSubs(rows.item(i), NodeToFind[6], "").trim();
-                    amount = Double.valueOf(findSubs(rows.item(i), NodeToFind[2], "").trim());
-
-                    comment = findSubs(rows.item(i), NodeToFind[3], "").trim() + " (" + (
-                                findSubs(rows.item(i), NodeToFind[1], "").trim().equals("CRDT")
-                                    ? findSubs(rows.item(i), NodeToFind[5], "").trim()
-                                    : findSubs(rows.item(i), NodeToFind[4], "").trim() + "/" + findSubs(rows.item(i), NodeToFind[6], "").trim()) + ")";
-
-                    billingMonth = LocalDate.parse((findSubs(rows.item(i), NodeToFind[0], "").trim()).substring(0, 8) + "01");
-                    bookingEvent = getPossibleEventId(comment);
-
+                    fillVariablesWithNodeSubs(rows.item(i));
                     buchungen.add(new RacTableRow(valueDate, cdtDbtInd, cdtDbtName, amount, comment, billingMonth, bookingEvent));
                 }
             }
@@ -194,6 +162,24 @@ public class ReadCamt {
         accountId = findAccountId(sIBAN);
     }
 
+    private void fillVariablesWithNodeSubs(Node actualItem) {
+        valueDate = LocalDate.parse(findSubs(actualItem, NodeToFind[0], "").trim());
+        cdtDbtInd = findSubs(actualItem, NodeToFind[1], "").trim().equals("CRDT") ? "h"
+                : "s";
+        cdtDbtName = findSubs(actualItem, NodeToFind[1], "").trim().equals("CRDT")
+                ? findSubs(actualItem, NodeToFind[5], "").trim()
+                : findSubs(actualItem, NodeToFind[4], "").trim() + "/"
+                        + findSubs(actualItem, NodeToFind[6], "").trim();
+        amount = Double.valueOf(findSubs(actualItem, NodeToFind[2], "").trim());
+
+        comment = findSubs(actualItem, NodeToFind[3], "").trim() + " (" + (
+                    findSubs(actualItem, NodeToFind[1], "").trim().equals("CRDT")
+                        ? findSubs(actualItem, NodeToFind[5], "").trim()
+                        : findSubs(actualItem, NodeToFind[4], "").trim() + "/" + findSubs(actualItem, NodeToFind[6], "").trim()) + ")";
+
+        billingMonth = LocalDate.parse((findSubs(actualItem, NodeToFind[0], "").trim()).substring(0, 8) + "01");
+        bookingEvent = getPossibleEventId(comment);
+    }
     private Document parseXML(String PathAndFile) {
         DocumentBuilder DocBuilder = getDocBuilder();
 
@@ -405,25 +391,6 @@ public class ReadCamt {
 
             // the Diba Data begin in the row after the Header
             for (int i = iHeaderRow + 1; i < csvContent.length; i++) {
-//                 buchungen[i - (iHeaderRow + 1)][ValueDate] = BigOneTools.datum_wandeln(csvContent[i].split(";")[1], 0);
-// ;
-//                 // the Credit or Dbit Inticator is in the csv Data not a separate field
-//                 // they is indicates by e minus or nothing bevore the amount (creditorische
-//                 // Buchung = haben / Debitorische Buchung = soll)
-//                 buchungen[i - (iHeaderRow + 1)][CreditDebitIndicator] = getCreditDebitIndicator(
-//                         csvContent[i].split(";")[7].replace(".", "").replaceAll(",", "."));
-
-//                 // the amount in the csv is german, we have to replace the thousand dot with
-//                 // null
-//                 // and the decimal separator with a dot
-//                 buchungen[i - (iHeaderRow + 1)][Amount] = delteSign(
-//                         csvContent[i].split(";")[7].replace(".", "").replaceAll(",", "."));
-//                 buchungen[i - (iHeaderRow + 1)][Unstructured] = csvContent[i].split(";")[4];
-//                 buchungen[i - (iHeaderRow + 1)][Creditor] = csvContent[i].split(";")[2];
-//                 buchungen[i - (iHeaderRow + 1)][Debitor] = csvContent[i].split(";")[2]; // wird nicht extra aufgeführt
-//                                                                                         // deshalb wird der selbe wert
-
-                // to reduce the code we define some Values here                                                                        // gelesen
                 valueDate = LocalDate.parse(csvContent[i].split(";")[1], DateTimeFormatter.ofPattern("d.M.yyyy"));
                 cdtDbtInd = !(csvContent[i].split(";")[7].startsWith("-")) ? "h" : "s";
                 cdtDbtName = csvContent[i].split(";")[2];

@@ -112,8 +112,8 @@ public class ComboTableCellEditor extends AbstractCellEditor implements TableCel
     }
 
     public Object getCellEditorValue() {
-        //damit bei erneuter auswahl immer der erste eintrag selectiert ist
-        //dieser kleine umweg
+        // damit bei erneuter auswahl immer der erste eintrag selectiert ist
+        // dieser kleine umweg
         // String strLager = new String(component.getSelectedItem().toString());
         // component.setSelectedIndex(0);
         // return strLager;

@@ -19,14 +19,13 @@ public class LiquiDateTableCellEditor extends AbstractCellEditor implements Tabl
     private JFormattedTextField component = new JFormattedTextField();
 
     public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int rowIndex, int colIndex) {
-        // eingabeformat vorbelegen
         try {
             component = new JFormattedTextField(new MaskFormatter("01.##.20##"));
         } catch (ParseException e1) {
             e1.printStackTrace();
         }
-        component.setText("");    //sicherheitshalber leer machen da sonst bei erneutem aufruf
-                                //und leerem value der letzte wert zurueckgegeben wird
+        component.setText("");      // sicherheitshalber leeren, da sonst bei erneutem aufruf
+                                    // und leerem value der letzte wert zurueckgegeben wird
         if(value != null)
             component.setText(BigOneTools.datum_wandeln(value.toString(),1));
         return component;
