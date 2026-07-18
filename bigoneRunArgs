@@ -1,0 +1,5 @@
+--module-path mods
+--class-path lib/jcalendar-1.4.jar:lib/postgresql-42.7.8.jar:lib/json-simple-1.1.jar
+# wir müssen sagen, dass das Modul den Classpath lesen darf
+--add-reads de.rachel.bigone=ALL-UNNAMED
+--module de.rachel.bigone/main.Menu
