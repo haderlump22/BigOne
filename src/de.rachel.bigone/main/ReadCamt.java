@@ -1,4 +1,4 @@
-package de.rachel.bigone;
+package main;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;

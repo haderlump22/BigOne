@@ -1,4 +1,4 @@
-package de.rachel.bigone;
+package main;
 
 import java.awt.Font;
 import java.awt.GridLayout;

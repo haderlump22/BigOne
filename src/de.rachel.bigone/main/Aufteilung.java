@@ -1,4 +1,4 @@
-package de.rachel.bigone;
+package main;
 
 //import static de.rachel.bigone.DBTools.*;
 

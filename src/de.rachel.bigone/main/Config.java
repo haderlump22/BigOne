@@ -1,4 +1,4 @@
-package de.rachel.bigone;
+package main;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -19,7 +19,7 @@ import org.json.simple.parser.ParseException;
  */
 public class Config {
     private String DbDrv, DbUrl, DbName, DbUserName, DbPw;
-    private boolean devMode = true;
+    private boolean devMode = false;
     private File configDir, configFile;
 
     Config() {

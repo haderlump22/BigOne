@@ -1,0 +1,5 @@
+-encoding utf-8
+-Xlint:all
+-d mods
+--module-source-path src
+--module de.rachel.cli

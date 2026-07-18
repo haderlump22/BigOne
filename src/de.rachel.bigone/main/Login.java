@@ -1,4 +1,4 @@
-package de.rachel.bigone;
+package main;
 
 import java.awt.Color;
 import java.awt.event.ActionEvent;

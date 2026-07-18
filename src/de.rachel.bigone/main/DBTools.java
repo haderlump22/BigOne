@@ -1,4 +1,4 @@
-package de.rachel.bigone;
+package main;
 
 import java.sql.Array;
 import java.sql.Connection;

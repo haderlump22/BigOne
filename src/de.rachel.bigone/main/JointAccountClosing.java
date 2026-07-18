@@ -1,4 +1,4 @@
-package de.rachel.bigone;
+package main;
 
 import java.sql.Connection;
 import java.sql.SQLException;
