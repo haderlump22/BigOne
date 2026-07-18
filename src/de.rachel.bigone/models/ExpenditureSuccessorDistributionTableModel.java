@@ -1,4 +1,4 @@
-package de.rachel.bigone.models;
+package models;
 
 import java.sql.Connection;
 import java.util.ArrayList;
@@ -6,8 +6,8 @@ import java.util.ArrayList;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
 
-import de.rachel.bigone.DBTools;
-import de.rachel.bigone.records.ExpenditureSuccessorDistributionTableRow;
+import main.DBTools;
+import records.ExpenditureSuccessorDistributionTableRow;
 
 public class ExpenditureSuccessorDistributionTableModel  extends AbstractTableModel {
     private Connection cn = null;

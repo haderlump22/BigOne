@@ -1,4 +1,4 @@
-package de.rachel.bigone.listeners;
+package listeners;
 
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -7,7 +7,7 @@ import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-import de.rachel.bigone.models.ExpenditureDistributionTableModel;
+import models.ExpenditureDistributionTableModel;
 
 public class ExpenditureDetailTableSelectionListener implements ListSelectionListener {
 

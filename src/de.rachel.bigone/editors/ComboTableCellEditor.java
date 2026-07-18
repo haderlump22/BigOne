@@ -1,4 +1,4 @@
-package de.rachel.bigone.editors;
+package editors;
 
 import java.awt.Component;
 import java.awt.event.ItemEvent;
@@ -13,7 +13,7 @@ import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 import javax.swing.table.TableCellEditor;
 
-import de.rachel.bigone.models.RacTableModel;
+import models.RacTableModel;
 /**
  * Generiert eine Combobox für die Auswahl eines Kontoereignis beim Importieren von
  * Kontobewegungen.

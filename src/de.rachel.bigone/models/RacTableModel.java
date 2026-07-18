@@ -1,4 +1,4 @@
-package de.rachel.bigone.models;
+package models;
 
 import java.sql.Connection;
 import java.text.SimpleDateFormat;
@@ -9,9 +9,9 @@ import java.util.List;
 
 import javax.swing.table.AbstractTableModel;
 
-import de.rachel.bigone.DBTools;
-import de.rachel.bigone.ReadCamt;
-import de.rachel.bigone.records.RacTableRow;
+import main.DBTools;
+import main.ReadCamt;
+import records.RacTableRow;
 
 public class RacTableModel extends AbstractTableModel{
     private static final long serialVersionUID = -2431676313753205738L;

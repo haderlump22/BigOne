@@ -7,11 +7,11 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.border.TitledBorder;
 
-import de.rachel.bigone.listeners.IncomeDetailTableMouseListener;
-import de.rachel.bigone.models.SalaryBasesIncomeDetailTableModel;
-import de.rachel.bigone.models.SalaryBasesSumOfIncomePerPartyTableModel;
-import de.rachel.bigone.renderer.SalaryBasesIncomeDetailTableCellRenderer;
-import de.rachel.bigone.renderer.SalaryBasesSumOfIncomePerPartyTableCellRenderer;
+import listeners.IncomeDetailTableMouseListener;
+import models.SalaryBasesIncomeDetailTableModel;
+import models.SalaryBasesSumOfIncomePerPartyTableModel;
+import renderer.SalaryBasesIncomeDetailTableCellRenderer;
+import renderer.SalaryBasesSumOfIncomePerPartyTableCellRenderer;
 
 import javax.swing.JTable;
 

@@ -1,4 +1,4 @@
-package de.rachel.bigone.renderer;
+package renderer;
 
 import javax.swing.JLabel;
 import javax.swing.JTable;

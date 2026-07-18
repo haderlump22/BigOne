@@ -1,4 +1,4 @@
-package de.rachel.bigone.editors;
+package editors;
 
 import java.awt.Component;
 

@@ -1,12 +1,12 @@
-package de.rachel.bigone.models;
+package models;
 
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.table.AbstractTableModel;
-import de.rachel.bigone.DBTools;
-import de.rachel.bigone.records.TransferAmountDetailTableRow;
+import main.DBTools;
+import records.TransferAmountDetailTableRow;
 
 public class TransferAmountDetailTableModel extends AbstractTableModel {
     private Connection cn = null;

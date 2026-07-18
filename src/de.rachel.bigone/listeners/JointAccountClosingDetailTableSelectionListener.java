@@ -1,4 +1,4 @@
-package de.rachel.bigone.listeners;
+package listeners;
 
 import java.sql.Connection;
 
@@ -8,9 +8,10 @@ import javax.swing.JTextArea;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import java.awt.Font;
 
-import de.rachel.bigone.DBTools;
+import main.DBTools;
+
+import java.awt.Font;
 
 public class JointAccountClosingDetailTableSelectionListener implements ListSelectionListener {
 

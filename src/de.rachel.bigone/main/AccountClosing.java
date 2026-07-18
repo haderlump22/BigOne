@@ -38,7 +38,8 @@ import javax.swing.border.TitledBorder;
 import javax.swing.text.MaskFormatter;
 import javax.swing.text.NumberFormatter;
 
-import de.rachel.bigone.records.MonthlyFixedCostsRow;
+import records.MonthlyFixedCostsRow;
+import main.DBTools;
 
 public class AccountClosing {
     private JFrame liquiwindow;

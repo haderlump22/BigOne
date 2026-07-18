@@ -1,4 +1,4 @@
-package de.rachel.bigone.dialogs;
+package dialogs;
 
 import java.awt.Dimension;
 import java.awt.Font;
@@ -30,9 +30,9 @@ import javax.swing.WindowConstants;
 import javax.swing.text.MaskFormatter;
 import javax.swing.text.NumberFormatter;
 
-import de.rachel.bigone.BigOneTools;
-import de.rachel.bigone.DBTools;
-import de.rachel.bigone.models.TransferAmountDetailTableModel;
+import main.BigOneTools;
+import main.DBTools;
+import models.TransferAmountDetailTableModel;
 
 public class TransferAmountSuccessorDialog {
     private JLabel lblPersonOfTransferAmount, lblTransferAmountValue, lblHeadline, lblValidFrom;

@@ -1,4 +1,4 @@
-package de.rachel.bigone.listeners;
+package listeners;
 
 import javax.swing.JTable;
 import javax.swing.JTextArea;

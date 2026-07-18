@@ -1,4 +1,4 @@
-package de.rachel.bigone.editors;
+package editors;
 
 import java.awt.Component;
 import java.text.ParseException;
@@ -9,7 +9,7 @@ import javax.swing.JFormattedTextField;
 import javax.swing.text.MaskFormatter;
 import javax.swing.table.TableCellEditor;
 
-import de.rachel.bigone.BigOneTools;
+import main.BigOneTools;
 
 public class LiquiDateTableCellEditor extends AbstractCellEditor implements TableCellEditor {
     /**

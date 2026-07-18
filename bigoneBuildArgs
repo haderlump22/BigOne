@@ -1,5 +1,10 @@
 -encoding utf-8
 -Xlint:all
 -d mods
+--class-path lib/jcalendar-1.4.jar:lib/postgresql-42.7.8.jar:lib/json-simple-1.1.jar
 --module-source-path src
---module de.rachel.cli
+--module de.rachel.bigone
+# Wenn der Compiler meckert, dass er Klassen aus dem Classpath nicht finden kann (obwohl der Pfad stimmt),
+# musst du ihm oft beim Kompilieren sagen, dass dein Modul den Classpath lesen darf. Das machst du mit dem
+# Flag --add-reads direkt in der Argument-Datei:
+--add-reads de.rachel.bigone=ALL-UNNAMED

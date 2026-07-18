@@ -26,10 +26,10 @@ import javax.swing.SwingUtilities;
 import javax.swing.text.MaskFormatter;
 import javax.swing.text.NumberFormatter;
 
-import de.rachel.bigone.editors.DateTableCellEditor;
-import de.rachel.bigone.editors.DecimalTableCellEditor;
-import de.rachel.bigone.models.ValuesTableModel;
-import de.rachel.bigone.renderer.ValuesTableCellRenderer;
+import editors.DateTableCellEditor;
+import editors.DecimalTableCellEditor;
+import models.ValuesTableModel;
+import renderer.ValuesTableCellRenderer;
 
 /**
  * @author Normen Rachel

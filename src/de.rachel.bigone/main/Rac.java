@@ -21,11 +21,11 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 import com.toedter.calendar.JDateChooser;
 
-import de.rachel.bigone.editors.ComboTableCellEditor;
-import de.rachel.bigone.editors.LiquiDateTableCellEditor;
-import de.rachel.bigone.listeners.RacMouseListener;
-import de.rachel.bigone.models.RacTableModel;
-import de.rachel.bigone.renderer.RacTableCellRenderer;
+import editors.ComboTableCellEditor;
+import editors.LiquiDateTableCellEditor;
+import listeners.RacMouseListener;
+import models.RacTableModel;
+import renderer.RacTableCellRenderer;
 
 public class Rac {
     private Connection cn = null;

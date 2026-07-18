@@ -1,4 +1,4 @@
-package de.rachel.bigone.models;
+package models;
 
 import java.sql.Connection;
 import java.time.LocalDate;
@@ -6,8 +6,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.table.AbstractTableModel;
-import de.rachel.bigone.DBTools;
-import de.rachel.bigone.records.ValuesTableRow;
+
+import records.ValuesTableRow;
+import main.DBTools;
 
 public class ValuesTableModel extends AbstractTableModel {
     private static final long serialVersionUID = -2431676313753205738L;

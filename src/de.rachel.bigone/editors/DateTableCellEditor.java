@@ -1,4 +1,4 @@
-package de.rachel.bigone.editors;
+package editors;
 
 import java.awt.Component;
 
@@ -7,7 +7,7 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.table.TableCellEditor;
 
-import de.rachel.bigone.BigOneTools;
+import main.BigOneTools;
 
 public class DateTableCellEditor extends AbstractCellEditor implements TableCellEditor {
     /**

@@ -1,4 +1,4 @@
-package de.rachel.bigone.listeners;
+package listeners;
 
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
@@ -7,7 +7,7 @@ import java.awt.event.MouseEvent;
 import javax.swing.JPopupMenu;
 import javax.swing.JTable;
 
-import de.rachel.bigone.models.RacTableModel;
+import models.RacTableModel;
 
 import javax.swing.JMenuItem;
 

@@ -1,11 +1,11 @@
-package de.rachel.bigone.renderer;
+package renderer;
 
 import java.awt.Component;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
 
-import de.rachel.bigone.BigOneTools;
+import main.BigOneTools;
 
 public class ValuesTableCellRenderer implements TableCellRenderer {
 

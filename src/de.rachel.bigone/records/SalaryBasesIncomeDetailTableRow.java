@@ -1,4 +1,4 @@
-package de.rachel.bigone.records;
+package records;
 
 import java.sql.Date;
 

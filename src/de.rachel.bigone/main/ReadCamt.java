@@ -25,7 +25,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 
-import de.rachel.bigone.records.RacTableRow;
+import records.RacTableRow;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;

@@ -30,16 +30,16 @@ import javax.swing.border.TitledBorder;
 import javax.swing.text.MaskFormatter;
 import javax.swing.text.NumberFormatter;
 
-import de.rachel.bigone.listeners.JointAccountClosingEventInfoAreaKeyListener;
-import de.rachel.bigone.listeners.JointAccountClosingDetailTableMouseListener;
-import de.rachel.bigone.listeners.JointAccountClosingDetailTableSelectionListener;
-import de.rachel.bigone.listeners.JointAccountClosingSumOverviewMouseListener;
-import de.rachel.bigone.models.JointAccountClosingBalanceAllocationOverviewDetailTableModel;
-import de.rachel.bigone.models.JointAccountClosingDetailTableModel;
-import de.rachel.bigone.records.JointAccountClosingBalanceAllocationOverviewDetailTableRow;
-import de.rachel.bigone.records.SalaryBasesSumOfIncomePerPartyTableRow;
-import de.rachel.bigone.renderer.JointAccountClosingBalanceAllocationOverviewDetailTableCellRenderer;
-import de.rachel.bigone.renderer.JointAccountClosingDetailTableCellRenderer;
+import listeners.JointAccountClosingEventInfoAreaKeyListener;
+import listeners.JointAccountClosingDetailTableMouseListener;
+import listeners.JointAccountClosingDetailTableSelectionListener;
+import listeners.JointAccountClosingSumOverviewMouseListener;
+import models.JointAccountClosingBalanceAllocationOverviewDetailTableModel;
+import models.JointAccountClosingDetailTableModel;
+import records.JointAccountClosingBalanceAllocationOverviewDetailTableRow;
+import records.SalaryBasesSumOfIncomePerPartyTableRow;
+import renderer.JointAccountClosingBalanceAllocationOverviewDetailTableCellRenderer;
+import renderer.JointAccountClosingDetailTableCellRenderer;
 
 public class JointAccountClosing {
     private Connection cn = null;

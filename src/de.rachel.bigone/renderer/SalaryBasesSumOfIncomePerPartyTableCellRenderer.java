@@ -1,4 +1,4 @@
-package de.rachel.bigone.renderer;
+package renderer;
 
 import java.awt.Component;
 

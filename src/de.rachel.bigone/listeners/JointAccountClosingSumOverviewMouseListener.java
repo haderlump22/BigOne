@@ -1,4 +1,4 @@
-package de.rachel.bigone.listeners;
+package listeners;
 
 import java.awt.Font;
 import java.awt.event.MouseAdapter;
@@ -11,8 +11,8 @@ import java.util.regex.Pattern;
 import javax.swing.JFormattedTextField;
 import javax.swing.JTable;
 
-import de.rachel.bigone.DBTools;
-import de.rachel.bigone.models.JointAccountClosingDetailTableModel;
+import main.DBTools;
+import models.JointAccountClosingDetailTableModel;
 
 public class JointAccountClosingSumOverviewMouseListener extends MouseAdapter {
     private JFormattedTextField billingMonth, sumOverviewNegativePlanedValue, sumOverviewNegativeUnplanedValue,

@@ -1,4 +1,4 @@
-package de.rachel.bigone.listeners;
+package listeners;
 
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
@@ -9,8 +9,8 @@ import java.sql.Connection;
 import javax.swing.JPopupMenu;
 import javax.swing.JTable;
 
-import de.rachel.bigone.dialogs.TransferAmountSuccessorDialog;
-import de.rachel.bigone.models.TransferAmountDetailTableModel;
+import dialogs.TransferAmountSuccessorDialog;
+import models.TransferAmountDetailTableModel;
 
 import javax.swing.JFrame;
 import javax.swing.JMenuItem;

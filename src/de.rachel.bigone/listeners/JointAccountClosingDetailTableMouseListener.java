@@ -1,4 +1,4 @@
-package de.rachel.bigone.listeners;
+package listeners;
 
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
@@ -8,11 +8,12 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import javax.swing.JPopupMenu;
 import javax.swing.JTable;
-import javax.swing.JMenuItem;
 
-import de.rachel.bigone.DBTools;
-import de.rachel.bigone.JointAccountClosing;
-import de.rachel.bigone.models.JointAccountClosingDetailTableModel;
+import main.DBTools;
+import main.JointAccountClosing;
+import models.JointAccountClosingDetailTableModel;
+
+import javax.swing.JMenuItem;
 
 public class JointAccountClosingDetailTableMouseListener extends MouseAdapter {
     private JPopupMenu popmen;

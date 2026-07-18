@@ -1,4 +1,4 @@
-package de.rachel.bigone.renderer;
+package renderer;
 
 import java.awt.Component;
 
@@ -6,8 +6,8 @@ import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
 
-import de.rachel.bigone.DBTools;
-import de.rachel.bigone.models.RacTableModel;
+import main.DBTools;
+import models.RacTableModel;
 
 import java.awt.Color;
 import java.sql.Connection;

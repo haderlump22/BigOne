@@ -1,10 +1,10 @@
-package de.rachel.bigone.models;
+package models;
 
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
 
-import de.rachel.bigone.records.JointAccountClosingBalanceAllocationOverviewDetailTableRow;
+import records.JointAccountClosingBalanceAllocationOverviewDetailTableRow;
 
 public class JointAccountClosingBalanceAllocationOverviewDetailTableModel extends AbstractTableModel {
     private String[] columnName = new String[] { "Name", "Anteil in %", "Betrag" };

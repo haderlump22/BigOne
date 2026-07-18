@@ -1,4 +1,4 @@
-package de.rachel.bigone.listeners;
+package listeners;
 
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;

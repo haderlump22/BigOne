@@ -1,4 +1,4 @@
-package de.rachel.bigone.listeners;
+package listeners;
 
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
@@ -14,10 +14,10 @@ import java.util.List;
 import javax.swing.JPopupMenu;
 import javax.swing.JTable;
 
-import de.rachel.bigone.DBTools;
-import de.rachel.bigone.Expenditure;
-import de.rachel.bigone.dialogs.ExpenditureSuccessorDialog;
-import de.rachel.bigone.records.ExpenditureSuccessorDistributionTableRow;
+import dialogs.ExpenditureSuccessorDialog;
+import main.DBTools;
+import main.Expenditure;
+import records.ExpenditureSuccessorDistributionTableRow;
 
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;

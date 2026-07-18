@@ -1,14 +1,15 @@
-package de.rachel.bigone.listeners;
+package listeners;
 
 import java.util.Timer;
 import java.util.TimerTask;
 
 import javax.swing.JTable;
 import javax.swing.JTextArea;
+
+import main.DBTools;
+
 import java.awt.event.*;
 import java.sql.Connection;
-
-import de.rachel.bigone.DBTools;
 
 public class JointAccountClosingEventInfoAreaKeyListener extends KeyAdapter {
     private Connection cn = null;

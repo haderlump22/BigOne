@@ -1,4 +1,4 @@
-package de.rachel.bigone.renderer;
+package renderer;
 
 import java.awt.Color;
 import java.awt.Component;
@@ -8,7 +8,7 @@ import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
 
-import de.rachel.bigone.models.JointAccountClosingDetailTableModel;
+import models.JointAccountClosingDetailTableModel;
 
 // import de.rachel.bigone.BigOneTools;
 

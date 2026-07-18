@@ -9,14 +9,14 @@ import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.border.TitledBorder;
 
-import de.rachel.bigone.listeners.ExpenditureDetailTableMouseListener;
-import de.rachel.bigone.listeners.ExpenditureDetailTableSelectionListener;
-import de.rachel.bigone.listeners.ExpenditureDistributionTableSelectionListener;
-import de.rachel.bigone.models.ExpenditureDetailTableModel;
-import de.rachel.bigone.models.ExpenditureDistributionTableModel;
-import de.rachel.bigone.models.ExpenditureSumPerPartyTableModel;
-import de.rachel.bigone.renderer.ExpenditureDetailTableCellRenderer;
-import de.rachel.bigone.renderer.ExpenditureSumPerPartyTableCellRenderer;
+import listeners.ExpenditureDetailTableMouseListener;
+import listeners.ExpenditureDetailTableSelectionListener;
+import listeners.ExpenditureDistributionTableSelectionListener;
+import models.ExpenditureDetailTableModel;
+import models.ExpenditureDistributionTableModel;
+import models.ExpenditureSumPerPartyTableModel;
+import renderer.ExpenditureDetailTableCellRenderer;
+import renderer.ExpenditureSumPerPartyTableCellRenderer;
 
 public class Expenditure {
     private Connection cn = null;

@@ -1,4 +1,4 @@
-package de.rachel.bigone.dialogs;
+package dialogs;
 
 import java.sql.Connection;
 import java.text.DecimalFormat;
@@ -25,10 +25,10 @@ import javax.swing.border.TitledBorder;
 import javax.swing.text.MaskFormatter;
 import javax.swing.text.NumberFormatter;
 
-import de.rachel.bigone.editors.DecimalTableCellEditor;
-import de.rachel.bigone.models.ExpenditureSuccessorDistributionTableModel;
-import de.rachel.bigone.records.ExpenditureSuccessorDistributionTableRow;
-import de.rachel.bigone.renderer.ExpenditureSuccessorDistributionTableCellRenderer;
+import editors.DecimalTableCellEditor;
+import models.ExpenditureSuccessorDistributionTableModel;
+import records.ExpenditureSuccessorDistributionTableRow;
+import renderer.ExpenditureSuccessorDistributionTableCellRenderer;
 
 import java.awt.Dimension;
 import java.awt.Font;
