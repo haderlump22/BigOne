@@ -20,6 +20,8 @@ import javax.swing.JTextField;
 import javax.swing.border.TitledBorder;
 
 import java.awt.event.KeyListener;
+import java.net.URL;
+import java.nio.file.Path;
 import java.awt.event.KeyEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.ItemEvent;
@@ -50,6 +52,7 @@ public class Transaktionen {
     private JComboBox<String> iban, ereigniss;
     private JButton btnSave, btnClean;
     private String[][] datenAuft;
+    private URL nullImageUrl, euroImageUrl;
 
     Transaktionen(Connection LoginCN) {
         cn = LoginCN;
@@ -72,7 +75,13 @@ public class Transaktionen {
         transaktion.setBounds(230, 35, 320, 38);
         // transaktion.setBorder(new EtchedBorder());
 
-        ImageIcon imgEuro = new ImageIcon(getClass().getResource("images/Euro.png"));
+        try {
+             euroImageUrl = Path.of("./resources/Euro.png").toUri().toURL();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        ImageIcon imgEuro = new ImageIcon(euroImageUrl);
         eurol = new JLabel(imgEuro, JLabel.CENTER);
         eurol.setBounds(90, 20, 81, 84);
         // eurol.setBorder(new EtchedBorder());
@@ -183,7 +192,13 @@ public class Transaktionen {
         btnSave = new JButton("Speichern");
         btnSave.setBounds(370, 360, 110, 55);
 
-        btnClean = new JButton(new ImageIcon(getClass().getResource("images/DevNull.png")));
+        try {
+            nullImageUrl = Path.of("./resources/DevNull.png").toUri().toURL();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        btnClean = new JButton(new ImageIcon(nullImageUrl));
         btnClean.setBounds(550, 360, 110, 55);
 
         lblInfoFeld = new JLabel("", JLabel.CENTER);
