@@ -1,5 +1,5 @@
 -encoding utf-8
--Xlint:all
+-Xlint:all,-serial
 -d mods
 --class-path lib/jcalendar-1.4.jar:lib/postgresql-42.7.8.jar:lib/json-simple-1.1.jar
 --module-source-path src
