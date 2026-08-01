@@ -1,0 +1,42 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>de.rachel.app</groupId>
+  <artifactId>bigone</artifactId>
+  <version>0.1</version>
+
+  <name>bigone</name>
+  <!-- FIXME change it to the project's website -->
+  <url>https://www.mustfindsomedomain.maybe</url>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.release>25</maven.compiler.release>
+    <maven.compiler.source>${maven.compiler.release}</maven.compiler.source>
+    <maven.compiler.target>${maven.compiler.release}</maven.compiler.target>
+    <my.extlib.path>/home/domm/workspace/extlibs</my.extlib.path>
+  </properties>
+
+  <dependencies>
+    <dependency>
+        <groupId>org.postgresql</groupId>
+        <artifactId>postgresql</artifactId>
+        <version>42.7.8</version>
+    </dependency>
+    <dependency>
+        <groupId>com.lokal</groupId>
+        <artifactId>jcalendar</artifactId>
+        <version>1.4</version>
+        <scope>system</scope>
+        <systemPath>${my.extlib.path}/jcalendar-1.4.jar</systemPath>
+    </dependency>
+        <dependency>
+        <groupId>com.lokal</groupId>
+        <artifactId>json-simple</artifactId>
+        <version>1.1</version>
+        <scope>system</scope>
+        <systemPath>${my.extlib.path}/json-simple-1.1.jar</systemPath>
+    </dependency>
+  </dependencies>
+</project>

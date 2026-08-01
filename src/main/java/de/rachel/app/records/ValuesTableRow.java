@@ -1,0 +1,7 @@
+package de.rachel.app.records;
+
+import java.time.LocalDate;
+
+public record ValuesTableRow(Integer transaktionsId, String cdtDbtIndicator, LocalDate date, Double amount, String comment,
+                LocalDate billingMonth, String bookingEvent) {
+};

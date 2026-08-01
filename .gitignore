@@ -12,3 +12,6 @@ Tools/*
 !Tools/createDbSchemaFile.sh
 info.txt
 TODO.TXT
+
+# Maven
+target
