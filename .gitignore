@@ -12,3 +12,4 @@ Tools/*
 !Tools/createDbSchemaFile.sh
 info.txt
 TODO.TXT
+/target
