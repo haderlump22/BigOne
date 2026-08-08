@@ -1,7 +1,7 @@
 -encoding utf-8
 -Xlint:all,-serial
 -d mods
---class-path lib/jcalendar-1.4.jar:lib/postgresql-42.7.8.jar:lib/json-simple-1.1.jar
+--class-path ../extlibs/jcalendar-1.4.jar:../extlibs/postgresql-42.7.13.jar:../extlibs/json-simple-1.1.jar
 --module-source-path src
 --module de.rachel.bigone
 # Wenn der Compiler meckert, dass er Klassen aus dem Classpath nicht finden kann (obwohl der Pfad stimmt),
