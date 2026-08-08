@@ -22,7 +22,7 @@
     <dependency>
         <groupId>org.postgresql</groupId>
         <artifactId>postgresql</artifactId>
-        <version>42.7.8</version>
+        <version>42.7.13</version>
     </dependency>
     <dependency>
         <groupId>com.lokal</groupId>
@@ -39,4 +39,68 @@
         <systemPath>${my.extlib.path}/json-simple-1.1.jar</systemPath>
     </dependency>
   </dependencies>
+  <build>
+    <plugins>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-dependency-plugin</artifactId>
+            <version>3.8.1</version>
+            <executions>
+                <execution>
+                <id>copy-dependencies</id>
+                <phase>package</phase>
+                <goals>
+                    <goal>copy-dependencies</goal>
+                </goals>
+                <configuration>
+                    <!-- Hier landen alle externen .jar Module (z.B. von Maven Central) -->
+                    <outputDirectory>${project.build.directory}/modules</outputDirectory>
+                    <includeScope>runtime</includeScope>
+                </configuration>
+                </execution>
+            </executions>
+        </plugin>
+
+        <!-- 2. Schritt: jpackage nativ mit dem Module-Path aufrufen -->
+        <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
+            <version>3.5.0</version>
+            <executions>
+                <execution>
+                    <id>run-jpackage-module</id>
+                    <phase>verify</phase> <!-- Wird direkt nach package ausgeführt -->
+                    <goals>
+                        <goal>exec</goal>
+                    </goals>
+                    <configuration>
+                        <executable>jpackage</executable>
+                        <arguments>
+                            <!-- Name der fertigen ausführbaren Datei -->
+                            <argument>--name</argument>
+                            <argument>${project.artifactId}</argument>
+
+                            <!-- Der Module-Path: Dein eigenes kompiliertes Modul + die externen Module -->
+                            <argument>--module-path</argument>
+                            <argument>${project.build.outputDirectory}${path.separator}${project.build.directory}/modules</argument>
+
+                            <!-- Das Start-Modul und die Main-Klasse (Syntax: modul.name/paket.MainKlasse) -->
+                            <argument>--module</argument>
+                            <argument>de.rachel.bigone/de.rachel.app.Menu</argument>
+
+                            <!-- Zielordner für das Ergebnis -->
+                            <argument>--dest</argument>
+                            <argument>${project.build.directory}/dist</argument>
+
+                            <!-- 'app-image' erstellt ein fertiges Verzeichnis mit schlanker Runtime.
+                                 Nutze 'msi', 'dmg' oder 'deb' für echte Installer -->
+                            <argument>--type</argument>
+                            <argument>app-image</argument>
+                        </arguments>
+                    </configuration>
+                </execution>
+            </executions>
+        </plugin>
+    </plugins>
+  </build>
 </project>
