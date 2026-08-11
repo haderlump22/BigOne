@@ -20,87 +20,156 @@
 
   <dependencies>
     <dependency>
-        <groupId>org.postgresql</groupId>
-        <artifactId>postgresql</artifactId>
-        <version>42.7.13</version>
+      <groupId>org.postgresql</groupId>
+      <artifactId>postgresql</artifactId>
+      <version>42.7.13</version>
     </dependency>
     <dependency>
-        <groupId>com.lokal</groupId>
+        <groupId>com.toedter</groupId>
         <artifactId>jcalendar</artifactId>
         <version>1.4</version>
-        <scope>system</scope>
-        <systemPath>${my.extlib.path}/jcalendar-1.4.jar</systemPath>
     </dependency>
-        <dependency>
-        <groupId>com.lokal</groupId>
-        <artifactId>json-simple</artifactId>
-        <version>1.1</version>
-        <scope>system</scope>
-        <systemPath>${my.extlib.path}/json-simple-1.1.jar</systemPath>
+    <dependency>
+      <groupId>com.google.code.gson</groupId>
+      <artifactId>gson</artifactId>
+      <version>2.14.0</version>
     </dependency>
   </dependencies>
   <build>
     <plugins>
-        <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-dependency-plugin</artifactId>
-            <version>3.8.1</version>
-            <executions>
-                <execution>
-                <id>copy-dependencies</id>
-                <phase>package</phase>
-                <goals>
-                    <goal>copy-dependencies</goal>
-                </goals>
-                <configuration>
-                    <!-- Hier landen alle externen .jar Module (z.B. von Maven Central) -->
-                    <outputDirectory>${project.build.directory}/modules</outputDirectory>
-                    <includeScope>runtime</includeScope>
-                </configuration>
-                </execution>
-            </executions>
-        </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.13.0</version> <!-- Wichtig für korrekten Modulepath -->
+        <configuration>
+            <release>${maven.compiler.release}</release>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>3.8.1</version>
+        <executions>
+          <execution>
+          <id>copy-dependencies</id>
+          <phase>package</phase>
+          <goals>
+            <goal>copy-dependencies</goal>
+          </goals>
+          <configuration>
+            <!-- Hier landen alle externen .jar Module (z.B. von Maven Central) -->
+            <outputDirectory>${project.build.directory}/modules</outputDirectory>
+            <includeScope>runtime</includeScope>
+          </configuration>
+          </execution>
+        </executions>
+      </plugin>
 
-        <!-- 2. Schritt: jpackage nativ mit dem Module-Path aufrufen -->
-        <plugin>
-            <groupId>org.codehaus.mojo</groupId>
-            <artifactId>exec-maven-plugin</artifactId>
-            <version>3.5.0</version>
-            <executions>
-                <execution>
-                    <id>run-jpackage-module</id>
-                    <phase>verify</phase> <!-- Wird direkt nach package ausgeführt -->
-                    <goals>
-                        <goal>exec</goal>
-                    </goals>
-                    <configuration>
-                        <executable>jpackage</executable>
-                        <arguments>
-                            <!-- Name der fertigen ausführbaren Datei -->
-                            <argument>--name</argument>
-                            <argument>${project.artifactId}</argument>
+      <plugin>
+          <groupId>org.moditect</groupId>
+          <artifactId>moditect-maven-plugin</artifactId>
+          <version>1.3.0.Final</version> <!-- Nutzen Sie die stabile Version -->
+          <executions>
+              <execution>
+                  <id>add-module-info-to-dependencies</id>
+                  <phase>generate-resources</phase>
+                  <goals>
+                      <goal>add-module-info</goal>
+                  </goals>
+                  <configuration>
+                      <modules>
+                          <module>
+                              <!-- Das betroffene JDBC-Artefakt -->
+                              <artifact>
+                                  <groupId>org.postgresql</groupId>
+                                  <artifactId>postgresql</artifactId>
+                                  <version>42.7.13</version> <!-- Muss exakt Ihrer PostgreSQL-Dependency-Version entsprechen -->
+                              </artifact>
+                              <!-- Definiert den neuen Modulnamen und seine Exports/Requires -->
+                              <moduleInfoSource>
+                                  module org.postgresql.jdbc {
+                                      requires java.sql;
+                                      requires java.transaction.xa;
+                                      exports org.postgresql;
+                                      exports org.postgresql.core;
+                                      exports org.postgresql.util;
+                                      provides java.sql.Driver with org.postgresql.Driver;
+                                  }
+                              </moduleInfoSource>
+                          </module>
+                          <module>
+                            <!-- Das betroffene JCalendar-Artefakt -->
+                            <artifact>
+                                <groupId>com.toedter</groupId>
+                                <artifactId>jcalendar</artifactId>
+                                <version>1.4</version> <!-- Muss exakt Ihrer JCalendar-Dependency entsprechen -->
+                            </artifact>
+                            <moduleInfoSource>
+                                module jcalendar {
+                                    // JCalendar ist eine GUI-Bibliothek und benötigt das Desktop-Modul (Swing/AWT)
+                                    requires java.desktop;
 
-                            <!-- Der Module-Path: Dein eigenes kompiliertes Modul + die externen Module -->
-                            <argument>--module-path</argument>
-                            <argument>${project.build.outputDirectory}${path.separator}${project.build.directory}/modules</argument>
+                                    // Exportiert alle enthaltenen Pakete für Ihre Anwendung
+                                    exports com.toedter.calendar;
+                                    exports com.toedter.components;
+                                    exports com.toedter.plaf;
+                                }
+                            </moduleInfoSource>
+                        </module>
+                      </modules>
+                      <!-- Überschreibt das originale automatische Modul im Build-Prozess -->
+                      <outputDirectory>${project.build.directory}/modules</outputDirectory>
+                  </configuration>
+              </execution>
+          </executions>
+      </plugin>
 
-                            <!-- Das Start-Modul und die Main-Klasse (Syntax: modul.name/paket.MainKlasse) -->
-                            <argument>--module</argument>
-                            <argument>de.rachel.bigone/de.rachel.app.Menu</argument>
 
-                            <!-- Zielordner für das Ergebnis -->
-                            <argument>--dest</argument>
-                            <argument>${project.build.directory}/dist</argument>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jlink-plugin</artifactId>
+        <version>3.2.0</version>
+        <extensions>true</extensions>
+        <configuration>
+          <!-- LÖSUNG: Unterscheidet das ZIP-Archiv von der Standard-JAR -->
+          <classifier>app-image</classifier>
+          <!-- WICHTIG: Überschreibt den Standard-Modulpfad von Maven -->
+          <modulePaths>
+            <!-- 1. Liest Ihre eigenen kompilierten Klassen ein -->
+            <modulePath>${project.build.outputDirectory}</modulePath>
+            <!-- 2. Liest die von ModiTect reparierten echten Module (PostgreSQL & JCalendar) ein -->
+            <modulePath>${project.build.directory}/modules</modulePath>
+          </modulePaths>
+          <!-- Definiert das Start-Modul und die Main-Klasse für das Image -->
+          <launcher>runBigone=de.rachel.bigone/de.rachel.app.Menu</launcher>
+          <!-- Komprimiert das finale Image, um Speicherplatz zu sparen -->
+          <stripDebug>true</stripDebug>
+          <noHeaderFiles>true</noHeaderFiles>
+          <noManPages>true</noManPages>
+        </configuration>
+        <executions>
+          <execution>
+            <id>create-jlink-image</id>
+            <phase>package</phase>
+            <goals>
+              <goal>jlink</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
 
-                            <!-- 'app-image' erstellt ein fertiges Verzeichnis mit schlanker Runtime.
-                                 Nutze 'msi', 'dmg' oder 'deb' für echte Installer -->
-                            <argument>--type</argument>
-                            <argument>app-image</argument>
-                        </arguments>
-                    </configuration>
-                </execution>
-            </executions>
-        </plugin>
+      <!-- for the mvn exec:java-->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>3.5.0</version>
+        <configuration>
+          <!-- Aktiviert den Modulpfad statt des Classpaths -->
+          <longModulepath>true</longModulepath>
+          <!-- Ihre modulare Hauptklasse -->
+          <mainClass>de.rachel.app.Menu</mainClass>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
 </project>
