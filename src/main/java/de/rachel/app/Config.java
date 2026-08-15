@@ -29,4 +29,24 @@ public class Config {
   public String getDbPw() {
       return DbPw;
   }
+
+  public void setDbDrv(String dbDrv) {
+    DbDrv = dbDrv;
+  }
+
+  public void setDbUrl(String dbUrl) {
+    DbUrl = dbUrl;
+  }
+
+  public void setDbName(String dbName) {
+    DbName = dbName;
+  }
+
+  public void setDbUserName(String dbUserName) {
+    DbUserName = dbUserName;
+  }
+
+  public void setDbPw(String dbPw) {
+    DbPw = dbPw;
+  }
 }

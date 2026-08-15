@@ -4,7 +4,9 @@ import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -33,6 +35,7 @@ public class Login {
   private String strB, strPW;
   private Connection cn = null;
   private Path configFile;
+  private FileWriter jsonConfigFile;
   private boolean devMode = false;
   private Config currentConfig;
 
@@ -52,6 +55,7 @@ public class Login {
 
     } catch (IOException e) {
       System.err.println("Datei konnte nicht gelesen werden: " + e.getMessage());
+      writeTemplateConfigFile();
     } catch (Exception e) {
       System.err.println("Fehler beim JSON-Parsing: " + e.getMessage());
     }
@@ -138,5 +142,38 @@ public class Login {
 
   public int getLogincount() {
     return Logincount;
+  }
+
+  private void writeTemplateConfigFile() {
+    Config exampleConfig = new Config();
+
+    exampleConfig.setDbDrv("org.postgresql.Driver");
+    exampleConfig.setDbName("<dbName>");
+    exampleConfig.setDbPw("<dbPassword>");
+    exampleConfig.setDbUrl("jdbc:postgresql:\\/\\/localhost:5432\\/");
+    exampleConfig.setDbUserName("<dbUserName>");
+
+    Gson gsonWriter = new GsonBuilder().setPrettyPrinting().create();
+
+    try {
+      if (devMode) {
+        jsonConfigFile = new FileWriter(System.getProperty("user.home") + "/BigOneConfig/BigOneConfigDev.json", StandardCharsets.UTF_8);
+      } else {
+        jsonConfigFile = new FileWriter(System.getProperty("user.home") + "/BigOneConfig/BigOneConfig.json", StandardCharsets.UTF_8);
+      }
+
+      gsonWriter.toJson(exampleConfig, jsonConfigFile);
+      jsonConfigFile.flush();
+      jsonConfigFile.close();
+
+      System.out.println("Eine Beispiel Config ist in den HomeFolder unter dem Verzeichnis BigOneConfig, geschrieben worden. Bitte passen Sie diese an und starten das Programm neu..");
+      System.exit(0);
+    } catch (IOException e) {
+      System.err.println("Datei konnte nicht geschrieben werden: " + e.getMessage());
+      System.exit(1);
+    } catch (Exception e) {
+      System.err.println("Fehler beim erstellen der Beispieldatei: " + e.getMessage());
+      System.exit(1);
+    }
   }
 }

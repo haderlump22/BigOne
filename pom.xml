@@ -119,6 +119,7 @@
                       </modules>
                       <!-- Überschreibt das originale automatische Modul im Build-Prozess -->
                       <outputDirectory>${project.build.directory}/modules</outputDirectory>
+                      <overwriteExistingFiles>true</overwriteExistingFiles>
                   </configuration>
               </execution>
           </executions>
