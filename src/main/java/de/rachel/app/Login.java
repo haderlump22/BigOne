@@ -36,7 +36,7 @@ public class Login {
   private Connection cn = null;
   private Path configFile;
   private FileWriter jsonConfigFile;
-  private boolean devMode = false;
+  private boolean devMode = true;
   private Config currentConfig;
 
   public Login(JFrame dialogOwner) {
@@ -54,7 +54,7 @@ public class Login {
       currentConfig = gsonParser.fromJson(configReader, Config.class);
 
     } catch (IOException e) {
-      System.err.println("Datei konnte nicht gelesen werden: " + e.getMessage());
+      System.err.println("Config Datei konnte nicht gelesen/gefunden werden: " + e.getMessage());
       writeTemplateConfigFile();
     } catch (Exception e) {
       System.err.println("Fehler beim JSON-Parsing: " + e.getMessage());
@@ -163,13 +163,12 @@ public class Login {
       }
 
       gsonWriter.toJson(exampleConfig, jsonConfigFile);
-      jsonConfigFile.flush();
       jsonConfigFile.close();
 
       System.out.println("Eine Beispiel Config ist in den HomeFolder unter dem Verzeichnis BigOneConfig, geschrieben worden. Bitte passen Sie diese an und starten das Programm neu..");
       System.exit(0);
     } catch (IOException e) {
-      System.err.println("Datei konnte nicht geschrieben werden: " + e.getMessage());
+      System.err.println("Beispiel Config konnte nicht geschrieben werden: " + e.getMessage());
       System.exit(1);
     } catch (Exception e) {
       System.err.println("Fehler beim erstellen der Beispieldatei: " + e.getMessage());

@@ -75,7 +75,7 @@ public class ExpenditureDetailTableMouseListener extends MouseAdapter {
 
             if (divideType.equals("V")) {
                 updateRatioShare.setEnabled(true);
-                createSuccessor.setEnabled(false);
+                createSuccessor.setEnabled(true);
             } else {
                 updateRatioShare.setEnabled(false);
                 createSuccessor.setEnabled(true);
@@ -124,7 +124,11 @@ public class ExpenditureDetailTableMouseListener extends MouseAdapter {
         }
 
         // die aktuellen Ausgaben die im Modus "Verhältnis" aufgeteilt werden
-        // merken
+        // merken,
+        // FIXME aber nur die bei denen das gilt ab datum kleiner ist als das neue gewünschte gilt ab
+        // denn es kann ja sein das bereits (durch nachfolger anlegen) eine Ausgabe ab dem neuen Datum existiert
+        // deren verhältnisse aber noch alt sind, dann darf nur die verhältnissaufteilung der existierenden Ausgabe
+        // angepasst werden, aber kein nachfolger für sie angelegt werden
         DBTools expentitureBackup = new DBTools(cn);
         record ActualRatioExpenditure(Integer expenditureId, String description, Double amount, String divideType,
         LocalDate validFrom, String expenditureHint, Integer frequency) {};

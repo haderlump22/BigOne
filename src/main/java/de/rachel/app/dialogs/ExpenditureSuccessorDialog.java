@@ -336,10 +336,10 @@ public class ExpenditureSuccessorDialog {
             return false;
         }
 
-        if (expenditureSuccessorCommentArea.getText().length() <= 250) {
+        if (expenditureSuccessorCommentArea.getText().length() <= 500) {
             allIsCorrect = true;
         } else {
-            valueCheckComment = "Hinweis enthält mehr als 250 Zeichen";
+            valueCheckComment = "Bemerkung enthält mehr als 500 Zeichen";
             return false;
         }
 
