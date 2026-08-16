@@ -91,7 +91,7 @@ public class ExpenditureDetailTableMouseListener extends MouseAdapter {
         LocalDate firstOfActualMonth = acutalMonth.minusDays(acutalMonth.getDayOfMonth() - 1);
         LocalDate newValidFromPeriod = LocalDate.parse(JOptionPane.showInputDialog("Bitte Periode angeben ab der die Werte gültig sind:", firstOfActualMonth.format(DateTimeFormatter.ofPattern("dd.MM.yyyy"))), DateTimeFormatter.ofPattern("dd.MM.yyyy"));
 
-        // aktuell Prozentanteile der Parteien ermitteln
+        // percentage ratio of the parties' incomes as of the reference date for the new ValidFromPeriod
         DBTools percentStatement = new DBTools(cn);
         Double sumOfAllIncome = 0.0;
         record PercentOfEachParty(Integer partyId, double percent) {};
@@ -100,10 +100,11 @@ public class ExpenditureDetailTableMouseListener extends MouseAdapter {
         percentStatement.select("""
                 SELECT partei_id, sum(betrag) as betrag
                 FROM ha_gehaltsgrundlagen gg
-                WHERE gilt_bis IS NULL
+                WHERE gilt_ab <= '%s'
+                AND (gilt_bis >= '%s' OR gilt_bis IS NULL)
                 GROUP BY partei_id
                 ORDER BY partei_id;
-                """);
+                """.formatted(newValidFromPeriod, newValidFromPeriod));
 
         try {
             // first get the Sum of all Incomes
@@ -125,39 +126,82 @@ public class ExpenditureDetailTableMouseListener extends MouseAdapter {
 
         // die aktuellen Ausgaben die im Modus "Verhältnis" aufgeteilt werden
         // merken,
-        // FIXME aber nur die bei denen das gilt ab datum kleiner ist als das neue gewünschte gilt ab
-        // denn es kann ja sein das bereits (durch nachfolger anlegen) eine Ausgabe ab dem neuen Datum existiert
-        // deren verhältnisse aber noch alt sind, dann darf nur die verhältnissaufteilung der existierenden Ausgabe
-        // angepasst werden, aber kein nachfolger für sie angelegt werden
-        DBTools expentitureBackup = new DBTools(cn);
+        DBTools expentitureBeforeNewValidDate = new DBTools(cn);
+        DBTools expentitureAfterOrEqualNewValidDate = new DBTools(cn);
         record ActualRatioExpenditure(Integer expenditureId, String description, Double amount, String divideType,
         LocalDate validFrom, String expenditureHint, Integer frequency) {};
         List<ActualRatioExpenditure> actualRatioExpenditure = new ArrayList<>();
 
-        expentitureBackup.select("""
+        // Aufteilungen der Ausgabendatensätze aktualisieren die ein Gültigkeitsdatum haben das gleich oder größer dem neuen ValidFrom Datum ist
+        // es könnte ja sein das es bereits aktualisierte Ausgaben für die Zukunft (als neues gilt_ab Datum, oder später) gibt,
+        // die keinen nachfolge brauchen, da sie ja schon für zukünftige Zeiten (gilt_ab) existieren, und deren Aufteilungsverhältnisse nur angepasst werden müssen
+        DBTools expenditureDistributionUpdate = new DBTools(cn);
+
+        expentitureAfterOrEqualNewValidDate.select("""
+                SELECT "ausgabenId", betrag, bezeichnung
+                FROM ha_ausgaben
+                WHERE aufteilungsart = 'V'
+                AND gilt_bis IS NULL
+                AND gilt_ab >= '%s';
+                """.formatted(newValidFromPeriod));
+
+        try {
+            expentitureAfterOrEqualNewValidDate.beforeFirst();
+
+            while (expentitureAfterOrEqualNewValidDate.next()) {
+                try {
+                    // für diese Datensätze neue Aufteilungen anhand der aktuell ermittelten
+                    // Prozentanteile erstellen
+                    for (PercentOfEachParty percentOfParty : partyPercents) {
+                        if (!expenditureDistributionUpdate.update("""
+                                UPDATE ha_ausgaben_aufteilung
+                                SET betrag = %s,
+                                    bemerkung = '%s'
+                                WHERE "parteiId" = %d
+                                AND "ausgabenId" = %d
+                                """.formatted((expentitureAfterOrEqualNewValidDate.getDouble("betrag") * percentOfParty.percent),
+                                "Aktualisierung des bestehenden Verhältnissanteils",
+                                percentOfParty.partyId,
+                                expentitureAfterOrEqualNewValidDate.getInt("ausgabenId")))) {
+                            System.out.println("Fehler beim aktualisieren des AusgabenAufteilungsdatensatz für Partei: -" + percentOfParty.partyId + "- der Ausgabe: " + expentitureAfterOrEqualNewValidDate.getString("bezeichnung"));
+                            System.exit(1);
+                        }
+                    }
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        } catch (Exception e) {
+           System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "+e.getStackTrace()[0].getLineNumber()+"): " + e.toString());
+        }
+
+        // note all expenditures with a validFrom Daten that is before the new one
+        expentitureBeforeNewValidDate.select("""
                 SELECT "ausgabenId", bezeichnung, betrag, aufteilungsart, gilt_ab, bemerkung, haeufigkeit
                 FROM ha_ausgaben
                 WHERE aufteilungsart = 'V'
-                AND gilt_bis IS NULL;
-                """);
+                AND gilt_bis IS NULL
+                AND gilt_ab < '%s';
+                """.formatted(newValidFromPeriod));
 
         try {
-            expentitureBackup.beforeFirst();
+            expentitureBeforeNewValidDate.beforeFirst();
 
-            while (expentitureBackup.next()) {
-                actualRatioExpenditure.add(new ActualRatioExpenditure(expentitureBackup.getInt("ausgabenId"),
-                        expentitureBackup.getString("bezeichnung"),
-                        expentitureBackup.getDouble("betrag"),
-                        expentitureBackup.getString("aufteilungsart"),
-                        (expentitureBackup.getDate("gilt_ab")).toLocalDate(),
-                        expentitureBackup.getString("bemerkung"),
-                        expentitureBackup.getInt("haeufigkeit")));
+            while (expentitureBeforeNewValidDate.next()) {
+                actualRatioExpenditure.add(new ActualRatioExpenditure(expentitureBeforeNewValidDate.getInt("ausgabenId"),
+                        expentitureBeforeNewValidDate.getString("bezeichnung"),
+                        expentitureBeforeNewValidDate.getDouble("betrag"),
+                        expentitureBeforeNewValidDate.getString("aufteilungsart"),
+                        (expentitureBeforeNewValidDate.getDate("gilt_ab")).toLocalDate(),
+                        expentitureBeforeNewValidDate.getString("bemerkung"),
+                        expentitureBeforeNewValidDate.getInt("haeufigkeit")));
             }
             System.out.println("Sicherheitsausgabe von zu verändernden Datensätzen:");
             System.out.println(actualRatioExpenditure);
         } catch (Exception e) {
-            System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "+e.getStackTrace()[0].getLineNumber()+"): " + e.toString());
+           System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "+e.getStackTrace()[0].getLineNumber()+"): " + e.toString());
         }
+
 
         // aktuell gültige Verhältnissbeträge mit einem GiltBis Wert versehen
         DBTools expenditureUpdate = new DBTools(cn);
@@ -166,8 +210,9 @@ public class ExpenditureDetailTableMouseListener extends MouseAdapter {
                 UPDATE ha_ausgaben
                 SET gilt_bis = '%s'
                 WHERE aufteilungsart = 'V'
-                AND gilt_bis IS NULL;
-                """.formatted(newValidFromPeriod.minusMonths(1)))) {
+                AND gilt_bis IS NULL
+                AND gilt_ab < '%s';
+                """.formatted(newValidFromPeriod.minusMonths(1), newValidFromPeriod))) {
             System.out.println("Fehler beim aktualisieren der alten Ausgabendatensätze vom Typ 'Verhältnis'");
             System.exit(1);
         }
@@ -190,7 +235,7 @@ public class ExpenditureDetailTableMouseListener extends MouseAdapter {
                     actualRatioExpenditureRow.amount,
                     actualRatioExpenditureRow.divideType,
                     actualRatioExpenditureRow.expenditureHint,
-                    newValidFromPeriod.toString(),
+                    newValidFromPeriod,
                     actualRatioExpenditureRow.frequency,
                     "ausgabenId"))) {
                 System.out.println("Fehler beim einfügen des neuen Ausgabendatenstz vom Typ 'Verhältnis' mit der Bezeichnung:" + actualRatioExpenditureRow.description);
@@ -210,7 +255,7 @@ public class ExpenditureDetailTableMouseListener extends MouseAdapter {
                                 (%d, %s, '%s', %d)
                                 """.formatted(percentOfParty.partyId,
                                 (actualRatioExpenditureRow.amount * percentOfParty.percent),
-                                "Verhältinisanteils Aktualisierung",
+                                "Nachfolgeerstellung von Verhältinisanteilen",
                                 lastInsertId))) {
                             System.out.println("Fehler beim einfügen des neuen AusgabenAufteilungsdatensatz für Partei: -" + percentOfParty.partyId + "- der Ausgabe: " + actualRatioExpenditureRow.description);
                             System.exit(1);
