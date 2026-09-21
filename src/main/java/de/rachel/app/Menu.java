@@ -3,11 +3,15 @@ package de.rachel.app;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.Connection;
+import java.util.Optional;
 
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.SwingUtilities;
+
+import javafx.application.Platform;
 
 public class Menu {
     private JFrame menuwindow = null;
@@ -16,9 +20,19 @@ public class Menu {
     private Connection cn = null;
 
     Menu() {
-        // show Login
-        login = new Login(menuwindow);
+        // 1. JavaFX-Code auf dem JavaFX-Thread ausführen
+        Platform.runLater(() -> {
+            Optional<String> result = LoginFx.showInputDialog();
+            result.ifPresent(name -> System.out.println("Eingegebener Name: " + name));
 
+            System.exit(0);
+            // Falls nach dem Login-Dialog das Swing-Fenster aufgebaut werden soll,
+            // machen wir das wieder auf dem Swing Event Dispatch Thread (EDT):
+            SwingUtilities.invokeLater(() -> initSwingGui());
+        });
+    }
+
+    private void initSwingGui() {
         // kill aplication by 3 loginerrors or however getConnection brings null
         if (login.getLogincount() == 3 || login.getConnection() == null)
             System.exit(0);
@@ -149,6 +163,15 @@ public class Menu {
      * @param args
      */
     public static void main(String[] args) {
+        try {
+            Platform.startup(() -> {
+                // Das Toolkit ist nun bereit
+            });
+        } catch (IllegalStateException e) {
+            // Falls Toolkit bereits läuft, ignorieren
+        }
+
+        // 3. Menü starten
         new Menu();
     }
 

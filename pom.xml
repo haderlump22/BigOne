@@ -16,6 +16,8 @@
     <maven.compiler.source>${maven.compiler.release}</maven.compiler.source>
     <maven.compiler.target>${maven.compiler.release}</maven.compiler.target>
     <my.extlib.path>/home/domm/workspace/extlibs</my.extlib.path>
+    <!-- Aktuelle JavaFX-Version eintragen (z. B. 21 oder 21.0.1) -->
+    <javafx.version>25.0.4</javafx.version>
   </properties>
 
   <dependencies>
@@ -33,6 +35,12 @@
       <groupId>com.google.code.gson</groupId>
       <artifactId>gson</artifactId>
       <version>2.14.0</version>
+    </dependency>
+    <!-- JavaFX Controls (Buttons, Dialoge, Layouts etc.) -->
+    <dependency>
+        <groupId>org.openjfx</groupId>
+        <artifactId>javafx-controls</artifactId>
+        <version>${javafx.version}</version>
     </dependency>
   </dependencies>
   <build>
