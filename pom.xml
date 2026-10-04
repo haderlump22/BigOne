@@ -27,9 +27,9 @@
       <version>42.7.13</version>
     </dependency>
     <dependency>
-        <groupId>com.toedter</groupId>
-        <artifactId>jcalendar</artifactId>
-        <version>1.4</version>
+      <groupId>com.toedter</groupId>
+      <artifactId>jcalendar</artifactId>
+      <version>1.4</version>
     </dependency>
     <dependency>
       <groupId>com.google.code.gson</groupId>
@@ -38,9 +38,14 @@
     </dependency>
     <!-- JavaFX Controls (Buttons, Dialoge, Layouts etc.) -->
     <dependency>
-        <groupId>org.openjfx</groupId>
-        <artifactId>javafx-controls</artifactId>
-        <version>${javafx.version}</version>
+      <groupId>org.openjfx</groupId>
+      <artifactId>javafx-controls</artifactId>
+      <version>${javafx.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.openjfx</groupId>
+      <artifactId>javafx-fxml</artifactId>
+      <version>${javafx.version}</version>
     </dependency>
   </dependencies>
   <build>

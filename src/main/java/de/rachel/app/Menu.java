@@ -16,19 +16,18 @@ import javafx.application.Platform;
 public class Menu {
     private JFrame menuwindow = null;
     private JMenuBar mbar = null;
-    private Login login = null;
+    private LoginOld login = null;
     private Connection cn = null;
 
     Menu() {
         // 1. JavaFX-Code auf dem JavaFX-Thread ausführen
         Platform.runLater(() -> {
-            Optional<String> result = LoginFx.showInputDialog();
-            result.ifPresent(name -> System.out.println("Eingegebener Name: " + name));
+          Optional<String> result = Login.showInputDialog();
+          result.ifPresent(name -> System.out.println("Eingegebener Name: " + name));
 
-            System.exit(0);
-            // Falls nach dem Login-Dialog das Swing-Fenster aufgebaut werden soll,
-            // machen wir das wieder auf dem Swing Event Dispatch Thread (EDT):
-            SwingUtilities.invokeLater(() -> initSwingGui());
+          // Falls nach dem Login-Dialog das Swing-Fenster aufgebaut werden soll,
+          // machen wir das wieder auf dem Swing Event Dispatch Thread (EDT):
+          SwingUtilities.invokeLater(() -> initSwingGui());
         });
     }
 
@@ -166,6 +165,7 @@ public class Menu {
         try {
             Platform.startup(() -> {
                 // Das Toolkit ist nun bereit
+                Platform.setImplicitExit(false);
             });
         } catch (IllegalStateException e) {
             // Falls Toolkit bereits läuft, ignorieren

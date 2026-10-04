@@ -1,178 +1,75 @@
 package de.rachel.app;
 
-import java.awt.Color;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.io.BufferedReader;
-import java.io.FileWriter;
+import javafx.application.Platform;
+import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.DialogPane;
+import javafx.scene.control.PasswordField;
+import javafx.scene.control.TextField;
+
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.sql.Connection;
-import java.sql.DriverManager;
-
-import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPasswordField;
-import javax.swing.JTextField;
-import javax.swing.WindowConstants;
-
-import com.google.gson.*;
+import java.util.Optional;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
 
 public class Login {
 
-  private JDialog login;
-  private int Logincount = 0;
-  private JLabel lblUeberschrift, lblName, lblPW;
-  private JTextField txtBenutzer;
-  private JPasswordField txtPW;
-  private JButton btnLogin;
-  private String strB, strPW;
-  private Connection cn = null;
-  private Path configFile;
-  private FileWriter jsonConfigFile;
-  private boolean devMode = true;
-  private Config currentConfig;
+    @FXML
+    private TextField username;
 
-  public Login(JFrame dialogOwner) {
-    Gson gsonParser = new Gson();
+    @FXML
+    private PasswordField password;
 
-    try {
-      if (devMode) {
-        configFile = Paths.get(System.getProperty("user.home") + "/BigOneConfig/BigOneConfigDev.json");
-      } else {
-        configFile = Paths.get(System.getProperty("user.home") + "/BigOneConfig/BigOneConfig.json");
-      }
-
-      BufferedReader configReader = Files.newBufferedReader(configFile);
-
-      currentConfig = gsonParser.fromJson(configReader, Config.class);
-
-    } catch (IOException e) {
-      System.err.println("Config Datei konnte nicht gelesen/gefunden werden: " + e.getMessage());
-      writeTemplateConfigFile();
-    } catch (Exception e) {
-      System.err.println("Fehler beim JSON-Parsing: " + e.getMessage());
+    public String getUsernameText() {
+        return username != null ? username.getText() : "";
     }
 
-    login = new JDialog(dialogOwner, "LOGIN", true);
-    login.setSize(290, 165);
-    login.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
-    login.setLayout(null);
-    login.getContentPane().setBackground(Color.white);
-
-    // check if DevMode ist aktive and make it visible
-    if (devMode) {
-      login.setTitle("LOGIN !!DEVMOD!!");
-      login.getContentPane().setBackground(Color.RED);
+    public String getPasswordText() {
+        return password != null ? password.getText() : "";
     }
 
-    lblUeberschrift = new JLabel("Login to BigOne");
-    lblUeberschrift.setBounds(10, 10, 270, 25);
+    // Statische Methode für den synchronen Aufruf aus Swing
+    public static Optional<String> showInputDialog() {
+        FutureTask<Optional<String>> task = new FutureTask<>(() -> {
+            try {
+                // 1. FXML laden
+                FXMLLoader loader = new FXMLLoader(Login.class.getResource("LoginView.fxml"));
+                DialogPane dialogPane = loader.load();
 
-    lblName = new JLabel("Username");
-    lblName.setBounds(10, 40, 100, 25);
+                // 2. Controller abgreifen
+                Login controller = loader.getController();
 
-    lblPW = new JLabel("Password");
-    lblPW.setBounds(10, 70, 100, 25);
+                // 3. JavaFX Dialog mit der geladenen DialogPane erstellen
+                Dialog<String> dialog = new Dialog<>();
+                dialog.setTitle("Login");
+                dialog.setDialogPane(dialogPane);
 
-    txtBenutzer = new JTextField();
-    txtBenutzer.setBounds(120, 40, 120, 25);
-    txtBenutzer.setText(currentConfig.getDbUserName());
+                // 4. ResultConverter steuert, was bei OK zurückgegeben wird
+                dialog.setResultConverter(buttonType -> {
+                    if (buttonType == ButtonType.OK) {
+                        return controller.getUsernameText();
+                    }
+                    return null;
+                });
 
-    txtPW = new JPasswordField("");
-    txtPW.setBounds(120, 70, 120, 25);
-    txtPW.setText(currentConfig.getDbPw());
+                // 5. Anzeigen und blockieren
+                return dialog.showAndWait();
 
-    btnLogin = new JButton("Login");
-    btnLogin.setBounds(100, 100, 90, 25);
-    btnLogin.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
+            } catch (IOException e) {
+                e.printStackTrace();
+                return Optional.empty();
+            }
+        });
 
-        // zuweisung der Textfeldwerte an die lokalen Varablen
-        strB = txtBenutzer.getText();
-        strPW = new String(txtPW.getPassword());
+        Platform.runLater(task);
 
         try {
-          // Select fitting database driver and connect:
-          Class.forName(currentConfig.getDbDrv());
-          cn = DriverManager.getConnection(currentConfig.getDbUrl() + currentConfig.getDbName(), strB, strPW);
-          login.dispose();
-        } catch (Exception ex) {
-          // ausnahme beschreibung auf der konsole ausgeben
-          txtPW.setText("");
-          txtPW.requestFocus();
-          Logincount++;
-          if (Logincount == 3) {
-            JOptionPane.showMessageDialog(null, "maximale Anzahl der Loginversuche überschritten", "Achtung",
-                JOptionPane.INFORMATION_MESSAGE);
-            login.dispose();
-          }
-          // System.out.println(ex.toString());
+            return task.get();
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+            return Optional.empty();
         }
-
-      }
-    });
-
-    login.add(lblUeberschrift);
-    login.add(lblName);
-    login.add(lblPW);
-    login.add(txtBenutzer);
-    login.add(txtPW);
-    login.add(btnLogin);
-    login.validate();
-    login.repaint();
-    login.setVisible(true);
-
-    txtBenutzer.requestFocus();
-  }
-
-  public Connection getConnection() {
-    return cn;
-  }
-
-  public String getUser() {
-    return txtBenutzer.getText();
-  }
-
-  public int getLogincount() {
-    return Logincount;
-  }
-
-  private void writeTemplateConfigFile() {
-    Config exampleConfig = new Config();
-
-    exampleConfig.setDbDrv("org.postgresql.Driver");
-    exampleConfig.setDbName("<dbName>");
-    exampleConfig.setDbPw("<dbPassword>");
-    exampleConfig.setDbUrl("jdbc:postgresql:\\/\\/localhost:5432\\/");
-    exampleConfig.setDbUserName("<dbUserName>");
-
-    Gson gsonWriter = new GsonBuilder().setPrettyPrinting().create();
-
-    try {
-      if (devMode) {
-        jsonConfigFile = new FileWriter(System.getProperty("user.home") + "/BigOneConfig/BigOneConfigDev.json", StandardCharsets.UTF_8);
-      } else {
-        jsonConfigFile = new FileWriter(System.getProperty("user.home") + "/BigOneConfig/BigOneConfig.json", StandardCharsets.UTF_8);
-      }
-
-      gsonWriter.toJson(exampleConfig, jsonConfigFile);
-      jsonConfigFile.close();
-
-      System.out.println("Eine Beispiel Config ist in den HomeFolder unter dem Verzeichnis BigOneConfig, geschrieben worden. Bitte passen Sie diese an und starten das Programm neu..");
-      System.exit(0);
-    } catch (IOException e) {
-      System.err.println("Beispiel Config konnte nicht geschrieben werden: " + e.getMessage());
-      System.exit(1);
-    } catch (Exception e) {
-      System.err.println("Fehler beim erstellen der Beispieldatei: " + e.getMessage());
-      System.exit(1);
     }
-  }
 }
