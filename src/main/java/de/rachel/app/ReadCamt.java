@@ -394,10 +394,10 @@ public class ReadCamt {
                 valueDate = LocalDate.parse(csvContent[i].split(";")[1], DateTimeFormatter.ofPattern("d.M.yyyy"));
                 cdtDbtInd = !(csvContent[i].split(";")[7].startsWith("-")) ? "h" : "s";
                 cdtDbtName = csvContent[i].split(";")[2];
-                amount = (csvContent[i].split(";")[7].startsWith("-")
+                amount = (csvContent[i].split(";")[8].startsWith("-")
                         ? Double.valueOf(
-                                csvContent[i].split(";")[7].replace("-", "").replace(".", "").replaceAll(",", "."))
-                        : Double.valueOf(csvContent[i].split(";")[7].replace(".", "").replaceAll(",", ".")));
+                                csvContent[i].split(";")[8].replace("-", "").replace(".", "").replaceAll(",", "."))
+                        : Double.valueOf(csvContent[i].split(";")[8].replace(".", "").replaceAll(",", ".")));
 
                 comment = csvContent[i].split(";")[4] + " (" + csvContent[i].split(";")[2] + ")";
 
