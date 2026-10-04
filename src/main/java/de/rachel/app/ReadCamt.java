@@ -392,7 +392,7 @@ public class ReadCamt {
             // the Diba Data begin in the row after the Header
             for (int i = iHeaderRow + 1; i < csvContent.length; i++) {
                 valueDate = LocalDate.parse(csvContent[i].split(";")[1], DateTimeFormatter.ofPattern("d.M.yyyy"));
-                cdtDbtInd = !(csvContent[i].split(";")[7].startsWith("-")) ? "h" : "s";
+                cdtDbtInd = !(csvContent[i].split(";")[8].startsWith("-")) ? "h" : "s";
                 cdtDbtName = csvContent[i].split(";")[2];
                 amount = (csvContent[i].split(";")[8].startsWith("-")
                         ? Double.valueOf(
