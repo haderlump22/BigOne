@@ -155,7 +155,7 @@
             <modulePath>${project.build.directory}/modules</modulePath>
           </modulePaths>
           <!-- Definiert das Start-Modul und die Main-Klasse für das Image -->
-          <launcher>runBigone=de.rachel.bigone/de.rachel.app.Menu</launcher>
+          <launcher>runBigone=de.rachel.bigone/de.rachel.app.Main</launcher>
           <!-- Komprimiert das finale Image, um Speicherplatz zu sparen -->
           <stripDebug>true</stripDebug>
           <noHeaderFiles>true</noHeaderFiles>
@@ -172,16 +172,12 @@
         </executions>
       </plugin>
 
-      <!-- for the mvn exec:java-->
       <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>exec-maven-plugin</artifactId>
-        <version>3.5.0</version>
+        <groupId>org.openjfx</groupId>
+        <artifactId>javafx-maven-plugin</artifactId>
+        <version>0.0.8</version>
         <configuration>
-          <!-- Aktiviert den Modulpfad statt des Classpaths -->
-          <longModulepath>true</longModulepath>
-          <!-- Ihre modulare Hauptklasse -->
-          <mainClass>de.rachel.app.Menu</mainClass>
+          <mainClass>de.rachel.app.Main</mainClass>
         </configuration>
       </plugin>
     </plugins>

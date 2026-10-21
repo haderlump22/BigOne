@@ -2,34 +2,24 @@ package de.rachel.app;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 import java.sql.Connection;
-import java.util.Optional;
 
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
-import javax.swing.SwingUtilities;
 
-import javafx.application.Platform;
+import javafx.application.Application;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
 
-public class Menu {
+public class Main extends Application{
     private JFrame menuwindow = null;
     private JMenuBar mbar = null;
     private LoginOld login = null;
     private Connection cn = null;
-
-    Menu() {
-        // 1. JavaFX-Code auf dem JavaFX-Thread ausführen
-        Platform.runLater(() -> {
-          Optional<String> result = Login.showInputDialog();
-          result.ifPresent(name -> System.out.println("Eingegebener Name: " + name));
-
-          // Falls nach dem Login-Dialog das Swing-Fenster aufgebaut werden soll,
-          // machen wir das wieder auf dem Swing Event Dispatch Thread (EDT):
-          SwingUtilities.invokeLater(() -> initSwingGui());
-        });
-    }
 
     private void initSwingGui() {
         // kill aplication by 3 loginerrors or however getConnection brings null
@@ -158,21 +148,19 @@ public class Menu {
         menuwindow.setVisible(true);
     }
 
-    /**
-     * @param args
-     */
-    public static void main(String[] args) {
-        try {
-            Platform.startup(() -> {
-                // Das Toolkit ist nun bereit
-                Platform.setImplicitExit(false);
-            });
-        } catch (IllegalStateException e) {
-            // Falls Toolkit bereits läuft, ignorieren
-        }
+    @Override
+    public void start(Stage loginStage) throws IOException{
+      FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("Login.fxml"));
 
-        // 3. Menü starten
-        new Menu();
+      Scene scene = new Scene(fxmlLoader.load());
+
+      loginStage.setResizable(false);
+      loginStage.setTitle("Login to BigOne");
+      loginStage.setScene(scene);
+      loginStage.show();
     }
 
+    public static void main(String[] args) {
+        launch(args);
+    }
 }

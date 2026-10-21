@@ -10,13 +10,11 @@
 <!-- 2. ROOT-ELEMENT (Layout-Container) -->
 <DialogPane xmlns="http://javafx.com/javafx/25"
       xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="de.rachel.app.Login"
-      prefWidth="320"
-      headerText="Login to BigOne">
+      fx:controller="de.rachel.app.Login">
 
     <!-- 3. INHALTE UND UI-ELEMENTE -->
     <content>
-        <VBox spacing="10 alignment="CENTER-LEFT">
+        <VBox spacing="10" alignment="CENTER_LEFT">
           <children>
             <Label text="Username" />
             <TextField fx:id="username" promptText="Benutzername" />

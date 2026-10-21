@@ -5,6 +5,9 @@ module de.rachel.bigone {
     requires com.google.gson;
     requires javafx.controls;
     requires javafx.fxml;
+
+    exports de.rachel.app;
+
     // Erlaubt Gson den Reflection-Zugriff auf alle Klassen in diesem Paket
-    opens de.rachel.app to com.google.gson, javafx.fxml;
+    opens de.rachel.app to com.google.gson, javafx.controls, javafx.fxml;
 }
