@@ -8,45 +8,45 @@ package de.rachel.app;
  *
  */
 public class Config {
-  private String DbDrv, DbUrl, DbName, DbUserName, DbPw;
+  private String databaseDriver, databaseUrl, databaseName, userName, password;
 
-  public String getDbDrv() {
-      return DbDrv;
+  public String getDatabaseDriver() {
+      return databaseDriver;
   }
 
-  public String getDbUrl() {
-      return DbUrl;
+  public String getDatabaseUrl() {
+      return databaseUrl;
   }
 
-  public String getDbName() {
-      return DbName;
+  public String getDatabaseName() {
+      return databaseName;
   }
 
-  public String getDbUserName() {
-      return DbUserName;
+  public String getUserName() {
+      return userName;
   }
 
-  public String getDbPw() {
-      return DbPw;
+  public String getPassword() {
+      return password;
   }
 
-  public void setDbDrv(String dbDrv) {
-    DbDrv = dbDrv;
+  public void setDatabaseDriver(String databaseDriver) {
+    this.databaseDriver = databaseDriver;
   }
 
-  public void setDbUrl(String dbUrl) {
-    DbUrl = dbUrl;
+  public void setDatabaseUrl(String databaseUrl) {
+    this.databaseUrl = databaseUrl;
   }
 
-  public void setDbName(String dbName) {
-    DbName = dbName;
+  public void setDatabaseName(String databaseName) {
+    this.databaseName = databaseName;
   }
 
-  public void setDbUserName(String dbUserName) {
-    DbUserName = dbUserName;
+  public void setUserName(String userName) {
+    this.userName = userName;
   }
 
-  public void setDbPw(String dbPw) {
-    DbPw = dbPw;
+  public void setPassword(String password) {
+    this.password = password;
   }
 }
