@@ -2,7 +2,9 @@ package de.rachel.app;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
@@ -19,8 +21,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DriverManager;
-
-import javax.swing.JOptionPane;
 
 import com.google.gson.*;
 
@@ -55,8 +55,21 @@ public class Login {
       Class.forName(currentConfig.getDatabaseDriver());
       cn = DriverManager.getConnection(currentConfig.getDatabaseUrl() + currentConfig.getDatabaseName(), username.getText(), password.getText());
 
-      System.out.println("Connection established: " + cn.toString());
+      Stage mainMenu = new Stage();
 
+      FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("MainMenu.fxml"));
+      Scene mainMenuScene = new Scene(fxmlLoader.load());
+      ((MainMenu) fxmlLoader.getController()).setConnection(cn); // must only be called after the fxmlLoader has loaded
+
+      mainMenu.setResizable(false);
+      mainMenu.setTitle("BigOne");
+      mainMenu.setScene(mainMenuScene);
+      mainMenu.show();
+
+      // after showing the Main Menubar we close the Login
+      Node source = (Node) event.getSource();
+      Stage stage = (Stage) source.getScene().getWindow();
+      stage.close();
     } catch (Exception ex) {
       // ausnahme beschreibung auf der konsole ausgeben
       Logincount++;
@@ -72,7 +85,6 @@ public class Login {
         Stage stage = (Stage) source.getScene().getWindow();
         stage.close();
       }
-      // System.out.println(ex.toString());
     }
   }
 
@@ -82,7 +94,7 @@ public class Login {
 
     try {
       if (devMode) {
-        configFile = Paths.get(System.getProperty("user.home") + "/BigOneConfig/BigOneConfigDev.json");
+        configFile = Paths.get(System.getProperty("user.home") + "/BigOneConfig/BigOneFxConfigDev.json");
         rootContainer.setStyle("-fx-background-color: red;");
       } else {
         configFile = Paths.get(System.getProperty("user.home") + "/BigOneConfig/BigOneConfig.json");

@@ -142,11 +142,11 @@ public class Main extends Application{
     public void start(Stage loginStage) throws IOException{
       FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("Login.fxml"));
 
-      Scene scene = new Scene(fxmlLoader.load());
+      Scene loginScene = new Scene(fxmlLoader.load());
 
       loginStage.setResizable(false);
       loginStage.setTitle("Login to BigOne");
-      loginStage.setScene(scene);
+      loginStage.setScene(loginScene);
       loginStage.show();
     }
 

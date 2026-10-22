@@ -35,7 +35,7 @@ import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 
-public class Transaktionen {
+public class TransaktionenOld {
     private static final int TANKEN = 6;
     private static final int AUFTEILUNG = 52;
     private Connection cn = null;
@@ -54,7 +54,7 @@ public class Transaktionen {
     private String[][] datenAuft;
     private URL nullImageUrl, euroImageUrl;
 
-    Transaktionen(Connection LoginCN) {
+    TransaktionenOld(Connection LoginCN) {
         cn = LoginCN;
         mainwindow = new JFrame("Transaktionen");
         mainwindow.setSize(800, 500);

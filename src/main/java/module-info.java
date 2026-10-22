@@ -5,6 +5,7 @@ module de.rachel.bigone {
     requires com.google.gson;
     requires javafx.controls;
     requires javafx.fxml;
+    requires javafx.base;
 
     exports de.rachel.app;
 
