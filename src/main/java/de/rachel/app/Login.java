@@ -29,7 +29,7 @@ public class Login {
   private boolean devMode = true;
   private Config currentConfig;
   private FileWriter jsonConfigFile;
-  private Connection cn = null;
+  private Connection dbConnection = null;
   private int Logincount = 0;
 
   @FXML
@@ -53,13 +53,13 @@ public class Login {
 
     try {
       Class.forName(currentConfig.getDatabaseDriver());
-      cn = DriverManager.getConnection(currentConfig.getDatabaseUrl() + currentConfig.getDatabaseName(), username.getText(), password.getText());
+      dbConnection = DriverManager.getConnection(currentConfig.getDatabaseUrl() + currentConfig.getDatabaseName(), username.getText(), password.getText());
 
       Stage mainMenu = new Stage();
 
       FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("MainMenu.fxml"));
       Scene mainMenuScene = new Scene(fxmlLoader.load());
-      ((MainMenu) fxmlLoader.getController()).setConnection(cn); // must only be called after the fxmlLoader has loaded
+      ((MainMenu) fxmlLoader.getController()).setConnection(dbConnection); // must only be called after the fxmlLoader has loaded
 
       mainMenu.setResizable(false);
       mainMenu.setTitle("BigOne");
