@@ -1,8 +1,14 @@
 package de.rachel.app;
 
 import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.function.UnaryOperator;
+
 import javafx.fxml.FXML;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.TextField;
+import javafx.scene.control.TextFormatter;
 import javafx.scene.layout.VBox;
 import javafx.event.ActionEvent;
 
@@ -11,17 +17,72 @@ public class Transactions {
 
   @FXML
   private ComboBox<String> iban;
+  @FXML
+  private CheckBox liquiRelevant;
+
+  @FXML
+  private TextField liquiDate;
+
+  @FXML
+  private TextField valueDate;
+
+  @FXML
+  private ComboBox<String> ereignis;
 
   @FXML
   public void initialize() {
-    fill_Iban();
+    UnaryOperator<TextFormatter.Change> dateMaskFilter = change -> {
+      String fullText = change.getControlNewText();
+      String newText = change.getText();
+
+      // 1. Wenn der Text gelöscht wird (BackSpace / Entf), erlauben wir das immer
+      if (change.isDeleted()) {
+        return change;
+      }
+
+      // Maximale Länge auf 10 Zeichen begrenzen (DD-MM-20YY)
+      if (fullText.length() > 10) {
+        return null;
+      }
+
+      // nur Ziffern erlauben
+      if (!newText.matches("\\d*")) {
+        return null;
+      }
+
+      // automatisches setzen der zwischenzeichen
+      if (fullText.length() == 2 || fullText.length() == 5) {
+        change.setText(newText + ".");
+
+        // Die exakte neue Position berechnen (Start der Eingabe + Länge des neuen Textes inkl. Punkt)
+        int newPos = change.getRangeStart() + change.getText().length();
+
+        // Caret UND Anchor auf dieselbe Position setzen (verhindert das Markieren)
+        change.setCaretPosition(newPos);
+        change.setAnchor(newPos);
+      }
+
+      return change; // Änderung erlauben
+    };
+
+    liquiDate.setTextFormatter(new TextFormatter<>(dateMaskFilter));
+    liquiDate.setPromptText("  .  .20  ");
+
+    valueDate.setTextFormatter(new TextFormatter<>(dateMaskFilter));
+    valueDate.setPromptText("  .  .20  ");
+
+
+    fill_iban();
+    fill_ereignis();
+
+    iban.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {fill_ereignis();});
   }
 
   public Transactions(Connection dbConnection) {
     this.dbConnection = dbConnection;
   }
 
-  private void fill_Iban() {
+  private void fill_iban() {
     DBTools getter = new DBTools(dbConnection);
 
     getter.select("""
@@ -42,5 +103,64 @@ public class Transactions {
       System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "
           + e.getStackTrace()[0].getLineNumber() + "): " + e.toString());
     }
+  }
+
+  private void fill_ereignis() {
+    DBTools getter = new DBTools(dbConnection);
+
+    // if we change the iban we has to clear first from the old Content
+    ereignis.getItems().clear();
+
+    if (isJointAccount(iban.getSelectionModel().getSelectedItem().toString().replace(" ", ""))) {
+      getter.select("""
+          SELECT ha_kategorie_id id, kategoriebezeichnung bez
+          FROM ha_kategorie
+          ORDER BY 2
+          """);
+    } else {
+      getter.select("""
+          SELECT ereigniss_id id, ereigniss_krzbez bez
+          FROM kontenereignisse
+          WHERE gueltig = TRUE
+          ORDER BY 2
+          """);
+    }
+
+    try {
+      getter.beforeFirst();
+
+      while (getter.next()) {
+        ereignis.getItems().add(getter.getString("bez") + " (" + getter.getInt("id") + ")");
+      }
+
+      ereignis.getSelectionModel().selectFirst();
+
+    } catch (Exception e) {
+      System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "
+          + e.getStackTrace()[0].getLineNumber() + "): " + e.toString());
+    }
+
+  }
+
+  private boolean isJointAccount(String iban) {
+    DBTools getter = new DBTools(dbConnection);
+    boolean isJointAccount = false;
+
+    getter.select("""
+        SELECT bemerkung
+        FROM konten
+        WHERE iban = '%s'
+        """.formatted(iban));
+
+    try {
+      getter.first();
+      isJointAccount = getter.getString("bemerkung").equals("Haushaltskonto");
+    } catch (SQLException e) {
+      System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "
+          + e.getStackTrace()[0].getLineNumber() + "): " + e.toString());
+      System.exit(1);
+    }
+
+    return isJointAccount;
   }
 }
