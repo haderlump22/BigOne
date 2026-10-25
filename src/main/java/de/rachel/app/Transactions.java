@@ -7,6 +7,7 @@ import java.util.function.UnaryOperator;
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextFormatter;
 import javafx.scene.layout.VBox;
@@ -30,7 +31,45 @@ public class Transactions {
   private ComboBox<String> ereignis;
 
   @FXML
+  private TextArea transactionText;
+
+  @FXML
+  private TextField amount;
+
+  @FXML
   public void initialize() {
+
+    UnaryOperator<TextFormatter.Change> decimalMaskFilter = change -> {
+      String newText = change.getControlNewText();
+
+      // 1. Wenn der Text gelöscht wird (BackSpace / Entf), erlauben wir das immer
+      if (change.isDeleted()) {
+        return change;
+      }
+
+      // 2. Erlaube leeres Feld oder reine Ziffern mit maximal einem Komma/Punkt
+      if (newText.matches("^\\d*[.,]?\\d*$")) {
+        try {
+          // Konvertiere das Komma für Java in einen Punkt, falls vorhanden
+          String parseable = newText.replace(",", ".");
+
+          // Wenn nur ein Punkt/Komma dasteht (z.B. "." oder ","), erlauben
+          if (parseable.equals(".") || parseable.isEmpty()) {
+            return change;
+          }
+
+          // pharsen testen
+          Double.parseDouble(parseable);
+
+          return change;
+        } catch (NumberFormatException e) {
+          // Falls das Parsen fehlschlägt, Änderung verwerfen
+        }
+      }
+
+      return null; // Änderung erlauben
+    };
+
     UnaryOperator<TextFormatter.Change> dateMaskFilter = change -> {
       String fullText = change.getControlNewText();
       String newText = change.getText();
@@ -71,6 +110,10 @@ public class Transactions {
     valueDate.setTextFormatter(new TextFormatter<>(dateMaskFilter));
     valueDate.setPromptText("  .  .20  ");
 
+    amount.setTextFormatter(new TextFormatter<>(decimalMaskFilter));
+    amount.setPromptText("0,00");
+
+    transactionText.setWrapText(true);
 
     fill_iban();
     fill_ereignis();

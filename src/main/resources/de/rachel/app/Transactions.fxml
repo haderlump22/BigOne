@@ -6,6 +6,7 @@
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.RadioButton?>
+<?import javafx.scene.control.ToggleGroup?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.TitledPane?>
@@ -41,8 +42,11 @@
             <TitledPane animated="false" collapsible="false" prefHeight="84.0" prefWidth="100.0" text="S/H">
               <content>
                 <VBox prefHeight="200.0" prefWidth="100.0">
+                  <fx:define>
+                    <ToggleGroup fx:id="shGroup" />
+                  </fx:define>
                   <children>
-                    <RadioButton mnemonicParsing="false" selected="true" text="Soll">
+                    <RadioButton toggleGroup="$shGroup" mnemonicParsing="false" selected="true" text="Soll">
                       <VBox.margin>
                         <Insets bottom="10.0" />
                       </VBox.margin>
@@ -50,7 +54,7 @@
                         <Font name="System Bold" size="13.0" />
                       </font>
                     </RadioButton>
-                    <RadioButton mnemonicParsing="false" text="Haben">
+                    <RadioButton toggleGroup="$shGroup" mnemonicParsing="false" text="Haben">
                       <font>
                         <Font name="System Bold" size="13.0" />
                       </font>
@@ -115,13 +119,13 @@
                     <Font name="System Bold" size="13.0" />
                   </font>
                 </Label>
-                <TextField GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                <TextField fx:id="amount" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                 <Label prefWidth="100.0" text="Beschreibung" GridPane.rowIndex="2" GridPane.valignment="TOP">
                   <font>
                     <Font name="System Bold" size="13.0" />
                   </font>
                 </Label>
-                <TextArea prefHeight="43.0" prefWidth="190.0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                <TextArea fx:id="transactionText"  prefHeight="43.0" prefWidth="190.0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                 <Label prefWidth="100.0" text="Ereignis" GridPane.rowIndex="3">
                   <font>
                     <Font name="System Bold" size="13.0" />
