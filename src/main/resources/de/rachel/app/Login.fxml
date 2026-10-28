@@ -10,7 +10,7 @@
 
 <VBox fx:id="rootContainer"
       alignment="CENTER_LEFT"
-      xmlns="http://javafx.com/javafx/25"
+      xmlns="http://javafx.com/javafx/26"
       xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="de.rachel.app.Login">
   <padding>

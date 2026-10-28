@@ -6,7 +6,7 @@
 <?import javafx.scene.layout.HBox?>
 
 
-<HBox xmlns="http://javafx.com/javafx/25"
+<HBox xmlns="http://javafx.com/javafx/26"
       xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="de.rachel.app.MainMenu">
    <children>

@@ -16,8 +16,7 @@
     <maven.compiler.source>${maven.compiler.release}</maven.compiler.source>
     <maven.compiler.target>${maven.compiler.release}</maven.compiler.target>
     <my.extlib.path>/home/domm/workspace/extlibs</my.extlib.path>
-    <!-- Aktuelle JavaFX-Version eintragen (z. B. 21 oder 21.0.1) -->
-    <javafx.version>25.0.4</javafx.version>
+    <javafx.version>26.0.2</javafx.version>
   </properties>
 
   <dependencies>
