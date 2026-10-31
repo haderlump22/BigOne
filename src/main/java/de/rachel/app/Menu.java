@@ -3,6 +3,7 @@ package de.rachel.app;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.Connection;
+import java.util.Locale;
 
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -149,7 +150,8 @@ public class Menu {
      * @param args
      */
     public static void main(String[] args) {
-        new Menu();
+      Locale.setDefault(Locale.GERMAN);
+      new Menu();
     }
 
 }

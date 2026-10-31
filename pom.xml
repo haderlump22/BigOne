@@ -132,13 +132,10 @@
         <version>3.2.0</version>
         <extensions>true</extensions>
         <configuration>
-          <!-- LÖSUNG: Unterscheidet das ZIP-Archiv von der Standard-JAR -->
           <classifier>app-image</classifier>
           <!-- WICHTIG: Überschreibt den Standard-Modulpfad von Maven -->
           <modulePaths>
-            <!-- 1. Liest Ihre eigenen kompilierten Klassen ein -->
             <modulePath>${project.build.outputDirectory}</modulePath>
-            <!-- 2. Liest die von ModiTect reparierten echten Module (PostgreSQL & JCalendar) ein -->
             <modulePath>${project.build.directory}/modules</modulePath>
           </modulePaths>
           <!-- Definiert das Start-Modul und die Main-Klasse für das Image -->
@@ -147,6 +144,11 @@
           <stripDebug>true</stripDebug>
           <noHeaderFiles>true</noHeaderFiles>
           <noManPages>true</noManPages>
+          <bindServices>true</bindServices>
+          <includeLocales>
+            <includeLocale>de</includeLocale>
+            <includeLocale>en</includeLocale>
+          </includeLocales>
         </configuration>
         <executions>
           <execution>
