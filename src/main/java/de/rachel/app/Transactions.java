@@ -1,5 +1,6 @@
 package de.rachel.app;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.LocalDate;
@@ -8,8 +9,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.UnaryOperator;
 
+import de.rachel.app.records.RefuelingRow;
 import de.rachel.app.records.TransactionsRow;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.CheckBox;
@@ -19,12 +25,14 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextFormatter;
 import javafx.scene.layout.VBox;
+import javafx.stage.Modality;
 import javafx.event.ActionEvent;
 
 public class Transactions {
   private Connection dbConnection = null;
   private static final int TANKEN = 6;
   private static final int AUFTEILUNG = 52;
+  private Stage ownStage;
 
   @FXML
   private ComboBox<String> iban;
@@ -237,59 +245,56 @@ public class Transactions {
   }
 
   private void SaveData() {
-      List<TransactionsRow> dataToSave = new ArrayList<>();
+    List<TransactionsRow> dataToSave = new ArrayList<>();
+    List<RefuelingRow> refuelingData = new ArrayList<>();
 
-      dataToSave.add(new TransactionsRow(
-        debitOrCredit(),
-        getKontoId(iban.getSelectionModel().getSelectedItem().replace(" ", "")),
-        (liquiRelevant.isSelected() ? LocalDate.parse(liquiDate.getText(), DateTimeFormatter.ofPattern("ds.MM.yyyy")) : null),
-        LocalDate.parse(valueDate.getText(), DateTimeFormatter.ofPattern("ds.MM.yyyy")),
-        Double.valueOf(amount.getText().replace(',', '.')),
-        comment.getText(),
-        BigOneTools.extractEreigId(ereignis.getSelectionModel().getSelectedItem())));
+    dataToSave.add(new TransactionsRow(
+      debitOrCredit(),
+      getKontoId(iban.getSelectionModel().getSelectedItem().replace(" ", "")),
+      (liquiRelevant.isSelected() ? LocalDate.parse(liquiDate.getText(), DateTimeFormatter.ofPattern("ds.MM.yyyy")) : null),
+      LocalDate.parse(valueDate.getText(), DateTimeFormatter.ofPattern("ds.MM.yyyy")),
+      Double.valueOf(amount.getText().replace(',', '.')),
+      comment.getText(),
+      BigOneTools.extractEreigId(ereignis.getSelectionModel().getSelectedItem())));
 
-      // hier werden diverse unterformulare aufgerufen um
-      // detailierte informatioenen zu einer Transaktionen aufzunehmen
-      switch (dataToSave.get(0).eventId()) {
-        case TANKEN:
-          // tankwerte zur eintragung aufnehmen
-          // das Programm arbeitet weiter wenn
-          // dialog geschlossen wird
-          TankDialog td = new TankDialog(mainwindow, txtBetrag.getText(), cn);
+    // hier werden diverse unterformulare aufgerufen um
+    // detailierte informatioenen zu einer Transaktionen aufzunehmen
+    switch (dataToSave.get(0).eventId()) {
+      case TANKEN:
+        refuelingData = getRefulingData();
 
-          bankStatementLine.KfzId = td.get_kfz_id();
-          bankStatementLine.TreibstoffId = td.get_treibstoff_id();
-          bankStatementLine.KilometerZahl = td.get_km();
-          bankStatementLine.LiterZahl = td.get_liter();
+        if (refuelingData == null ) {
+          System.exit(1);
+        }
 
-          // nun die Daten einfuegen
-          transaktionsdaten_einfuegen(bankStatementLine);
-          // der funktion wird die ebend durch einfuegen des
-          // transaktionsdatensatzes erzeugte transaktionsid uebergeben
-          // plus dem bankStatementLine objekt
-          tankdaten_einfuegen(get_max_transaktions_id(), bankStatementLine);
+        // insert Data in that ordner, because we need the transaction_id for the refuelingData
+        Integer transaktionsId = transaktionsdaten_einfuegen(dataToSave);
+        if (transaktionsId == null)
+          System.exit(1);
 
-          break;
-        case AUFTEILUNG:
-          // aufteilungsdaten aufnehmen
-          // das Programm arbeitet weiter wenn
-          // dialog geschlossen wird
-          Aufteilung auft = new Aufteilung(mainwindow, Double.valueOf(bankStatementLine.Betrag).doubleValue(),
-              bankStatementLine.Buchungstext, cn);
+        tankdaten_einfuegen(transaktionsId, refuelingData);
 
-          datenAuft = auft.getDaten();
+        break;
+      case AUFTEILUNG:
+        // aufteilungsdaten aufnehmen
+        // das Programm arbeitet weiter wenn
+        // dialog geschlossen wird
+        Aufteilung auft = new Aufteilung(mainwindow, Double.valueOf(bankStatementLine.Betrag).doubleValue(),
+            bankStatementLine.Buchungstext, cn);
 
-          // nun die Daten einfuegen
-          transaktionsdaten_einfuegen(bankStatementLine);
-          // der funktion wird die ebend durch einfuegen des
-          // transaktionsdatensatzes erzeugte transaktionsid uebergeben
-          // plus dem bankStatementLine objekt
-          aufteilungsdaten_einfuegen(get_max_transaktions_id(), datenAuft);
+        datenAuft = auft.getDaten();
 
-          break;
-        default:
-          transaktionsdaten_einfuegen(bankStatementLine);
-      }
+        // nun die Daten einfuegen
+        transaktionsdaten_einfuegen(bankStatementLine);
+        // der funktion wird die ebend durch einfuegen des
+        // transaktionsdatensatzes erzeugte transaktionsid uebergeben
+        // plus dem bankStatementLine objekt
+        aufteilungsdaten_einfuegen(get_max_transaktions_id(), datenAuft);
+
+        break;
+      default:
+        transaktionsdaten_einfuegen(dataToSave);
+    }
     resetContent();
   }
 
@@ -333,5 +338,88 @@ public class Transactions {
     }
 
     return kontoId;
+  }
+
+  private List<RefuelingRow> getRefulingData() {
+    try {
+      // 1. FXML laden
+      FXMLLoader refuelingLoader = new FXMLLoader(getClass().getResource("RefuelDialog.fxml"));
+      Parent refuelingDialogRoot = refuelingLoader.load();
+
+      // 2. Controller des Dialogs holen (wichtig, um später Daten abzufragen)
+      RefuelingDialog refuelingDialogController = refuelingLoader.getController();
+
+      Stage refuelingDialogStage = new Stage();
+
+      refuelingDialogController.setDbConnection(dbConnection);
+      refuelingDialogController.setOwnStage(refuelingDialogStage);
+
+      // 4. MODAL machen (blockiert das Hauptfenster)
+      refuelingDialogStage.setTitle("Tankdaten: " + "0,00");
+      refuelingDialogStage.initModality(Modality.APPLICATION_MODAL);
+      refuelingDialogStage.initOwner(ownStage);
+      refuelingDialogStage.setScene(new Scene(refuelingDialogRoot));
+      refuelingDialogStage.showAndWait();
+
+      // 6. Werte auslesen, NACHDEM der Dialog geschlossen wurde
+      return refuelingDialogController.getRefuelingData();
+    } catch (IOException e) {
+      e.printStackTrace();
+      return null;
+    }
+  }
+
+  public void setStage(Stage ownStage) {
+    this.ownStage = ownStage;
+  }
+
+  private Integer transaktionsdaten_einfuegen(List<TransactionsRow> dataToSave) {
+    DBTools insertWithReturn = new DBTools(dbConnection);
+
+    String sql = """
+        INSERT INTO transaktionen
+        (soll_haben, konten_id, datum, betrag, buchtext, ereigniss_id, liqui_monat)
+        VALUES
+        ('%s', %d, '%s', %s, '%s', %d
+        """.formatted(dataToSave.get(0).creditDebitIndicator(),
+                      dataToSave.get(0).accountId(),
+                      dataToSave.get(0).valueDate(),
+                      dataToSave.get(0).amount(),
+                      dataToSave.get(0).comment(),
+                      dataToSave.get(0).eventId());
+
+    // if liqui should be null, then no single quotes allow
+    if (dataToSave.get(0).liquiDate() == null)
+      sql = sql + "," + dataToSave.get(0).liquiDate() + ") RETURNING transaktions_id";
+    else
+      sql = sql + ",'" + dataToSave.get(0).liquiDate() + "') RETURNING transaktions_id";
+
+    insertWithReturn.insert(sql);
+
+    try {
+      return insertWithReturn.getInt("transaktions_id");
+    } catch (SQLException e) {
+      // TODO Auto-generated catch block
+      System.err.println("Fehler beim Einfügen der Transaktionsdaten...");
+      e.printStackTrace();
+      return null;
+    }
+  }
+
+  private void tankdaten_einfuegen(Integer transaktions_id, List<RefuelingRow> refuelingData) {
+    // fuegt die Tanktaden in die entsprechende Tabelle anhand der im
+    // BankStatementLine hinterlegten werte ein
+    DBTools refuelingInsert = new DBTools(dbConnection);
+
+    refuelingInsert.insert("""
+        INSERT INTO tankdaten
+        (transaktions_id, liter, km, kraftstoff_id, datum_bar, betrag_bar, kfz_id)
+        VALUES
+        (%d, %s, %s, %s, NULL, NULL, %s)
+        """.formatted(transaktions_id,
+                      refuelingData.get(0).liters(),
+                      refuelingData.get(0).mileage(),
+                      refuelingData.get(0).fuelId(),
+                      refuelingData.get(0).automotivId()));
   }
 }

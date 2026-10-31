@@ -25,6 +25,8 @@ public class MainMenu {
       });
       Scene transactionsScene = new Scene(fxmlLoader.load());
 
+      Transactions transactionsController = fxmlLoader.getController();
+      transactionsController.setStage(transactionsStage); // needed for setting as Parrent for a Dialogstage, creating in this controller
       transactionsStage.setResizable(false);
       transactionsStage.setTitle("Transaktionen");
       transactionsStage.setScene(transactionsScene);
