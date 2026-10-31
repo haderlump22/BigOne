@@ -159,6 +159,11 @@
           <stripDebug>true</stripDebug>
           <noHeaderFiles>true</noHeaderFiles>
           <noManPages>true</noManPages>
+          <bindServices>true</bindServices>
+          <includeLocales>
+            <includeLocale>de</includeLocale>
+            <includeLocale>en</includeLocale>
+          </includeLocales>
         </configuration>
         <executions>
           <execution>

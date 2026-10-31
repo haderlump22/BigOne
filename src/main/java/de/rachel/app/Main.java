@@ -2,6 +2,7 @@ package de.rachel.app;
 
 import java.io.IOException;
 import java.sql.Connection;
+import java.util.Locale;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -151,6 +152,7 @@ public class Main extends Application{
     }
 
     public static void main(String[] args) {
+      Locale.setDefault(Locale.GERMAN);
       launch(args);
     }
 }
