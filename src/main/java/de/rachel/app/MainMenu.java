@@ -16,21 +16,21 @@ public class MainMenu {
 
   @FXML
   protected void openTransaction(ActionEvent event) {
-    Stage transactionsStage = new Stage();
+    Stage transactionStage = new Stage();
 
     try {
-      FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("Transactions.fxml"));
+      FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("Transaction.fxml"));
       fxmlLoader.setControllerFactory(controllerClass -> {
-        return new Transactions(dbConnection);
+        return new Transaction(dbConnection);
       });
-      Scene transactionsScene = new Scene(fxmlLoader.load());
+      Scene transactionScene = new Scene(fxmlLoader.load());
 
-      Transactions transactionsController = fxmlLoader.getController();
-      transactionsController.setStage(transactionsStage); // needed for setting as Parrent for a Dialogstage, creating in this controller
-      transactionsStage.setResizable(false);
-      transactionsStage.setTitle("Transaktionen");
-      transactionsStage.setScene(transactionsScene);
-      transactionsStage.show();
+      Transaction transactionsController = fxmlLoader.getController();
+      transactionsController.setStage(transactionStage); // needed for setting as Parrent for a Dialogstage, creating in this controller
+      transactionStage.setResizable(false);
+      transactionStage.setTitle("Transaktionen");
+      transactionStage.setScene(transactionScene);
+      transactionStage.show();
     } catch (IOException ex) {
       Alert loginFehler = new Alert(AlertType.ERROR);
 
@@ -41,7 +41,7 @@ public class MainMenu {
     }
   }
 
-  public void setConnection(Connection dbConnection) {
+  void setConnection(Connection dbConnection) {
     this.dbConnection = dbConnection;
   }
 }

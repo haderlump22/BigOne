@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.function.UnaryOperator;
 
 import de.rachel.app.records.RefuelingRow;
+import de.rachel.app.records.SplittingRow;
 import de.rachel.app.records.TransactionsRow;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -24,11 +25,10 @@ import javafx.scene.control.RadioButton;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextFormatter;
-import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.event.ActionEvent;
 
-public class Transactions {
+public class Transaction {
   private Connection dbConnection = null;
   private static final int TANKEN = 6;
   private static final int AUFTEILUNG = 52;
@@ -36,6 +36,7 @@ public class Transactions {
 
   @FXML
   private ComboBox<String> iban;
+
   @FXML
   private CheckBox liquiRelevant;
 
@@ -46,7 +47,7 @@ public class Transactions {
   private TextField valueDate;
 
   @FXML
-  private ComboBox<String> ereignis;
+  private ComboBox<String> event;
 
   @FXML
   private TextArea comment;
@@ -138,12 +139,12 @@ public class Transactions {
     comment.setWrapText(true);
 
     fill_iban();
-    fill_ereignis();
+    fill_event();
 
-    iban.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {fill_ereignis();});
+    iban.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {fill_event();});
   }
 
-  public Transactions(Connection dbConnection) {
+  Transaction(Connection dbConnection) {
     this.dbConnection = dbConnection;
   }
 
@@ -170,11 +171,11 @@ public class Transactions {
     }
   }
 
-  private void fill_ereignis() {
+  private void fill_event() {
     DBTools getter = new DBTools(dbConnection);
 
     // if we change the iban we has to clear first from the old Content
-    ereignis.getItems().clear();
+    event.getItems().clear();
 
     if (isJointAccount(iban.getSelectionModel().getSelectedItem().toString().replace(" ", ""))) {
       getter.select("""
@@ -195,10 +196,10 @@ public class Transactions {
       getter.beforeFirst();
 
       while (getter.next()) {
-        ereignis.getItems().add(getter.getString("bez") + " (" + getter.getInt("id") + ")");
+        event.getItems().add(getter.getString("bez") + " (" + getter.getInt("id") + ")");
       }
 
-      ereignis.getSelectionModel().selectFirst();
+      event.getSelectionModel().selectFirst();
 
     } catch (Exception e) {
       System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "
@@ -241,12 +242,15 @@ public class Transactions {
     valueDate.setText(null);
     amount.setText(null);
     comment.setText(null);
-    ereignis.getSelectionModel().selectFirst();
+    event.getSelectionModel().selectFirst();
   }
 
-  private void SaveData() {
+  @FXML
+  private void saveData() {
     List<TransactionsRow> dataToSave = new ArrayList<>();
     List<RefuelingRow> refuelingData = new ArrayList<>();
+    List<SplittingRow> splittingData = new ArrayList<>();
+    Integer transaktionsId = null;
 
     dataToSave.add(new TransactionsRow(
       debitOrCredit(),
@@ -255,7 +259,7 @@ public class Transactions {
       LocalDate.parse(valueDate.getText(), DateTimeFormatter.ofPattern("ds.MM.yyyy")),
       Double.valueOf(amount.getText().replace(',', '.')),
       comment.getText(),
-      BigOneTools.extractEreigId(ereignis.getSelectionModel().getSelectedItem())));
+      BigOneTools.extractId(event.getSelectionModel().getSelectedItem())));
 
     // hier werden diverse unterformulare aufgerufen um
     // detailierte informatioenen zu einer Transaktionen aufzunehmen
@@ -268,32 +272,26 @@ public class Transactions {
         }
 
         // insert Data in that ordner, because we need the transaction_id for the refuelingData
-        Integer transaktionsId = transaktionsdaten_einfuegen(dataToSave);
+        transaktionsId = insertTransaction(dataToSave);
         if (transaktionsId == null)
           System.exit(1);
 
-        tankdaten_einfuegen(transaktionsId, refuelingData);
+        insertRefuelingData(transaktionsId, refuelingData);
 
         break;
       case AUFTEILUNG:
-        // aufteilungsdaten aufnehmen
-        // das Programm arbeitet weiter wenn
-        // dialog geschlossen wird
-        Aufteilung auft = new Aufteilung(mainwindow, Double.valueOf(bankStatementLine.Betrag).doubleValue(),
-            bankStatementLine.Buchungstext, cn);
-
-        datenAuft = auft.getDaten();
+        splittingData = getSplittingData(dataToSave.get(0).amount(), comment.getText());
 
         // nun die Daten einfuegen
-        transaktionsdaten_einfuegen(bankStatementLine);
-        // der funktion wird die ebend durch einfuegen des
-        // transaktionsdatensatzes erzeugte transaktionsid uebergeben
-        // plus dem bankStatementLine objekt
-        aufteilungsdaten_einfuegen(get_max_transaktions_id(), datenAuft);
+        transaktionsId = insertTransaction(dataToSave);
+        if (transaktionsId == null)
+          System.exit(1);
+
+        insertSplittingData(transaktionsId, splittingData);
 
         break;
       default:
-        transaktionsdaten_einfuegen(dataToSave);
+        insertTransaction(dataToSave);
     }
     resetContent();
   }
@@ -369,11 +367,43 @@ public class Transactions {
     }
   }
 
-  public void setStage(Stage ownStage) {
+  private List<SplittingRow> getSplittingData(Double amount, String comment) {
+    try {
+      // 1. FXML laden
+      FXMLLoader splittingLoader = new FXMLLoader(getClass().getResource("TransactionSplittingDialog.fxml"));
+      Parent splittingDialogRoot = splittingLoader.load();
+
+      // 2. Controller des Dialogs holen (wichtig, um später Daten abzufragen)
+      TransactionSplittingDialog splittingDialogController = splittingLoader.getController();
+
+      Stage splittingDialogStage = new Stage();
+
+      splittingDialogController.setDbConnection(dbConnection);
+      splittingDialogController.setAmountToSplit(amount);
+      splittingDialogController.setComment(comment);
+      splittingDialogController.setIban(iban.getSelectionModel().getSelectedItem().replace(" ", ""));
+      splittingDialogController.setOwnStage(splittingDialogStage);
+
+      // 4. MODAL machen (blockiert das Hauptfenster)
+      splittingDialogStage.setTitle("Aufteilung");
+      splittingDialogStage.initModality(Modality.APPLICATION_MODAL);
+      splittingDialogStage.initOwner(ownStage);
+      splittingDialogStage.setScene(new Scene(splittingDialogRoot));
+      splittingDialogStage.showAndWait();
+
+      // 6. Werte auslesen, NACHDEM der Dialog geschlossen wurde
+      return splittingDialogController.getSplittingData();
+    } catch (IOException e) {
+      e.printStackTrace();
+      return null;
+    }
+  }
+
+  void setStage(Stage ownStage) {
     this.ownStage = ownStage;
   }
 
-  private Integer transaktionsdaten_einfuegen(List<TransactionsRow> dataToSave) {
+  private Integer insertTransaction(List<TransactionsRow> dataToSave) {
     DBTools insertWithReturn = new DBTools(dbConnection);
 
     String sql = """
@@ -406,7 +436,7 @@ public class Transactions {
     }
   }
 
-  private void tankdaten_einfuegen(Integer transaktions_id, List<RefuelingRow> refuelingData) {
+  private void insertRefuelingData(Integer transaktions_id, List<RefuelingRow> refuelingData) {
     // fuegt die Tanktaden in die entsprechende Tabelle anhand der im
     // BankStatementLine hinterlegten werte ein
     DBTools refuelingInsert = new DBTools(dbConnection);
@@ -421,5 +451,36 @@ public class Transactions {
                       refuelingData.get(0).mileage(),
                       refuelingData.get(0).fuelId(),
                       refuelingData.get(0).automotivId()));
+  }
+
+  private void insertSplittingData(Integer transaktions_id, List<SplittingRow> splittingData) {
+    // fuegt die aufteilungsdaten in die entsprechende Tabelle anhand der im
+    // array hinterlegten werte ein
+    DBTools splittingInsert = new DBTools(dbConnection);
+
+    StringBuilder splittingImportData = new StringBuilder();
+
+    for (SplittingRow splitRow : splittingData) {
+      splittingImportData.append("(" +
+          transaktions_id + "," +
+          splitRow.amount() + "," +
+          splitRow.eventId() + "," +
+          splitRow.liquiRelevant() +
+          "),");
+    }
+
+    // delete the Last commata from the String that represent the Import Values for the Import Statement
+    splittingImportData.delete(splittingImportData.length() - 1, splittingImportData.length());
+
+    if (!splittingInsert.insert(
+        """
+          INSERT INTO aufteilung
+          (transaktions_id, betrag, ereigniss_id, liqui)
+          VALUES
+          %s
+          """.formatted(splittingImportData))) {
+      System.err.println("Einfügen der Abschlusssummenaufteilung fehlgeschlagen!");
+      System.exit(1);
+    }
   }
 }

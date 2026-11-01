@@ -140,7 +140,7 @@
                     <Font name="System Bold" size="13.0" />
                   </font>
                 </Label>
-                <ComboBox fx:id="ereignis" prefWidth="150.0" GridPane.columnIndex="1"
+                <ComboBox fx:id="event" prefWidth="150.0" GridPane.columnIndex="1"
                   GridPane.rowIndex="3" />
               </children>
             </GridPane>
