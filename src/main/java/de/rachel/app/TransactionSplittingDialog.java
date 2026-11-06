@@ -11,7 +11,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
-import javafx.scene.control.ComboBox;
+import org.controlsfx.control.SearchableComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextFormatter;
@@ -33,7 +33,7 @@ public class TransactionSplittingDialog {
   private TextField amount;
 
   @FXML
-  private ComboBox<String> event;
+  private SearchableComboBox<String> event;
 
   @FXML
   private Button save;

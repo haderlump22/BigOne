@@ -27,6 +27,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.TextFormatter;
 import javafx.stage.Modality;
 import javafx.event.ActionEvent;
+import org.controlsfx.control.SearchableComboBox;
 
 public class Transaction {
   private Connection dbConnection = null;
@@ -47,7 +48,7 @@ public class Transaction {
   private TextField valueDate;
 
   @FXML
-  private ComboBox<String> event;
+  private SearchableComboBox<String> event;
 
   @FXML
   private TextArea comment;
@@ -95,12 +96,12 @@ public class Transaction {
     };
 
     UnaryOperator<TextFormatter.Change> dateMaskFilter = change -> {
-      String fullText = change.getControlNewText();
-      String newText = change.getText();
-
-      if (change.isDeleted()) {
+      if (change.isDeleted() || change.getControlNewText().isEmpty()) {
         return change;
       }
+
+      String fullText = change.getControlNewText();
+      String newText = change.getText();
 
       // Maximale Länge auf 10 Zeichen begrenzen (DD-MM-20YY)
       if (fullText.length() > 10) {
@@ -128,7 +129,7 @@ public class Transaction {
     };
 
     liquiDate.setTextFormatter(new TextFormatter<>(dateMaskFilter));
-    liquiDate.setPromptText("  .  .20  ");
+    liquiDate.setPromptText("01.  .20  ");
 
     valueDate.setTextFormatter(new TextFormatter<>(dateMaskFilter));
     valueDate.setPromptText("  .  .20  ");
@@ -142,6 +143,15 @@ public class Transaction {
     fill_event();
 
     iban.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {fill_event();});
+
+    // ChangeListener an die selectedProperty hängen
+    liquiRelevant.selectedProperty().addListener((observable, oldValue, newValue) -> {
+      if (!newValue) {
+        liquiDate.setText(null);
+      } else {
+        liquiDate.setText("01");
+      }
+    });
   }
 
   Transaction(Connection dbConnection) {
@@ -255,8 +265,8 @@ public class Transaction {
     dataToSave.add(new TransactionsRow(
       debitOrCredit(),
       getKontoId(iban.getSelectionModel().getSelectedItem().replace(" ", "")),
-      (liquiRelevant.isSelected() ? LocalDate.parse(liquiDate.getText(), DateTimeFormatter.ofPattern("ds.MM.yyyy")) : null),
-      LocalDate.parse(valueDate.getText(), DateTimeFormatter.ofPattern("ds.MM.yyyy")),
+      (liquiRelevant.isSelected() ? LocalDate.parse(liquiDate.getText(), DateTimeFormatter.ofPattern("dd.MM.yyyy")) : null),
+      LocalDate.parse(valueDate.getText(), DateTimeFormatter.ofPattern("dd.MM.yyyy")),
       Double.valueOf(amount.getText().replace(',', '.')),
       comment.getText(),
       BigOneTools.extractId(event.getSelectionModel().getSelectedItem())));
@@ -273,7 +283,7 @@ public class Transaction {
 
         // insert Data in that ordner, because we need the transaction_id for the refuelingData
         transaktionsId = insertTransaction(dataToSave);
-        if (transaktionsId == null)
+        if (transaktionsId == null || transaktionsId < 0)
           System.exit(1);
 
         insertRefuelingData(transaktionsId, refuelingData);
@@ -284,7 +294,7 @@ public class Transaction {
 
         // nun die Daten einfuegen
         transaktionsId = insertTransaction(dataToSave);
-        if (transaktionsId == null)
+        if (transaktionsId == null || transaktionsId < 0)
           System.exit(1);
 
         insertSplittingData(transaktionsId, splittingData);
@@ -404,7 +414,7 @@ public class Transaction {
   }
 
   private Integer insertTransaction(List<TransactionsRow> dataToSave) {
-    DBTools insertWithReturn = new DBTools(dbConnection);
+    DBTools dbTool = new DBTools(dbConnection);
 
     String sql = """
         INSERT INTO transaktionen
@@ -424,24 +434,27 @@ public class Transaction {
     else
       sql = sql + ",'" + dataToSave.get(0).liquiDate() + "') RETURNING transaktions_id";
 
-    insertWithReturn.insert(sql);
-
-    try {
-      return insertWithReturn.getInt("transaktions_id");
-    } catch (SQLException e) {
-      // TODO Auto-generated catch block
+    if (!dbTool.insertWithReturn(sql)) {
       System.err.println("Fehler beim Einfügen der Transaktionsdaten...");
-      e.printStackTrace();
-      return null;
+      return -1;
+    } else {
+      try {
+        dbTool.first();
+        return dbTool.getInt("transaktions_id");
+      } catch (SQLException e) {
+        e.printStackTrace();
+        System.err.println("Fehler beim ermitteln des Insert - Rückgabewertes: transaktions_id");
+        return -1;
+      }
     }
   }
 
   private void insertRefuelingData(Integer transaktions_id, List<RefuelingRow> refuelingData) {
     // fuegt die Tanktaden in die entsprechende Tabelle anhand der im
     // BankStatementLine hinterlegten werte ein
-    DBTools refuelingInsert = new DBTools(dbConnection);
+    DBTools dbTool = new DBTools(dbConnection);
 
-    refuelingInsert.insert("""
+    dbTool.insert("""
         INSERT INTO tankdaten
         (transaktions_id, liter, km, kraftstoff_id, datum_bar, betrag_bar, kfz_id)
         VALUES
@@ -456,7 +469,7 @@ public class Transaction {
   private void insertSplittingData(Integer transaktions_id, List<SplittingRow> splittingData) {
     // fuegt die aufteilungsdaten in die entsprechende Tabelle anhand der im
     // array hinterlegten werte ein
-    DBTools splittingInsert = new DBTools(dbConnection);
+    DBTools dbTool = new DBTools(dbConnection);
 
     StringBuilder splittingImportData = new StringBuilder();
 
@@ -472,7 +485,7 @@ public class Transaction {
     // delete the Last commata from the String that represent the Import Values for the Import Statement
     splittingImportData.delete(splittingImportData.length() - 1, splittingImportData.length());
 
-    if (!splittingInsert.insert(
+    if (!dbTool.insert(
         """
           INSERT INTO aufteilung
           (transaktions_id, betrag, ereigniss_id, liqui)

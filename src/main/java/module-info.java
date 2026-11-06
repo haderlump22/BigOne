@@ -7,6 +7,7 @@ module de.rachel.bigone {
     requires javafx.fxml;
     requires javafx.base;
     requires javafx.graphics;
+    requires org.controlsfx.controls;
 
     exports de.rachel.app;
 
