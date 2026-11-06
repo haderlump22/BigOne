@@ -13,6 +13,10 @@ public class BigOneTools {
     return Integer.valueOf(event.substring(event.indexOf('(') + 1, event.indexOf(')')));
   }
 
+  static public int extractEreigId(String event) {
+    return Integer.valueOf(event.substring(event.indexOf('(') + 1, event.indexOf(')')));
+  }
+
   static public String datum_wandeln(String text, int iArt) {
     // Art 0
     // diese Funktion konvertiert ein Datum im Format TT.MM.JJJJ

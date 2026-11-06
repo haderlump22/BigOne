@@ -342,7 +342,7 @@ public class TransaktionenOld {
             else
                 BankStatementLine.LiquiDate = "NULL";
 
-            BankStatementLine.EreignisId = BigOneTools.extractEreigId(ereigniss.getSelectedItem().toString());
+            BankStatementLine.EreignisId = BigOneTools.extractId(ereigniss.getSelectedItem().toString());
 
             // hier werden diverse unterformulare aufgerufen um
             // detailierte informatioenen zu einer Transaktionen aufzunehmen
@@ -351,12 +351,12 @@ public class TransaktionenOld {
                     // tankwerte zur eintragung aufnehmen
                     // das Programm arbeitet weiter wenn
                     // dialog geschlossen wird
-                    TankDialog td = new TankDialog(mainwindow, txtBetrag.getText(), cn);
+                    // TankDialog td = new TankDialog(mainwindow, txtBetrag.getText(), cn);
 
-                    BankStatementLine.KfzId = td.get_kfz_id();
-                    BankStatementLine.TreibstoffId = td.get_treibstoff_id();
-                    BankStatementLine.KilometerZahl = td.get_km();
-                    BankStatementLine.LiterZahl = td.get_liter();
+                    // BankStatementLine.KfzId = td.get_kfz_id();
+                    // BankStatementLine.TreibstoffId = td.get_treibstoff_id();
+                    // BankStatementLine.KilometerZahl = td.get_km();
+                    // BankStatementLine.LiterZahl = td.get_liter();
 
                     // nun die Daten einfuegen
                     transaktionsdaten_einfuegen(BankStatementLine);
@@ -370,10 +370,10 @@ public class TransaktionenOld {
                     // aufteilungsdaten aufnehmen
                     // das Programm arbeitet weiter wenn
                     // dialog geschlossen wird
-                    Aufteilung auft = new Aufteilung(mainwindow, Double.valueOf(BankStatementLine.Betrag).doubleValue(),
-                            BankStatementLine.Buchungstext, cn);
+                    // TransactionSplittingDialog auft = new TransactionSplittingDialog(mainwindow, Double.valueOf(BankStatementLine.Betrag).doubleValue(),
+                    //         BankStatementLine.Buchungstext, cn);
 
-                    datenAuft = auft.getDaten();
+                    // datenAuft = auft.getDaten();
 
                     // nun die Daten einfuegen
                     transaktionsdaten_einfuegen(BankStatementLine);
