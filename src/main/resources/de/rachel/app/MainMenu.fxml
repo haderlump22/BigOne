@@ -20,7 +20,7 @@
           <Menu mnemonicParsing="false" text="Konten">
             <items>
               <MenuItem mnemonicParsing="false" text="Abschluss" />
-                  <MenuItem mnemonicParsing="false" text="Beträge finden" />
+                  <MenuItem mnemonicParsing="false" text="Beträge finden" onAction="#openAmountFinder"/>
                   <MenuItem mnemonicParsing="false" text="Kontostand" />
                   <MenuItem mnemonicParsing="false" text="Import" />
             </items>

@@ -23,21 +23,48 @@ public class MainMenu {
       fxmlLoader.setControllerFactory(controllerClass -> {
         return new Transaction(dbConnection);
       });
-      Scene transactionScene = new Scene(fxmlLoader.load());
 
+      Scene transactionScene = new Scene(fxmlLoader.load());
       Transaction transactionsController = fxmlLoader.getController();
+
       transactionsController.setStage(transactionStage); // needed for setting as Parrent for a Dialogstage, creating in this controller
       transactionStage.setResizable(false);
       transactionStage.setTitle("Transaktionen");
       transactionStage.setScene(transactionScene);
       transactionStage.show();
     } catch (IOException ex) {
-      Alert loginFehler = new Alert(AlertType.ERROR);
+      Alert fxmlLoadFailure = new Alert(AlertType.ERROR);
 
-      loginFehler.setTitle("Fehler");
-      loginFehler.setHeaderText("konnte fxml Datei nicht laden...");
-      loginFehler.setContentText(ex.getMessage());
-      loginFehler.showAndWait();
+      fxmlLoadFailure.setTitle("Fehler");
+      fxmlLoadFailure.setHeaderText("konnte fxml Datei nicht laden...");
+      fxmlLoadFailure.setContentText(ex.getMessage());
+      fxmlLoadFailure.showAndWait();
+    }
+  }
+
+  @FXML
+  protected void openAmountFinder(ActionEvent event) {
+    Stage amountFinderStage = new Stage();
+
+    try {
+      FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("AmountFinder.fxml"));
+      fxmlLoader.setControllerFactory(controllerClass -> {
+        return new AmountFinder(dbConnection);
+      });
+
+      Scene amountFinderScene = new Scene(fxmlLoader.load());
+
+      amountFinderStage.setResizable(false);
+      amountFinderStage.setTitle("Beträge finden");
+      amountFinderStage.setScene(amountFinderScene);
+      amountFinderStage.show();
+    } catch (IOException ex) {
+      Alert fxmlLoadFailure = new Alert(AlertType.ERROR);
+
+      fxmlLoadFailure.setTitle("Fehler");
+      fxmlLoadFailure.setHeaderText("konnte fxml Datei nicht laden...");
+      fxmlLoadFailure.setContentText(ex.getMessage());
+      fxmlLoadFailure.showAndWait();
     }
   }
 

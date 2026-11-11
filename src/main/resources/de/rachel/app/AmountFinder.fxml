@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="537.0" prefWidth="823.0" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <HBox alignment="CENTER_LEFT" prefHeight="59.0" prefWidth="822.0">
+         <children>
+            <TextField prefHeight="26.0" prefWidth="112.0">
+               <opaqueInsets>
+                  <Insets />
+               </opaqueInsets>
+               <HBox.margin>
+                  <Insets right="20.0" />
+               </HBox.margin>
+            </TextField>
+            <TextField prefHeight="26.0" prefWidth="125.0">
+               <HBox.margin>
+                  <Insets right="20.0" />
+               </HBox.margin>
+            </TextField>
+            <ComboBox prefHeight="26.0" prefWidth="313.0">
+               <HBox.margin>
+                  <Insets right="20.0" />
+               </HBox.margin>
+            </ComboBox>
+            <CheckBox mnemonicParsing="false" text="mit Liquidatum suchen" />
+         </children>
+         <opaqueInsets>
+            <Insets />
+         </opaqueInsets>
+         <VBox.margin>
+            <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+         </VBox.margin>
+      </HBox>
+      <ScrollPane hbarPolicy="NEVER" prefHeight="426.0" prefWidth="823.0">
+         <content>
+            <TableView prefHeight="440.0" prefWidth="822.0">
+              <columns>
+                <TableColumn prefWidth="68.0" resizable="false" text="TId" />
+                <TableColumn prefWidth="44.0" resizable="false" text="s/h" />
+                <TableColumn prefWidth="87.0" resizable="false" text="Datum" />
+                <TableColumn prefWidth="69.0" resizable="false" text="Betrag" />
+                <TableColumn prefWidth="300.0" resizable="false" text="Buchtext" />
+                <TableColumn minWidth="0.0" prefWidth="84.0" resizable="false" text="LiquiMonat" />
+                <TableColumn prefWidth="169.0" resizable="false" text="Ereignis" />
+              </columns>
+            </TableView>
+         </content>
+         <VBox.margin>
+            <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+         </VBox.margin>
+      </ScrollPane>
+   </children>
+</VBox>
