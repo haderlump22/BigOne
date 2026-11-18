@@ -43,15 +43,15 @@
       </HBox>
       <ScrollPane hbarPolicy="NEVER" prefHeight="426.0" prefWidth="823.0">
          <content>
-            <TableView prefHeight="440.0" prefWidth="822.0">
+            <TableView fx:id="tableAmountFinder" editable="true" prefHeight="440.0" prefWidth="822.0">
               <columns>
-                <TableColumn prefWidth="68.0" resizable="false" text="TId" />
-                <TableColumn prefWidth="44.0" resizable="false" text="s/h" />
-                <TableColumn prefWidth="87.0" resizable="false" text="Datum" />
-                <TableColumn prefWidth="69.0" resizable="false" text="Betrag" />
-                <TableColumn prefWidth="300.0" resizable="false" text="Buchtext" />
-                <TableColumn minWidth="0.0" prefWidth="84.0" resizable="false" text="LiquiMonat" />
-                <TableColumn prefWidth="169.0" resizable="false" text="Ereignis" />
+                <TableColumn fx:id="colTransactionId" prefWidth="68.0" resizable="false" text="TId" />
+                <TableColumn fx:id="colCdtDbtIndicator" prefWidth="44.0" resizable="false" text="s/h" />
+                <TableColumn fx:id="colDate" prefWidth="87.0" resizable="false" text="Datum" />
+                <TableColumn fx:id="colAmount" prefWidth="69.0" resizable="false" text="Betrag" />
+                <TableColumn fx:id="colComment" prefWidth="300.0" resizable="false" text="Buchtext" />
+                <TableColumn fx:id="colBillingMonth" minWidth="0.0" prefWidth="84.0" resizable="false" text="LiquiMonat" />
+                <TableColumn fx:id="colBookingEvent" prefWidth="169.0" resizable="false" text="Ereignis" />
               </columns>
             </TableView>
          </content>
