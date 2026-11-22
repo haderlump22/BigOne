@@ -2,9 +2,9 @@ package de.rachel.app;
 
 import java.sql.Connection;
 import java.time.LocalDate;
-import java.util.function.UnaryOperator;
 
 import de.rachel.app.datamodels.AmountFinderRow;
+import de.rachel.app.util.InputFormatters;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -49,7 +49,21 @@ public class AmountFinder {
     });
 
     colAmount.setCellValueFactory(cellData -> cellData.getValue().amountProperty().asObject());
-    colAmount.setCellFactory(TextFieldTableCell.forTableColumn(new DoubleStringConverter()));
+    colAmount.setCellFactory(col -> new TextFieldTableCell<>(InputFormatters.GERMAN_DOUBLE_CONVERTER) {
+      @Override
+      public void startEdit() {
+        super.startEdit();
+
+        // Grafik der Zelle ist während des Editierens das TextField
+        if (isEditing() && getGraphic() instanceof TextField amountEditTextField) {
+          String currentText = amountEditTextField.getText();
+          if (currentText != null && currentText.contains(".")) {
+            amountEditTextField.setText(currentText.replace('.', ','));
+          }
+          amountEditTextField.setTextFormatter(new TextFormatter<>(InputFormatters.DECIMAL_MASK_FILTER));
+        }
+      }
+    });
     colAmount.setOnEditCommit(event -> {
       AmountFinderRow row = event.getRowValue();
       row.setAmount(event.getNewValue());
@@ -71,73 +85,10 @@ public class AmountFinder {
 
     colBookingEvent.setCellValueFactory(cellData -> cellData.getValue().bookingEventProperty());
 
-    UnaryOperator<TextFormatter.Change> decimalMaskFilter = change -> {
-      String newText = change.getControlNewText();
-
-      if (change.isDeleted()) {
-        return change;
-      }
-
-      // Erlaube leeres Feld oder reine Ziffern mit maximal einem Komma/Punkt
-      if (newText.matches("^\\d*[.,]?\\d*$")) {
-        try {
-          // Konvertiere das Komma für Java in einen Punkt, falls vorhanden
-          String parseable = newText.replace(",", ".");
-
-          // Wenn nur ein Punkt/Komma dasteht (z.B. "." oder ","), erlauben
-          if (parseable.equals(".") || parseable.isEmpty()) {
-            return change;
-          }
-
-          // pharsen testen
-          Double.parseDouble(parseable);
-
-          return change;
-        } catch (NumberFormatException e) {
-          // Falls das Parsen fehlschlägt, Änderung verwerfen
-        }
-      }
-
-      return null;
-    };
-
-    UnaryOperator<TextFormatter.Change> dateMaskFilter = change -> {
-      if (change.isDeleted() || change.getControlNewText().isEmpty()) {
-        return change;
-      }
-
-      String fullText = change.getControlNewText();
-      String newText = change.getText();
-
-      // Maximale Länge auf 10 Zeichen begrenzen (DD-MM-20YY)
-      if (fullText.length() > 10) {
-        return null;
-      }
-
-      // nur Ziffern erlauben
-      if (!newText.matches("\\d*")) {
-        return null;
-      }
-
-      // automatisches setzen der zwischenzeichen
-      if (fullText.length() == 2 || fullText.length() == 5) {
-        change.setText(newText + ".");
-
-        // Die exakte neue Position berechnen (Start der Eingabe + Länge des neuen Textes inkl. Punkt)
-        int newPos = change.getRangeStart() + change.getText().length();
-
-        // Caret UND Anchor auf dieselbe Position setzen (verhindert das Markieren)
-        change.setCaretPosition(newPos);
-        change.setAnchor(newPos);
-      }
-
-      return change; // Änderung erlauben
-    };
-
-    liquiDate.setTextFormatter(new TextFormatter<>(dateMaskFilter));
+    liquiDate.setTextFormatter(new TextFormatter<>(InputFormatters.DATE_MASK_FILTER));
     liquiDate.setPromptText("01.  .20  ");
 
-    searchAmount.setTextFormatter(new TextFormatter<>(decimalMaskFilter));
+    searchAmount.setTextFormatter(new TextFormatter<>(InputFormatters.DECIMAL_MASK_FILTER));
     searchAmount.setPromptText("0,00");
 
     // ChangeListener an die selectedProperty hängen
@@ -199,7 +150,7 @@ public class AmountFinder {
         (accountType.equals("Haushaltskonto") ? "ha_kategorie" : "kontenereignisse"),
         newSearchValue,
         (accountType.equals("Haushaltskonto") ? "ha_kategorie_id" : "ereigniss_id"),
-        (liquiDate.getText().isEmpty() ? "" : " and t.liqui_monat = '" + liquiDate.getText() + "'"),
+        ((liquiDate.getText() == null || liquiDate.getText().isEmpty()) ? "" : " and t.liqui_monat = '" + liquiDate.getText() + "'"),
         iban.getValue().replaceAll(" ", "")));
 
     try {
@@ -218,8 +169,6 @@ public class AmountFinder {
       System.err.println(this.getClass().getName() + "/" + e.getStackTrace()[2].getMethodName() + " (Line: "
           + e.getStackTrace()[0].getLineNumber() + "): " + e.toString());
     }
-
-    System.out.println(amountFinderData.size());
   }
 
   private void fill_iban() {

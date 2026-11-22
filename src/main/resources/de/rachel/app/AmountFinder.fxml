@@ -13,7 +13,7 @@
    <children>
       <HBox alignment="CENTER_LEFT" prefHeight="59.0" prefWidth="822.0">
          <children>
-            <TextField fx:id="searchAmount" prefHeight="26.0" prefWidth="112.0" onAction="#searchEnteredValue">
+            <TextField fx:id="searchAmount" onAction="#searchEnteredValue" prefHeight="26.0" prefWidth="112.0">
                <opaqueInsets>
                   <Insets />
                </opaqueInsets>
@@ -21,7 +21,7 @@
                   <Insets right="20.0" />
                </HBox.margin>
             </TextField>
-            <TextField fx:id="liquiDate" prefHeight="26.0" prefWidth="125.0">
+            <TextField fx:id="liquiDate" disable="true" prefHeight="26.0" prefWidth="125.0">
                <HBox.margin>
                   <Insets right="20.0" />
                </HBox.margin>

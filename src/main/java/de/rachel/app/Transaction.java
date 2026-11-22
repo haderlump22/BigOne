@@ -12,6 +12,7 @@ import java.util.function.UnaryOperator;
 import de.rachel.app.records.RefuelingRow;
 import de.rachel.app.records.SplittingRow;
 import de.rachel.app.records.TransactionsRow;
+import de.rachel.app.util.InputFormatters;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -64,77 +65,13 @@ public class Transaction {
 
   @FXML
   public void initialize() {
-
-    UnaryOperator<TextFormatter.Change> decimalMaskFilter = change -> {
-      String newText = change.getControlNewText();
-
-      if (change.isDeleted()) {
-        return change;
-      }
-
-      // Erlaube leeres Feld oder reine Ziffern mit maximal einem Komma/Punkt
-      if (newText.matches("^\\d*[.,]?\\d*$")) {
-        try {
-          // Konvertiere das Komma für Java in einen Punkt, falls vorhanden
-          String parseable = newText.replace(",", ".");
-
-          // Wenn nur ein Punkt/Komma dasteht (z.B. "." oder ","), erlauben
-          if (parseable.equals(".") || parseable.isEmpty()) {
-            return change;
-          }
-
-          // pharsen testen
-          Double.parseDouble(parseable);
-
-          return change;
-        } catch (NumberFormatException e) {
-          // Falls das Parsen fehlschlägt, Änderung verwerfen
-        }
-      }
-
-      return null;
-    };
-
-    UnaryOperator<TextFormatter.Change> dateMaskFilter = change -> {
-      if (change.isDeleted() || change.getControlNewText().isEmpty()) {
-        return change;
-      }
-
-      String fullText = change.getControlNewText();
-      String newText = change.getText();
-
-      // Maximale Länge auf 10 Zeichen begrenzen (DD-MM-20YY)
-      if (fullText.length() > 10) {
-        return null;
-      }
-
-      // nur Ziffern erlauben
-      if (!newText.matches("\\d*")) {
-        return null;
-      }
-
-      // automatisches setzen der zwischenzeichen
-      if (fullText.length() == 2 || fullText.length() == 5) {
-        change.setText(newText + ".");
-
-        // Die exakte neue Position berechnen (Start der Eingabe + Länge des neuen Textes inkl. Punkt)
-        int newPos = change.getRangeStart() + change.getText().length();
-
-        // Caret UND Anchor auf dieselbe Position setzen (verhindert das Markieren)
-        change.setCaretPosition(newPos);
-        change.setAnchor(newPos);
-      }
-
-      return change; // Änderung erlauben
-    };
-
-    liquiDate.setTextFormatter(new TextFormatter<>(dateMaskFilter));
+    liquiDate.setTextFormatter(new TextFormatter<>(InputFormatters.DATE_MASK_FILTER));
     liquiDate.setPromptText("01.  .20  ");
 
-    valueDate.setTextFormatter(new TextFormatter<>(dateMaskFilter));
+    valueDate.setTextFormatter(new TextFormatter<>(InputFormatters.DATE_MASK_FILTER));
     valueDate.setPromptText("  .  .20  ");
 
-    amount.setTextFormatter(new TextFormatter<>(decimalMaskFilter));
+    amount.setTextFormatter(new TextFormatter<>(InputFormatters.DECIMAL_MASK_FILTER));
     amount.setPromptText("0,00");
 
     comment.setWrapText(true);
