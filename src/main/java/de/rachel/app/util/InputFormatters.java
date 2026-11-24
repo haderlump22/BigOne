@@ -2,6 +2,9 @@ package de.rachel.app.util;
 
 import java.text.NumberFormat;
 import java.text.ParseException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Locale;
 import java.util.function.UnaryOperator;
 
@@ -87,11 +90,11 @@ public class InputFormatters {
   };
 
   public static final StringConverter<Double> GERMAN_DOUBLE_CONVERTER = new StringConverter<>() {
-    private final NumberFormat nf = NumberFormat.getNumberInstance(Locale.GERMANY);
+    private final NumberFormat numberFormatGerman= NumberFormat.getNumberInstance(Locale.GERMANY);
 
     @Override
     public String toString(Double value) {
-      return value == null ? "" : nf.format(value);
+      return value == null ? "" : numberFormatGerman.format(value);
     }
 
     @Override
@@ -100,10 +103,31 @@ public class InputFormatters {
         return null;
       }
       try {
-        Number parsed = nf.parse(text.trim().replace('.', ','));
+        Number parsed = numberFormatGerman.parse(text.trim().replace('.', ','));
         return parsed.doubleValue();
       } catch (ParseException e) {
-        throw new IllegalArgumentException("Ungültige Zahl: " + text, e);
+        return null;
+      }
+    }
+  };
+
+  public static final DateTimeFormatter GERMAN_DATE_FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+
+  public static final StringConverter<LocalDate> GERMAN_DATE_CONVERTER = new StringConverter<>() {
+    @Override
+    public String toString(LocalDate date) {
+      return date == null ? "" : GERMAN_DATE_FORMATTER.format(date);
+    }
+
+    @Override
+    public LocalDate fromString(String text) {
+      if (text == null || text.isBlank()) {
+        return null;
+      }
+      try {
+        return LocalDate.parse(text.trim(), GERMAN_DATE_FORMATTER);
+      } catch (DateTimeParseException e) {
+        return null;
       }
     }
   };

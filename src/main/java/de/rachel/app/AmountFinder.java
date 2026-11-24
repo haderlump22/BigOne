@@ -42,10 +42,24 @@ public class AmountFinder {
     colCdtDbtIndicator.setCellValueFactory(cellData -> cellData.getValue().cdtDbtIndicatorProperty());
 
     colDate.setCellValueFactory(cellData -> cellData.getValue().dateProperty());
-    colDate.setCellFactory(TextFieldTableCell.forTableColumn(new LocalDateStringConverter()));
+    colDate.setCellFactory(col -> new TextFieldTableCell<>(InputFormatters.GERMAN_DATE_CONVERTER) {
+      @Override
+      public void startEdit() {
+        super.startEdit();
+
+        if (isEditing() && getGraphic() instanceof TextField dateEditTextField) {
+          dateEditTextField.setTextFormatter(new TextFormatter<>(InputFormatters.DATE_MASK_FILTER));
+        }
+      }
+    });
     colDate.setOnEditCommit(event -> {
-      AmountFinderRow row = event.getRowValue();
-      row.setDate(event.getNewValue());
+      LocalDate newValue = event.getNewValue();
+
+      if (newValue == null) {
+        event.getTableView().refresh();
+        return;
+      }
+      event.getRowValue().setDate(newValue);
     });
 
     colAmount.setCellValueFactory(cellData -> cellData.getValue().amountProperty().asObject());
@@ -65,8 +79,12 @@ public class AmountFinder {
       }
     });
     colAmount.setOnEditCommit(event -> {
-      AmountFinderRow row = event.getRowValue();
-      row.setAmount(event.getNewValue());
+      Double newVal = event.getNewValue();
+      if (newVal == null) {
+        event.getTableView().refresh();
+        return;
+      }
+      event.getRowValue().setAmount(newVal);
     });
 
     colComment.setCellValueFactory(cellData -> cellData.getValue().commentProperty());
@@ -77,10 +95,24 @@ public class AmountFinder {
     });
 
     colBillingMonth.setCellValueFactory(cellData -> cellData.getValue().billingMonthProperty());
-    colBillingMonth.setCellFactory(TextFieldTableCell.forTableColumn(new LocalDateStringConverter()));
+    colBillingMonth.setCellFactory(col -> new TextFieldTableCell<>(InputFormatters.GERMAN_DATE_CONVERTER) {
+      @Override
+      public void startEdit() {
+        super.startEdit();
+
+        if (isEditing() && getGraphic() instanceof TextField dateEditTextField) {
+          dateEditTextField.setTextFormatter(new TextFormatter<>(InputFormatters.DATE_MASK_FILTER));
+        }
+      }
+    });
     colBillingMonth.setOnEditCommit(event -> {
-      AmountFinderRow row = event.getRowValue();
-      row.setDate(event.getNewValue());
+      LocalDate newValue = event.getNewValue();
+
+      if (newValue == null) {
+        event.getTableView().refresh();
+        return;
+      }
+      event.getRowValue().setDate(newValue);
     });
 
     colBookingEvent.setCellValueFactory(cellData -> cellData.getValue().bookingEventProperty());
