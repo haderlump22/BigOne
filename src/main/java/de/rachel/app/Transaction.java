@@ -7,7 +7,6 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.UnaryOperator;
 
 import de.rachel.app.records.RefuelingRow;
 import de.rachel.app.records.SplittingRow;
@@ -36,32 +35,15 @@ public class Transaction {
   private static final int AUFTEILUNG = 52;
   private Stage ownStage;
 
-  @FXML
-  private ComboBox<String> iban;
-
-  @FXML
-  private CheckBox liquiRelevant;
-
-  @FXML
-  private TextField liquiDate;
-
-  @FXML
-  private TextField valueDate;
-
-  @FXML
-  private SearchableComboBox<String> event;
-
-  @FXML
-  private TextArea comment;
-
-  @FXML
-  private TextField amount;
-
-  @FXML
-  private RadioButton credit;
-
-  @FXML
-  private RadioButton debit;
+  @FXML private ComboBox<String> iban;
+  @FXML private CheckBox liquiRelevant;
+  @FXML private TextField liquiDate;
+  @FXML private TextField valueDate;
+  @FXML private SearchableComboBox<String> event;
+  @FXML private TextArea comment;
+  @FXML private TextField amount;
+  @FXML private RadioButton credit;
+  @FXML private RadioButton debit;
 
   @FXML
   public void initialize() {
