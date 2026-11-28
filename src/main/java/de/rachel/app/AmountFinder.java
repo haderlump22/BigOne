@@ -16,8 +16,6 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.TextFormatter;
 import javafx.scene.control.Tooltip;
 import javafx.scene.control.cell.TextFieldTableCell;
-import javafx.util.converter.DoubleStringConverter;
-import javafx.util.converter.LocalDateStringConverter;
 
 public class AmountFinder {
   private Connection dbConnection = null;
@@ -59,7 +57,12 @@ public class AmountFinder {
         event.getTableView().refresh();
         return;
       }
-      event.getRowValue().setDate(newValue);
+
+      if (updateDateToDatabase(event.getRowValue().getTransactionId(), newValue)) {
+        event.getRowValue().setDate(newValue);
+      } else {
+        event.getTableView().refresh();
+      }
     });
 
     colAmount.setCellValueFactory(cellData -> cellData.getValue().amountProperty().asObject());
@@ -79,19 +82,29 @@ public class AmountFinder {
       }
     });
     colAmount.setOnEditCommit(event -> {
-      Double newVal = event.getNewValue();
-      if (newVal == null) {
+      Double newValue = event.getNewValue();
+      if (newValue == null) {
         event.getTableView().refresh();
         return;
       }
-      event.getRowValue().setAmount(newVal);
+
+      if (updateAmountToDatabase(event.getRowValue().getTransactionId(), newValue)) {
+        event.getRowValue().setAmount(newValue);
+      } else {
+        event.getTableView().refresh();
+      }
     });
 
     colComment.setCellValueFactory(cellData -> cellData.getValue().commentProperty());
     colComment.setCellFactory(TextFieldTableCell.forTableColumn());
     colComment.setOnEditCommit(event -> {
-      AmountFinderRow row = event.getRowValue();
-      row.setComment(event.getNewValue());
+      String newValue = event.getNewValue();
+
+      if (updateCommentToDatabase(event.getRowValue().getTransactionId(), newValue)) {
+        event.getRowValue().setComment(newValue);
+      } else {
+        event.getTableView().refresh();
+      }
     });
 
     colBillingMonth.setCellValueFactory(cellData -> cellData.getValue().billingMonthProperty());
@@ -112,7 +125,12 @@ public class AmountFinder {
         event.getTableView().refresh();
         return;
       }
-      event.getRowValue().setDate(newValue);
+
+      if (updateBillingMonthToDatabase(event.getRowValue().getTransactionId(), newValue)) {
+        event.getRowValue().setBillingmonth(newValue);
+      } else {
+        event.getTableView().refresh();
+      }
     });
 
     colBookingEvent.setCellValueFactory(cellData -> cellData.getValue().bookingEventProperty());
@@ -251,5 +269,81 @@ public class AmountFinder {
     }
 
     return returnValue;
+  }
+
+  private Boolean updateAmountToDatabase(Integer transactionId, Double newValue) {
+
+    String updateStatement = null;
+    DBTools updater = new DBTools(dbConnection);
+
+    updateStatement = """
+        UPDATE transaktionen SET betrag = %s
+        WHERE transaktions_id = %d;
+        """.formatted(newValue, transactionId);
+
+    if (!updater.update(updateStatement)) {
+      System.err.println("Aktualisierung des neuen Wertes: -" + newValue + "- für die TransaktionsId: -" + transactionId
+          + "- nicht erfolgreich!");
+      return false;
+    } else {
+      return true;
+    }
+  }
+
+  private Boolean updateBillingMonthToDatabase(Integer transactionId, LocalDate newValue) {
+
+    String updateStatement = null;
+    DBTools updater = new DBTools(dbConnection);
+
+    updateStatement = """
+        UPDATE transaktionen SET liqui_monat = '%s'
+        WHERE transaktions_id = %d;
+        """.formatted(newValue, transactionId);
+
+    if (!updater.update(updateStatement)) {
+      System.err.println("Aktualisierung des neuen Wertes: -" + newValue + "- für die TransaktionsId: -" + transactionId
+          + "- nicht erfolgreich!");
+      return false;
+    } else {
+      return true;
+    }
+  }
+
+  private Boolean updateCommentToDatabase(Integer transactionId, String newValue) {
+
+    String updateStatement = null;
+    DBTools updater = new DBTools(dbConnection);
+
+    updateStatement = """
+        UPDATE transaktionen SET buchtext = '%s'
+        WHERE transaktions_id = %d;
+        """.formatted(newValue, transactionId);
+
+    if (!updater.update(updateStatement)) {
+      System.err.println("Aktualisierung des neuen Wertes: -" + newValue + "- für die TransaktionsId: -" + transactionId
+          + "- nicht erfolgreich!");
+      return false;
+    } else {
+      return true;
+    }
+  }
+
+  private Boolean updateDateToDatabase(Integer transactionId, LocalDate newValue) {
+
+    String updateStatement = null;
+    DBTools updater = new DBTools(dbConnection);
+
+    updateStatement = """
+        UPDATE transaktionen SET datum = '%s'
+        WHERE transaktions_id = %d;
+        """.formatted(newValue, transactionId);
+
+    if (!updater.update(updateStatement)) {
+      System.err.println("Aktualisierung des neuen Wertes: -" + newValue + "- für die TransaktionsId: -" + transactionId
+          + "- nicht erfolgreich!");
+      return false;
+    } else {
+      return true;
+    }
   }
 }
