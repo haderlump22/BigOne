@@ -5,7 +5,7 @@
 /bin
 /lib
 /mods
-/.vscode
+.vscode/*
 /bakgit.tar
 Tools/*
 !Tools/bigone_schema.sql

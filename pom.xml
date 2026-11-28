@@ -194,6 +194,17 @@
             <option>--enable-native-access=javafx.graphics</option>
           </options>
         </configuration>
+        <executions>
+          <execution>
+            <id>debug</id>
+            <configuration>
+              <options>
+                <option>--enable-native-access=javafx.graphics</option>
+                <option>-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=*:5005</option>
+              </options>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>
